@@ -50,6 +50,9 @@ formal specification or internal processing. For the purposes of this
 specification, all examples and definitions will be presented in **JSON**
 format.
 
+You can find the UFO RPC json schema in the
+[schema.spec.json](./schema.spec.json) file.
+
 ---
 
 ## Design Goals
