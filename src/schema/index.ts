@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
+import schemaJson from "./schema.json" with { type: "json" };
 import {
   type DetailedField,
   parseDetailedField,
@@ -162,10 +163,7 @@ export async function parseSchema(content: string): Promise<Schema> {
   });
   addFormats(ajv);
 
-  // Load and validate against JSON Schema
-  const schemaJson = JSON.parse(
-    await Deno.readTextFile(new URL("./schema.json", import.meta.url)),
-  );
+  // Validate against JSON Schema
   const validate = ajv.compile(schemaJson);
 
   if (!validate(rawSchema)) {
@@ -176,7 +174,7 @@ export async function parseSchema(content: string): Promise<Schema> {
   }
 
   // Transform to our internal types
-  const typedSchema = rawSchema as RawSchema;
+  const typedSchema = rawSchema as unknown as RawSchema;
 
   return {
     types: typedSchema.types?.map(transformType),
