@@ -22,7 +22,7 @@ import {
 Deno.test("isPrimitiveType", async (t) => {
   await t.step("should identify valid primitive types", () => {
     assertEquals(isPrimitiveType("string"), true);
-    assertEquals(isPrimitiveType("number"), true);
+    assertEquals(isPrimitiveType("int"), true);
     assertEquals(isPrimitiveType("float"), true);
     assertEquals(isPrimitiveType("boolean"), true);
   });
@@ -35,7 +35,7 @@ Deno.test("isPrimitiveType", async (t) => {
 
   await t.step("should handle edge cases", () => {
     assertEquals(isPrimitiveType("String"), false);
-    assertEquals(isPrimitiveType("NUMBER"), false);
+    assertEquals(isPrimitiveType("INT"), false);
     assertEquals(isPrimitiveType(""), false);
     assertEquals(isPrimitiveType(" string "), false);
   });
@@ -70,7 +70,7 @@ Deno.test("isArrayType", async (t) => {
     assertEquals(isArrayType({ baseType: "User", dimensions: 2 }), true);
     assertEquals(
       isArrayType({
-        baseType: { baseType: "number", dimensions: 1 },
+        baseType: { baseType: "int", dimensions: 1 },
         dimensions: 1,
       }),
       true,
@@ -105,7 +105,7 @@ Deno.test("isObjectType", async (t) => {
 Deno.test("isValidFieldType", async (t) => {
   await t.step("should validate primitive types", () => {
     assertEquals(isValidFieldType("string"), true);
-    assertEquals(isValidFieldType("number"), true);
+    assertEquals(isValidFieldType("int"), true);
     assertEquals(isValidFieldType("float"), true);
     assertEquals(isValidFieldType("boolean"), true);
   });
@@ -121,7 +121,7 @@ Deno.test("isValidFieldType", async (t) => {
     assertEquals(isValidFieldType({ baseType: "User", dimensions: 2 }), true);
     assertEquals(
       isValidFieldType({
-        baseType: { baseType: "number", dimensions: 1 },
+        baseType: { baseType: "int", dimensions: 1 },
         dimensions: 1,
       }),
       true,
@@ -163,8 +163,8 @@ Deno.test("parseArrayType", async (t) => {
       baseType: "string",
       dimensions: 1,
     });
-    assertEquals(parseArrayType("number[][]"), {
-      baseType: "number",
+    assertEquals(parseArrayType("int[][]"), {
+      baseType: "int",
       dimensions: 2,
     });
     assertEquals(parseArrayType("User[][][]"), {
@@ -202,7 +202,7 @@ Deno.test("parseArrayType", async (t) => {
 Deno.test("parseFieldType", async (t) => {
   await t.step("should parse primitive types", () => {
     assertEquals(parseFieldType("string"), "string");
-    assertEquals(parseFieldType("number"), "number");
+    assertEquals(parseFieldType("int"), "int");
     assertEquals(parseFieldType("float"), "float");
     assertEquals(parseFieldType("boolean"), "boolean");
   });
@@ -258,7 +258,7 @@ Deno.test("parseDetailedField", async (t) => {
       desc: "An object field",
       fields: {
         name: { type: "string" },
-        age: { type: "number" },
+        age: { type: "int" },
       },
     };
     assertEquals(parseDetailedField(field), field);
@@ -375,7 +375,7 @@ Deno.test("Complex type scenarios", async (t) => {
       type: "object",
       desc: "Complex object",
       fields: {
-        matrix: { type: { baseType: "number", dimensions: 2 } },
+        matrix: { type: { baseType: "int", dimensions: 2 } },
         users: { type: { baseType: "User", dimensions: 1 } },
         metadata: {
           type: "object",

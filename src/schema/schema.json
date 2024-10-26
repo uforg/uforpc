@@ -23,7 +23,7 @@
                   "anyOf": [
                     {
                       "type": "string",
-                      "pattern": "^(string|number|float|boolean|object|.*\\[\\]|[A-Z][a-zA-Z0-9]*)$"
+                      "pattern": "^(string|int|float|boolean|object|.*\\[\\]|[A-Z][a-zA-Z0-9]*)$"
                     },
                     {
                       "type": "object",

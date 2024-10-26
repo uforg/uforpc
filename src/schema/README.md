@@ -8,8 +8,8 @@ schemas into a normalized internal representation optimized for code generation.
 1. **Schema Parsing**: Takes a JSON string input and parses it into a raw
    JavaScript object, ensuring the input is valid JSON.
 
-2. **Schema Validation**: Validates the parsed object against the UFO RPC JSON
-   Schema specification, ensuring:
+2. **Schema Validation**: Validates the parsed object against the UFO RPC Zod
+   Schema Validation, ensuring:
    - Valid structure
    - Correct types and patterns
    - Required fields

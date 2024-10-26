@@ -10,15 +10,15 @@ import { z, type ZodType } from "zod";
 /**
  * Schema with regular expression pattern to validate the "type" field.
  * It allows:
- * - Basic types: string, number, float, boolean, object
+ * - Basic types: string, int, float, boolean, object
  * - Custom types starting with an uppercase letter followed by alphanumerics
  * - Array types: e.g., string[], MyType[][], etc.
  */
 const TypeRegexSchema = z.string().regex(
-  /^(string|number|float|boolean|object|.*\[\]|[A-Z][a-zA-Z0-9]*)$/,
+  /^(string|int|float|boolean|object|.*\[\]|[A-Z][a-zA-Z0-9]*)$/,
   {
     message:
-      'The "type" field must be one of the allowed types: string, number, float, boolean, object, an array (e.g., string[] or MyType[][]), or a custom type name starting with an uppercase letter.',
+      'The "type" field must be one of the allowed types: string, int, float, boolean, object, an array (e.g., string[] or MyType[][]), or a custom type name starting with an uppercase letter.',
   },
 );
 
@@ -49,6 +49,15 @@ const FieldSchema = z.lazy(() =>
     .describe(
       "Definition of a field, which can be a type string or a detailed field definition",
     )
+    .superRefine((data, ctx) => {
+      if (typeof data === "string" && data === "object") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'The field type "object" must be a detailed field definition',
+        });
+      }
+    })
 );
 
 /**
@@ -91,22 +100,23 @@ const DetailedFieldSchema: ZodType<IDetailedField> = z
   })
   .strict()
   .superRefine((data, ctx) => {
-    if (data.type === "object") {
-      if (!data.fields) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "'fields' is required when 'type' is 'object'",
-          path: ["fields"],
-        });
-      }
-    } else {
-      if (data.fields !== undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "'fields' is not allowed when 'type' is not 'object'",
-          path: ["fields"],
-        });
-      }
+    const isObjectType = data.type === "object";
+    const hasFields = data.fields && Object.keys(data.fields).length > 0;
+
+    if (isObjectType && !hasFields) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "'fields' is required when 'type' is 'object'",
+        path: ["fields"],
+      });
+    }
+
+    if (!isObjectType && hasFields) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "'fields' is not allowed when 'type' is not 'object'",
+        path: ["fields"],
+      });
     }
   });
 
@@ -191,7 +201,7 @@ const ProcedureSchema = z
 
     /**
      * Optional metadata for the procedure.
-     * Each metadata property can be a string, number, or boolean.
+     * Each metadata property can be a string, number (int/float), or boolean.
      */
     meta: z
       .record(z.union([z.string(), z.number(), z.boolean()]))
@@ -228,7 +238,7 @@ const MainSchema = z
   .describe("UFO RPC Schema")
   .strict();
 
-/**
- * Exporting the main schema for external usage.
- */
 export default MainSchema;
+export type TypeSchemaType = z.infer<typeof TypeSchema>;
+export type ProcedureSchemaType = z.infer<typeof ProcedureSchema>;
+export type FieldSchemaType = z.infer<typeof FieldSchema>;

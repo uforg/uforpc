@@ -1,6 +1,4 @@
-import Ajv from "ajv";
-import addFormats from "ajv-formats";
-import schemaJson from "./schema.json" with { type: "json" };
+export * from "./types.ts";
 import {
   type DetailedField,
   parseDetailedField,
@@ -8,6 +6,12 @@ import {
   type Schema,
   type TypeDefinition,
 } from "./types.ts";
+import MainSchema from "./schema.ts";
+import type {
+  FieldSchemaType,
+  ProcedureSchemaType,
+  TypeSchemaType,
+} from "./schema.ts";
 
 export class SchemaParsingError extends Error {
   constructor(message: string) {
@@ -19,37 +23,11 @@ export class SchemaParsingError extends Error {
 export class SchemaValidationError extends Error {
   constructor(
     message: string,
-    public errors: unknown[],
+    public errors: string[],
   ) {
-    super(message);
+    super(`${message}: ${errors.join(", ")}`);
     this.name = "SchemaValidationError";
   }
-}
-
-interface RawField {
-  type?: string;
-  desc?: string;
-  fields?: Record<string, RawField | string>;
-}
-
-interface RawType {
-  name: string;
-  desc?: string;
-  fields: Record<string, RawField | string>;
-}
-
-interface RawProcedure {
-  name: string;
-  type: "query" | "mutation";
-  desc?: string;
-  input?: Record<string, RawField | string>;
-  output?: Record<string, RawField | string>;
-  meta?: Record<string, string | number | boolean>;
-}
-
-interface RawSchema {
-  types?: RawType[];
-  procedures: RawProcedure[];
 }
 
 /**
@@ -57,21 +35,19 @@ interface RawSchema {
  * @param field - Raw field from JSON
  * @returns Transformed DetailedField
  */
-function transformField(field: RawField | string): DetailedField {
+function transformField(field: FieldSchemaType): DetailedField {
   if (typeof field === "string") {
     return parseDetailedField(field);
   }
 
-  // Transform nested fields if they exist
-  const transformedFields = field.fields
-    ? Object.entries(field.fields).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: transformField(value),
-      }),
-      {} as Record<string, DetailedField>,
-    )
-    : undefined;
+  let transformedFields: Record<string, DetailedField> | undefined;
+
+  if (field.fields) {
+    transformedFields = {};
+    for (const [key, value] of Object.entries(field.fields)) {
+      transformedFields[key] = transformField(value);
+    }
+  }
 
   return parseDetailedField({
     type: field.type!,
@@ -85,14 +61,12 @@ function transformField(field: RawField | string): DetailedField {
  * @param type - Raw type from JSON
  * @returns Transformed TypeDefinition
  */
-function transformType(type: RawType): TypeDefinition {
-  const transformedFields = Object.entries(type.fields).reduce(
-    (acc, [key, value]) => ({
-      ...acc,
-      [key]: transformField(value),
-    }),
-    {} as Record<string, DetailedField>,
-  );
+function transformType(type: TypeSchemaType): TypeDefinition {
+  const transformedFields: Record<string, DetailedField> = {};
+
+  for (const [key, value] of Object.entries(type.fields)) {
+    transformedFields[key] = transformField(value);
+  }
 
   return {
     name: type.name,
@@ -106,29 +80,30 @@ function transformType(type: RawType): TypeDefinition {
  * @param procedure - Raw procedure from JSON
  * @returns Transformed Procedure
  */
-function transformProcedure(procedure: RawProcedure): Procedure {
+function transformProcedure(procedure: ProcedureSchemaType): Procedure {
+  let transformedInput: Record<string, DetailedField> | undefined;
+  let transformedOutput: Record<string, DetailedField> | undefined;
+
+  if (procedure.input) {
+    transformedInput = {};
+    for (const [key, value] of Object.entries(procedure.input)) {
+      transformedInput[key] = transformField(value);
+    }
+  }
+
+  if (procedure.output) {
+    transformedOutput = {};
+    for (const [key, value] of Object.entries(procedure.output)) {
+      transformedOutput[key] = transformField(value);
+    }
+  }
+
   return {
     name: procedure.name,
     type: procedure.type,
     desc: procedure.desc,
-    input: procedure.input
-      ? Object.entries(procedure.input).reduce(
-        (acc, [key, value]) => ({
-          ...acc,
-          [key]: transformField(value),
-        }),
-        {} as Record<string, DetailedField>,
-      )
-      : undefined,
-    output: procedure.output
-      ? Object.entries(procedure.output).reduce(
-        (acc, [key, value]) => ({
-          ...acc,
-          [key]: transformField(value),
-        }),
-        {} as Record<string, DetailedField>,
-      )
-      : undefined,
+    input: transformedInput,
+    output: transformedOutput,
     meta: procedure.meta,
   };
 }
@@ -153,31 +128,19 @@ export function parseSchema(content: string): Schema {
     );
   }
 
-  // Setup Ajv
-  const ajv = new Ajv({
-    allErrors: true,
-    strict: true,
-    strictTypes: true,
-    strictRequired: true,
-    allowUnionTypes: true,
-  });
-  addFormats(ajv);
+  const parsed = MainSchema.safeParse(rawSchema);
+  if (!parsed.success) {
+    const errs: string[] = [];
 
-  // Validate against JSON Schema
-  const validate = ajv.compile(schemaJson);
+    for (const issue of parsed.error.issues ?? []) {
+      errs.push(issue.path.join(".") + ": " + issue.message);
+    }
 
-  if (!validate(rawSchema)) {
-    throw new SchemaValidationError(
-      "Schema validation failed",
-      validate.errors ?? [],
-    );
+    throw new SchemaValidationError("Schema validation failed", errs);
   }
 
-  // Transform to our internal types
-  const typedSchema = rawSchema as unknown as RawSchema;
-
   return {
-    types: typedSchema.types?.map(transformType),
-    procedures: typedSchema.procedures.map(transformProcedure),
+    types: parsed.data.types?.map(transformType),
+    procedures: parsed.data.procedures.map(transformProcedure),
   };
 }

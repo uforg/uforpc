@@ -1,5 +1,5 @@
 /** Primitive types supported by the schema */
-export type PrimitiveType = "string" | "number" | "float" | "boolean";
+export type PrimitiveType = "string" | "int" | "float" | "boolean";
 
 /** Represents the object type in the schema */
 export type ObjectType = "object";
@@ -76,7 +76,7 @@ export interface Schema {
  */
 export function isPrimitiveType(type: FieldType): type is PrimitiveType {
   return typeof type === "string" &&
-    ["string", "number", "float", "boolean"].includes(type);
+    ["string", "int", "float", "boolean"].includes(type);
 }
 
 /**
@@ -163,7 +163,7 @@ export function parseFieldType(typeStr: string): FieldType | null {
   const arrayType = parseArrayType(typeStr);
   if (arrayType) return arrayType;
 
-  if (["string", "number", "float", "boolean", "object"].includes(typeStr)) {
+  if (["string", "int", "float", "boolean", "object"].includes(typeStr)) {
     return typeStr as FieldType;
   }
 

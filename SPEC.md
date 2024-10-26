@@ -98,7 +98,7 @@ formal specification or internal processing.
 UFO RPC supports the following primitive data types:
 
 - `string`
-- `number`
+- `int`
 - `float`
 - `boolean`
 
@@ -206,7 +206,7 @@ objects.
       "desc": "User profile information.",
       "fields": {
         "age": {
-          "type": "number",
+          "type": "int",
           "desc": "Age of the user."
         },
         "address": {
@@ -573,7 +573,7 @@ discussed features.
       "desc": "User profile information.",
       "fields": {
         "age": {
-          "type": "number",
+          "type": "int",
           "desc": "Age of the user."
         },
         "address": {
@@ -628,11 +628,11 @@ discussed features.
       "desc": "Retrieves a paginated list of users.",
       "input": {
         "page": {
-          "type": "number",
+          "type": "int",
           "desc": "Page number."
         },
         "pageSize": {
-          "type": "number",
+          "type": "int",
           "desc": "Number of users per page."
         }
       },
@@ -642,7 +642,7 @@ discussed features.
           "desc": "Array of user objects."
         },
         "totalCount": {
-          "type": "number",
+          "type": "int",
           "desc": "Total number of users."
         }
       }
@@ -682,7 +682,7 @@ discussed features.
           "desc": "Profile information to update.",
           "fields": {
             "age": {
-              "type": "number",
+              "type": "int",
               "desc": "Age of the user."
             },
             "address": {
@@ -719,7 +719,7 @@ discussed features.
 
 In this example:
 
-- **Primitive Types**: Includes `string`, `number`, `float`, and `boolean`.
+- **Primitive Types**: Includes `string`, `int`, `float`, and `boolean`.
 - **Arrays and Nested Objects**: Demonstrates the use of arrays
   (`roles: string[]`) and nested objects with `"type": "object"` and `"fields"`.
 - **Custom Types**: `Address` and `Profile` are custom types used within other
@@ -786,7 +786,7 @@ Arrays are denoted by appending `[]` to the type of the elements they contain.
     "desc": "List of roles assigned to the user."
   },
   "userIds": {
-    "type": "number[]",
+    "type": "int[]",
     "desc": "Array of user IDs."
   },
   "scores": {
@@ -837,7 +837,7 @@ Nested objects can be defined in two ways:
        "desc": "User profile information.",
        "fields": {
          "age": {
-           "type": "number",
+           "type": "int",
            "desc": "Age of the user."
          },
          "address": {
@@ -895,7 +895,7 @@ Nested objects can be defined in two ways:
          "desc": "User profile information.",
          "fields": {
            "age": {
-             "type": "number",
+             "type": "int",
              "desc": "Age of the user."
            },
            "address": {
@@ -977,7 +977,7 @@ specifying the type as a string.
       "desc": "Profile information to update.",
       "fields": {
         "age": {
-          "type": "number",
+          "type": "int",
           "desc": "Age of the user."
         },
         "address": {
