@@ -8,9 +8,11 @@
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "denoland.vscode-deno",
+    "editor.rulers": [80]
   },
   "[javascript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
+    "editor.defaultFormatter": "denoland.vscode-deno",
+    "editor.rulers": [80]
   }
 }
