@@ -1,3 +1,10 @@
+/**
+ * ⚠️ IMPORTANT ⚠️
+ * If you modify this file, make sure to run the following command in order
+ * to auto-generate the corresponding json schema from this zod schema:
+ * deno task gen:schema
+ */
+
 import { z, type ZodType } from "zod";
 
 /**
