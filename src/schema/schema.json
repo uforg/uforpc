@@ -1,119 +1,128 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "required": [
-    "procedures"
-  ],
-  "properties": {
-    "types": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Type"
-      }
-    },
-    "procedures": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/definitions/Procedure"
-      }
+  "$ref": "#/definitions/uforpcSchema",
+  "definitions": {
+    "uforpcSchema": {
+      "type": "object",
+      "properties": {
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Z][a-zA-Z0-9]*$"
+              },
+              "desc": {
+                "type": "string",
+                "description": "Optional description of the type"
+              },
+              "fields": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^(string|number|float|boolean|object|.*\\[\\]|[A-Z][a-zA-Z0-9]*)$"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/fields/additionalProperties/anyOf/0"
+                        },
+                        "desc": {
+                          "type": "string",
+                          "description": "Optional description of the field"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/fields/additionalProperties"
+                          },
+                          "description": "Optional nested fields"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ],
+                  "description": "Definition of a field, which can be a type string or a detailed field definition"
+                },
+                "description": "Fields of the custom type"
+              }
+            },
+            "required": [
+              "name",
+              "fields"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Optional list of custom types"
+        },
+        "procedures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/name"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "query",
+                  "mutation"
+                ]
+              },
+              "desc": {
+                "type": "string",
+                "description": "Optional description of the procedure"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/fields/additionalProperties"
+                },
+                "description": "Optional input for the procedure"
+              },
+              "output": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/fields/additionalProperties"
+                },
+                "description": "Optional output for the procedure"
+              },
+              "meta": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                },
+                "description": "Optional metadata for the procedure"
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "description": "List of procedures"
+        }
+      },
+      "required": [
+        "procedures"
+      ],
+      "additionalProperties": false,
+      "description": "UFO RPC Schema"
     }
   },
-  "definitions": {
-    "FieldDefinition": {
-      "type": "object",
-      "required": [
-        "type"
-      ],
-      "properties": {
-        "type": {
-          "type": "string",
-          "pattern": "^(string|number|float|boolean|object|.*\\[\\]|[A-Z][a-zA-Z0-9]*)$"
-        },
-        "desc": {
-          "type": "string"
-        },
-        "fields": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/Field"
-          }
-        }
-      }
-    },
-    "Field": {
-      "oneOf": [
-        {
-          "type": "string",
-          "pattern": "^(string|number|float|boolean|object|.*\\[\\]|[A-Z][a-zA-Z0-9]*)$"
-        },
-        {
-          "$ref": "#/definitions/FieldDefinition"
-        }
-      ]
-    },
-    "Type": {
-      "type": "object",
-      "required": [
-        "name",
-        "fields"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "pattern": "^[A-Z][a-zA-Z0-9]*$"
-        },
-        "desc": {
-          "type": "string"
-        },
-        "fields": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/Field"
-          }
-        }
-      }
-    },
-    "Procedure": {
-      "type": "object",
-      "required": [
-        "name",
-        "type"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "pattern": "^[A-Z][a-zA-Z0-9]*$"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "query",
-            "mutation"
-          ]
-        },
-        "desc": {
-          "type": "string"
-        },
-        "input": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/Field"
-          }
-        },
-        "output": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/Field"
-          }
-        },
-        "meta": {
-          "type": "object",
-          "additionalProperties": {
-            "type": ["string", "number", "boolean"]
-          }
-        }
-      }
-    }
-  }
+  "$schema": "http://json-schema.org/draft-07/schema#"
 }
