@@ -140,7 +140,7 @@ function transformProcedure(procedure: RawProcedure): Procedure {
  * @throws SchemaParsingError if the JSON is invalid
  * @throws SchemaValidationError if the schema is invalid
  */
-export async function parseSchema(content: string): Promise<Schema> {
+export function parseSchema(content: string): Schema {
   // Parse JSON
   let rawSchema: unknown;
   try {
