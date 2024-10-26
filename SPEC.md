@@ -51,7 +51,8 @@ specification, all examples and definitions will be presented in **JSON**
 format.
 
 You can find the UFO RPC json schema in the
-[src/schema/schema.json](./src/schema/schema.json) file.
+[src/schema/schema.json](./src/schema/schema.json) file and the validation
+schema in the [src/schema/schema.ts](./src/schema/schema.ts) file
 
 ---
 
