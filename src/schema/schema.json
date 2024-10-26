@@ -82,7 +82,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "pattern": "^[a-z][a-zA-Z0-9]*$"
+          "pattern": "^[A-Z][a-zA-Z0-9]*$"
         },
         "type": {
           "type": "string",
