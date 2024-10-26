@@ -105,7 +105,7 @@ UFO RPC supports the following primitive data types:
 
 Custom types are user-defined data structures composed of primitive types and
 other custom types. They allow for modeling complex data structures in a
-type-safe manner.
+type-safe manner. All custom type names must start with a capital letter.
 
 **Syntax:**
 
@@ -275,10 +275,12 @@ objects.
 
 #### Procedure Definition
 
-Procedures represent the remote functions that can be called. They are defined
-with the following attributes:
+Procedures represent the remote functions that can be called. All procedure
+names must start with a capital letter. They are defined with the following
+attributes:
 
-- `name`: A unique identifier for the procedure.
+- `name`: A unique identifier for the procedure (should start with a capital
+  letter).
 - `type`: Specifies whether it is a `query` or a `mutation`.
 - `desc`: An optional description of the procedure.
 - `input`: The input parameters of the procedure.
@@ -294,7 +296,7 @@ the `input` or `output` fields can be omitted.
 {
   "procedures": [
     {
-      "name": "procedureName",
+      "name": "ProcedureName",
       "type": "query | mutation",
       "desc": "Description of the procedure.",
       "input": {
@@ -347,7 +349,7 @@ annotations.
 {
   "procedures": [
     {
-      "name": "createUser",
+      "name": "CreateUser",
       "type": "mutation",
       "desc": "Creates a new user in the system.",
       "meta": {
@@ -580,7 +582,7 @@ discussed features.
   ],
   "procedures": [
     {
-      "name": "getUser",
+      "name": "GetUser",
       "type": "query",
       "desc": "Retrieves user information by ID.",
       "input": {
@@ -597,7 +599,7 @@ discussed features.
       }
     },
     {
-      "name": "createUser",
+      "name": "CreateUser",
       "type": "mutation",
       "desc": "Creates a new user in the system.",
       "meta": {
@@ -618,7 +620,7 @@ discussed features.
       }
     },
     {
-      "name": "listUsers",
+      "name": "ListUsers",
       "type": "query",
       "desc": "Retrieves a paginated list of users.",
       "input": {
@@ -643,7 +645,7 @@ discussed features.
       }
     },
     {
-      "name": "deleteUser",
+      "name": "DeleteUser",
       "type": "mutation",
       "desc": "Deletes a user from the system.",
       "meta": {
@@ -664,7 +666,7 @@ discussed features.
       }
     },
     {
-      "name": "updateUserProfile",
+      "name": "UpdateUserProfile",
       "type": "mutation",
       "desc": "Updates the user's profile information.",
       "input": {
