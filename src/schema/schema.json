@@ -108,7 +108,9 @@
         },
         "meta": {
           "type": "object",
-          "additionalProperties": true
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
         }
       }
     }
