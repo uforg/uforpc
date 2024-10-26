@@ -335,6 +335,8 @@ used during the code generation process itself but can be leveraged in the
 generated code for various purposes such as authentication, logging, or custom
 annotations.
 
+The metadata values can only be [primitive types](#primitive-types)
+
 **Syntax:**
 
 ```json
