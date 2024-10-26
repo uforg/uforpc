@@ -1,7 +1,19 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import { isPrimitiveType, isValidType } from "./types.ts";
-import type { Field, Schema } from "./types.ts";
+import {
+  type DetailedField,
+  parseDetailedField,
+  type Procedure,
+  type Schema,
+  type TypeDefinition,
+} from "./types.ts";
+
+export class SchemaParsingError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SchemaParsingError";
+  }
+}
 
 export class SchemaValidationError extends Error {
   constructor(
@@ -13,119 +25,125 @@ export class SchemaValidationError extends Error {
   }
 }
 
-export class SchemaParsingError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "SchemaParsingError";
+interface RawField {
+  type?: string;
+  desc?: string;
+  fields?: Record<string, RawField | string>;
+}
+
+interface RawType {
+  name: string;
+  desc?: string;
+  fields: Record<string, RawField | string>;
+}
+
+interface RawProcedure {
+  name: string;
+  type: "query" | "mutation";
+  desc?: string;
+  input?: Record<string, RawField | string>;
+  output?: Record<string, RawField | string>;
+  meta?: Record<string, string | number | boolean>;
+}
+
+interface RawSchema {
+  types?: RawType[];
+  procedures: RawProcedure[];
+}
+
+/**
+ * Transforms a raw field (from JSON) into a DetailedField
+ * @param field - Raw field from JSON
+ * @returns Transformed DetailedField
+ */
+function transformField(field: RawField | string): DetailedField {
+  if (typeof field === "string") {
+    return parseDetailedField(field);
   }
-}
 
-function validateTypeReferences(
-  fields: Record<string, Field>,
-  definedTypes: Set<string>,
-  path: string,
-): string[] {
-  return Object.entries(fields).flatMap(([fieldName, field]) => {
-    const currentPath = `${path}.${fieldName}`;
-    const errors: string[] = [];
+  // Transform nested fields if they exist
+  const transformedFields = field.fields
+    ? Object.entries(field.fields).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: transformField(value),
+      }),
+      {} as Record<string, DetailedField>,
+    )
+    : undefined;
 
-    const fieldType = typeof field === "string" ? field : field.type;
-    const baseType = fieldType.replace(/\[\]/g, "");
-
-    if (
-      !isPrimitiveType(baseType) && baseType !== "object" &&
-      !definedTypes.has(baseType)
-    ) {
-      errors.push(
-        `Type "${baseType}" referenced at "${currentPath}" is not defined`,
-      );
-    }
-
-    if (!isValidType(fieldType)) {
-      errors.push(`Invalid type "${fieldType}" at "${currentPath}"`);
-    }
-
-    if (typeof field === "object" && field.fields) {
-      errors.push(
-        ...validateTypeReferences(field.fields, definedTypes, currentPath),
-      );
-    }
-
-    return errors;
+  return parseDetailedField({
+    type: field.type!,
+    desc: field.desc,
+    fields: transformedFields,
   });
 }
 
-function validateProcedureNames(procedures: Schema["procedures"]): string[] {
-  return procedures.flatMap((proc) => {
-    if (!/^[A-Z][a-zA-Z0-9]*$/.test(proc.name)) {
-      return [
-        `Procedure name "${proc.name}" must start with uppercase letter and contain only alphanumeric characters`,
-      ];
-    }
-    return [];
-  });
+/**
+ * Transforms a raw type definition into a TypeDefinition
+ * @param type - Raw type from JSON
+ * @returns Transformed TypeDefinition
+ */
+function transformType(type: RawType): TypeDefinition {
+  const transformedFields = Object.entries(type.fields).reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: transformField(value),
+    }),
+    {} as Record<string, DetailedField>,
+  );
+
+  return {
+    name: type.name,
+    desc: type.desc,
+    fields: transformedFields,
+  };
 }
 
-function validateTypeNames(types: Schema["types"] = []): string[] {
-  return types.flatMap((type) => {
-    if (!/^[A-Z][a-zA-Z0-9]*$/.test(type.name)) {
-      return [
-        `Type name "${type.name}" must start with uppercase letter and contain only alphanumeric characters`,
-      ];
-    }
-    return [];
-  });
+/**
+ * Transforms a raw procedure into a Procedure
+ * @param procedure - Raw procedure from JSON
+ * @returns Transformed Procedure
+ */
+function transformProcedure(procedure: RawProcedure): Procedure {
+  return {
+    name: procedure.name,
+    type: procedure.type,
+    desc: procedure.desc,
+    input: procedure.input
+      ? Object.entries(procedure.input).reduce(
+        (acc, [key, value]) => ({
+          ...acc,
+          [key]: transformField(value),
+        }),
+        {} as Record<string, DetailedField>,
+      )
+      : undefined,
+    output: procedure.output
+      ? Object.entries(procedure.output).reduce(
+        (acc, [key, value]) => ({
+          ...acc,
+          [key]: transformField(value),
+        }),
+        {} as Record<string, DetailedField>,
+      )
+      : undefined,
+    meta: procedure.meta,
+  };
 }
 
-function validateSchema(schema: Schema): void {
-  const definedTypes = new Set(schema.types?.map((type) => type.name) ?? []);
-  const errors: string[] = [];
-
-  // Validate type names
-  errors.push(...validateTypeNames(schema.types));
-
-  // Validate procedure names
-  errors.push(...validateProcedureNames(schema.procedures));
-
-  // Validate type references in custom types
-  schema.types?.forEach((type) => {
-    errors.push(
-      ...validateTypeReferences(type.fields, definedTypes, `type:${type.name}`),
-    );
-  });
-
-  // Validate type references in procedures
-  schema.procedures.forEach((proc) => {
-    if (proc.input) {
-      errors.push(
-        ...validateTypeReferences(
-          proc.input,
-          definedTypes,
-          `procedure:${proc.name}:input`,
-        ),
-      );
-    }
-    if (proc.output) {
-      errors.push(
-        ...validateTypeReferences(
-          proc.output,
-          definedTypes,
-          `procedure:${proc.name}:output`,
-        ),
-      );
-    }
-  });
-
-  if (errors.length > 0) {
-    throw new SchemaValidationError("Schema validation failed", errors);
-  }
-}
-
+/**
+ * Parses and validates a schema string, then transforms it into our internal Schema type
+ * @param content - The schema string to parse
+ * @returns Parsed and transformed Schema
+ * @throws SchemaParsingError if the JSON is invalid
+ * @throws SchemaValidationError if the schema is invalid
+ */
 export async function parseSchema(content: string): Promise<Schema> {
-  let parsed: unknown;
-
+  // Parse JSON
+  let rawSchema: unknown;
   try {
-    parsed = JSON.parse(content);
+    rawSchema = JSON.parse(content);
   } catch (error) {
     throw new SchemaParsingError(
       `Invalid JSON: ${
@@ -134,32 +152,34 @@ export async function parseSchema(content: string): Promise<Schema> {
     );
   }
 
+  // Setup Ajv
   const ajv = new Ajv({
     allErrors: true,
     strict: true,
     strictTypes: true,
     strictRequired: true,
+    allowUnionTypes: true,
   });
   addFormats(ajv);
 
+  // Load and validate against JSON Schema
   const schemaJson = JSON.parse(
     await Deno.readTextFile(new URL("./schema.json", import.meta.url)),
   );
-
   const validate = ajv.compile(schemaJson);
 
-  if (!validate(parsed)) {
+  if (!validate(rawSchema)) {
     throw new SchemaValidationError(
       "Schema validation failed",
       validate.errors ?? [],
     );
   }
 
-  const typedSchema = parsed as Schema;
-  validateSchema(typedSchema);
+  // Transform to our internal types
+  const typedSchema = rawSchema as RawSchema;
 
-  return typedSchema;
+  return {
+    types: typedSchema.types?.map(transformType),
+    procedures: typedSchema.procedures.map(transformProcedure),
+  };
 }
-
-export { isPrimitiveType, isValidType };
-export type { Field, Schema };
