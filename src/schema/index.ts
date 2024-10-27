@@ -50,7 +50,8 @@ function transformField(field: FieldSchemaType): DetailedField {
   }
 
   return parseDetailedField({
-    type: field.type!,
+    type: field.type,
+    optional: field.optional,
     desc: field.desc,
     fields: transformedFields,
   });

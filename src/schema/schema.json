@@ -35,6 +35,10 @@
                           "type": "string",
                           "description": "Optional description of the field"
                         },
+                        "optional": {
+                          "type": "boolean",
+                          "description": "Optional flag to indicate if the field is optional"
+                        },
                         "fields": {
                           "type": "object",
                           "additionalProperties": {

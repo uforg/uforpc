@@ -343,6 +343,62 @@ Deno.test("parseSchema - object fields validations", async (t) => {
   );
 });
 
+Deno.test("parseSchema - optional field variations", async (t) => {
+  await t.step("Default to false when not specified", async () => {
+    const parsed = parseSchema(`{
+      "procedures": [
+        {
+          "name": "GetUser",
+          "type": "query",
+          "input": {
+            "user": "string"
+          }
+        }
+      ]
+    }`);
+
+    assertEquals(parsed.procedures[0].input?.user.optional, false);
+  });
+
+  await t.step("Value specified to false", async () => {
+    const parsed = parseSchema(`{
+      "procedures": [
+        {
+          "name": "GetUser",
+          "type": "query",
+          "input": {
+            "user": {
+              "type": "string",
+              "optional": false
+            }
+          }
+        }
+      ]
+    }`);
+
+    assertEquals(parsed.procedures[0].input?.user.optional, false);
+  });
+
+  await t.step("Value specified to true", async () => {
+    const parsed = parseSchema(`{
+      "procedures": [
+        {
+          "name": "GetUser",
+          "type": "query",
+          "input": {
+            "user": {
+              "type": "string",
+              "optional": true
+            }
+          }
+        }
+      ]
+    }`);
+
+    assertEquals(parsed.procedures[0].input?.user.optional, true);
+  });
+});
+
 Deno.test("parseSchema - edge cases", async (t) => {
   await t.step("empty arrays", async () => {
     const schema = `{

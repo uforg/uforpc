@@ -28,6 +28,7 @@ export type MetaValue = string | number | boolean;
  */
 export interface DetailedField {
   type: FieldType;
+  optional: boolean;
   desc?: string;
   fields?: Record<string, DetailedField>;
 }
@@ -211,7 +212,7 @@ export function parseDetailedField(
   if (typeof value === "string") {
     const parsedType = parseFieldType(value);
     if (!parsedType) throw new Error(`Invalid type: ${value}`);
-    return { type: parsedType };
+    return { type: parsedType, optional: false };
   }
 
   if (!value.type) throw new Error("DetailedField must have a type");
@@ -225,6 +226,7 @@ export function parseDetailedField(
   return {
     ...value,
     type: parsedType,
+    optional: value.optional ?? false,
   };
 }
 

@@ -238,27 +238,32 @@ Deno.test("parseFieldType", async (t) => {
 
 Deno.test("parseDetailedField", async (t) => {
   await t.step("should parse string to detailed field", () => {
-    assertEquals(parseDetailedField("string"), { type: "string" });
-    assertEquals(parseDetailedField("User"), { type: "User" });
+    assertEquals(parseDetailedField("string"), {
+      type: "string",
+      optional: false,
+    });
+    assertEquals(parseDetailedField("User"), { type: "User", optional: false });
     assertEquals(parseDetailedField("string[]"), {
       type: { baseType: "string", dimensions: 1 },
+      optional: false,
     });
   });
 
   await t.step("should parse partial detailed field", () => {
     assertEquals(
       parseDetailedField({ type: "string", desc: "A string field" }),
-      { type: "string", desc: "A string field" },
+      { type: "string", optional: false, desc: "A string field" },
     );
   });
 
   await t.step("should parse detailed field with fields", () => {
     const field = {
       type: "object",
+      optional: false,
       desc: "An object field",
       fields: {
-        name: { type: "string" },
-        age: { type: "int" },
+        name: { type: "string", optional: false },
+        age: { type: "int", optional: false },
       },
     };
     assertEquals(parseDetailedField(field), field);
@@ -373,14 +378,19 @@ Deno.test("Complex type scenarios", async (t) => {
   await t.step("should handle detailed fields with nested array types", () => {
     const detailedField: DetailedField = {
       type: "object",
+      optional: false,
       desc: "Complex object",
       fields: {
-        matrix: { type: { baseType: "int", dimensions: 2 } },
-        users: { type: { baseType: "User", dimensions: 1 } },
+        matrix: { type: { baseType: "int", dimensions: 2 }, optional: false },
+        users: { type: { baseType: "User", dimensions: 1 }, optional: false },
         metadata: {
           type: "object",
+          optional: false,
           fields: {
-            tags: { type: { baseType: "string", dimensions: 1 } },
+            tags: {
+              type: { baseType: "string", dimensions: 1 },
+              optional: false,
+            },
           },
         },
       },

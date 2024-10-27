@@ -68,6 +68,7 @@ const FieldSchema = z.lazy(() =>
 interface IDetailedField {
   type: string;
   desc?: string;
+  optional?: boolean;
   fields?: Record<string, string | IDetailedField>;
 }
 
@@ -88,6 +89,13 @@ const DetailedFieldSchema: ZodType<IDetailedField> = z
      * Optional description of the field.
      */
     desc: z.string().optional().describe("Optional description of the field"),
+
+    /**
+     * Optional flag to indicate if the field is optional.
+     */
+    optional: z.boolean().optional().describe(
+      "Optional flag to indicate if the field is optional",
+    ),
 
     /**
      * Optional nested fields within the field definition.
