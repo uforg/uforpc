@@ -123,7 +123,8 @@ type-safe manner. All custom type names must start with a capital letter.
         },
         "anotherField": {
           "type": "anotherType",
-          "desc": "Description of another field."
+          "desc": "Description of another field.",
+          "optional": true
         }
       }
     }
@@ -150,13 +151,21 @@ type-safe manner. All custom type names must start with a capital letter.
         },
         "email": {
           "type": "string",
-          "desc": "Email address of the user."
+          "desc": "Email address of the user.",
+          "optional": true
         }
       }
     }
   ]
 }
 ```
+
+**Notes:**
+
+- **Optional Fields**: To mark a field as optional, include the
+  `"optional": true` attribute in the field definition.
+- **Default Behavior**: If the `"optional"` attribute is omitted, the field is
+  considered **required** by default.
 
 #### Arrays and Nested Objects
 
@@ -185,7 +194,8 @@ Arrays are denoted by appending `[]` to the type of the elements they contain.
   },
   "users": {
     "type": "User[]",
-    "desc": "Array of user objects."
+    "desc": "Array of user objects.",
+    "optional": true
   }
 }
 ```
@@ -207,7 +217,8 @@ objects.
       "fields": {
         "age": {
           "type": "int",
-          "desc": "Age of the user."
+          "desc": "Age of the user.",
+          "optional": true
         },
         "address": {
           "type": "object",
@@ -223,7 +234,8 @@ objects.
             },
             "zipCode": {
               "type": "string",
-              "desc": "Postal code."
+              "desc": "Postal code.",
+              "optional": true
             }
           }
         }
@@ -253,7 +265,8 @@ objects.
           },
           "zipCode": {
             "type": "string",
-            "desc": "Postal code."
+            "desc": "Postal code.",
+            "optional": true
           }
         }
       }
@@ -307,7 +320,8 @@ the `input` or `output` fields can be omitted.
         },
         "anotherParameter": {
           "type": "anotherType",
-          "desc": "Description of another parameter."
+          "desc": "Description of another parameter.",
+          "optional": true
         }
       },
       "output": {
@@ -317,7 +331,8 @@ the `input` or `output` fields can be omitted.
         },
         "anotherField": {
           "type": "anotherType",
-          "desc": "Description of another output field."
+          "desc": "Description of another output field.",
+          "optional": true
         }
       },
       "meta": {
@@ -411,6 +426,8 @@ The `input` and `output` fields in a procedure definition can be:
   can have:
   - `type`: The type of the field.
   - `desc` (optional): A description of the field.
+  - `optional` (optional): A boolean indicating whether the field is optional.
+    Defaults to `false`.
 
 - **A string representing a type**. In this case, the input/output is of that
   type.
@@ -437,7 +454,8 @@ type of the input/output.
       },
       "profile": {
         "type": "Profile",
-        "desc": "Profile information to update."
+        "desc": "Profile information to update.",
+        "optional": true
       }
     }
   }
@@ -539,14 +557,19 @@ discussed features.
       "fields": {
         "id": "string",
         "username": "string",
-        "email": "string",
+        "email": {
+          "type": "string",
+          "desc": "Email address of the user.",
+          "optional": true
+        },
         "roles": {
           "type": "string[]",
           "desc": "List of roles assigned to the user."
         },
         "profile": {
           "type": "Profile",
-          "desc": "User profile information."
+          "desc": "User profile information.",
+          "optional": true
         }
       }
     },
@@ -564,7 +587,8 @@ discussed features.
         },
         "zipCode": {
           "type": "string",
-          "desc": "Postal code."
+          "desc": "Postal code.",
+          "optional": true
         }
       }
     },
@@ -574,7 +598,8 @@ discussed features.
       "fields": {
         "age": {
           "type": "int",
-          "desc": "Age of the user."
+          "desc": "Age of the user.",
+          "optional": true
         },
         "address": {
           "type": "Address",
@@ -680,10 +705,12 @@ discussed features.
         "profile": {
           "type": "object",
           "desc": "Profile information to update.",
+          "optional": true,
           "fields": {
             "age": {
               "type": "int",
-              "desc": "Age of the user."
+              "desc": "Age of the user.",
+              "optional": true
             },
             "address": {
               "type": "object",
@@ -699,7 +726,8 @@ discussed features.
                 },
                 "zipCode": {
                   "type": "string",
-                  "desc": "Postal code."
+                  "desc": "Postal code.",
+                  "optional": true
                 }
               }
             }
@@ -729,6 +757,8 @@ In this example:
     type.
   - Fields in `input` and `output` are treated as anonymous custom types with
     exactly the same fields.
+- **Optional Fields**: Fields like `email`, `profile`, and `zipCode` are marked
+  as optional using the `"optional": true` attribute.
 - **Descriptions (`desc`)**: Added to types, procedures, and fields to enhance
   documentation and understanding.
 - **Procedure Metadata**: Uses the `meta` field for additional procedure
@@ -787,7 +817,8 @@ Arrays are denoted by appending `[]` to the type of the elements they contain.
   },
   "userIds": {
     "type": "int[]",
-    "desc": "Array of user IDs."
+    "desc": "Array of user IDs.",
+    "optional": true
   },
   "scores": {
     "type": "float[]",
@@ -795,7 +826,8 @@ Arrays are denoted by appending `[]` to the type of the elements they contain.
   },
   "users": {
     "type": "User[]",
-    "desc": "Array of user objects."
+    "desc": "Array of user objects.",
+    "optional": true
   },
   "addresses": {
     "type": "object[]",
@@ -811,7 +843,8 @@ Arrays are denoted by appending `[]` to the type of the elements they contain.
       },
       "zipCode": {
         "type": "string",
-        "desc": "Postal code."
+        "desc": "Postal code.",
+        "optional": true
       }
     }
   }
@@ -838,7 +871,8 @@ Nested objects can be defined in two ways:
        "fields": {
          "age": {
            "type": "int",
-           "desc": "Age of the user."
+           "desc": "Age of the user.",
+           "optional": true
          },
          "address": {
            "type": "object",
@@ -854,7 +888,8 @@ Nested objects can be defined in two ways:
              },
              "zipCode": {
                "type": "string",
-               "desc": "Postal code."
+               "desc": "Postal code.",
+               "optional": true
              }
            }
          }
@@ -886,7 +921,8 @@ Nested objects can be defined in two ways:
            },
            "zipCode": {
              "type": "string",
-             "desc": "Postal code."
+             "desc": "Postal code.",
+             "optional": true
            }
          }
        },
@@ -896,7 +932,8 @@ Nested objects can be defined in two ways:
          "fields": {
            "age": {
              "type": "int",
-             "desc": "Age of the user."
+             "desc": "Age of the user.",
+             "optional": true
            },
            "address": {
              "type": "Address",
@@ -944,7 +981,8 @@ specifying the type as a string.
   "fields": {
     "profile": {
       "type": "Profile",
-      "desc": "User profile information."
+      "desc": "User profile information.",
+      "optional": true
     }
   },
   "input": {
@@ -975,10 +1013,12 @@ specifying the type as a string.
     "profile": {
       "type": "object",
       "desc": "Profile information to update.",
+      "optional": true,
       "fields": {
         "age": {
           "type": "int",
-          "desc": "Age of the user."
+          "desc": "Age of the user.",
+          "optional": true
         },
         "address": {
           "type": "object",
@@ -994,7 +1034,8 @@ specifying the type as a string.
             },
             "zipCode": {
               "type": "string",
-              "desc": "Postal code."
+              "desc": "Postal code.",
+              "optional": true
             }
           }
         }
