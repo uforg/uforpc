@@ -1,6 +1,7 @@
 export * from "./types.ts";
 import {
   type DetailedField,
+  isCustomType,
   parseDetailedField,
   type Procedure,
   type Schema,
@@ -140,8 +141,69 @@ export function parseSchema(content: string): Schema {
     throw new SchemaValidationError("Schema validation failed", errs);
   }
 
-  return {
+  const transformedSchema = {
     types: parsed.data.types?.map(transformType),
     procedures: parsed.data.procedures.map(transformProcedure),
   };
+
+  assertCustomTypesUniqueness(transformedSchema);
+  assertCustomTypeDefinitions(transformedSchema);
+
+  return transformedSchema;
+}
+
+/**
+ * Asserts that custom type names are unique
+ * @param schema - Schema to validate
+ * @throws SchemaValidationError if a custom type name is not unique
+ */
+function assertCustomTypesUniqueness(schema: Schema) {
+  const typeNames: Record<string, boolean> = {};
+  for (const type of schema.types ?? []) {
+    if (typeNames[type.name]) {
+      throw new SchemaValidationError(`Duplicate type name: ${type.name}`, []);
+    }
+    typeNames[type.name] = true;
+  }
+}
+
+/**
+ * Asserts that all used custom types are defined in the schema
+ * @param schema - Schema to validate
+ * @throws SchemaValidationError if a custom type is not defined
+ */
+function assertCustomTypeDefinitions(schema: Schema) {
+  const findCustomTypes = (field: DetailedField): string[] => {
+    const customTypes: string[] = [];
+
+    if (field.type.toString().startsWith("object")) {
+      for (const key in field.fields) {
+        const customTypes = findCustomTypes(field.fields[key]);
+        customTypes.push(...customTypes);
+      }
+    }
+    if (isCustomType(field.type)) customTypes.push(field.type.toString());
+
+    return customTypes;
+  };
+
+  const desiredCustomTypes: string[] = [];
+  for (const procedure of schema.procedures) {
+    for (const input in procedure.input) {
+      desiredCustomTypes.push(...findCustomTypes(procedure.input[input]));
+    }
+    for (const output in procedure.output) {
+      desiredCustomTypes.push(...findCustomTypes(procedure.output[output]));
+    }
+  }
+
+  const existingCustomTypes = (schema.types ?? []).map((type) => type.name);
+  for (const desired of desiredCustomTypes) {
+    if (!existingCustomTypes.includes(desired)) {
+      throw new SchemaValidationError(
+        `Custom type ${desired} is not defined in the schema`,
+        [],
+      );
+    }
+  }
 }
