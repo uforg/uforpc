@@ -471,3 +471,63 @@ Deno.test("parseSchema - edge cases", async (t) => {
     assertEquals(complexType?.fields.data.type, "object");
   });
 });
+
+Deno.test("parseSchema - duplicate type names", async () => {
+  const schema = `{
+    "types": [
+      {
+        "name": "User",
+        "fields": {
+          "id": "string"
+        }
+      },
+      {
+        "name": "User",
+        "fields": {
+          "name": "string"
+        }
+      }
+    ],
+    "procedures": [
+      {
+        "name": "GetUser",
+        "type": "query",
+        "input": {
+          "id": "string"
+        },
+        "output": {
+          "user": "User"
+        }
+      }
+    ]
+  }`;
+
+  await assertRejects(
+    async () => parseSchema(schema),
+    SchemaValidationError,
+    "Duplicate type name",
+  );
+});
+
+Deno.test("parseSchema - undefined custom types", async () => {
+  const schema = `{
+    "procedures": [
+      {
+        "name": "GetUser",
+        "type": "query",
+        "input": {
+          "id": "string"
+        },
+        "output": {
+          "user": "User"
+        }
+      }
+    ]
+  }`;
+
+  await assertRejects(
+    async () => parseSchema(schema),
+    SchemaValidationError,
+    "Custom type User is not defined",
+  );
+});
