@@ -108,7 +108,7 @@ const DetailedFieldSchema: ZodType<IDetailedField> = z
   })
   .strict()
   .superRefine((data, ctx) => {
-    const isObjectType = data.type === "object";
+    const isObjectType = data.type.startsWith("object");
     const hasFields = data.fields && Object.keys(data.fields).length > 0;
 
     if (isObjectType && !hasFields) {
