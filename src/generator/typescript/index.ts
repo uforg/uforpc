@@ -70,14 +70,56 @@ const coreTypesTemplate = `
 // Core Types
 // -----------------------------------------------------------------------------
 
+/** Represents an HTTP method */
 export type UFOHTTPMethod = "GET" | "POST";
 
+/** Represents the output of an error in the UFO RPC system */
+export interface UFOErrorOutput {
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+/** Represents the output of a UFO RPC request */
+export type UFOResponse<T> =
+  | {
+    readonly ok: true;
+    readonly output: T;
+    readonly error?: never;
+  }
+  | {
+    readonly ok: false;
+    readonly output?: never;
+    readonly error: UFOErrorOutput;
+  };
+
+/** Represents an error in the UFO RPC system */
 export class UFOError extends Error {
   constructor(message: string, public details?: Record<string, unknown>) {
     super(message);
     this.name = "UFOError";
   }
-}`;
+}
+
+/** Gets the error output for a given error */
+function getErrorOutput(err: unknown): UFOErrorOutput {
+  if (err instanceof UFOError) {
+    return {
+      message: err.message,
+      details: err.details,
+    };
+  }
+
+  if (err instanceof Error) {
+    return {
+      message: err.message,
+    };
+  }
+
+  return {
+    message: "Unknown error",
+  };
+}
+`;
 
 const domainTypesTemplate = `
 // -----------------------------------------------------------------------------
@@ -148,7 +190,20 @@ const serverTemplate = `
 // Server Types
 // -----------------------------------------------------------------------------
 
-export interface UFOProcedureContext<TInput, TMeta, UFORequestContext> {
+export interface UFOServerRPCRequest<UFORequestContext> {
+  readonly procedure: UFOProcedureNames | string;
+  readonly method: UFOHTTPMethod;
+  readonly input: UFOProcedures[UFOProcedureNames]["input"];
+  readonly context: UFORequestContext;
+}
+
+export interface UFOServerProcedureContext<
+  UFOProcedureNames,
+  TInput,
+  TMeta,
+  UFORequestContext
+> {
+  readonly procedure: UFOProcedureNames;
   readonly input: TInput;
   readonly meta: TMeta;
   readonly context: UFORequestContext;
@@ -160,15 +215,22 @@ export interface UFOProcedureContext<TInput, TMeta, UFORequestContext> {
 /** {{desc}} */
 {{/if}}
 export type P{{name}}Handler<UFORequestContext> = (
-  ctx: UFOProcedureContext<P{{name}}Input, P{{name}}Meta, UFORequestContext>
+  ctx: UFOServerProcedureContext<
+    "{{name}}",
+    P{{name}}Input,
+    P{{name}}Meta,
+    UFORequestContext
+  >
 ) => Promise<P{{name}}Output>;
 
 {{/each}}
 
 export interface UFOServerMiddleware<UFORequestContext> {
   before?(context: UFORequestContext): Promise<UFORequestContext>;
-  after?(context: UFORequestContext, result: unknown): Promise<unknown>;
-  error?(context: UFORequestContext, error: Error): Promise<void>;
+  after?(
+    context: UFORequestContext,
+    response: UFOResponse<UFOProcedures[UFOProcedureNames]["output"]>,
+  ): Promise<typeof response>;
 }
 
 // -----------------------------------------------------------------------------
@@ -179,7 +241,12 @@ export class UFOServer<UFORequestContext> {
   private readonly handlers = new Map<
     UFOProcedureNames,
     (
-      ctx: UFOProcedureContext<unknown, unknown, UFORequestContext>
+      ctx: UFOServerProcedureContext<
+        UFOProcedureNames,
+        unknown,
+        unknown,
+        UFORequestContext
+      >,
     ) => Promise<unknown>
   >();
   private readonly middleware: UFOServerMiddleware<UFORequestContext>[] = [];
@@ -201,7 +268,8 @@ export class UFOServer<UFORequestContext> {
   defineHandler<P extends UFOProcedureNames>(
     procedure: P,
     handler: (
-      ctx: UFOProcedureContext<
+      ctx: UFOServerProcedureContext<
+        P,
         UFOProcedures[P]["input"],
         UFOProcedures[P]["meta"],
         UFORequestContext
@@ -211,7 +279,12 @@ export class UFOServer<UFORequestContext> {
     this.handlers.set(
       procedure,
       handler as (
-        ctx: UFOProcedureContext<unknown, unknown, UFORequestContext>
+        ctx: UFOServerProcedureContext<
+          UFOProcedureNames,
+          unknown,
+          unknown,
+          UFORequestContext
+        >
       ) => Promise<unknown>
     );
     return this;
@@ -222,60 +295,90 @@ export class UFOServer<UFORequestContext> {
     return this;
   }
 
-  async handleRequest<P extends UFOProcedureNames>(
-    procedure: P,
-    method: UFOHTTPMethod,
-    input: UFOProcedures[P]["input"],
-    context: UFORequestContext
-  ): Promise<UFOProcedures[P]["output"]> {
-    if (!procedure) {
-      throw new UFOError("Procedure not defined");
+  async handleRequest(
+    request: UFOServerRPCRequest<UFORequestContext>
+  ): Promise<UFOResponse<UFOProcedures[UFOProcedureNames]["output"]>> {
+    type ProcedureOutput = UFOProcedures[UFOProcedureNames]["output"];
+    const procedureName = request.procedure as UFOProcedureNames;
+
+    if (!procedureName) {
+      return {
+        ok: false,
+        error: {
+          message: "Procedure not defined"
+        }
+      };
     }
 
-    const handler = this.handlers.get(procedure);
+    const handler = this.handlers.get(procedureName);
     if (!handler) {
-      throw new UFOError(\`Handler not defined for procedure: \${procedure}\`);
+      return {
+        ok: false,
+        error: {
+          message: \`Handler not defined for procedure \${request.procedure}\`
+        }
+      };
     }
 
-    const expectedMethod = this.methodMap[procedure];
-    if (method !== expectedMethod) {
-      throw new UFOError(
-        \`\${procedure} requires \${expectedMethod} method, got \${method}\`
-      );
+    const expectedMethod = this.methodMap[procedureName];
+    if (request.method !== expectedMethod) {
+      return {
+        ok: false,
+        error: {
+          message: \`Method \${expectedMethod} not allowed for \${request.procedure} procedure\`
+        }
+      };
     }
 
     try {
-      let currentUFORequestContext = context;
+      let currentUFORequestContext = request.context;
 
-      for (const m of this.middleware) {
+      for await (const m of this.middleware) {
         if (m.before) {
           currentUFORequestContext = await m.before(currentUFORequestContext);
         }
       }
 
-      let result = await handler({
-        input,
-        meta: this.metaMap[procedure] as UFOProcedures[P]["meta"],
-        context: currentUFORequestContext,
-      });
-
-      for (const m of this.middleware) {
-        if (m.after) {
-          result = await m.after(currentUFORequestContext, result);
+      let response: UFOResponse<UFOProcedures[UFOProcedureNames]["output"]> = {
+        ok: false,
+        error: {
+          message: "Unknown error"
+        }
+      }
+      
+      try {
+        const output = (await handler({
+          procedure: procedureName,
+          input: request.input,
+          meta: this.metaMap[procedureName],
+          context: currentUFORequestContext,
+        })) as ProcedureOutput;
+        response = {
+          ok: true,
+          output,
+        };
+      } catch (err) {
+        response = {
+          ok: false,
+          error: getErrorOutput(err)
         }
       }
 
-      return result as UFOProcedures[P]["output"];
-    } catch (err) {
-      const error = err instanceof UFOError
-        ? err
-        : new UFOError(err instanceof Error ? err.message : "Unknown error");
-
-      for (const m of this.middleware) {
-        if (m.error) await m.error(context, error);
+      for await (const m of this.middleware) {
+        if (m.after) {
+          response = (await m.after(
+            currentUFORequestContext,
+            response,
+          )) as typeof response;
+        }
       }
 
-      throw error;
+      return response
+    } catch (err) {
+      return {
+        ok: false,
+        error: getErrorOutput(err)
+      };
     }
   }
 }`;
@@ -292,7 +395,7 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
           private readonly fetch: typeof globalThis.fetch = globalThis.fetch
         ) {}
 
-        async request<T>(request: UFOCientRequest): Promise<UFOClientResponse<T>> {
+        async request<T>(request: UFOClientHTTPRequest): Promise<UFOResponse<T>> {
           const options: RequestInit = {
             method: request.method,
             headers: request.headers,
@@ -305,21 +408,21 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
           const response = await this.fetch(request.url, options);
           const data = await response.json();
 
-          if (!response.ok) {
-            return {
-              ok: false,
-              data: data,
-              error: {
-                message: data.error?.message ?? "Unknown error",
-                details: data.error?.details,
-              },
-            };
+          if (typeof data.ok === "boolean" && (data.output || data.error)) {
+            return data;
           }
 
           return {
-            ok: true,
-            data,
-          };
+            ok: false,
+            error: {
+              message: "Invalid response from server",
+              details: {
+                status: response.status,
+                statusText: response.statusText,
+                data,
+              },
+            },
+          }
         }
       }
     `;
@@ -336,30 +439,20 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
     // Client Implementation
     // -----------------------------------------------------------------------------
 
-    export interface UFOCientRequest {
+    export interface UFOClientHTTPRequest {
       url: string;
       method: UFOHTTPMethod;
       body?: unknown;
       headers?: Record<string, string>;
     }
 
-    export interface UFOClientResponse<T = unknown> {
-      ok: boolean;
-      data: T;
-      error?: {
-        message: string;
-        details?: Record<string, unknown>;
-      };
-    }
-
     export interface UFOHTTPClient {
-      request<T>(request: UFOCientRequest): Promise<UFOClientResponse<T>>;
+      request<T>(request: UFOClientHTTPRequest): Promise<UFOResponse<T>>;
     }
 
     export interface UFOClientMiddleware {
-      before?(request: UFOCientRequest): Promise<UFOCientRequest>;
-      after?(response: UFOClientResponse): Promise<UFOClientResponse>;
-      error?(error: UFOError): Promise<never>;
+      before?(request: UFOClientHTTPRequest): Promise<UFOClientHTTPRequest>;
+      after?(response: UFOResponse<UFOProcedures[UFOProcedureNames]["output"]>): Promise<typeof response>;
     }
 
     ${fetchClient}
@@ -385,52 +478,54 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
       private async request<P extends UFOProcedureNames>(
         procedure: P,
         method: UFOHTTPMethod,
-        input: UFOProcedures[P]["input"]
-      ): Promise<UFOProcedures[P]["output"]> {
-        let request: UFOCientRequest = {
+        input: UFOProcedures[P]["input"],
+      ): Promise<UFOResponse<UFOProcedures[P]["output"]>> {
+        let request: UFOClientHTTPRequest = {
           url: this.buildUrl(procedure, method, input),
           method,
-          headers: method === "POST"
-            ? { "Content-Type": "application/json" }
-            : undefined,
-          ...(method === "POST" && { body: input }),
         };
+        if (method === "POST") {
+          request.headers = { "Content-Type": "application/json" };
+          request.body = input;
+        }
 
         try {
-          for (const m of this.middleware) {
+          for await (const m of this.middleware) {
             if (m.before) request = await m.before(request);
           }
 
-          let response = await this.httpClient.request<UFOProcedures[P]["output"]>(
-            request
-          );
+          let response: UFOResponse<UFOProcedures[P]["output"]> = {
+            ok: false,
+            error: {
+              message: "Unknown error"
+            }
+          };
 
-          for (const m of this.middleware) {
+          try {
+            response = await this.httpClient.request<UFOProcedures[P]["output"]>(
+              request,
+            );
+          } catch (err) {
+            response = {
+              ok: false,
+              error: getErrorOutput(err),
+            };
+          }
+
+          for await (const m of this.middleware) {
             if (m.after) {
-              response = await m.after(response) as UFOClientResponse<
+              response = (await m.after(response)) as UFOResponse<
                 UFOProcedures[P]["output"]
               >;
             }
           }
 
-          if (!response.ok) {
-            throw new UFOError(
-              response.error?.message ?? "Unknown error",
-              response.error?.details
-            );
-          }
-
-          return response.data;
+          return response;
         } catch (err) {
-          const error = err instanceof UFOError
-            ? err
-            : new UFOError(err instanceof Error ? err.message : "Unknown error");
-
-          for (const m of this.middleware) {
-            if (m.error) await m.error(error);
-          }
-
-          throw error;
+          return {
+            ok: false,
+            error: getErrorOutput(err),
+          };
         }
       }
 
