@@ -228,16 +228,20 @@ export class UFOServer<UFORequestContext> {
     input: UFOProcedures[P]["input"],
     context: UFORequestContext
   ): Promise<UFOProcedures[P]["output"]> {
-    const expectedMethod = this.methodMap[procedure];
-    if (method !== expectedMethod) {
-      throw new UFOError(
-        \`\${procedure} requires \${expectedMethod} method, got \${method}\`
-      );
+    if (!procedure) {
+      throw new UFOError("Procedure not defined");
     }
 
     const handler = this.handlers.get(procedure);
     if (!handler) {
       throw new UFOError(\`Handler not defined for procedure: \${procedure}\`);
+    }
+
+    const expectedMethod = this.methodMap[procedure];
+    if (method !== expectedMethod) {
+      throw new UFOError(
+        \`\${procedure} requires \${expectedMethod} method, got \${method}\`
+      );
     }
 
     try {
