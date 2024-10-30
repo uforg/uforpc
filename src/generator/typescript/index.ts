@@ -133,11 +133,9 @@ export type UFOResponse<T> =
   | {
     readonly ok: true;
     readonly output: T;
-    readonly error?: never;
   }
   | {
     readonly ok: false;
-    readonly output?: never;
     readonly error: UFOErrorOutput;
   };
 
@@ -442,7 +440,7 @@ export interface P{{name}}Input {
   {{renderFields input}}
 }
 {{else}}
-export type P{{name}}Input = never;
+export type P{{name}}Input = void;
 {{/if}}
 
 {{#if input}}
@@ -458,7 +456,7 @@ export interface P{{name}}Output {
   {{renderFields output}}
 }
 {{else}}
-export type P{{name}}Output = never;
+export type P{{name}}Output = void;
 {{/if}}
 
 /** Represents the metadata for the **{{name}}** procedure. */
@@ -469,7 +467,7 @@ export interface P{{name}}Meta {
   {{/each}}
 }
 {{else}}
-export type P{{name}}Meta = never;
+export type P{{name}}Meta = void;
 {{/if}}
 
 {{/each}}
@@ -912,7 +910,7 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
       ): string {
         const url = new URL(\`\${this.config.baseUrl}/\${procedure}\`);
 
-        if (method === "GET") {
+        if (method === "GET" && input) {
           url.searchParams.append("input", JSON.stringify(input));
         }
 
