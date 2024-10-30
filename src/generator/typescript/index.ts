@@ -532,10 +532,10 @@ function createServerTemplate(opts: GenerateTypescriptOpts): string {
     // -----------------------------------------------------------------------------
 
     export interface UFOServerRPCRequest<UFORequestContext> {
-      readonly procedure: UFOProcedureNames | string;
       readonly method: UFOHTTPMethod;
-      readonly input: UFOProcedures[UFOProcedureNames]["input"];
       readonly context: UFORequestContext;
+      readonly procedure: string;
+      readonly input: unknown;
     }
 
     export interface UFOServerProcedureContext<
