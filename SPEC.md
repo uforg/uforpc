@@ -474,40 +474,118 @@ corresponds directly to a custom type.
 
 ---
 
-## Data Serialization
+## Data Serialization and Response Format
 
 All data exchanged between clients and servers using UFO RPC is serialized in
-**JSON** format. JSON was chosen due to its ubiquity, readability, and ease of
-use across multiple programming languages. This ensures:
+**JSON** format. Every response from the server follows a strict format that
+clearly discriminates between successful and failed responses.
 
-- **Wide Compatibility**: Almost all programming languages have built-in support
-  for JSON parsing and serialization.
-- **Ease of Debugging**: Human-readable format simplifies the debugging process
-  during development and troubleshooting.
+### Response Structure
 
----
+All server responses must follow this structure:
+
+For successful responses:
+
+```json
+{
+  "ok": true,
+  "output": {
+    // The procedure's output data here
+    "userId": "123",
+    "username": "john_doe"
+  }
+}
+```
+
+For error responses:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "message": "A human readable error message",
+    "details": {
+      // Optional additional error context
+      "detailsField1": "value",
+      "detailsField2": "value"
+    }
+  }
+}
+```
+
+The response structure is discriminated by the `ok` field:
+
+- When `ok` is `true`, the response must include an `output` field and must not
+  include an `error` field
+- When `ok` is `false`, the response must include an `error` field and must not
+  include an `output` field
 
 ## Error Handling
 
 ### Error Response Format
 
-When errors occur during the execution of a procedure, UFO RPC returns a
-standardized JSON error response. This consistent format allows client
-applications to handle errors efficiently and uniformly.
-
-**Error Response Structure:**
+All error responses in UFO RPC must follow this structure:
 
 ```json
 {
+  "ok": false,
   "error": {
-    "message": "The user with the specified ID does not exist.",
+    "message": "The error message goes here",
     "details": {
-      "field1": "field value",
-      "userId": "12345"
+      "additionalContext1": "value",
+      "additionalContext2": "value"
     }
   }
 }
 ```
+
+**Fields:**
+
+- `ok`: Must be `false` for error responses
+- `error`: An object containing:
+  - `message` (required): A human-readable description of the error
+  - `details` (optional): An object with additional error context
+
+**Example Error Scenarios:**
+
+1. Resource Not Found:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "message": "User not found",
+    "details": {
+      "userId": "123"
+    }
+  }
+}
+```
+
+2. Validation Error:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "message": "Invalid input parameters",
+    "details": {
+      "field": "email",
+      "reason": "Invalid format",
+      "received": "not-an-email"
+    }
+  }
+}
+```
+
+### Error Handling Best Practices
+
+1. **Clear Messages**: Error messages should be clear, concise, and actionable
+2. **Relevant Details**: Include relevant debugging information in the details
+   field
+3. **Consistency**: Always use this format for all error responses
+4. **Security**: Avoid exposing sensitive information in error messages or
+   details
 
 **Fields:**
 
