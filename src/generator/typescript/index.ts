@@ -666,7 +666,7 @@ function createServerTemplate(opts: GenerateTypescriptOpts): string {
           return {
             ok: false,
             error: {
-              message: \`Method \${expectedMethod} not allowed for \${request.procedure} procedure\`
+              message: \`Method \${request.method} not allowed for \${request.procedure} procedure\`
             }
           };
         }
