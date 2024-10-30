@@ -475,7 +475,11 @@ export type P{{name}}Meta = never;
 {{/each}}
 
 /** All validation schemas for procedures */
-const AllValidationSchemas = {
+const AllValidationSchemas: Record<
+  string,
+  {hasValidationSchema: true, validationSchema: ValidationSchema<unknown>} |
+  {hasValidationSchema: false}
+> = {
   {{#each procedures}}
     {{name}}: {
       {{#if input}}
@@ -511,7 +515,7 @@ function createServerTemplate(opts: GenerateTypescriptOpts): string {
     validationLogic = `
       let isValid = true;
       const valSchema = AllValidationSchemas[procedureName];
-      if (valSchema.hasValidationSchema) {
+      if (valSchema?.hasValidationSchema && valSchema?.validationSchema) {
         const valRes = valSchema.validationSchema.validate(request.input);
         isValid = valRes.isValid;
         if (!isValid) {
@@ -781,7 +785,7 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
     validationLogic = `
       let isValid = true;
       const valSchema = AllValidationSchemas[procedure];
-      if (valSchema.hasValidationSchema) {
+      if (valSchema?.hasValidationSchema && valSchema?.validationSchema) {
         const valRes = valSchema.validationSchema.validate(input);
         isValid = valRes.isValid;
         if (!isValid) {
