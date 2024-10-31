@@ -5,15 +5,165 @@
  * deno task gen:schema
  */
 
-import { z, type ZodType } from "zod";
+import { z } from "zod";
+import type { IssueData, ZodType } from "zod";
 
 /**
- * Schema with regular expression pattern to validate the "type" field.
- * It allows:
- * - Basic types: string, int, float, boolean, object
- * - Custom types starting with an uppercase letter followed by alphanumerics
- * - Array types: e.g., string[], MyType[][], etc.
+ * Type definitions for validation rules
  */
+type ValidationRule =
+  | "required"
+  | "regex"
+  | "equals"
+  | "contains"
+  | "length"
+  | "minLength"
+  | "maxLength"
+  | "enum"
+  | "email"
+  | "iso8601"
+  | "json"
+  | "lowercase"
+  | "uppercase"
+  | "min"
+  | "max";
+
+type RuleConfig = {
+  string: ValidationRule[];
+  int: ValidationRule[];
+  float: ValidationRule[];
+  boolean: ValidationRule[];
+  object: ValidationRule[];
+};
+
+/**
+ * Valid rule configurations per field type
+ */
+const VALID_RULES: RuleConfig = {
+  string: [
+    "required",
+    "regex",
+    "equals",
+    "contains",
+    "length",
+    "minLength",
+    "maxLength",
+    "enum",
+    "email",
+    "iso8601",
+    "json",
+    "lowercase",
+    "uppercase",
+  ],
+  int: [
+    "required",
+    "equals",
+    "min",
+    "max",
+    "enum",
+  ],
+  float: [
+    "required",
+    "equals",
+    "min",
+    "max",
+  ],
+  boolean: [
+    "required",
+    "equals",
+  ],
+  object: [
+    "required",
+    "json",
+  ],
+};
+
+/**
+ * Schema for validation rule types
+ */
+const ValidationRuleSchema = z.discriminatedUnion("rule", [
+  // Required validation
+  z.object({
+    rule: z.literal("required"),
+    message: z.string().optional(),
+  }),
+
+  // String pattern validations
+  z.object({
+    rule: z.literal("regex"),
+    pattern: z.string(),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("equals"),
+    value: z.union([z.string(), z.number(), z.boolean()]),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("contains"),
+    value: z.string(),
+    message: z.string().optional(),
+  }),
+
+  // Format validations
+  z.object({
+    rule: z.literal("email"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("iso8601"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("json"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("lowercase"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("uppercase"),
+    message: z.string().optional(),
+  }),
+
+  // Numeric validations
+  z.object({
+    rule: z.literal("min"),
+    value: z.number(),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("max"),
+    value: z.number(),
+    message: z.string().optional(),
+  }),
+
+  // Length validations
+  z.object({
+    rule: z.literal("length"),
+    value: z.number(),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("minLength"),
+    value: z.number(),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("maxLength"),
+    value: z.number(),
+    message: z.string().optional(),
+  }),
+
+  // Enumeration validation
+  z.object({
+    rule: z.literal("enum"),
+    values: z.array(z.union([z.string(), z.number()])),
+    message: z.string().optional(),
+  }),
+]);
+
 const TypeRegexSchema = z.string().regex(
   /^(string|int|float|boolean|object|.*\[\]|[A-Z][a-zA-Z0-9]*)$/,
   {
@@ -22,11 +172,6 @@ const TypeRegexSchema = z.string().regex(
   },
 );
 
-/**
- * Schema with regular expression pattern to validate the "name" field.
- * It requires the name to start with an uppercase letter followed
- * by alphanumerics.
- */
 const UpperNameSchema = z.string().regex(
   /^[A-Z][a-zA-Z0-9]*$/,
   {
@@ -36,48 +181,141 @@ const UpperNameSchema = z.string().regex(
 );
 
 /**
- * Zod schema for Field.
- * Represents a field that can either be a simple type string or
- * a DetailedField.
+ * Validation core types and utilities
  */
-const FieldSchema = z.lazy(() =>
-  z
-    .union([
-      TypeRegexSchema,
-      DetailedFieldSchema,
-    ])
-    .describe(
-      "Definition of a field, which can be a type string or a detailed field definition",
-    )
-    .superRefine((data, ctx) => {
-      if (typeof data === "string" && data === "object") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            'The field type "object" must be a detailed field definition',
-        });
-      }
-    })
-);
-
-/**
- * TypeScript interface for DetailedField.
- * Required to define a recursive structure in zod
- * https://zod.dev/?id=recursive-types
- */
-interface IDetailedField {
+interface IField {
   type: string;
   desc?: string;
-  optional?: boolean;
-  fields?: Record<string, string | IDetailedField>;
+  rules?: z.infer<typeof ValidationRuleSchema>[];
+  fields?: Record<string, IField>;
+}
+
+class FieldValidator {
+  constructor(private field: IField) {}
+
+  private createIssue(message: string, path?: (string | number)[]): IssueData {
+    return {
+      code: z.ZodIssueCode.custom,
+      message,
+      path,
+    };
+  }
+
+  private getBaseType(): string {
+    return this.field.type.replaceAll("[]", "");
+  }
+
+  private getValidRules(baseType: string): ValidationRule[] {
+    return (baseType in VALID_RULES
+      ? VALID_RULES[baseType as keyof RuleConfig]
+      : VALID_RULES.string);
+  }
+
+  validateObjectFields(): IssueData[] {
+    const issues: IssueData[] = [];
+    const isObjectType = this.field.type.startsWith("object");
+    const hasFields = this.field.fields &&
+      Object.keys(this.field.fields).length > 0;
+
+    if (isObjectType && !hasFields) {
+      issues.push(this.createIssue(
+        "'fields' is required when 'type' is 'object'",
+        ["fields"],
+      ));
+    }
+
+    if (!isObjectType && hasFields) {
+      issues.push(this.createIssue(
+        "'fields' is not allowed when 'type' is not 'object'",
+        ["fields"],
+      ));
+    }
+
+    return issues;
+  }
+
+  validateRuleTypeCompatibility(
+    rule: z.infer<typeof ValidationRuleSchema>,
+    ruleIndex: number,
+  ): IssueData[] {
+    const baseType = this.getBaseType();
+    const validRules = this.getValidRules(baseType);
+
+    if (!validRules.includes(rule.rule as ValidationRule)) {
+      return [this.createIssue(
+        `The rule "${rule.rule}" is not valid for type "${this.field.type}". Valid rules are: ${
+          validRules.join(", ")
+        }`,
+        ["rules", ruleIndex],
+      )];
+    }
+
+    return [];
+  }
+
+  validateEqualsRule(
+    rule: z.infer<typeof ValidationRuleSchema>,
+    ruleIndex: number,
+  ): IssueData[] {
+    if (rule.rule !== "equals") return [];
+
+    const baseType = this.getBaseType();
+    const valueType = typeof rule.value;
+    const typeValidations: Record<
+      string,
+      { expected: string; check: () => boolean }
+    > = {
+      string: {
+        expected: "string",
+        check: () => valueType === "string",
+      },
+      int: {
+        expected: "number",
+        check: () => valueType === "number",
+      },
+      float: {
+        expected: "number",
+        check: () => valueType === "number",
+      },
+      boolean: {
+        expected: "boolean",
+        check: () => valueType === "boolean",
+      },
+    };
+
+    const validation = typeValidations[baseType];
+    if (validation && !validation.check()) {
+      return [this.createIssue(
+        `equals rule for ${baseType} type must have a ${validation.expected} value`,
+        ["rules", ruleIndex, "value"],
+      )];
+    }
+
+    return [];
+  }
+
+  validate(): IssueData[] {
+    const issues: IssueData[] = [
+      ...this.validateObjectFields(),
+    ];
+
+    if (this.field.rules) {
+      this.field.rules.forEach((rule, index) => {
+        issues.push(
+          ...this.validateRuleTypeCompatibility(rule, index),
+          ...this.validateEqualsRule(rule, index),
+        );
+      });
+    }
+
+    return issues;
+  }
 }
 
 /**
- * Zod schema for DetailedField.
- * Represents a detailed definition of a field, including its
- * type, description, and nested fields.
+ * Schema definitions
  */
-const DetailedFieldSchema: ZodType<IDetailedField> = z
+const FieldSchema: ZodType<IField> = z
   .object({
     /**
      * The type of the field.
@@ -89,42 +327,20 @@ const DetailedFieldSchema: ZodType<IDetailedField> = z
      * Optional description of the field.
      */
     desc: z.string().optional().describe("Optional description of the field"),
-
-    /**
-     * Optional flag to indicate if the field is optional.
-     */
-    optional: z.boolean().optional().describe(
-      "Optional flag to indicate if the field is optional",
-    ),
-
-    /**
-     * Optional nested fields within the field definition.
-     * Each nested field must adhere to the FieldSchema.
-     */
+    rules: z.array(ValidationRuleSchema).optional()
+      .describe("Validation rules for the field"),
     fields: z
-      .record(FieldSchema)
+      .record(z.lazy(() => FieldSchema))
       .optional()
       .describe("Optional nested fields"),
   })
   .strict()
   .superRefine((data, ctx) => {
-    const isObjectType = data.type.startsWith("object");
-    const hasFields = data.fields && Object.keys(data.fields).length > 0;
+    const validator = new FieldValidator(data);
+    const issues = validator.validate();
 
-    if (isObjectType && !hasFields) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "'fields' is required when 'type' is 'object'",
-        path: ["fields"],
-      });
-    }
-
-    if (!isObjectType && hasFields) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "'fields' is not allowed when 'type' is not 'object'",
-        path: ["fields"],
-      });
+    for (const issue of issues) {
+      ctx.addIssue(issue);
     }
   });
 
@@ -191,25 +407,25 @@ const ProcedureSchema = z
 
     /**
      * Optional input for the procedure.
-     * Each input field must adhere to the FieldSchema.
+     * Must adhere to the FieldSchema.
+     * If not provided, the procedure does not accept any input.
      */
-    input: z
-      .record(FieldSchema)
-      .optional()
-      .describe("Optional input for the procedure"),
+    input: z.record(FieldSchema).optional().describe(
+      "Optional input for the procedure",
+    ),
 
     /**
      * Optional output for the procedure.
-     * Each output field must adhere to the FieldSchema.
+     * Must adhere to the FieldSchema.
+     * If not provided, the procedure does not return any output.
      */
-    output: z
-      .record(FieldSchema)
-      .optional()
-      .describe("Optional output for the procedure"),
+    output: z.record(FieldSchema).optional().describe(
+      "Optional output for the procedure",
+    ),
 
     /**
      * Optional metadata for the procedure.
-     * Each metadata property can be a string, number (int/float), or boolean.
+     * Must be a record with string, number, or boolean values.
      */
     meta: z
       .record(z.union([z.string(), z.number(), z.boolean()]))
@@ -219,8 +435,10 @@ const ProcedureSchema = z
   .strict();
 
 /**
- * Zod schema for the main object.
- * Requires at least one procedure and optionally includes custom types.
+ * Zod schema for the main UFO RPC schema.
+ * Contains a list of custom types and procedures.
+ * At least one procedure must be defined.
+ * Custom types are optional.
  */
 const MainSchema = z
   .object({
@@ -234,7 +452,6 @@ const MainSchema = z
 
     /**
      * List of procedures.
-     * Must contain at least one procedure.
      */
     procedures: z
       .array(ProcedureSchema)
@@ -250,3 +467,4 @@ export default MainSchema;
 export type TypeSchemaType = z.infer<typeof TypeSchema>;
 export type ProcedureSchemaType = z.infer<typeof ProcedureSchema>;
 export type FieldSchemaType = z.infer<typeof FieldSchema>;
+export type ValidationRuleType = z.infer<typeof ValidationRuleSchema>;

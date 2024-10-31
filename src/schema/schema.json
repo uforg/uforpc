@@ -20,40 +20,322 @@
               "fields": {
                 "type": "object",
                 "additionalProperties": {
-                  "anyOf": [
-                    {
+                  "type": "object",
+                  "properties": {
+                    "type": {
                       "type": "string",
                       "pattern": "^(string|int|float|boolean|object|.*\\[\\]|[A-Z][a-zA-Z0-9]*)$"
                     },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/fields/additionalProperties/anyOf/0"
-                        },
-                        "desc": {
-                          "type": "string",
-                          "description": "Optional description of the field"
-                        },
-                        "optional": {
-                          "type": "boolean",
-                          "description": "Optional flag to indicate if the field is optional"
-                        },
-                        "fields": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/fields/additionalProperties"
+                    "desc": {
+                      "type": "string",
+                      "description": "Optional description of the field"
+                    },
+                    "rules": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "required"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule"
+                            ],
+                            "additionalProperties": false
                           },
-                          "description": "Optional nested fields"
-                        }
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "regex"
+                              },
+                              "pattern": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "pattern"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "equals"
+                              },
+                              "value": {
+                                "type": [
+                                  "string",
+                                  "number",
+                                  "boolean"
+                                ]
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "contains"
+                              },
+                              "value": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "email"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "iso8601"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "json"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "lowercase"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "uppercase"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "min"
+                              },
+                              "value": {
+                                "type": "number"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "max"
+                              },
+                              "value": {
+                                "type": "number"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "length"
+                              },
+                              "value": {
+                                "type": "number"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "minLength"
+                              },
+                              "value": {
+                                "type": "number"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "maxLength"
+                              },
+                              "value": {
+                                "type": "number"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
+                                "const": "enum"
+                              },
+                              "values": {
+                                "type": "array",
+                                "items": {
+                                  "type": [
+                                    "string",
+                                    "number"
+                                  ]
+                                }
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule",
+                              "values"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
                       },
-                      "required": [
-                        "type"
-                      ],
-                      "additionalProperties": false
+                      "description": "Validation rules for the field"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/definitions/uforpcSchema/properties/types/items/properties/fields/additionalProperties"
+                      },
+                      "description": "Optional nested fields"
                     }
+                  },
+                  "required": [
+                    "type"
                   ],
-                  "description": "Definition of a field, which can be a type string or a detailed field definition"
+                  "additionalProperties": false
                 },
                 "description": "Fields of the custom type"
               }
