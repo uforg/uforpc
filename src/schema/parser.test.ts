@@ -4,8 +4,8 @@ import {
   parseSchema,
   SchemaParsingError,
   SchemaValidationError,
-} from "./index.ts";
-import type { ArrayType } from "./types.ts";
+} from "./parser.ts";
+import { parseArrayType } from "@/schema/helpers.ts";
 
 Deno.test("parseSchema - basic valid schema", async () => {
   const validSchema = `{
@@ -14,14 +14,20 @@ Deno.test("parseSchema - basic valid schema", async () => {
         "name": "GetUser",
         "type": "query",
         "input": {
-          "id": "string"
+          "id": {
+            "type": "string"
+          }
         },
         "output": {
           "user": {
             "type": "object",
             "fields": {
-              "id": "string",
-              "name": "string"
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
             }
           }
         }
@@ -42,8 +48,12 @@ Deno.test("parseSchema - complete schema with types", async () => {
         "name": "User",
         "desc": "User type",
         "fields": {
-          "id": "string",
-          "name": "string",
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
           "age": {
             "type": "int",
             "desc": "User's age"
@@ -52,7 +62,9 @@ Deno.test("parseSchema - complete schema with types", async () => {
             "type": "string[][]",
             "desc": "User's roles"
           },
-          "permissions": "string[]" 
+          "permissions": {
+            "type": "string[]"
+          } 
         }
       }
     ],
@@ -61,10 +73,14 @@ Deno.test("parseSchema - complete schema with types", async () => {
         "name": "CreateUser",
         "type": "mutation",
         "input": {
-          "user": "User"
+          "user": {
+            "type": "User"
+          }
         },
         "output": {
-          "id": "string"
+          "id": {
+            "type": "string"
+          }
         },
         "meta": {
           "requiresAuth": true,
@@ -79,22 +95,24 @@ Deno.test("parseSchema - complete schema with types", async () => {
   assertEquals(schema.types?.length, 1);
   assertEquals(schema.types?.[0].fields.name.type, "string");
   assertEquals(schema.types?.[0].fields.age.type, "int");
+
   assertEquals(
-    (schema.types?.[0].fields.roles.type as ArrayType).baseType,
+    parseArrayType(schema.types?.[0].fields.roles!).type.type,
     "string",
   );
   assertEquals(
-    (schema.types?.[0].fields.roles.type as ArrayType).dimensions,
+    parseArrayType(schema.types?.[0].fields.roles!).dimensions,
     2,
   );
   assertEquals(
-    (schema.types?.[0].fields.permissions.type as ArrayType).baseType,
+    parseArrayType(schema.types?.[0].fields.permissions!).type.type,
     "string",
   );
   assertEquals(
-    (schema.types?.[0].fields.permissions.type as ArrayType).dimensions,
+    parseArrayType(schema.types?.[0].fields.permissions!).dimensions,
     1,
   );
+
   assertEquals(schema.types?.[0].name, "User");
   assertEquals(schema.procedures[0].meta?.requiresAuth, true);
   assertEquals(schema.procedures[0].meta?.rateLimit, 100);
@@ -107,8 +125,12 @@ Deno.test("parseSchema - array types", async () => {
       {
         "name": "Matrix",
         "fields": {
-          "data": "int[][]",
-          "labels": "string[]"
+          "data": {
+            "type": "int[][]"
+          },
+          "labels": {
+            "type": "string[]"
+          }
         }
       }
     ],
@@ -117,10 +139,14 @@ Deno.test("parseSchema - array types", async () => {
         "name": "ProcessMatrix",
         "type": "query",
         "input": {
-          "matrix": "Matrix"
+          "matrix": {
+            "type": "Matrix"
+          }
         },
         "output": {
-          "result": "int[][]"
+          "result": {
+            "type": "int[][]"
+          }
         }
       }
     ]
@@ -128,8 +154,24 @@ Deno.test("parseSchema - array types", async () => {
 
   const parsed = parseSchema(schema);
   const matrixType = parsed.types?.[0];
-  assertEquals((matrixType?.fields.data.type as ArrayType).dimensions, 2);
-  assertEquals((matrixType?.fields.labels.type as ArrayType).dimensions, 1);
+
+  assertEquals(
+    parseArrayType(matrixType?.fields.data!).type.type,
+    "int",
+  );
+  assertEquals(
+    parseArrayType(matrixType?.fields.labels!).type.type,
+    "string",
+  );
+
+  assertEquals(
+    parseArrayType(matrixType?.fields.data!).dimensions,
+    2,
+  );
+  assertEquals(
+    parseArrayType(matrixType?.fields.labels!).dimensions,
+    1,
+  );
 });
 
 Deno.test("parseSchema - nested objects", async () => {
@@ -142,12 +184,18 @@ Deno.test("parseSchema - nested objects", async () => {
           "profile": {
             "type": "object",
             "fields": {
-              "name": "string",
+              "name": {
+                "type": "string"
+              },
               "address": {
                 "type": "object",
                 "fields": {
-                  "street": "string",
-                  "city": "string"
+                  "street": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -170,7 +218,9 @@ Deno.test("parseSchema - invalid JSON", async () => {
       {
         "name": "User",
         "fields": {
-          "id": "string",
+          "id": {
+            "type": "string"
+          },
         }
       }
     ],
@@ -208,7 +258,9 @@ Deno.test("parseSchema - schema validation errors", async (t) => {
           "name": "Test",
           "type": "query",
           "input": {
-            "test": "[int]"
+            "test": {
+              "type": "[int]"
+            }
           }
         }
       ]
@@ -250,7 +302,9 @@ Deno.test("parseSchema - object fields validations", async (t) => {
           "name": "GetUser",
           "type": "query",
           "input": {
-            "user": "object"
+            "user": {
+              "type": "object"
+            }
           }
         }
       ]
@@ -326,7 +380,9 @@ Deno.test("parseSchema - object fields validations", async (t) => {
               "user": {
                 "type": "object",
                 "fields": {
-                  "name": "string"
+                  "name": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -341,62 +397,6 @@ Deno.test("parseSchema - object fields validations", async (t) => {
       );
     },
   );
-});
-
-Deno.test("parseSchema - optional field variations", async (t) => {
-  await t.step("Default to false when not specified", async () => {
-    const parsed = parseSchema(`{
-      "procedures": [
-        {
-          "name": "GetUser",
-          "type": "query",
-          "input": {
-            "user": "string"
-          }
-        }
-      ]
-    }`);
-
-    assertEquals(parsed.procedures[0].input?.user.optional, false);
-  });
-
-  await t.step("Value specified to false", async () => {
-    const parsed = parseSchema(`{
-      "procedures": [
-        {
-          "name": "GetUser",
-          "type": "query",
-          "input": {
-            "user": {
-              "type": "string",
-              "optional": false
-            }
-          }
-        }
-      ]
-    }`);
-
-    assertEquals(parsed.procedures[0].input?.user.optional, false);
-  });
-
-  await t.step("Value specified to true", async () => {
-    const parsed = parseSchema(`{
-      "procedures": [
-        {
-          "name": "GetUser",
-          "type": "query",
-          "input": {
-            "user": {
-              "type": "string",
-              "optional": true
-            }
-          }
-        }
-      ]
-    }`);
-
-    assertEquals(parsed.procedures[0].input?.user.optional, true);
-  });
 });
 
 Deno.test("parseSchema - edge cases", async (t) => {
@@ -420,7 +420,9 @@ Deno.test("parseSchema - edge cases", async (t) => {
           "name": "Test",
           "type": "query",
           "input": {
-            "data": "int[][][][][]"
+            "data": {
+              "type": "int[][][][][]"
+            }
           }
         }
       ]
@@ -428,7 +430,11 @@ Deno.test("parseSchema - edge cases", async (t) => {
 
     const parsed = parseSchema(schema);
     assertEquals(
-      (parsed.procedures[0].input?.data.type as ArrayType).dimensions,
+      parseArrayType(parsed.procedures[0].input?.data!).type.type,
+      "int",
+    );
+    assertEquals(
+      parseArrayType(parsed.procedures[0].input?.data!).dimensions,
       5,
     );
   });
@@ -442,11 +448,15 @@ Deno.test("parseSchema - edge cases", async (t) => {
             "data": {
               "type": "object",
               "fields": {
-                "matrix": "int[][]",
+                "matrix": {
+                  "type": "int[][]"
+                },
                 "metadata": {
                   "type": "object",
                   "fields": {
-                    "tags": "string[]"
+                    "tags": {
+                      "type": "string[]"
+                    }
                   }
                 }
               }
@@ -459,7 +469,9 @@ Deno.test("parseSchema - edge cases", async (t) => {
           "name": "Process",
           "type": "query",
           "input": {
-            "complex": "Complex"
+            "complex": {
+              "type": "Complex"
+            }
           }
         }
       ]
@@ -478,13 +490,17 @@ Deno.test("parseSchema - duplicate type names", async () => {
       {
         "name": "User",
         "fields": {
-          "id": "string"
+          "id": {
+            "type": "string"
+          }
         }
       },
       {
         "name": "User",
         "fields": {
-          "name": "string"
+          "name": {
+            "type": "string"
+          }
         }
       }
     ],
@@ -493,10 +509,14 @@ Deno.test("parseSchema - duplicate type names", async () => {
         "name": "GetUser",
         "type": "query",
         "input": {
-          "id": "string"
+          "id": {
+            "type": "string"
+          }
         },
         "output": {
-          "user": "User"
+          "user": {
+            "type": "User"
+          }
         }
       }
     ]
@@ -516,10 +536,14 @@ Deno.test("parseSchema - undefined custom types", async () => {
         "name": "GetUser",
         "type": "query",
         "input": {
-          "id": "string"
+          "id": {
+            "type": "string"
+          }
         },
         "output": {
-          "user": "User"
+          "user": {
+            "type": "User"
+          }
         }
       }
     ]

@@ -464,6 +464,7 @@ const MainSchema = z
   .strict();
 
 export default MainSchema;
+export type MainSchemaType = z.infer<typeof MainSchema>;
 export type TypeSchemaType = z.infer<typeof TypeSchema>;
 export type ProcedureSchemaType = z.infer<typeof ProcedureSchema>;
 export type FieldSchemaType = z.infer<typeof FieldSchema>;

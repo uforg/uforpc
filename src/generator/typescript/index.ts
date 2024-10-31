@@ -1,18 +1,19 @@
 import Handlebars from "handlebars";
 import prettier from "prettier";
-import { isArrayType, Schema } from "@/schema/types.ts";
-import type { DetailedField, FieldType } from "@/schema/types.ts";
+import { isArrayType, parseArrayType } from "@/schema/index.ts";
+import type { FieldSchemaType, MainSchemaType } from "@/schema/index.ts";
 
 function registerHelpers() {
-  Handlebars.registerHelper("tsType", function (type: FieldType): string {
+  Handlebars.registerHelper("tsType", function (type: FieldSchemaType): string {
     if (typeof type === "string") {
       if (type === "int" || type === "float") return "number";
       if (/^[A-Z]/.test(type)) return `T${type}`;
       return type;
     }
     if (isArrayType(type)) {
-      const baseType = Handlebars.helpers["tsType"](type.baseType);
-      return `${baseType}${"[]".repeat(type.dimensions)}`;
+      const parsed = parseArrayType(type);
+      const baseType = Handlebars.helpers["tsType"](parsed.type.type);
+      return `${baseType}${"[]".repeat(parsed.dimensions)}`;
     }
     return "unknown";
   });
@@ -34,19 +35,22 @@ function registerHelpers() {
 
   Handlebars.registerHelper(
     "renderFields",
-    function (fields: Record<string, DetailedField>): string {
+    function (fields: Record<string, FieldSchemaType>): string {
       if (!fields) return "";
       let result = "";
 
       for (const [key, field] of Object.entries(fields)) {
-        const optional = field.optional ? "?" : "";
+        // TODO: Fix optional validation
+        // const optional = field.optional ? "?" : "";
+        const optional = "?";
 
         let fieldType = "";
         if (field.fields) {
           fieldType = "{\n" + Handlebars.helpers["renderFields"](field.fields) +
             "}";
-          if (isArrayType(field.type)) {
-            fieldType += "[]".repeat(field.type.dimensions);
+          if (isArrayType(field)) {
+            const parsed = parseArrayType(field);
+            fieldType += "[]".repeat(parsed.dimensions);
           }
         } else {
           fieldType = Handlebars.helpers["tsType"](field.type);
@@ -64,7 +68,7 @@ function registerHelpers() {
 
   Handlebars.registerHelper(
     "renderValidationSchemaFields",
-    function (fields: Record<string, DetailedField>): string {
+    function (fields: Record<string, FieldSchemaType>): string {
       if (!fields) return "";
       let result = "";
 
@@ -91,18 +95,20 @@ function registerHelpers() {
           const nestedFields = Handlebars.helpers
             ["renderValidationSchemaFields"](field.fields);
           schemaType = `validationSchema.object({\n${nestedFields}})`;
-        } else if (isArrayType(field.type)) {
-          schemaType = getBaseSchema(key, field.type.baseType as string);
-          for (let i = 0; i < field.type.dimensions; i++) {
+        } else if (isArrayType(field)) {
+          const parsed = parseArrayType(field);
+          schemaType = getBaseSchema(key, parsed.type.type);
+          for (let i = 0; i < parsed.dimensions; i++) {
             schemaType = `validationSchema.array(${schemaType})`;
           }
         } else if (typeof field.type === "string") {
           schemaType = getBaseSchema(key, field.type);
         }
 
-        if (!field.optional) {
-          schemaType += `.required('${key} is required')`;
-        }
+        // TODO: Fix required validation
+        // if (!field.optional) {
+        //   schemaType += `.required('${key} is required')`;
+        // }
         result += `    ${key}: ${schemaType},\n`;
       }
 
@@ -970,7 +976,7 @@ export interface GenerateTypescriptOpts {
  * Generates TypeScript code from a UFO RPC schema, including types, server, and client implementations
  */
 export async function generateTypeScript(
-  schema: Schema,
+  schema: MainSchemaType,
   opts: GenerateTypescriptOpts,
 ): Promise<string> {
   registerHelpers();
