@@ -150,7 +150,6 @@ Deno.test("String validation", async (t) => {
     }
   });
 
-  // ISO8601 date validation tests
   await t.step("should validate ISO8601 date formats", () => {
     const schema = schValidator.string().iso8601();
     const tests: string[] = [
@@ -182,6 +181,50 @@ Deno.test("String validation", async (t) => {
       assertEquals(
         result.error,
         "String is not a valid ISO8601 date",
+        `Failed for ${test}`,
+      );
+    }
+  });
+
+  await t.step("should validate UUID strings", () => {
+    const schema = schValidator.string().uuid();
+    const tests: string[] = [
+      "a8e636cc-97b2-11ef-b864-0242ac120002", // v1
+      "000003e8-97b2-21ef-8900-325096b39f47", // v2
+      "f57d6300-2b9d-3f7a-87e1-79c6ac813803", // v3
+      "0ce3a2ea-1ad9-4694-9d58-13b78a7a9359", // v4
+      "97767cc1-d7d2-5352-951e-0311a8530ca5", // v5
+    ];
+
+    // Add other random generated UUIDs
+    for (let i = 0; i < 20; i++) {
+      tests.push(crypto.randomUUID());
+    }
+
+    for (const test of tests) {
+      const result = schema.validate(test);
+      assertEquals(result.isValid, true, `Failed for ${test}`);
+    }
+  });
+
+  await t.step("should invalidate incorrect UUID strings", () => {
+    const schema = schValidator.string().uuid();
+    const tests: string[] = [
+      "",
+      "12345",
+      "other-text",
+      "a8e636cc-97b2-11ef-b864-0242ac12000",
+      "000003e8-97b2-21ef-8900-325096b39f4",
+      "f57d6300-2b9d-3f7a-87e1-79c6ac81380",
+      "97767cc1-d7d2-5352-951e-0311a8530ca5a",
+    ];
+
+    for (const test of tests) {
+      const result = schema.validate(test);
+      assertEquals(result.isValid, false, `Failed for ${test}`);
+      assertEquals(
+        result.error,
+        "String is not a valid UUID",
         `Failed for ${test}`,
       );
     }

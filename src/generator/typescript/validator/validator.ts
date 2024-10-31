@@ -27,6 +27,8 @@ export class SchemaValidator<T> {
     email: /^((?!\.)[\w\-+_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/,
     iso8601:
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[\+\-]\d{2}:\d{2})?$/,
+    uuid:
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/i,
   };
 
   private type: SchemaValidatorType;
@@ -46,7 +48,8 @@ export class SchemaValidator<T> {
   private maxValue?: number;
   private isEmail?: boolean;
   private isIso8601?: boolean;
-  private isJson?: boolean;
+  private isUUID?: boolean;
+  private isJSON?: boolean;
   private isLowercase?: boolean;
   private isUppercase?: boolean;
 
@@ -175,12 +178,23 @@ export class SchemaValidator<T> {
   }
 
   /**
+   * Checks if the string is a valid UUIDv4
+   * @param errorMessage - Optional custom error message for UUIDv4 validation
+   */
+  uuid(errorMessage?: string): SchemaValidator<T> {
+    if (this.type !== "string") return this;
+    this.isUUID = true;
+    this.errorMessage = errorMessage || this.errorMessage;
+    return this;
+  }
+
+  /**
    * Checks if the value is valid JSON
    * @param errorMessage - Optional custom error message for JSON validation
    */
   json(errorMessage?: string): SchemaValidator<T> {
     if (this.type !== "string" && this.type !== "object") return this;
-    this.isJson = true;
+    this.isJSON = true;
     this.errorMessage = errorMessage || this.errorMessage;
     return this;
   }
@@ -383,7 +397,15 @@ export class SchemaValidator<T> {
           };
         }
       }
-      if (this.isJson) {
+      if (this.isUUID) {
+        if (!this.regexes.uuid.test(value)) {
+          return {
+            isValid: false,
+            error: this.errorMessage || "String is not a valid UUID",
+          };
+        }
+      }
+      if (this.isJSON) {
         try {
           JSON.parse(value);
         } catch {
@@ -439,7 +461,7 @@ export class SchemaValidator<T> {
       // No additional boolean validations implemented for the moment
     }
 
-    if (this.isJson && this.type === "object" && typeof value === "object") {
+    if (this.isJSON && this.type === "object" && typeof value === "object") {
       try {
         JSON.stringify(value);
       } catch {

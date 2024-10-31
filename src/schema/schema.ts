@@ -22,6 +22,7 @@ type ValidationRule =
   | "enum"
   | "email"
   | "iso8601"
+  | "uuid"
   | "json"
   | "lowercase"
   | "uppercase"
@@ -51,6 +52,7 @@ const VALID_RULES: RuleConfig = {
     "enum",
     "email",
     "iso8601",
+    "uuid",
     "json",
     "lowercase",
     "uppercase",
@@ -112,6 +114,10 @@ const ValidationRuleSchema = z.discriminatedUnion("rule", [
   }),
   z.object({
     rule: z.literal("iso8601"),
+    message: z.string().optional(),
+  }),
+  z.object({
+    rule: z.literal("uuid"),
     message: z.string().optional(),
   }),
   z.object({
