@@ -1,3 +1,4 @@
+import path from "node:path";
 import Handlebars from "handlebars";
 import prettier from "prettier";
 import { isArrayType, parseArrayType } from "@/schema/index.ts";
@@ -74,16 +75,16 @@ function registerHelpers() {
 
       function getBaseSchema(key: string, type: string): string {
         if (type === "int" || type === "float") {
-          return `validationSchema.number('${key} must be a number')`;
+          return `schValidator.number('${key} must be a number')`;
         }
         if (type === "string") {
-          return `validationSchema.string('${key} must be a string')`;
+          return `schValidator.string('${key} must be a string')`;
         }
         if (type === "boolean") {
-          return `validationSchema.boolean('${key} must be a boolean')`;
+          return `schValidator.boolean('${key} must be a boolean')`;
         }
         if (/^[A-Z]/.test(type)) {
-          return `validationSchema.lazy(() => T${type}ValidationSchema, '${key} must be a ${type}')`;
+          return `schValidator.lazy(() => T${type}ValidationSchema, '${key} must be a ${type}')`;
         }
         return "";
       }
@@ -94,12 +95,12 @@ function registerHelpers() {
         if (field.fields) {
           const nestedFields = Handlebars.helpers
             ["renderValidationSchemaFields"](field.fields);
-          schemaType = `validationSchema.object({\n${nestedFields}})`;
+          schemaType = `schValidator.object({\n${nestedFields}})`;
         } else if (isArrayType(field)) {
           const parsed = parseArrayType(field);
           schemaType = getBaseSchema(key, parsed.type.type);
           for (let i = 0; i < parsed.dimensions; i++) {
-            schemaType = `validationSchema.array(${schemaType})`;
+            schemaType = `schValidator.array(${schemaType})`;
           }
         } else if (typeof field.type === "string") {
           schemaType = getBaseSchema(key, field.type);
@@ -249,247 +250,19 @@ function createValidationSchemaTemplate(opts: GenerateTypescriptOpts): string {
     return "";
   }
 
-  return `
-    // -----------------------------------------------------------------------------
-    // Schema validator
-    // -----------------------------------------------------------------------------
+  let validatorContent = Deno.readTextFileSync(path.join(
+    import.meta.dirname || "./",
+    "./validator/validator.ts",
+  ));
 
-    /** Available schema types for validation */
-    type ValidationSchemaType =
-      | "string"
-      | "number"
-      | "boolean"
-      | "array"
-      | "object";
+  validatorContent = validatorContent.replaceAll("export class", "class");
+  validatorContent = validatorContent.replaceAll("export const", "const");
 
-    /** Result of schema validation containing validity status and optional error message */
-    type ValidationSchemaResult = {
-      isValid: boolean;
-      error?: string;
-    };
-
-    /**
-     * Schema class for type-safe validation
-     * @template T - The type of value being validated
-     */
-    class ValidationSchema<T> {
-      private type: ValidationSchemaType;
-      private isRequired = false;
-      private pattern?: RegExp;
-      private arraySchema?: ValidationSchema<unknown>;
-      private objectSchema?: Record<string, ValidationSchema<unknown>>;
-      private errorMessage?: string;
-
-      /**
-       * Creates a new validation schema
-       * @param type - The type of value to validate
-       * @param errorMessage - Optional custom error message
-       */
-      constructor(type: ValidationSchemaType, errorMessage?: string) {
-        this.type = type;
-        this.errorMessage = errorMessage;
-      }
-
-      /**
-       * Makes the schema required (non-nullable/undefined)
-       * @param errorMessage - Optional custom error message for required validation
-       */
-      required(errorMessage?: string): ValidationSchema<T> {
-        this.isRequired = true;
-        this.errorMessage = errorMessage || this.errorMessage;
-        return this;
-      }
-
-      /**
-       * Adds regex validation for string schemas
-       * @param pattern - RegExp to test against string values
-       * @param errorMessage - Optional custom error message for pattern validation
-       */
-      regex(pattern: RegExp, errorMessage?: string): ValidationSchema<T> {
-        if (this.type !== "string") {
-          throw new Error("Regex validation only applies to string schemas");
-        }
-        this.pattern = pattern;
-        this.errorMessage = errorMessage || this.errorMessage;
-        return this;
-      }
-
-      /**
-       * Creates an array schema
-       * @param schema - Schema for array elements
-       * @param errorMessage - Optional custom error message for array validation
-       */
-      array<U>(
-        schema: ValidationSchema<U>,
-        errorMessage?: string,
-      ): ValidationSchema<U[]> {
-        const newSchema = new ValidationSchema<U[]>("array", errorMessage);
-        newSchema.arraySchema = schema;
-        return newSchema;
-      }
-
-      /**
-       * Creates an object schema
-       * @param schema - Record of property schemas
-       * @param errorMessage - Optional custom error message for object validation
-       */
-      object<U extends Record<string, unknown>>(
-        schema: { [K in keyof U]: ValidationSchema<U[K]> },
-        errorMessage?: string,
-      ): ValidationSchema<U> {
-        const newSchema = new ValidationSchema<U>("object", errorMessage);
-        newSchema.objectSchema = schema as Record<
-          string,
-          ValidationSchema<unknown>
-        >;
-        return newSchema;
-      }
-
-      /**
-       * Creates a lazy schema for recursive validation
-       * @param schema - Function returning the validation schema
-       * @param errorMessage - Optional custom error message for lazy validation
-       */
-      static lazy<T>(
-        schema: () => ValidationSchema<T>,
-        errorMessage?: string,
-      ): ValidationSchema<T> {
-        const lazySchema = new ValidationSchema<T>("object", errorMessage);
-        lazySchema.validate = (value: unknown): ValidationSchemaResult =>
-          schema().validate(value);
-        return lazySchema;
-      }
-
-      /**
-       * Validates a value against the schema
-       * @param value - Value to validate
-       * @returns Validation result with boolean and optional error message
-       */
-      validate(value: unknown): ValidationSchemaResult {
-        if (value === undefined || value === null) {
-          return {
-            isValid: !this.isRequired,
-            error: this.isRequired
-              ? this.errorMessage || "Field is required"
-              : undefined,
-          };
-        }
-
-        if (!this.validateType(value)) {
-          return {
-            isValid: false,
-            error: this.errorMessage || \`Invalid type, expected \${this.type}\`,
-          };
-        }
-
-        if (this.type === "string" && typeof value === "string") {
-          if (this.pattern && !this.pattern.test(value)) {
-            return {
-              isValid: false,
-              error: this.errorMessage || "String does not match pattern",
-            };
-          }
-        }
-
-        if (this.type === "array" && Array.isArray(value)) {
-          if (this.arraySchema) {
-            for (const item of value) {
-              const result = this.arraySchema.validate(item);
-              if (!result.isValid) return result;
-            }
-          }
-        }
-
-        if (
-          this.type === "object" && typeof value === "object" &&
-          !Array.isArray(value)
-        ) {
-          if (this.objectSchema) {
-            for (const [key, schema] of Object.entries(this.objectSchema)) {
-              const result = schema.validate(
-                (value as Record<string, unknown>)[key],
-              );
-              if (!result.isValid) return result;
-            }
-          }
-        }
-
-        return { isValid: true };
-      }
-
-      /**
-       * Validates the type of a value
-       * @param value - Value to validate type of
-       * @returns Whether the value matches the schema type
-       */
-      private validateType(value: unknown): boolean {
-        switch (this.type) {
-          case "string":
-            return typeof value === "string";
-          case "number":
-            return typeof value === "number";
-          case "boolean":
-            return typeof value === "boolean";
-          case "array":
-            return Array.isArray(value);
-          case "object":
-            return typeof value === "object" && !Array.isArray(value);
-          default:
-            return false;
-        }
-      }
-    }
-
-    /** Factory object for creating validation schemas */
-    const validationSchema = {
-      /** Creates a string validation schema
-       * @param errorMessage - Optional custom error message
-       */
-      string: (errorMessage?: string) =>
-        new ValidationSchema<string>("string", errorMessage),
-
-      /** Creates a number validation schema
-       * @param errorMessage - Optional custom error message
-       */
-      number: (errorMessage?: string) =>
-        new ValidationSchema<number>("number", errorMessage),
-
-      /** Creates a boolean validation schema
-       * @param errorMessage - Optional custom error message
-       */
-      boolean: (errorMessage?: string) =>
-        new ValidationSchema<boolean>("boolean", errorMessage),
-
-      /** Creates an array validation schema
-       * @param schema - Schema for array elements
-       * @param errorMessage - Optional custom error message
-       */
-      array: <T>(schema: ValidationSchema<T>, errorMessage?: string) =>
-        new ValidationSchema<T[]>("array", errorMessage).array(schema),
-
-      /** Creates an object validation schema
-       * @param schema - Record of property schemas
-       * @param errorMessage - Optional custom error message
-       */
-      object: <T extends Record<string, unknown>>(
-        schema: { [K in keyof T]: ValidationSchema<T[K]> },
-        errorMessage?: string,
-      ) => new ValidationSchema<T>("object", errorMessage).object(schema),
-
-      /** Creates a lazy validation schema for recursive validation
-       * @param schema - Function returning the validation schema
-       * @param errorMessage - Optional custom error message
-       */
-      lazy: <T>(
-        schema: () => ValidationSchema<T>,
-        errorMessage?: string,
-      ): ValidationSchema<T> => ValidationSchema.lazy(schema, errorMessage),
-    };
-
+  const template = `
     {{#each types}}
 
       /** Schema to validate the **T{{name}}** custom type. */
-      const T{{name}}ValidationSchema = validationSchema.object({
+      const T{{name}}ValidationSchema = schValidator.object({
         {{renderValidationSchemaFields fields}}
       })
 
@@ -499,7 +272,7 @@ function createValidationSchemaTemplate(opts: GenerateTypescriptOpts): string {
 
       {{#if input}}
         /** Schema to validate the input for the **{{name}}** procedure. */
-        const P{{name}}InputValidationSchema = validationSchema.object({
+        const P{{name}}InputValidationSchema = schValidator.object({
           {{renderValidationSchemaFields input}}
         })
       {{/if}}
@@ -509,21 +282,23 @@ function createValidationSchemaTemplate(opts: GenerateTypescriptOpts): string {
     /** All validation schemas for procedures */
     const AllValidationSchemas: Record<
       string,
-      {hasValidationSchema: true, validationSchema: ValidationSchema<unknown>} |
-      {hasValidationSchema: false}
+      {hasSchValidator: true, schValidator: SchemaValidator<unknown>} |
+      {hasSchValidator: false}
     > = {
       {{#each procedures}}
         {{name}}: {
           {{#if input}}
-            hasValidationSchema: true,
-            validationSchema: P{{name}}InputValidationSchema,
+            hasSchValidator: true,
+            schValidator: P{{name}}InputValidationSchema,
           {{else}}
-            hasValidationSchema: false,
+            hasSchValidator: false,
           {{/if}}
         },
       {{/each}}
     };
   `;
+
+  return `${validatorContent}\n\n${template}`;
 }
 
 function createServerTemplate(opts: GenerateTypescriptOpts): string {
@@ -534,8 +309,8 @@ function createServerTemplate(opts: GenerateTypescriptOpts): string {
     validationLogic = `
       let isValid = true;
       const valSchema = AllValidationSchemas[procedureName];
-      if (valSchema?.hasValidationSchema && valSchema?.validationSchema) {
-        const valRes = valSchema.validationSchema.validate(request.input);
+      if (valSchema?.hasSchValidator && valSchema?.schValidator) {
+        const valRes = valSchema.schValidator.validate(request.input);
         isValid = valRes.isValid;
         if (!isValid) {
           response = {
@@ -804,8 +579,8 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
     validationLogic = `
       let isValid = true;
       const valSchema = AllValidationSchemas[procedure];
-      if (valSchema?.hasValidationSchema && valSchema?.validationSchema) {
-        const valRes = valSchema.validationSchema.validate(input);
+      if (valSchema?.hasSchValidator && valSchema?.schValidator) {
+        const valRes = valSchema.schValidator.validate(input);
         isValid = valRes.isValid;
         if (!isValid) {
           response = {
