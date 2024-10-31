@@ -151,6 +151,22 @@
                             "properties": {
                               "rule": {
                                 "type": "string",
+                                "const": "uuid"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "rule"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "rule": {
+                                "type": "string",
                                 "const": "json"
                               },
                               "message": {
