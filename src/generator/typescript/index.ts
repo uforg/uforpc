@@ -41,9 +41,11 @@ function registerHelpers() {
       let result = "";
 
       for (const [key, field] of Object.entries(fields)) {
-        // TODO: Fix optional validation
-        // const optional = field.optional ? "?" : "";
-        const optional = "?";
+        const isRequired = field.rules?.some((rule) => {
+          return rule.rule === "required";
+        });
+
+        const optional = isRequired ? "" : "?";
 
         let fieldType = "";
         if (field.fields) {
@@ -106,10 +108,98 @@ function registerHelpers() {
           schemaType = getBaseSchema(key, field.type);
         }
 
-        // TODO: Fix required validation
-        // if (!field.optional) {
-        //   schemaType += `.required('${key} is required')`;
-        // }
+        for (const rule of field.rules || []) {
+          switch (rule.rule) {
+            case "required": {
+              const msg = rule.message || `${key} is required`;
+              schemaType += `.required('${msg}')`;
+              break;
+            }
+            case "regex": {
+              const msg = rule.message || `${key} must match ${rule.pattern}`;
+              schemaType += `.regex(${rule.pattern}, '${msg}')`;
+              break;
+            }
+            case "contains": {
+              const msg = rule.message || `${key} must contain ${rule.value}`;
+              schemaType += `.contains('${rule.value}', '${msg}')`;
+              break;
+            }
+            case "equals": {
+              const msg = rule.message || `${key} must equal to ${rule.value}`;
+              schemaType += `.equals('${rule.value}', '${msg}')`;
+              break;
+            }
+            case "enum": {
+              const msg = rule.message ||
+                `${key} must be one of ${rule.values.join(", ")}`;
+              schemaType += `.enum(${JSON.stringify(rule.values)}, '${msg}')`;
+              break;
+            }
+            case "email": {
+              const msg = rule.message || `${key} must be a valid email`;
+              schemaType += `.email('${msg}')`;
+              break;
+            }
+            case "iso8601": {
+              const msg = rule.message ||
+                `${key} must be a valid ISO 8601 date`;
+              schemaType += `.iso8601('${msg}')`;
+              break;
+            }
+            case "uuid": {
+              const msg = rule.message || `${key} must be a valid UUID`;
+              schemaType += `.uuid('${msg}')`;
+              break;
+            }
+            case "json": {
+              const msg = rule.message || `${key} must be a valid JSON string`;
+              schemaType += `.json('${msg}')`;
+              break;
+            }
+            case "length": {
+              const msg = rule.message ||
+                `${key} must have length ${rule.value}`;
+              schemaType += `.length(${rule.value}, '${msg}')`;
+              break;
+            }
+            case "minLength": {
+              const msg = rule.message ||
+                `${key} must have a minimum length of ${rule.value}`;
+              schemaType += `.minLength(${rule.value}, '${msg}')`;
+              break;
+            }
+            case "maxLength": {
+              const msg = rule.message ||
+                `${key} must have a maximum length of ${rule.value}`;
+              schemaType += `.maxLength(${rule.value}, '${msg}')`;
+              break;
+            }
+            case "lowercase": {
+              const msg = rule.message || `${key} must be lowercase`;
+              schemaType += `.lowercase('${msg}')`;
+              break;
+            }
+            case "uppercase": {
+              const msg = rule.message || `${key} must be uppercase`;
+              schemaType += `.uppercase('${msg}')`;
+              break;
+            }
+            case "min": {
+              const msg = rule.message ||
+                `${key} must be greater than ${rule.value}`;
+              schemaType += `.min(${rule.value}, '${msg}')`;
+              break;
+            }
+            case "max": {
+              const msg = rule.message ||
+                `${key} must be less than ${rule.value}`;
+              schemaType += `.max(${rule.value}, '${msg}')`;
+              break;
+            }
+          }
+        }
+
         result += `    ${key}: ${schemaType},\n`;
       }
 
