@@ -1,8 +1,9 @@
 import path from "node:path";
 import Handlebars from "handlebars";
-import prettier from "prettier";
 import { isArrayType, parseArrayType } from "@/schema/index.ts";
 import type { FieldSchemaType, MainSchemaType } from "@/schema/index.ts";
+import { handlebarsCompileTemplate } from "../common/handlebars-compile-template.ts";
+import { formatTsCode } from "@/generator/typescript/format-ts-code.ts";
 
 function registerHelpers() {
   Handlebars.registerHelper("tsType", function (type: FieldSchemaType): string {
@@ -812,23 +813,6 @@ function createClientTemplate(opts: GenerateTypescriptOpts): string {
   return template;
 }
 
-/**
- * Compiles a Handlebars template with proper configuration for TypeScript generation
- */
-function compileTemplate(template: string): HandlebarsTemplateDelegate {
-  return Handlebars.compile(template, {
-    noEscape: true,
-    strict: true,
-  });
-}
-
-/**
- * Formats an string of typescript code
- */
-async function formatCode(code: string): Promise<string> {
-  return await prettier.format(code, { parser: "typescript" });
-}
-
 export interface GenerateTypescriptOpts {
   includeServer?: boolean;
   includeClient?: boolean;
@@ -838,7 +822,8 @@ export interface GenerateTypescriptOpts {
 }
 
 /**
- * Generates TypeScript code from a UFO RPC schema, including types, server, and client implementations
+ * Generates TypeScript code from a UFO RPC schema, including types, server, and
+ * client implementations
  */
 export async function generateTypeScript(
   schema: MainSchemaType,
@@ -855,10 +840,10 @@ export async function generateTypeScript(
     createClientTemplate(opts),
   ];
 
-  const compiled = templates.map(compileTemplate);
+  const compiled = templates.map(handlebarsCompileTemplate);
   const generated = compiled.map((template) => template(schema)).join("\n\n");
 
-  const formatted = await formatCode(generated);
+  const formatted = await formatTsCode(generated);
 
   return formatted;
 }
