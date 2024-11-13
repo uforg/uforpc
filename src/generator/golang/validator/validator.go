@@ -34,12 +34,12 @@ type schemaValidator struct {
 	ErrorMessage   string
 	IsRequired     bool
 	Pattern        *regexp.Regexp
-	EqualsValue    interface{}
+	EqualsValue    any
 	ContainsValue  *string
 	LengthValue    *int
 	MinLengthValue *int
 	MaxLengthValue *int
-	EnumValues     []interface{}
+	EnumValues     []any
 	MinValue       *float64
 	MaxValue       *float64
 	IsEmail        bool
@@ -93,7 +93,7 @@ func (sv *schemaValidator) Regex(pattern string, errorMessage string) *schemaVal
 }
 
 // Equals adds equality validation
-func (sv *schemaValidator) Equals(value interface{}, errorMessage string) *schemaValidator {
+func (sv *schemaValidator) Equals(value any, errorMessage string) *schemaValidator {
 	sv.EqualsValue = value
 	if errorMessage != "" {
 		sv.ErrorMessage = errorMessage
@@ -150,7 +150,7 @@ func (sv *schemaValidator) MaxLength(length int, errorMessage string) *schemaVal
 }
 
 // Enum adds enumeration validation
-func (sv *schemaValidator) Enum(values []interface{}, errorMessage string) *schemaValidator {
+func (sv *schemaValidator) Enum(values []any, errorMessage string) *schemaValidator {
 	sv.EnumValues = values
 	if errorMessage != "" {
 		sv.ErrorMessage = errorMessage
@@ -276,7 +276,7 @@ func Lazy(schema func() *schemaValidator, errorMessage string) *schemaValidator 
 }
 
 // validateType checks if a value matches the expected type
-func (sv *schemaValidator) validateType(value interface{}) bool {
+func (sv *schemaValidator) validateType(value any) bool {
 	if value == nil {
 		return false
 	}
@@ -295,10 +295,10 @@ func (sv *schemaValidator) validateType(value interface{}) bool {
 		_, ok := value.(bool)
 		return ok
 	case SchemaTypeArray:
-		_, ok := value.([]interface{})
+		_, ok := value.([]any)
 		return ok
 	case SchemaTypeObject:
-		_, ok := value.(map[string]interface{})
+		_, ok := value.(map[string]any)
 		return ok
 	default:
 		return false
@@ -306,7 +306,7 @@ func (sv *schemaValidator) validateType(value interface{}) bool {
 }
 
 // Validate performs the validation according to the schema
-func (sv *schemaValidator) Validate(value interface{}) schemaValidatorResult {
+func (sv *schemaValidator) Validate(value any) schemaValidatorResult {
 	// Handle required validation
 	if value == nil {
 		if sv.IsRequired {
@@ -414,7 +414,7 @@ func (sv *schemaValidator) Validate(value interface{}) schemaValidatorResult {
 		}
 
 		if sv.IsJSON {
-			var js interface{}
+			var js any
 			if err := json.Unmarshal([]byte(strValue), &js); err != nil {
 				return schemaValidatorResult{
 					IsValid: false,
@@ -459,7 +459,7 @@ func (sv *schemaValidator) Validate(value interface{}) schemaValidatorResult {
 
 	// Array validation
 	if sv.Type == SchemaTypeArray {
-		arrValue := value.([]interface{})
+		arrValue := value.([]any)
 		if sv.ArraySchema != nil {
 			for _, item := range arrValue {
 				result := sv.ArraySchema.Validate(item)
@@ -476,7 +476,7 @@ func (sv *schemaValidator) Validate(value interface{}) schemaValidatorResult {
 			return sv.LazySchemaFunc().Validate(value)
 		}
 
-		mapValue := value.(map[string]interface{})
+		mapValue := value.(map[string]any)
 		if sv.ObjectSchema != nil {
 			for key, schema := range sv.ObjectSchema {
 				val, exists := mapValue[key]
