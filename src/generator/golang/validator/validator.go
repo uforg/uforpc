@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+/** START FROM HERE **/
+
 // schemaValidatorType represents the available types for validation
 type schemaValidatorType string
 
