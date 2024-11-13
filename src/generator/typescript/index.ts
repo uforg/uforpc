@@ -209,131 +209,139 @@ function registerHelpers() {
   );
 }
 
-const coreTypesTemplate = `
-// This file has been generated using UFO RPC. DO NOT EDIT.
-// If you edit this file, it will be overwritten the next time it is generated
+function createCoreTypesTemplate() {
+  return `
+    // This file has been generated using UFO RPC. DO NOT EDIT.
+    // If you edit this file, it will be overwritten the next time it is generated
 
-// -----------------------------------------------------------------------------
-// Core Types
-// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // Core Types
+    // -----------------------------------------------------------------------------
 
-/** Represents an HTTP method */
-export type UFOHTTPMethod = "GET" | "POST";
+    /** Represents an HTTP method */
+    export type UFOHTTPMethod = "GET" | "POST";
 
-/** Represents the output of an error in the UFO RPC system */
-export interface UFOErrorOutput {
-  message: string;
-  details?: Record<string, unknown>;
+    /** Represents the output of an error in the UFO RPC system */
+    export interface UFOErrorOutput {
+      message: string;
+      details?: Record<string, unknown>;
+    }
+
+    /** Represents the output of a UFO RPC request */
+    export type UFOResponse<T> =
+      | {
+        readonly ok: true;
+        readonly output: T;
+      }
+      | {
+        readonly ok: false;
+        readonly error: UFOErrorOutput;
+      };
+
+    /** Represents an error in the UFO RPC system */
+    export class UFOError extends Error {
+      constructor(message: string, public details?: Record<string, unknown>) {
+        super(message);
+        this.name = "UFOError";
+      }
+    }
+
+    /** Gets the error output for a given error */
+    function getErrorOutput(err: unknown): UFOErrorOutput {
+      if (err instanceof UFOError) {
+        return {
+          message: err.message,
+          details: err.details,
+        };
+      }
+
+      if (err instanceof Error) {
+        return {
+          message: err.message,
+        };
+      }
+
+      return {
+        message: "Unknown error",
+      };
+    }
+  `;
 }
 
-/** Represents the output of a UFO RPC request */
-export type UFOResponse<T> =
-  | {
-    readonly ok: true;
-    readonly output: T;
-  }
-  | {
-    readonly ok: false;
-    readonly error: UFOErrorOutput;
-  };
+function createDomainTypesTemplate() {
+  return `
+    // -----------------------------------------------------------------------------
+    // Domain Types
+    // -----------------------------------------------------------------------------
 
-/** Represents an error in the UFO RPC system */
-export class UFOError extends Error {
-  constructor(message: string, public details?: Record<string, unknown>) {
-    super(message);
-    this.name = "UFOError";
-  }
+    {{#each types}}
+
+    {{#if desc}}
+    /** {{desc}} */
+    {{/if}}
+    export interface T{{name}} {
+      {{renderFields fields}}
+    }
+
+    {{/each}}
+  `;
 }
 
-/** Gets the error output for a given error */
-function getErrorOutput(err: unknown): UFOErrorOutput {
-  if (err instanceof UFOError) {
-    return {
-      message: err.message,
-      details: err.details,
-    };
-  }
+function createProcedureTypesTemplate() {
+  return `
+    // -----------------------------------------------------------------------------
+    // Procedure Types
+    // -----------------------------------------------------------------------------
 
-  if (err instanceof Error) {
-    return {
-      message: err.message,
-    };
-  }
+    {{#each procedures}}
 
-  return {
-    message: "Unknown error",
-  };
+    /** Represents the input for the **{{name}}** procedure. */
+    {{#if input}}
+    export interface P{{name}}Input {
+      {{renderFields input}}
+    }
+    {{else}}
+    export type P{{name}}Input = void;
+    {{/if}}
+
+    /** Represents the output for the **{{name}}** procedure. */
+    {{#if output}}
+    export interface P{{name}}Output {
+      {{renderFields output}}
+    }
+    {{else}}
+    export type P{{name}}Output = void;
+    {{/if}}
+
+    /** Represents the metadata for the **{{name}}** procedure. */
+    {{#if meta}}
+    export interface P{{name}}Meta {
+      {{#each meta}}
+        {{@key}}: {{inferMetaType this}};
+      {{/each}}
+    }
+    {{else}}
+    export type P{{name}}Meta = void;
+    {{/if}}
+
+    {{/each}}
+
+    /** Types for all procedures */
+    export interface UFOProcedures {
+      {{#each procedures}}
+        {{name}}: {
+          type: "{{type}}";
+          input: P{{name}}Input;
+          output: P{{name}}Output;
+          meta: P{{name}}Meta;
+        };
+      {{/each}}
+    }
+
+    /** Names for all procedures */
+    export type UFOProcedureNames = keyof UFOProcedures;
+  `;
 }
-`;
-
-const domainTypesTemplate = `
-// -----------------------------------------------------------------------------
-// Domain Types
-// -----------------------------------------------------------------------------
-
-{{#each types}}
-
-{{#if desc}}
-/** {{desc}} */
-{{/if}}
-export interface T{{name}} {
-  {{renderFields fields}}
-}
-
-{{/each}}`;
-
-const procedureTypesTemplate = `
-// -----------------------------------------------------------------------------
-// Procedure Types
-// -----------------------------------------------------------------------------
-
-{{#each procedures}}
-
-/** Represents the input for the **{{name}}** procedure. */
-{{#if input}}
-export interface P{{name}}Input {
-  {{renderFields input}}
-}
-{{else}}
-export type P{{name}}Input = void;
-{{/if}}
-
-/** Represents the output for the **{{name}}** procedure. */
-{{#if output}}
-export interface P{{name}}Output {
-  {{renderFields output}}
-}
-{{else}}
-export type P{{name}}Output = void;
-{{/if}}
-
-/** Represents the metadata for the **{{name}}** procedure. */
-{{#if meta}}
-export interface P{{name}}Meta {
-  {{#each meta}}
-    {{@key}}: {{inferMetaType this}};
-  {{/each}}
-}
-{{else}}
-export type P{{name}}Meta = void;
-{{/if}}
-
-{{/each}}
-
-/** Types for all procedures */
-export interface UFOProcedures {
-  {{#each procedures}}
-    {{name}}: {
-      type: "{{type}}";
-      input: P{{name}}Input;
-      output: P{{name}}Output;
-      meta: P{{name}}Meta;
-    };
-  {{/each}}
-}
-
-/** Names for all procedures */
-export type UFOProcedureNames = keyof UFOProcedures;`;
 
 function createValidationSchemaTemplate(opts: GenerateTypescriptOpts): string {
   if (!opts.includeClient && !opts.includeServer) return "";
@@ -832,9 +840,9 @@ export async function generateTypeScript(
   registerHelpers();
 
   const templates = [
-    coreTypesTemplate,
-    domainTypesTemplate,
-    procedureTypesTemplate,
+    createCoreTypesTemplate(),
+    createDomainTypesTemplate(),
+    createProcedureTypesTemplate(),
     createValidationSchemaTemplate(opts),
     createServerTemplate(opts),
     createClientTemplate(opts),
