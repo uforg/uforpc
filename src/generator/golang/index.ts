@@ -200,6 +200,152 @@ function registerHelpers() {
     if (typeof value === "boolean") return "bool";
     return "any";
   });
+
+  Handlebars.registerHelper(
+    "renderValidationSchemaFields",
+    function (fields: Record<string, FieldSchemaType>): string {
+      if (!fields) return "";
+      let result = "";
+
+      function getBaseSchema(key: string, type: string): string {
+        if (type === "int" || type === "float") {
+          return `schValidator.Number("${key} must be a number")`;
+        }
+        if (type === "string") {
+          return `schValidator.String("${key} must be a string")`;
+        }
+        if (type === "boolean") {
+          return `schValidator.Boolean("${key} must be a boolean")`;
+        }
+        if (/^[A-Z]/.test(type)) {
+          return `schValidator.Lazy(func() *schemaValidator { return vs${type}ValidationSchema }, "${key} must be a ${type}")`;
+        }
+        return "";
+      }
+
+      for (const [key, field] of Object.entries(fields)) {
+        let schemaType = "";
+
+        if (field.fields) {
+          const nestedFields = Handlebars.helpers
+            ["renderValidationSchemaFields"](field.fields);
+          schemaType =
+            `schValidator.Object(map[string]*schemaValidator{\n${nestedFields}}, "")`;
+        } else if (isArrayType(field)) {
+          const parsed = parseArrayType(field);
+          schemaType = getBaseSchema(key, parsed.type.type);
+          for (let i = 0; i < parsed.dimensions; i++) {
+            schemaType = `schValidator.Array(${schemaType}, "")`;
+          }
+        } else if (typeof field.type === "string") {
+          schemaType = getBaseSchema(key, field.type);
+        }
+
+        for (const rule of field.rules || []) {
+          switch (rule.rule) {
+            case "required": {
+              const msg = rule.message || `${key} is required`;
+              schemaType += `.Required("${msg}")`;
+              break;
+            }
+            case "regex": {
+              const msg = rule.message || `${key} must match ${rule.pattern}`;
+              schemaType += `.Regex("${rule.pattern}", "${msg}")`;
+              break;
+            }
+            case "contains": {
+              const msg = rule.message || `${key} must contain ${rule.value}`;
+              schemaType += `.Contains("${rule.value}", "${msg}")`;
+              break;
+            }
+            case "equals": {
+              const msg = rule.message || `${key} must equal to ${rule.value}`;
+              schemaType += `.Equals(${JSON.stringify(rule.value)}, "${msg}")`;
+              break;
+            }
+            case "enum": {
+              const msg = rule.message ||
+                `${key} must be one of ${rule.values.join(", ")}`;
+
+              let goValues = "[]any{";
+              for (const value of rule.values) {
+                goValues += JSON.stringify(value) + ", ";
+              }
+              goValues += "}";
+
+              schemaType += `.Enum(${goValues}, "${msg}")`;
+              break;
+            }
+            case "email": {
+              const msg = rule.message || `${key} must be a valid email`;
+              schemaType += `.Email("${msg}")`;
+              break;
+            }
+            case "iso8601": {
+              const msg = rule.message ||
+                `${key} must be a valid ISO 8601 date`;
+              schemaType += `.Iso8601("${msg}")`;
+              break;
+            }
+            case "uuid": {
+              const msg = rule.message || `${key} must be a valid UUID`;
+              schemaType += `.UUID("${msg}")`;
+              break;
+            }
+            case "json": {
+              const msg = rule.message || `${key} must be a valid JSON string`;
+              schemaType += `.JSON("${msg}")`;
+              break;
+            }
+            case "length": {
+              const msg = rule.message ||
+                `${key} must have length ${rule.value}`;
+              schemaType += `.Length(${rule.value}, "${msg}")`;
+              break;
+            }
+            case "minLength": {
+              const msg = rule.message ||
+                `${key} must have a minimum length of ${rule.value}`;
+              schemaType += `.MinLength(${rule.value}, "${msg}")`;
+              break;
+            }
+            case "maxLength": {
+              const msg = rule.message ||
+                `${key} must have a maximum length of ${rule.value}`;
+              schemaType += `.MaxLength(${rule.value}, "${msg}")`;
+              break;
+            }
+            case "lowercase": {
+              const msg = rule.message || `${key} must be lowercase`;
+              schemaType += `.Lowercase("${msg}")`;
+              break;
+            }
+            case "uppercase": {
+              const msg = rule.message || `${key} must be uppercase`;
+              schemaType += `.Uppercase("${msg}")`;
+              break;
+            }
+            case "min": {
+              const msg = rule.message ||
+                `${key} must be greater than ${rule.value}`;
+              schemaType += `.Min(${rule.value}, "${msg}")`;
+              break;
+            }
+            case "max": {
+              const msg = rule.message ||
+                `${key} must be less than ${rule.value}`;
+              schemaType += `.Max(${rule.value}, "${msg}")`;
+              break;
+            }
+          }
+        }
+
+        result += `    "${key}": ${schemaType},\n`;
+      }
+
+      return result;
+    },
+  );
 }
 
 function createPackageAndCoreTypesTemplate(opts: GenerateGolangOpts) {
@@ -213,6 +359,9 @@ function createPackageAndCoreTypesTemplate(opts: GenerateGolangOpts) {
     import (
       "errors"
       "encoding/json"
+      "fmt"
+      "regexp"
+      "strings"
     )
 
     // -----------------------------------------------------------------------------
@@ -267,15 +416,6 @@ function createPackageAndCoreTypesTemplate(opts: GenerateGolangOpts) {
       }
     }
   `;
-}
-
-function createNullTypeTemplate() {
-  const fileContent = Deno.readTextFileSync(path.join(
-    import.meta.dirname || "./",
-    "./null/null.go",
-  ));
-
-  return extractContentAfterMarker(fileContent);
 }
 
 function createDomainTypesTemplate() {
@@ -336,6 +476,92 @@ function createProcedureTypesTemplate() {
         {{name}}(input P{{name}}Input) (UFOResponse[P{{name}}Output], error)
       {{/each}}
     }
+    
+    type UFOProcedureName string
+
+    var UFOProcedureNames = struct {
+      {{#each procedures}}
+        {{name}} UFOProcedureName
+      {{/each}}
+    }{
+      {{#each procedures}}
+        {{name}}: "{{name}}",
+      {{/each}}
+    }
+  `;
+}
+
+function createNullTypeTemplate() {
+  const fileContent = Deno.readTextFileSync(path.join(
+    import.meta.dirname || "./",
+    "./null/null.go",
+  ));
+
+  return extractContentAfterMarker(fileContent);
+}
+
+function createValidationSchemaTemplate(opts: GenerateGolangOpts): string {
+  if (opts.omitClientRequestValidation && opts.omitServerRequestValidation) {
+    return "";
+  }
+
+  let validatorContent = Deno.readTextFileSync(path.join(
+    import.meta.dirname || "./",
+    "./validator/validator.go",
+  ));
+
+  validatorContent = extractContentAfterMarker(validatorContent);
+
+  const template = `
+    {{#each types}}
+    
+    // vs{{name}}ValidationSchema defines the validation rules for the {{name}} type
+    var vs{{name}}ValidationSchema = schValidator.Object(map[string]*schemaValidator{
+      {{renderValidationSchemaFields fields}}
+    }, "")
+
+    {{/each}}
+
+    {{#each procedures}}
+
+    {{#if input}}
+    // vs{{name}}InputValidationSchema defines the validation rules for the {{name}} procedure input
+    var vs{{name}}InputValidationSchema = schValidator.Object(map[string]*schemaValidator{
+      {{renderValidationSchemaFields input}}
+    }, "")
+    {{/if}}
+
+    {{/each}}
+
+    // validationSchemas contains all available validation schemas for procedures
+    var validationSchemas = map[string]struct {
+      HasValidator bool
+      Validator    *schemaValidator
+    }{
+      {{#each procedures}}
+      "{{name}}": {
+        {{#if input}}
+        HasValidator: true,
+        Validator:    vs{{name}}InputValidationSchema,
+        {{else}}
+        HasValidator: false,
+        Validator:    nil,
+        {{/if}}
+      },
+      {{/each}}
+    }
+  `;
+
+  return `${validatorContent}\n\n${template}`;
+}
+
+function createServerTemplate(opts: GenerateGolangOpts): string {
+  if (!opts.includeServer) return "";
+
+  return `
+    // -----------------------------------------------------------------------------
+    // Server Implementation
+    // -----------------------------------------------------------------------------
   `;
 }
 
@@ -362,9 +588,11 @@ export async function generateGolang(
 
   const templates = [
     createPackageAndCoreTypesTemplate(opts),
-    createNullTypeTemplate(),
     createDomainTypesTemplate(),
     createProcedureTypesTemplate(),
+    createNullTypeTemplate(),
+    createValidationSchemaTemplate(opts),
+    createServerTemplate(opts),
   ];
 
   const compiled = templates.map(handlebarsCompileTemplate);
