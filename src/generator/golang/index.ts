@@ -692,8 +692,8 @@ function createServerTemplate(opts: GenerateGolangOpts): string {
     }
 
     {{#each procedures}}
-    // DefineHandlerFor{{name}} registers the handler for the {{name}} procedure
-    func (s *UFOServer[T]) DefineHandlerFor{{name}}(
+    // Set{{name}}Handler registers the handler for the {{name}} procedure
+    func (s *UFOServer[T]) Set{{name}}Handler(
       handler func(context T, input P{{name}}Input) (P{{name}}Output, error),
     ) *UFOServer[T] {
       s.handlers[UFOProcedureNames.{{name}}] = func(context T, input any) (any, error) {
@@ -707,14 +707,14 @@ function createServerTemplate(opts: GenerateGolangOpts): string {
     }
     {{/each}}
 
-    // RegisterBeforeMiddleware adds a middleware function that runs before the handler
-    func (s *UFOServer[T]) RegisterBeforeMiddleware(fn UFOMiddlewareBefore[T]) *UFOServer[T] {
+    // AddMiddlewareBefore adds a middleware function that runs before the handler
+    func (s *UFOServer[T]) AddMiddlewareBefore(fn UFOMiddlewareBefore[T]) *UFOServer[T] {
       s.beforeMiddleware = append(s.beforeMiddleware, fn)
       return s
     }
 
-    // RegisterAfterMiddleware adds a middleware function that runs after the handler
-    func (s *UFOServer[T]) RegisterAfterMiddleware(fn UFOMiddlewareAfter[T]) *UFOServer[T] {
+    // AddMiddlewareAfter adds a middleware function that runs after the handler
+    func (s *UFOServer[T]) AddMiddlewareAfter(fn UFOMiddlewareAfter[T]) *UFOServer[T] {
       s.afterMiddleware = append(s.afterMiddleware, fn)
       return s
     }
