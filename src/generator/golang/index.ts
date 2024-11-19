@@ -357,7 +357,6 @@ function createPackageAndCoreTypesTemplate(opts: GenerateGolangOpts) {
     package ${opts.packageName}
 
     import (
-      "errors"
       "encoding/json"
       "fmt"
       "regexp"
@@ -380,39 +379,124 @@ function createPackageAndCoreTypesTemplate(opts: GenerateGolangOpts) {
 
     // UFOResponse represents the response of a UFO RPC call.
     type UFOResponse[T any] struct {
-      Ok     bool           \`json:"ok"\`
-      Output T              \`json:"output,omitempty"\`
-      Error  UFOErrorOutput \`json:"error,omitempty"\`
+      Ok     bool             \`json:"ok"\`
+      Output T                \`json:"output,omitempty"\`
+      Error  UFOError         \`json:"error,omitempty"\`
     }
 
-    // UFOErrorOutput represents an error output in the UFO RPC system.
-    type UFOErrorOutput struct {
-      Message string                 \`json:"message"\`
+    // UFOError represents a standardized error in the UFO RPC system.
+    //
+    // It provides structured information about errors that occur within the system,
+    // enabling consistent error handling across servers and clients.
+    //
+    // Fields:
+    //   - Message: A human-readable description of the error.
+    //   - Category: Optional. Categorizes the error by its nature or source (e.g., "ValidationError", "DatabaseError").
+    //   - Code: Optional. A machine-readable identifier for the specific error condition (e.g., "INVALID_EMAIL").
+    //   - Details: Optional. Additional information about the error.
+    //
+    // The struct implements the error interface.
+    type UFOError struct {
+      // Message provides a human-readable description of the error.
+      //
+      // This message can be displayed to end-users or used for logging and debugging purposes.
+      //
+      // Use Cases:
+      //   1. If localization is not implemented, Message can be directly shown to the user to inform them of the issue.
+      //   2. Developers can use Message in logs to diagnose problems during development or in production.
+      Message string \`json:"message"\`
+
+      // Category categorizes the error by its nature or source.
+      //
+      // Examples:
+      //   - "ValidationError" for input validation errors.
+      //   - "DatabaseError" for errors originating from database operations.
+      //   - "AuthenticationError" for authentication-related issues.
+      //
+      // Use Cases:
+      //   1. In middleware, you can use Category to determine how to handle the error.
+      //      For instance, you might log "InternalError" types and return a generic message to the client.
+      //   2. Clients can inspect the Category to decide whether to prompt the user for action,
+      //      such as re-authentication if the Category is "AuthenticationError".
+      Category string \`json:"category,omitempty"\`
+
+      // Code is a machine-readable identifier for the specific error condition.
+      //
+      // Examples:
+      //   - "INVALID_EMAIL" when an email address fails validation.
+      //   - "USER_NOT_FOUND" when a requested user does not exist.
+      //   - "RATE_LIMIT_EXCEEDED" when a client has made too many requests.
+      //
+      // Use Cases:
+      //   1. Clients can map Codes to localized error messages for internationalization (i18n),
+      //      displaying appropriate messages based on the user's language settings.
+      //   2. Clients or middleware can implement specific logic based on the Code,
+      //      such as retry mechanisms for "TEMPORARY_FAILURE" or showing captcha for "RATE_LIMIT_EXCEEDED".
+      Code string \`json:"code,omitempty"\`
+
+      // Details contains optional additional information about the error.
+      //
+      // This field can include any relevant data that provides more context about the error.
+      // The contents should be serializable to JSON.
+      //
+      // Use Cases:
+      //   1. Providing field-level validation errors, e.g., Details could be:
+      //      {"fields": {"email": "Email is invalid", "password": "Password is too short"}}
+      //   2. Including diagnostic information such as timestamps, request IDs, or stack traces
+      //      (ensure sensitive information is not exposed to clients).
       Details map[string]any \`json:"details,omitempty"\`
     }
 
-    // UFOError represents an error in the UFO RPC system.
-    type UFOError struct {
-      Message string
-      Details map[string]any
-    }
-
-    // Error implements the error interface.
-    func (e *UFOError) Error() string {
+    // Error implements the error interface, returning the error message.
+    func (e UFOError) Error() string {
       return e.Message
     }
 
-    // getErrorOutput returns the UFOErrorOutput for a given error.
-    func getErrorOutput(err error) UFOErrorOutput {
-      var ufoErr *UFOError
-      if errors.As(err, &ufoErr) {
-        return UFOErrorOutput{
-          Message: ufoErr.Message,
-          Details: ufoErr.Details,
-        }
+    // String implements the fmt.Stringer interface, returning the error message.
+    func (e UFOError) String() string {
+      return e.Message
+    }
+    
+    // ToJSON returns the UFOError as a JSON-formatted string including all its fields.
+    // This is useful for logging and debugging purposes.
+    //
+    // Example usage:
+    //   err := UFOError{
+    //     Category: "ValidationError",
+    //     Code:     "INVALID_EMAIL",
+    //     Message:  "The email address provided is invalid.",
+    //     Details:  map[string]any{
+    //       "field": "email",
+    //     },
+    //   }
+    //   log.Println(err.ToJSON())
+    func (e UFOError) ToJSON() string {
+      b, err := json.Marshal(e)
+      if err != nil {
+        return fmt.Sprintf(
+          \`{"message":%q,"error":"Failed to marshal UFOError: %s"}\`,
+          e.Message, err.Error(),
+        )
       }
-      return UFOErrorOutput{
-        Message: err.Error(),
+      return string(b)
+    }
+
+    // asUFOError converts any error into a UFOError.
+    // If the provided error is already a UFOError, it returns it as is.
+    // Otherwise, it wraps the error message into a new UFOError.
+    //
+    // This function ensures that all errors conform to the UFOError structure,
+    // facilitating consistent error handling across the system.
+    func asUFOError(err error) UFOError {
+      switch e := err.(type) {
+      case UFOError:
+        return e
+      case *UFOError:
+        return *e
+      default:
+        return UFOError{
+          Message: err.Error(),
+        }
       }
     }
   `;
@@ -454,17 +538,6 @@ function createProcedureTypesTemplate() {
     }
     {{else}}
     type P{{name}}Output struct{}
-    {{/if}}
-
-    // P{{name}}Meta represents the metadata for the {{name}} procedure.
-    {{#if meta}}
-    type P{{name}}Meta struct {
-      {{#each meta}}
-      {{@key}} {{goMetaType this}} \`json:"{{@key}}"\`
-      {{/each}}
-    }
-    {{else}}
-    type P{{name}}Meta struct{}
     {{/if}}
 
     {{/each}}
@@ -558,10 +631,164 @@ function createValidationSchemaTemplate(opts: GenerateGolangOpts): string {
 function createServerTemplate(opts: GenerateGolangOpts): string {
   if (!opts.includeServer) return "";
 
+  let validationLogic = "isValid := true";
+  if (!opts.omitServerRequestValidation) {
+    validationLogic = `
+      isValid := true
+      if valSchema, exists := validationSchemas[string(procedureName)]; exists && valSchema.HasValidator {
+        valRes := valSchema.Validator.Validate(request.Input)
+        isValid = valRes.IsValid
+        if !isValid {
+          response = UFOResponse[any]{
+            Ok: false,
+            Error: UFOError{
+              Message: valRes.Error,
+            },
+          }
+        }
+      }
+    `;
+  }
+
   return `
     // -----------------------------------------------------------------------------
-    // Server Implementation
+    // Server Types
     // -----------------------------------------------------------------------------
+
+    // UFOServerRequest represents an incoming RPC request
+    type UFOServerRequest[T any] struct {
+      Method     UFOHTTPMethod
+      Context    T
+      Procedure  string
+      Input      any
+    }
+
+    // UFOMiddlewareBefore represents a function that runs before request processing
+    type UFOMiddlewareBefore[T any] func(context T) (T, error)
+
+    // UFOMiddlewareAfter represents a function that runs after request processing
+    type UFOMiddlewareAfter[T any] func(context T, response UFOResponse[any]) UFOResponse[any]
+
+    // UFOServer handles RPC requests
+    type UFOServer[T any] struct {
+      handlers         map[UFOProcedureName]func(context T, input any) (any, error)
+      beforeMiddleware []UFOMiddlewareBefore[T]
+      afterMiddleware  []UFOMiddlewareAfter[T]
+      methodMap       map[UFOProcedureName]UFOHTTPMethod
+    }
+
+    // NewUFOServer creates a new UFO RPC server
+    func NewUFOServer[T any]() *UFOServer[T] {
+      return &UFOServer[T]{
+        handlers:         make(map[UFOProcedureName]func(T, any) (any, error)),
+        beforeMiddleware: make([]UFOMiddlewareBefore[T], 0),
+        afterMiddleware:  make([]UFOMiddlewareAfter[T], 0),
+        methodMap: map[UFOProcedureName]UFOHTTPMethod{
+          {{#each procedures}}
+          UFOProcedureNames.{{name}}: "{{httpMethod type}}",
+          {{/each}}
+        },
+      }
+    }
+
+    {{#each procedures}}
+    // DefineHandlerFor{{name}} registers the handler for the {{name}} procedure
+    func (s *UFOServer[T]) DefineHandlerFor{{name}}(
+      handler func(context T, input P{{name}}Input) (P{{name}}Output, error),
+    ) *UFOServer[T] {
+      s.handlers[UFOProcedureNames.{{name}}] = func(context T, input any) (any, error) {
+        typedInput, ok := input.(P{{name}}Input)
+        if !ok {
+          return nil, &UFOError{Message: "Invalid input type for {{name}}"}
+        }
+        return handler(context, typedInput)
+      }
+      return s
+    }
+    {{/each}}
+
+    // RegisterBeforeMiddleware adds a middleware function that runs before the handler
+    func (s *UFOServer[T]) RegisterBeforeMiddleware(fn UFOMiddlewareBefore[T]) *UFOServer[T] {
+      s.beforeMiddleware = append(s.beforeMiddleware, fn)
+      return s
+    }
+
+    // RegisterAfterMiddleware adds a middleware function that runs after the handler
+    func (s *UFOServer[T]) RegisterAfterMiddleware(fn UFOMiddlewareAfter[T]) *UFOServer[T] {
+      s.afterMiddleware = append(s.afterMiddleware, fn)
+      return s
+    }
+
+    // HandleRequest processes an incoming RPC request
+    func (s *UFOServer[T]) HandleRequest(request UFOServerRequest[T]) (UFOResponse[any], error) {
+      procedureName := UFOProcedureName(request.Procedure)
+      currentContext := request.Context
+      response := UFOResponse[any]{Ok: true}
+      shouldSkipHandler := false
+
+      // Initial validation for procedure and method
+      if _, exists := s.handlers[procedureName]; !exists {
+        response = UFOResponse[any]{
+          Ok: false,
+          Error: UFOError{
+            Message: fmt.Sprintf("Handler not defined for procedure %s", request.Procedure),
+          },
+        }
+        shouldSkipHandler = true
+      } else if expectedMethod := s.methodMap[procedureName]; expectedMethod != request.Method {
+        response = UFOResponse[any]{
+          Ok: false,
+          Error: UFOError{
+            Message: fmt.Sprintf("Method %s not allowed for %s procedure", request.Method, request.Procedure),
+          },
+        }
+        shouldSkipHandler = true
+      }
+
+      // Execute Before middleware if we haven't encountered an error yet
+      if !shouldSkipHandler {
+        // Execute Before middleware
+        for _, fn := range s.beforeMiddleware {
+          var err error
+          if currentContext, err = fn(currentContext); err != nil {
+            response = UFOResponse[any]{
+              Ok: false,
+              Error: asUFOError(err),
+            }
+            shouldSkipHandler = true
+            break
+          }
+        }
+      }
+
+      // Run handler if no errors have occurred
+      if !shouldSkipHandler {
+        // Validate input if required
+        ${validationLogic}
+
+        if isValid {
+          // Execute handler
+          if output, err := s.handlers[procedureName](currentContext, request.Input); err != nil {
+            response = UFOResponse[any]{
+              Ok:    false,
+              Error: asUFOError(err),
+            }
+          } else {
+            response = UFOResponse[any]{
+              Ok:     true,
+              Output: output,
+            }
+          }
+        }
+      }
+
+      // Always execute After middleware, regardless of any previous errors
+      for _, fn := range s.afterMiddleware {
+        response = fn(currentContext, response)
+      }
+
+      return response, nil
+    }
   `;
 }
 
