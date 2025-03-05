@@ -1,0 +1,14 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  fmt:
+    desc: Format all code on this repo
+    cmds:
+      - go fmt ./...
+      - deno fmt
+
+  fixperms:
+    desc: Fix permissions on all files
+    cmd: chmod -R 777 .
