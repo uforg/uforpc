@@ -12,16 +12,19 @@ import "github.com/orsinium-labs/enum"
 // RuleName represents the allowed field rules
 type RuleName enum.Member[string]
 
+// MarshalJSON implements the json.Marshaler interface
 func (ruleName RuleName) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + ruleName.Value + `"`), nil
 }
 
+// UnmarshalJSON implements the json.Unmarshaler interface
 func (ruleName *RuleName) UnmarshalJSON(data []byte) error {
 	value := string(data[1 : len(data)-1])
 	*ruleName = RuleName{value}
 	return nil
 }
 
+// Allowed field rule names
 var (
 	RuleNameOptional  = RuleName{"optional"}
 	RuleNameEquals    = RuleName{"equals"}
