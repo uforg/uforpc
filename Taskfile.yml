@@ -3,6 +3,10 @@
 version: "3"
 
 tasks:
+  test:
+    desc: Run all tests
+    cmd: go test ./...
+
   fmt:
     desc: Format all code on this repo
     cmds:
