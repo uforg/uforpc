@@ -49,13 +49,12 @@ var (
 
 // Schema represents the complete UFO RPC schema
 type Schema struct {
-	Types      map[string]Field `json:"types,omitzero"`
-	Procedures []Procedure      `json:"procedures,omitzero"`
+	Types      map[string]Field     `json:"types,omitzero"`
+	Procedures map[string]Procedure `json:"procedures,omitzero"`
 }
 
 // Procedure represents an RPC procedure (query or mutation)
 type Procedure struct {
-	Name        string         `json:"name"`
 	Type        ProcedureType  `json:"type"`
 	Description string         `json:"description,omitzero"`
 	Input       Field          `json:"input,omitzero"`
