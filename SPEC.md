@@ -43,12 +43,11 @@ extend support to additional programming languages in the future.
 
 UFO RPC uses **JSON** as the primary format for schema definitions. Internally,
 the framework processes schemas written in JSON. However, to enhance the
-development experience, developers can write their schemas in **YAML** or other
-formats, which are then transpiled into JSON before being processed by UFO RPC.
-This provides syntactic sugar and improved readability without affecting the
-formal specification or internal processing. For the purposes of this
-specification, all examples and definitions will be presented in **JSON**
-format.
+development experience, developers can write their schemas in other formats,
+which are then transpiled into JSON before being processed by UFO RPC. This
+provides syntactic sugar and improved readability without affecting the formal
+specification or internal processing. For the purposes of this specification,
+all examples and definitions will be presented in **JSON** format.
 
 You can find the UFO RPC json schema in the
 [src/schema/schema.json](./src/schema/schema.json) file and the validation
@@ -83,9 +82,9 @@ and mutations). The schema is then used to generate both client and server code,
 ensuring consistency and reducing manual coding efforts.
 
 To enhance the development experience, UFO RPC allows schemas to be written in
-**YAML** or other formats, which are transpiled into JSON before processing.
-This provides syntactic sugar and improved readability without affecting the
-formal specification or internal processing.
+other formats, which are transpiled into JSON before processing. This provides
+syntactic sugar and improved readability without affecting the formal
+specification or internal processing.
 
 ---
 
@@ -428,6 +427,7 @@ The `input` and `output` fields in a procedure definition can be:
   - `desc` (optional): A description of the field.
   - `optional` (optional): A boolean indicating whether the field is optional.
     Defaults to `false`.
+  - `fields` (optional): Only if `type` is `object`.
 
 - **A string representing a type**. In this case, the input/output is of that
   type.
