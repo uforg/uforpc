@@ -59,9 +59,7 @@ func TestParseImplementedRuleFromJSON(t *testing.T) {
 func TestParseUnimplementedRuleFromJSON(t *testing.T) {
 	// Test parsing a rule that exists but is not implemented in ToSpecificRule
 	jsonData := `{
-		"name": "minLength",
-		"value": "5",
-		"message": "Must be at least 5 characters"
+		"name": "notImplemented"
 	}`
 
 	var rule schema.RuleCatchAll
@@ -69,9 +67,7 @@ func TestParseUnimplementedRuleFromJSON(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify parsing was correct
-	assert.Equal(t, schema.RuleNameMinLength, rule.Name)
-	assert.Equal(t, "5", rule.Value)
-	assert.Equal(t, "Must be at least 5 characters", rule.Message)
+	assert.Equal(t, schema.RuleName{"notImplemented"}, rule.Name)
 
 	// Try to convert to specific rule
 	specificRule := rule.ToSpecificRule()

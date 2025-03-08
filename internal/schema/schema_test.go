@@ -693,7 +693,7 @@ func TestRuleCatchAllToSpecificRule(t *testing.T) {
 
 	// Unimplemented rule (should return nil)
 	unimplementedRule := schema.RuleCatchAll{
-		Name:    schema.RuleNameEmail,
+		Name:    schema.RuleName{"notImplemented"},
 		Message: "Must be a valid email",
 	}
 
