@@ -24,6 +24,13 @@ var (
 	PrimitiveTypeInt     = PrimitiveType{"int"}
 	PrimitiveTypeFloat   = PrimitiveType{"float"}
 	PrimitiveTypeBoolean = PrimitiveType{"boolean"}
+
+	PrimitiveTypes = []PrimitiveType{
+		PrimitiveTypeString,
+		PrimitiveTypeInt,
+		PrimitiveTypeFloat,
+		PrimitiveTypeBoolean,
+	}
 )
 
 // ProcedureType represents the allowed procedure types
