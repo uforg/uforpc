@@ -296,8 +296,10 @@ attributes:
   letter).
 - `type`: Specifies whether it is a `query` or a `mutation`.
 - `desc`: An optional description of the procedure.
-- `input`: The input parameters of the procedure.
-- `output`: The output returned by the procedure.
+- `input`: Input parameters of the procedure can be a primitive or custom type,
+  it has the same shape of a type field.
+- `output`: Output returned by the procedure can be a primitive or custom type,
+  it has the same shape of a type field.
 - `meta`: Optional metadata for the procedure.
 
 If a procedure does not require input parameters or does not return any output,
@@ -313,26 +315,14 @@ the `input` or `output` fields can be omitted.
       "type": "query | mutation",
       "desc": "Description of the procedure.",
       "input": {
-        "parameterName": {
-          "type": "parameterType",
-          "desc": "Description of the parameter."
-        },
-        "anotherParameter": {
-          "type": "anotherType",
-          "desc": "Description of another parameter.",
-          "optional": true
-        }
+        "type": "InputType",
+        "desc": "Description of the input.",
+        "optional": false
       },
       "output": {
-        "fieldName": {
-          "type": "fieldType",
-          "desc": "Description of the output field."
-        },
-        "anotherField": {
-          "type": "anotherType",
-          "desc": "Description of another output field.",
-          "optional": true
-        }
+        "type": "OutputType",
+        "desc": "Description of the output.",
+        "optional": false
       },
       "meta": {
         "key": "value"
@@ -374,20 +364,12 @@ The metadata values can only be [primitive types](#primitive-types)
         "logLevel": "debug"
       },
       "input": {
-        "user": {
-          "type": "User",
-          "desc": "User information to create."
-        }
+        "type": "User",
+        "desc": "User information to create."
       },
       "output": {
-        "id": {
-          "type": "string",
-          "desc": "Unique identifier of the created user."
-        },
-        "username": {
-          "type": "string",
-          "desc": "Username of the created user."
-        }
+        "type": "CreateUserOutput",
+        "desc": "Result of the user creation."
       }
     }
   ]
@@ -419,58 +401,87 @@ caching strategies.
 
 #### Input and Output Structure
 
-The `input` and `output` fields in a procedure definition can be:
+The `input` and `output` fields in a procedure definition follow the same
+structure as fields in custom types:
 
-- **An object** defining the parameters (fields) of the input/output. Each field
-  can have:
-  - `type`: The type of the field.
-  - `desc` (optional): A description of the field.
-  - `optional` (optional): A boolean indicating whether the field is optional.
-    Defaults to `false`.
-  - `fields` (optional): Only if `type` is `object`.
+- Each has a `type` attribute specifying the data type
+- Can include additional attributes like `desc` for description and `optional`
+  to mark as optional
+- Can reference a custom type, primitive type, or an array type
 
-- **A string representing a type**. In this case, the input/output is of that
-  type.
+This unified structure allows for consistent handling of fields, inputs, and
+outputs, enabling code reuse across the framework.
 
-If the `input` or `output` is assigned only a string, it is interpreted as the
-type of the input/output.
+**Syntax:**
 
-**Important Note:**
-
-- **Fields in `input` and `output` are treated as an anonymous custom type**
-  with exactly the same fields. This means they have the same structure and
-  behavior as a named custom type but without a specific name.
+```json
+{
+  "input": {
+    "type": "InputType",
+    "desc": "Description of the input.",
+    "optional": false
+  },
+  "output": {
+    "type": "OutputType",
+    "desc": "Description of the output.",
+    "optional": false
+  }
+}
+```
 
 **Examples:**
 
-- **Object Definition:**
+- **Simple Type Reference:**
 
   ```json
   {
     "input": {
-      "userId": {
-        "type": "string",
-        "desc": "Unique identifier of the user."
-      },
-      "profile": {
-        "type": "Profile",
-        "desc": "Profile information to update.",
-        "optional": true
-      }
+      "type": "User",
+      "desc": "The user to create."
+    },
+    "output": {
+      "type": "string",
+      "desc": "The ID of the created user."
     }
   }
   ```
 
-- **Type Reference:**
+- **Array Type:**
 
   ```json
   {
-    "input": "User"
+    "input": {
+      "type": "string",
+      "desc": "The query string."
+    },
+    "output": {
+      "type": "User[]",
+      "desc": "List of matching users."
+    }
   }
   ```
 
-This flexibility allows for concise definitions when the input or output
-corresponds directly to a custom type.
+- **Object Type:**
+
+  ```json
+  {
+    "input": {
+      "type": "object",
+      "desc": "The search criteria.",
+      "fields": {
+        "name": {
+          "type": "string",
+          "desc": "User's name to search for."
+        },
+        "minAge": {
+          "type": "int",
+          "desc": "Minimum age.",
+          "optional": true
+        }
+      }
+    }
+  }
+  ```
 
 ---
 
@@ -633,8 +644,14 @@ discussed features.
       "name": "User",
       "desc": "Represents a user in the system.",
       "fields": {
-        "id": "string",
-        "username": "string",
+        "id": {
+          "type": "string",
+          "desc": "Unique identifier for the user."
+        },
+        "username": {
+          "type": "string",
+          "desc": "Username of the user."
+        },
         "email": {
           "type": "string",
           "desc": "Email address of the user.",
@@ -684,6 +701,16 @@ discussed features.
           "desc": "Address details."
         }
       }
+    },
+    {
+      "name": "CreateUserOutput",
+      "desc": "Result from creating a user.",
+      "fields": {
+        "userId": {
+          "type": "string",
+          "desc": "Unique identifier of the created user."
+        }
+      }
     }
   ],
   "procedures": [
@@ -692,16 +719,12 @@ discussed features.
       "type": "query",
       "desc": "Retrieves user information by ID.",
       "input": {
-        "userId": {
-          "type": "string",
-          "desc": "The user's unique identifier."
-        }
+        "type": "string",
+        "desc": "The user's unique identifier."
       },
       "output": {
-        "user": {
-          "type": "User",
-          "desc": "The user details."
-        }
+        "type": "User",
+        "desc": "The user details."
       }
     },
     {
@@ -713,16 +736,12 @@ discussed features.
         "logLevel": "debug"
       },
       "input": {
-        "user": {
-          "type": "User",
-          "desc": "User information to create."
-        }
+        "type": "User",
+        "desc": "User information to create."
       },
       "output": {
-        "userId": {
-          "type": "string",
-          "desc": "Unique identifier of the created user."
-        }
+        "type": "CreateUserOutput",
+        "desc": "Result of the user creation operation."
       }
     },
     {
@@ -730,23 +749,31 @@ discussed features.
       "type": "query",
       "desc": "Retrieves a paginated list of users.",
       "input": {
-        "page": {
-          "type": "int",
-          "desc": "Page number."
-        },
-        "pageSize": {
-          "type": "int",
-          "desc": "Number of users per page."
+        "type": "object",
+        "desc": "Pagination parameters.",
+        "fields": {
+          "page": {
+            "type": "int",
+            "desc": "Page number."
+          },
+          "pageSize": {
+            "type": "int",
+            "desc": "Number of users per page."
+          }
         }
       },
       "output": {
-        "users": {
-          "type": "User[]",
-          "desc": "Array of user objects."
-        },
-        "totalCount": {
-          "type": "int",
-          "desc": "Total number of users."
+        "type": "object",
+        "desc": "Paginated user list result.",
+        "fields": {
+          "users": {
+            "type": "User[]",
+            "desc": "Array of user objects."
+          },
+          "totalCount": {
+            "type": "int",
+            "desc": "Total number of users."
+          }
         }
       }
     },
@@ -759,16 +786,12 @@ discussed features.
         "logLevel": "info"
       },
       "input": {
-        "userId": {
-          "type": "string",
-          "desc": "Unique identifier of the user to delete."
-        }
+        "type": "string",
+        "desc": "Unique identifier of the user to delete."
       },
       "output": {
-        "success": {
-          "type": "boolean",
-          "desc": "Indicates if the deletion was successful."
-        }
+        "type": "boolean",
+        "desc": "Indicates if the deletion was successful."
       }
     },
     {
@@ -776,47 +799,23 @@ discussed features.
       "type": "mutation",
       "desc": "Updates the user's profile information.",
       "input": {
-        "userId": {
-          "type": "string",
-          "desc": "The user's unique identifier."
-        },
-        "profile": {
-          "type": "object",
-          "desc": "Profile information to update.",
-          "optional": true,
-          "fields": {
-            "age": {
-              "type": "int",
-              "desc": "Age of the user.",
-              "optional": true
-            },
-            "address": {
-              "type": "object",
-              "desc": "Address details.",
-              "fields": {
-                "street": {
-                  "type": "string",
-                  "desc": "Street name."
-                },
-                "city": {
-                  "type": "string",
-                  "desc": "City name."
-                },
-                "zipCode": {
-                  "type": "string",
-                  "desc": "Postal code.",
-                  "optional": true
-                }
-              }
-            }
+        "type": "object",
+        "desc": "Update parameters.",
+        "fields": {
+          "userId": {
+            "type": "string",
+            "desc": "The user's unique identifier."
+          },
+          "profile": {
+            "type": "Profile",
+            "desc": "Profile information to update.",
+            "optional": true
           }
         }
       },
       "output": {
-        "success": {
-          "type": "boolean",
-          "desc": "Indicates if the update was successful."
-        }
+        "type": "boolean",
+        "desc": "Indicates if the update was successful."
       }
     }
   ]
@@ -831,10 +830,9 @@ In this example:
 - **Custom Types**: `Address` and `Profile` are custom types used within other
   types and procedures.
 - **Input and Output Structure**:
-  - Inputs and outputs can be objects with fields or assigned directly to a
-    type.
-  - Fields in `input` and `output` are treated as anonymous custom types with
-    exactly the same fields.
+  - Inputs and outputs have a consistent structure with a `type` attribute just
+    like fields in custom types
+  - This allows for consistent handling and code reuse
 - **Optional Fields**: Fields like `email`, `profile`, and `zipCode` are marked
   as optional using the `"optional": true` attribute.
 - **Descriptions (`desc`)**: Added to types, procedures, and fields to enhance
@@ -1030,8 +1028,8 @@ Nested objects can be defined in two ways:
 ### Handling Custom Types
 
 Custom types are used directly by assigning them as the type of a field, just
-like primitive types. Inputs and outputs can be assigned directly to a type by
-specifying the type as a string.
+like primitive types. Inputs and outputs use the same structure as fields, with
+a `type` attribute.
 
 **Defining Custom Types:**
 
@@ -1052,80 +1050,27 @@ specifying the type as a string.
 }
 ```
 
-**Using Custom Types:**
+**Using Custom Types in Procedures:**
 
 ```json
 {
-  "fields": {
-    "profile": {
-      "type": "Profile",
-      "desc": "User profile information.",
-      "optional": true
-    }
-  },
-  "input": {
-    "user": {
-      "type": "User",
-      "desc": "User information."
-    }
-  },
-  "input": "User"
-}
-```
-
-**Fields in Input/Output as Anonymous Custom Types:**
-
-- When you define fields directly under `input` or `output`, they are treated as
-  an **anonymous custom type** with exactly the same fields.
-- This means they behave like a custom type but without a specific name.
-
-**Example:**
-
-```json
-{
-  "input": {
-    "userId": {
-      "type": "string",
-      "desc": "Unique identifier of the user."
-    },
-    "profile": {
-      "type": "object",
-      "desc": "Profile information to update.",
-      "optional": true,
-      "fields": {
-        "age": {
-          "type": "int",
-          "desc": "Age of the user.",
-          "optional": true
-        },
-        "address": {
-          "type": "object",
-          "desc": "Address details.",
-          "fields": {
-            "street": {
-              "type": "string",
-              "desc": "Street name."
-            },
-            "city": {
-              "type": "string",
-              "desc": "City name."
-            },
-            "zipCode": {
-              "type": "string",
-              "desc": "Postal code.",
-              "optional": true
-            }
-          }
-        }
+  "procedures": [
+    {
+      "name": "GetProfile",
+      "type": "query",
+      "desc": "Gets user profile information.",
+      "input": {
+        "type": "string",
+        "desc": "User ID."
+      },
+      "output": {
+        "type": "Profile",
+        "desc": "User profile information."
       }
     }
-  }
+  ]
 }
 ```
-
-By allowing inputs and outputs to be assigned directly to a type or defined as
-anonymous custom types with fields, the schema remains flexible, concise, and
-easy to understand.
 
 ---
 
