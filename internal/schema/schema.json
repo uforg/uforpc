@@ -34,9 +34,12 @@
           "type": "object"
         },
         "fields": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
         },
-        "itemType": {
+        "arrayType": {
           "type": "object",
           "$ref": "#/$defs/field"
         }
@@ -61,7 +64,7 @@
             "required": ["type"]
           },
           "then": {
-            "required": ["itemType"]
+            "required": ["arrayType"]
           }
         }
       ]
