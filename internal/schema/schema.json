@@ -377,7 +377,10 @@
           "$ref": "#/$defs/field"
         },
         "meta": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
         }
       }
     }
