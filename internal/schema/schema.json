@@ -6,10 +6,16 @@
   "properties": {
     "version": { "const": 1 },
     "types": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/field"
+      }
     },
     "procedures": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/procedure"
+      }
     }
   },
   "$defs": {
@@ -351,6 +357,29 @@
           }
         }
       ]
+    },
+    "procedure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["query", "mutation"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "input": {
+          "$ref": "#/$defs/field"
+        },
+        "output": {
+          "$ref": "#/$defs/field"
+        },
+        "meta": {
+          "type": "object"
+        }
+      }
     }
   }
 }
