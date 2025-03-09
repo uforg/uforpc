@@ -16,11 +16,14 @@
     "field": {
       "type": "object",
       "additionalProperties": false,
+      "required": ["type"],
       "properties": {
         "type": {
           "type": "string",
           "anyOf": [
-            { "enum": ["string", "int", "float", "boolean"] },
+            {
+              "enum": ["string", "int", "float", "boolean", "object", "array"]
+            },
             { "pattern": "^[A-Z][a-zA-Z0-9]*$" }
           ]
         },
@@ -32,8 +35,36 @@
         },
         "fields": {
           "type": "object"
+        },
+        "itemType": {
+          "type": "object",
+          "$ref": "#/$defs/field"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "object" }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["fields"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "array" }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["itemType"]
+          }
+        }
+      ]
     }
   }
 }
