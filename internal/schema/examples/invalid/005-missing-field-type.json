@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidField": {
+      "type": "object",
+      "fields": {
+        "missingTypeField": {
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

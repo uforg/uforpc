@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "UpdateStatus": {
+      "type": "subscription",
+      "input": {
+        "type": "string"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

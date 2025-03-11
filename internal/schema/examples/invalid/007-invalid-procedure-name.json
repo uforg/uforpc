@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "createUser": {
+      "type": "mutation",
+      "input": {
+        "type": "string"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}
