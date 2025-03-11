@@ -60,6 +60,33 @@
                 },
                 "errorMessage": { "type": "string" }
               }
+            },
+            "equals": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value"],
+              "properties": {
+                "value": {},
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "min": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value"],
+              "properties": {
+                "value": {},
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "max": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value"],
+              "properties": {
+                "value": {},
+                "errorMessage": { "type": "string" }
+              }
             }
           },
           "allOf": [
@@ -71,15 +98,6 @@
               },
               "then": {
                 "properties": {
-                  "equals": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "string" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
                   "contains": {
                     "type": "object",
                     "additionalProperties": false,
@@ -155,102 +173,6 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                      "errorMessage": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "type": { "const": "int" }
-                }
-              },
-              "then": {
-                "properties": {
-                  "equals": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "integer" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "min": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "integer" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "max": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "integer" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "type": { "const": "float" }
-                }
-              },
-              "then": {
-                "properties": {
-                  "equals": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "number" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "min": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "number" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "max": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "number" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "type": { "const": "boolean" }
-                }
-              },
-              "then": {
-                "properties": {
-                  "equals": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "boolean" },
                       "errorMessage": { "type": "string" }
                     }
                   }
