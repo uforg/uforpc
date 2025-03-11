@@ -49,18 +49,6 @@
                 "errorMessage": { "type": "string" }
               }
             },
-            "enum": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["values"],
-              "properties": {
-                "values": {
-                  "type": "array",
-                  "minItems": 1
-                },
-                "errorMessage": { "type": "string" }
-              }
-            },
             "equals": {
               "type": "object",
               "additionalProperties": false,
@@ -87,137 +75,98 @@
                 "value": {},
                 "errorMessage": { "type": "string" }
               }
-            }
-          },
-          "allOf": [
-            {
-              "if": {
-                "properties": {
-                  "type": { "const": "string" }
-                }
-              },
-              "then": {
-                "properties": {
-                  "contains": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "string" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "regex": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["pattern"],
-                    "properties": {
-                      "pattern": { "type": "string" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "minLen": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "integer" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "maxLen": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "integer" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "email": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "iso8601": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "uuid": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "json": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "lowercase": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "uppercase": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "errorMessage": { "type": "string" }
-                    }
-                  }
-                }
+            },
+            "contains": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value"],
+              "properties": {
+                "value": {},
+                "errorMessage": { "type": "string" }
               }
             },
-            {
-              "if": {
-                "properties": {
-                  "type": { "const": "array" }
-                }
-              },
-              "then": {
-                "properties": {
-                  "contains": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "object" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "minLen": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "integer", "minimum": 0 },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "maxLen": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "integer", "minimum": 0 },
-                      "errorMessage": { "type": "string" }
-                    }
-                  }
-                }
+            "regex": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["pattern"],
+              "properties": {
+                "pattern": { "type": "string" },
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "minLen": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value"],
+              "properties": {
+                "value": { "type": "integer" },
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "maxLen": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value"],
+              "properties": {
+                "value": { "type": "integer" },
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "enum": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["values"],
+              "properties": {
+                "values": {
+                  "type": "array",
+                  "minItems": 1
+                },
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "email": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "iso8601": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "uuid": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "json": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "lowercase": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "errorMessage": { "type": "string" }
+              }
+            },
+            "uppercase": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "errorMessage": { "type": "string" }
               }
             }
-          ]
+          }
         },
         "fields": {
           "type": "object",
