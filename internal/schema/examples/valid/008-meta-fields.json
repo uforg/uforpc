@@ -8,7 +8,7 @@
           "type": "string",
           "rules": {
             "regex": {
-              "pattern": "^https?://.*$",
+              "value": "^https?://.*$",
               "errorMessage": "Must be a valid URL"
             }
           }

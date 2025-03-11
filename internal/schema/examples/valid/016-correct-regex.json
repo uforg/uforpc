@@ -8,7 +8,7 @@
           "type": "string",
           "rules": {
             "regex": {
-              "pattern": "^[A-Z]{3}-\\d{4}$",
+              "value": "^[A-Z]{3}-\\d{4}$",
               "errorMessage": "Format must be ABC-1234"
             }
           }

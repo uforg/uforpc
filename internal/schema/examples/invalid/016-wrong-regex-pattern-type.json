@@ -8,7 +8,7 @@
           "type": "string",
           "rules": {
             "regex": {
-              "pattern": 123,
+              "value": 123,
               "errorMessage": "Pattern must be a string"
             }
           }

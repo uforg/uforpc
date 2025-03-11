@@ -79,9 +79,7 @@
       "input": {
         "type": "User",
         "rules": {
-          "optional": {
-            "errorMessage": "Invalid data"
-          }
+          "optional": true
         }
       },
       "output": {
@@ -98,7 +96,7 @@
         "type": "string",
         "rules": {
           "regex": {
-            "pattern": "^[a-f\\d]{24}$",
+            "value": "^[a-f\\d]{24}$",
             "errorMessage": "Invalid ID"
           }
         }

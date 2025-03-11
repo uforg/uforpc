@@ -24,17 +24,13 @@
         "displayName": {
           "type": "string",
           "rules": {
-            "optional": {
-              "errorMessage": "Display name is optional"
-            }
+            "optional": true
           }
         },
         "age": {
           "type": "int",
           "rules": {
-            "optional": {
-              "errorMessage": "Age is optional"
-            },
+            "optional": true,
             "min": {
               "value": 13,
               "errorMessage": "Must be at least 13 years old"
@@ -44,9 +40,7 @@
         "preferences": {
           "type": "object",
           "rules": {
-            "optional": {
-              "errorMessage": "Preferences are optional"
-            }
+            "optional": true
           },
           "fields": {
             "theme": {
