@@ -9,11 +9,11 @@
           "rules": {
             "min": {
               "value": 0,
-              "errorMessage": "Debe ser mayor o igual a 0"
+              "errorMessage": "Must be greater than or equal to 0"
             },
             "max": {
               "value": 100,
-              "errorMessage": "Debe ser menor o igual a 100"
+              "errorMessage": "Must be less than or equal to 100"
             }
           }
         },
@@ -22,7 +22,7 @@
           "rules": {
             "equals": {
               "value": 42,
-              "errorMessage": "Debe ser exactamente 42"
+              "errorMessage": "Must be exactly 42"
             }
           }
         },
@@ -31,11 +31,11 @@
           "rules": {
             "min": {
               "value": 0.0,
-              "errorMessage": "Debe ser mayor o igual a 0.0"
+              "errorMessage": "Must be greater than or equal to 0.0"
             },
             "max": {
               "value": 1.0,
-              "errorMessage": "Debe ser menor o igual a 1.0"
+              "errorMessage": "Must be less than or equal to 1.0"
             }
           }
         },
@@ -44,7 +44,7 @@
           "rules": {
             "equals": {
               "value": 3.14159,
-              "errorMessage": "Debe ser exactamente Pi"
+              "errorMessage": "Must be exactly Pi"
             }
           }
         }

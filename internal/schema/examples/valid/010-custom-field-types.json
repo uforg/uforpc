@@ -6,7 +6,7 @@
       "rules": {
         "enum": {
           "values": ["USD", "EUR", "GBP", "JPY"],
-          "errorMessage": "Moneda no soportada"
+          "errorMessage": "Unsupported currency"
         }
       }
     },
@@ -18,7 +18,7 @@
           "rules": {
             "min": {
               "value": 0,
-              "errorMessage": "La cantidad no puede ser negativa"
+              "errorMessage": "Amount cannot be negative"
             }
           }
         },
@@ -34,7 +34,7 @@
           "type": "string",
           "rules": {
             "uuid": {
-              "errorMessage": "Debe ser un UUID válido"
+              "errorMessage": "Must be a valid UUID"
             }
           }
         },
@@ -64,7 +64,7 @@
       },
       "output": {
         "type": "string",
-        "description": "Devuelve el ID del producto creado"
+        "description": "Returns the ID of the created product"
       }
     }
   }

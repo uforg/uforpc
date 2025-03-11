@@ -9,7 +9,7 @@
           "rules": {
             "enum": {
               "values": ["one", "two", "three"],
-              "errorMessage": "Debe ser uno de los strings predefinidos"
+              "errorMessage": "Must be one of the predefined strings"
             }
           }
         },
@@ -18,7 +18,7 @@
           "rules": {
             "enum": {
               "values": [1, 2, 3],
-              "errorMessage": "Debe ser uno de los enteros predefinidos"
+              "errorMessage": "Must be one of the predefined integers"
             }
           }
         },
@@ -27,7 +27,7 @@
           "rules": {
             "enum": {
               "values": [1.1, 2.2, 3.3],
-              "errorMessage": "Debe ser uno de los decimales predefinidos"
+              "errorMessage": "Must be one of the predefined decimals"
             }
           }
         }

@@ -9,7 +9,7 @@
           "rules": {
             "regex": {
               "pattern": "^https?://.*$",
-              "errorMessage": "Debe ser una URL válida"
+              "errorMessage": "Must be a valid URL"
             }
           }
         },
@@ -18,7 +18,7 @@
           "rules": {
             "min": {
               "value": 100,
-              "errorMessage": "El timeout debe ser al menos 100ms"
+              "errorMessage": "Timeout must be at least 100ms"
             }
           }
         }

@@ -12,11 +12,11 @@
           "rules": {
             "minLen": {
               "value": 1,
-              "errorMessage": "El array debe tener al menos un elemento"
+              "errorMessage": "The array must have at least one element"
             },
             "maxLen": {
               "value": 5,
-              "errorMessage": "El array debe tener como máximo 5 elementos"
+              "errorMessage": "The array must have a maximum of 5 elements"
             }
           }
         },

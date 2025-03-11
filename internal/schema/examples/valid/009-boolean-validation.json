@@ -6,29 +6,29 @@
       "fields": {
         "darkMode": {
           "type": "boolean",
-          "description": "Activar modo oscuro en la UI"
+          "description": "Enable dark mode in the UI"
         },
         "betaFeatures": {
           "type": "boolean",
-          "description": "Activar características experimentales",
+          "description": "Enable experimental features",
           "rules": {
             "equals": {
               "value": false,
-              "errorMessage": "Las características beta están actualmente deshabilitadas para todos los usuarios"
+              "errorMessage": "Beta features are currently disabled for all users"
             }
           }
         },
         "notifications": {
           "type": "boolean",
-          "description": "Activar sistema de notificaciones"
+          "description": "Enable notification system"
         },
         "analytics": {
           "type": "boolean",
-          "description": "Activar análisis de uso",
+          "description": "Enable usage analytics",
           "rules": {
             "equals": {
               "value": true,
-              "errorMessage": "El análisis no puede ser deshabilitado en esta versión"
+              "errorMessage": "Analytics cannot be disabled in this version"
             }
           }
         }

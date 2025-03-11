@@ -15,7 +15,7 @@
           "rules": {
             "regex": {
               "pattern": "^\\d{5}$",
-              "errorMessage": "Debe ser un código postal de 5 dígitos"
+              "errorMessage": "Must be a 5-digit zip code"
             }
           }
         }
@@ -28,7 +28,7 @@
           "type": "string",
           "rules": {
             "email": {
-              "errorMessage": "Debe ser un email válido"
+              "errorMessage": "Must be a valid email"
             }
           }
         },
@@ -37,7 +37,7 @@
           "rules": {
             "regex": {
               "pattern": "^\\+?[0-9]{10,15}$",
-              "errorMessage": "Debe ser un número de teléfono válido"
+              "errorMessage": "Must be a valid phone number"
             }
           }
         }
@@ -54,7 +54,7 @@
           "rules": {
             "min": {
               "value": 0,
-              "errorMessage": "La edad no puede ser negativa"
+              "errorMessage": "Age cannot be negative"
             }
           }
         },
@@ -68,6 +68,24 @@
           "type": "array",
           "arrayType": {
             "type": "string"
+          }
+        },
+        "nested": {
+          "type": "object",
+          "fields": {
+            "nestedField": {
+              "type": "object",
+              "fields": {
+                "nestedNestedField": {
+                  "type": "object",
+                  "fields": {
+                    "nestedNestedNestedField": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

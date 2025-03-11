@@ -8,7 +8,7 @@
           "type": "string",
           "rules": {
             "uuid": {
-              "errorMessage": "Debe ser un UUID válido"
+              "errorMessage": "Must be a valid UUID"
             }
           }
         },
@@ -17,11 +17,11 @@
           "rules": {
             "minLen": {
               "value": 3,
-              "errorMessage": "Mínimo 3 caracteres"
+              "errorMessage": "Minimum 3 characters"
             },
             "maxLen": {
               "value": 30,
-              "errorMessage": "Máximo 30 caracteres"
+              "errorMessage": "Maximum 30 characters"
             }
           }
         },
@@ -30,13 +30,13 @@
           "rules": {
             "min": {
               "value": 18,
-              "errorMessage": "Mayor de edad requerido"
+              "errorMessage": "Age required to be over 18"
             }
           }
         },
         "preferences": {
           "type": "CustomSettings",
-          "description": "Configuración personalizada del usuario"
+          "description": "User's custom settings"
         }
       }
     },
@@ -48,7 +48,7 @@
           "rules": {
             "enum": {
               "values": ["light", "dark"],
-              "errorMessage": "Tema no válido"
+              "errorMessage": "Invalid theme"
             }
           }
         },
@@ -57,15 +57,15 @@
           "rules": {
             "min": {
               "value": 1,
-              "errorMessage": "Mínimo 1"
+              "errorMessage": "Minimum 1"
             },
             "max": {
               "value": 10,
-              "errorMessage": "Máximo 10"
+              "errorMessage": "Maximum 10"
             },
             "enum": {
               "values": [1, 2, 3, 5, 8, 13],
-              "errorMessage": "Valor no permitido"
+              "errorMessage": "Value not allowed"
             }
           }
         }
@@ -75,12 +75,12 @@
   "procedures": {
     "CreateUser": {
       "type": "mutation",
-      "description": "Crea un nuevo usuario",
+      "description": "Creates a new user",
       "input": {
         "type": "User",
         "rules": {
           "optional": {
-            "errorMessage": "Datos inválidos"
+            "errorMessage": "Invalid data"
           }
         }
       },
@@ -99,7 +99,7 @@
         "rules": {
           "regex": {
             "pattern": "^[a-f\\d]{24}$",
-            "errorMessage": "ID inválido"
+            "errorMessage": "Invalid ID"
           }
         }
       },

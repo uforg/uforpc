@@ -8,7 +8,7 @@
           "type": "string",
           "rules": {
             "email": {
-              "errorMessage": "Debe ser un email válido"
+              "errorMessage": "Must be a valid email"
             }
           }
         },
@@ -16,7 +16,7 @@
           "type": "string",
           "rules": {
             "iso8601": {
-              "errorMessage": "Debe ser una fecha ISO8601 válida"
+              "errorMessage": "Must be a valid ISO8601 date"
             }
           }
         },
@@ -24,7 +24,7 @@
           "type": "string",
           "rules": {
             "uuid": {
-              "errorMessage": "Debe ser un UUID válido"
+              "errorMessage": "Must be a valid UUID"
             }
           }
         },
@@ -32,7 +32,7 @@
           "type": "string",
           "rules": {
             "json": {
-              "errorMessage": "Debe ser JSON válido"
+              "errorMessage": "Must be valid JSON"
             }
           }
         },
@@ -40,7 +40,7 @@
           "type": "string",
           "rules": {
             "lowercase": {
-              "errorMessage": "Debe estar en minúsculas"
+              "errorMessage": "Must be in lowercase"
             }
           }
         },
@@ -48,7 +48,7 @@
           "type": "string",
           "rules": {
             "uppercase": {
-              "errorMessage": "Debe estar en mayúsculas"
+              "errorMessage": "Must be in uppercase"
             }
           }
         }
