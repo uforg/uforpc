@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "types": {
+    "FeatureFlags": {
+      "type": "object",
+      "fields": {
+        "darkMode": {
+          "type": "boolean",
+          "description": "Activar modo oscuro en la UI"
+        },
+        "betaFeatures": {
+          "type": "boolean",
+          "description": "Activar características experimentales",
+          "rules": {
+            "equals": {
+              "value": false,
+              "errorMessage": "Las características beta están actualmente deshabilitadas para todos los usuarios"
+            }
+          }
+        },
+        "notifications": {
+          "type": "boolean",
+          "description": "Activar sistema de notificaciones"
+        },
+        "analytics": {
+          "type": "boolean",
+          "description": "Activar análisis de uso",
+          "rules": {
+            "equals": {
+              "value": true,
+              "errorMessage": "El análisis no puede ser deshabilitado en esta versión"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "UpdateFeatureFlags": {
+      "type": "mutation",
+      "input": {
+        "type": "FeatureFlags"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

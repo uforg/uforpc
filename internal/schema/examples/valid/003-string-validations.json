@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "types": {
+    "StringValidations": {
+      "type": "object",
+      "fields": {
+        "email": {
+          "type": "string",
+          "rules": {
+            "email": {
+              "errorMessage": "Debe ser un email válido"
+            }
+          }
+        },
+        "date": {
+          "type": "string",
+          "rules": {
+            "iso8601": {
+              "errorMessage": "Debe ser una fecha ISO8601 válida"
+            }
+          }
+        },
+        "id": {
+          "type": "string",
+          "rules": {
+            "uuid": {
+              "errorMessage": "Debe ser un UUID válido"
+            }
+          }
+        },
+        "jsonData": {
+          "type": "string",
+          "rules": {
+            "json": {
+              "errorMessage": "Debe ser JSON válido"
+            }
+          }
+        },
+        "lowercase": {
+          "type": "string",
+          "rules": {
+            "lowercase": {
+              "errorMessage": "Debe estar en minúsculas"
+            }
+          }
+        },
+        "uppercase": {
+          "type": "string",
+          "rules": {
+            "uppercase": {
+              "errorMessage": "Debe estar en mayúsculas"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateStrings": {
+      "type": "query",
+      "input": {
+        "type": "StringValidations"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

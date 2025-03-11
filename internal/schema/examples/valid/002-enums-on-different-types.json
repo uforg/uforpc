@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "types": {
+    "EnumTypes": {
+      "type": "object",
+      "fields": {
+        "stringEnum": {
+          "type": "string",
+          "rules": {
+            "enum": {
+              "values": ["one", "two", "three"],
+              "errorMessage": "Debe ser uno de los strings predefinidos"
+            }
+          }
+        },
+        "intEnum": {
+          "type": "int",
+          "rules": {
+            "enum": {
+              "values": [1, 2, 3],
+              "errorMessage": "Debe ser uno de los enteros predefinidos"
+            }
+          }
+        },
+        "floatEnum": {
+          "type": "float",
+          "rules": {
+            "enum": {
+              "values": [1.1, 2.2, 3.3],
+              "errorMessage": "Debe ser uno de los decimales predefinidos"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "CheckEnums": {
+      "type": "query",
+      "input": {
+        "type": "EnumTypes"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "types": {
+    "Currency": {
+      "type": "string",
+      "rules": {
+        "enum": {
+          "values": ["USD", "EUR", "GBP", "JPY"],
+          "errorMessage": "Moneda no soportada"
+        }
+      }
+    },
+    "Money": {
+      "type": "object",
+      "fields": {
+        "amount": {
+          "type": "float",
+          "rules": {
+            "min": {
+              "value": 0,
+              "errorMessage": "La cantidad no puede ser negativa"
+            }
+          }
+        },
+        "currency": {
+          "type": "Currency"
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "fields": {
+        "id": {
+          "type": "string",
+          "rules": {
+            "uuid": {
+              "errorMessage": "Debe ser un UUID válido"
+            }
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "Money"
+        },
+        "inStock": {
+          "type": "boolean"
+        },
+        "tags": {
+          "type": "array",
+          "arrayType": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "CreateProduct": {
+      "type": "mutation",
+      "input": {
+        "type": "Product"
+      },
+      "output": {
+        "type": "string",
+        "description": "Devuelve el ID del producto creado"
+      }
+    }
+  }
+}

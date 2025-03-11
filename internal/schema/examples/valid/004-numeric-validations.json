@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "types": {
+    "NumericValidations": {
+      "type": "object",
+      "fields": {
+        "intWithRange": {
+          "type": "int",
+          "rules": {
+            "min": {
+              "value": 0,
+              "errorMessage": "Debe ser mayor o igual a 0"
+            },
+            "max": {
+              "value": 100,
+              "errorMessage": "Debe ser menor o igual a 100"
+            }
+          }
+        },
+        "exactInt": {
+          "type": "int",
+          "rules": {
+            "equals": {
+              "value": 42,
+              "errorMessage": "Debe ser exactamente 42"
+            }
+          }
+        },
+        "floatWithRange": {
+          "type": "float",
+          "rules": {
+            "min": {
+              "value": 0.0,
+              "errorMessage": "Debe ser mayor o igual a 0.0"
+            },
+            "max": {
+              "value": 1.0,
+              "errorMessage": "Debe ser menor o igual a 1.0"
+            }
+          }
+        },
+        "exactFloat": {
+          "type": "float",
+          "rules": {
+            "equals": {
+              "value": 3.14159,
+              "errorMessage": "Debe ser exactamente Pi"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateNumbers": {
+      "type": "query",
+      "input": {
+        "type": "NumericValidations"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

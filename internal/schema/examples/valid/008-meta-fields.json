@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "types": {
+    "ApiSettings": {
+      "type": "object",
+      "fields": {
+        "endpoint": {
+          "type": "string",
+          "rules": {
+            "regex": {
+              "pattern": "^https?://.*$",
+              "errorMessage": "Debe ser una URL válida"
+            }
+          }
+        },
+        "timeout": {
+          "type": "int",
+          "rules": {
+            "min": {
+              "value": 100,
+              "errorMessage": "El timeout debe ser al menos 100ms"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ConfigureApi": {
+      "type": "mutation",
+      "description": "Actualiza la configuración de la API",
+      "input": {
+        "type": "ApiSettings"
+      },
+      "output": {
+        "type": "boolean"
+      },
+      "meta": {
+        "requiresAdmin": true,
+        "rateLimit": 10,
+        "cacheDuration": 300,
+        "version": "2.0.0"
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "types": {
+    "Address": {
+      "type": "object",
+      "fields": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "zipCode": {
+          "type": "string",
+          "rules": {
+            "regex": {
+              "pattern": "^\\d{5}$",
+              "errorMessage": "Debe ser un código postal de 5 dígitos"
+            }
+          }
+        }
+      }
+    },
+    "Contact": {
+      "type": "object",
+      "fields": {
+        "email": {
+          "type": "string",
+          "rules": {
+            "email": {
+              "errorMessage": "Debe ser un email válido"
+            }
+          }
+        },
+        "phone": {
+          "type": "string",
+          "rules": {
+            "regex": {
+              "pattern": "^\\+?[0-9]{10,15}$",
+              "errorMessage": "Debe ser un número de teléfono válido"
+            }
+          }
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "fields": {
+        "name": {
+          "type": "string"
+        },
+        "age": {
+          "type": "int",
+          "rules": {
+            "min": {
+              "value": 0,
+              "errorMessage": "La edad no puede ser negativa"
+            }
+          }
+        },
+        "address": {
+          "type": "Address"
+        },
+        "contact": {
+          "type": "Contact"
+        },
+        "tags": {
+          "type": "array",
+          "arrayType": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "CreatePerson": {
+      "type": "mutation",
+      "input": {
+        "type": "Person"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

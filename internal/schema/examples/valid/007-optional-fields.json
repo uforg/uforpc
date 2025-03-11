@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "types": {
+    "UserProfile": {
+      "type": "object",
+      "fields": {
+        "username": {
+          "type": "string",
+          "rules": {
+            "minLen": {
+              "value": 3,
+              "errorMessage": "El nombre de usuario debe tener al menos 3 caracteres"
+            }
+          }
+        },
+        "email": {
+          "type": "string",
+          "rules": {
+            "email": {
+              "errorMessage": "Debe ser un email válido"
+            }
+          }
+        },
+        "displayName": {
+          "type": "string",
+          "rules": {
+            "optional": {
+              "errorMessage": "El nombre de visualización es opcional"
+            }
+          }
+        },
+        "age": {
+          "type": "int",
+          "rules": {
+            "optional": {
+              "errorMessage": "La edad es opcional"
+            },
+            "min": {
+              "value": 13,
+              "errorMessage": "Debe tener al menos 13 años"
+            }
+          }
+        },
+        "preferences": {
+          "type": "object",
+          "rules": {
+            "optional": {
+              "errorMessage": "Las preferencias son opcionales"
+            }
+          },
+          "fields": {
+            "theme": {
+              "type": "string",
+              "rules": {
+                "enum": {
+                  "values": ["light", "dark", "system"],
+                  "errorMessage": "Tema no válido"
+                }
+              }
+            },
+            "notifications": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "UpdateProfile": {
+      "type": "mutation",
+      "input": {
+        "type": "UserProfile"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}
