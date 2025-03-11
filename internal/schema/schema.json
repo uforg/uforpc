@@ -13,9 +13,12 @@
     },
     "procedures": {
       "type": "object",
-      "additionalProperties": {
-        "$ref": "#/$defs/procedure"
-      }
+      "patternProperties": {
+        "^[A-Z][a-zA-Z0-9]*$": {
+          "$ref": "#/$defs/procedure"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "$defs": {
