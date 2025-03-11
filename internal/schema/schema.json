@@ -242,6 +242,12 @@
                         "items": { "type": "integer" }
                       }
                     }
+                  },
+                  "min": {
+                    "properties": { "value": { "type": "integer" } }
+                  },
+                  "max": {
+                    "properties": { "value": { "type": "integer" } }
                   }
                 }
               }
@@ -268,6 +274,12 @@
                         "items": { "type": "number" }
                       }
                     }
+                  },
+                  "min": {
+                    "properties": { "value": { "type": "number" } }
+                  },
+                  "max": {
+                    "properties": { "value": { "type": "number" } }
                   }
                 }
               }
