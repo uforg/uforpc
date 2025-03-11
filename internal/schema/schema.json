@@ -48,6 +48,18 @@
               "properties": {
                 "errorMessage": { "type": "string" }
               }
+            },
+            "enum": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["values"],
+              "properties": {
+                "values": {
+                  "type": "array",
+                  "minItems": 1
+                },
+                "errorMessage": { "type": "string" }
+              }
             }
           },
           "allOf": [
@@ -101,25 +113,6 @@
                     "required": ["value"],
                     "properties": {
                       "value": { "type": "integer" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
-                  "enum": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["values"],
-                    "properties": {
-                      "values": {
-                        "type": "array",
-                        "items": {
-                          "oneOf": [
-                            { "type": "string" },
-                            { "type": "integer" },
-                            { "type": "number" }
-                          ]
-                        },
-                        "minItems": 1
-                      },
                       "errorMessage": { "type": "string" }
                     }
                   },
@@ -202,25 +195,6 @@
                       "value": { "type": "integer" },
                       "errorMessage": { "type": "string" }
                     }
-                  },
-                  "enum": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["values"],
-                    "properties": {
-                      "values": {
-                        "type": "array",
-                        "items": {
-                          "oneOf": [
-                            { "type": "string" },
-                            { "type": "integer" },
-                            { "type": "number" }
-                          ]
-                        },
-                        "minItems": 1
-                      },
-                      "errorMessage": { "type": "string" }
-                    }
                   }
                 }
               }
@@ -259,25 +233,6 @@
                       "value": { "type": "number" },
                       "errorMessage": { "type": "string" }
                     }
-                  },
-                  "enum": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["values"],
-                    "properties": {
-                      "values": {
-                        "type": "array",
-                        "items": {
-                          "oneOf": [
-                            { "type": "string" },
-                            { "type": "integer" },
-                            { "type": "number" }
-                          ]
-                        },
-                        "minItems": 1
-                      },
-                      "errorMessage": { "type": "string" }
-                    }
                   }
                 }
               }
@@ -310,6 +265,15 @@
               },
               "then": {
                 "properties": {
+                  "contains": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["value"],
+                    "properties": {
+                      "value": { "type": "object" },
+                      "errorMessage": { "type": "string" }
+                    }
+                  },
                   "minLen": {
                     "type": "object",
                     "additionalProperties": false,
