@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "ValidBoolean": {
+      "type": "object",
+      "fields": {
+        "flag": {
+          "type": "boolean",
+          "rules": {
+            "equals": {
+              "value": true,
+              "errorMessage": "Flag must be true"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

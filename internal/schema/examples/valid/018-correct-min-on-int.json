@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "ValidMin": {
+      "type": "object",
+      "fields": {
+        "age": {
+          "type": "int",
+          "rules": {
+            "min": {
+              "value": 18,
+              "errorMessage": "Age must be over 18"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

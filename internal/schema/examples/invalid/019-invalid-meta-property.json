@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "TestProcedure": {
+      "type": "query",
+      "input": {
+        "type": "string"
+      },
+      "output": {
+        "type": "boolean"
+      },
+      "meta": {
+        "nested": { "inner": "value" }
+      }
+    }
+  }
+}

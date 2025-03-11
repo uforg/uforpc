@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "TestEnum": {
+      "type": "object",
+      "fields": {
+        "score": {
+          "type": "int",
+          "rules": {
+            "enum": {
+              "values": [1, "two", 3],
+              "errorMessage": "Enum values must be integers"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "types": {
+    "ValidArray": {
+      "type": "object",
+      "fields": {
+        "ids": {
+          "type": "array",
+          "arrayType": {
+            "type": "string",
+            "rules": {
+              "uuid": {
+                "errorMessage": "Must be a valid UUID"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "ValidEquals": {
+      "type": "object",
+      "fields": {
+        "title": {
+          "type": "string",
+          "rules": {
+            "equals": {
+              "value": "Test",
+              "errorMessage": "Title must be Test"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "types": {
+    "TestArray": {
+      "type": "object",
+      "fields": {
+        "ids": {
+          "type": "array",
+          "arrayType": {
+            "type": "unknownType"
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

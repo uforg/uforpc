@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "TestEquals": {
+      "type": "object",
+      "fields": {
+        "title": {
+          "type": "string",
+          "rules": {
+            "equals": {
+              "value": 1,
+              "errorMessage": "Should be a string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

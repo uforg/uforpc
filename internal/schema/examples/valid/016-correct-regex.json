@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "ValidRegex": {
+      "type": "object",
+      "fields": {
+        "code": {
+          "type": "string",
+          "rules": {
+            "regex": {
+              "pattern": "^[A-Z]{3}-\\d{4}$",
+              "errorMessage": "Format must be ABC-1234"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

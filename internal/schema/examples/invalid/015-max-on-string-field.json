@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "TestMaxRule": {
+      "type": "object",
+      "fields": {
+        "description": {
+          "type": "string",
+          "rules": {
+            "max": {
+              "value": "100",
+              "errorMessage": "Value must be a number"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

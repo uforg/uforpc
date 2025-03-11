@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "TestFloatEnum": {
+      "type": "object",
+      "fields": {
+        "ratio": {
+          "type": "float",
+          "rules": {
+            "enum": {
+              "values": [0.1, "0.2", 0.3],
+              "errorMessage": "Enum values must be floats"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

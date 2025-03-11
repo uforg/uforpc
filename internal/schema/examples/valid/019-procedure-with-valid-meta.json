@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "ValidProcedure": {
+      "type": "mutation",
+      "input": {
+        "type": "string"
+      },
+      "output": {
+        "type": "boolean"
+      },
+      "meta": {
+        "audit": true,
+        "retryCount": 3,
+        "note": "Valid meta"
+      }
+    }
+  }
+}

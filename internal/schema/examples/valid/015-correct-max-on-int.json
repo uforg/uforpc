@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "ValidMax": {
+      "type": "object",
+      "fields": {
+        "count": {
+          "type": "int",
+          "rules": {
+            "max": {
+              "value": 100,
+              "errorMessage": "Maximum is 100"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}
