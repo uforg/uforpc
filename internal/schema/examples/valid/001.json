@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "types": {
+    "User": {
+      "type": "object",
+      "fields": {
+        "id": {
+          "type": "string",
+          "rules": {
+            "uuid": {
+              "errorMessage": "Debe ser un UUID válido"
+            }
+          }
+        },
+        "name": {
+          "type": "string",
+          "rules": {
+            "minLen": {
+              "value": 3,
+              "errorMessage": "Mínimo 3 caracteres"
+            },
+            "maxLen": {
+              "value": 30,
+              "errorMessage": "Máximo 30 caracteres"
+            }
+          }
+        },
+        "age": {
+          "type": "int",
+          "rules": {
+            "min": {
+              "value": 18,
+              "errorMessage": "Mayor de edad requerido"
+            }
+          }
+        },
+        "preferences": {
+          "type": "CustomSettings",
+          "description": "Configuración personalizada del usuario"
+        }
+      }
+    },
+    "CustomSettings": {
+      "type": "object",
+      "fields": {
+        "theme": {
+          "type": "string",
+          "rules": {
+            "enum": {
+              "values": ["light", "dark"],
+              "errorMessage": "Tema no válido"
+            }
+          }
+        },
+        "qty": {
+          "type": "int",
+          "rules": {
+            "min": {
+              "value": 1,
+              "errorMessage": "Mínimo 1"
+            },
+            "max": {
+              "value": 10,
+              "errorMessage": "Máximo 10"
+            },
+            "enum": {
+              "values": [1, 2, 3, 5, 8, 13],
+              "errorMessage": "Valor no permitido"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "CreateUser": {
+      "type": "mutation",
+      "description": "Crea un nuevo usuario",
+      "input": {
+        "type": "User",
+        "rules": {
+          "optional": {
+            "errorMessage": "Datos inválidos"
+          }
+        }
+      },
+      "output": {
+        "type": "boolean"
+      },
+      "meta": {
+        "audit": true,
+        "retryCount": 3
+      }
+    },
+    "GetUserProfile": {
+      "type": "query",
+      "input": {
+        "type": "string",
+        "rules": {
+          "regex": {
+            "pattern": "^[a-f\\d]{24}$",
+            "errorMessage": "ID inválido"
+          }
+        }
+      },
+      "output": {
+        "type": "User"
+      }
+    }
+  }
+}
