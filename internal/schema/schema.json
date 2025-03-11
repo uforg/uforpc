@@ -201,6 +201,119 @@
           "then": {
             "required": ["arrayType"]
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "string" }
+            }
+          },
+          "then": {
+            "properties": {
+              "rules": {
+                "properties": {
+                  "equals": {
+                    "properties": { "value": { "type": "string" } }
+                  },
+                  "min": false,
+                  "max": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "int" }
+            }
+          },
+          "then": {
+            "properties": {
+              "rules": {
+                "properties": {
+                  "equals": {
+                    "properties": { "value": { "type": "integer" } }
+                  },
+                  "enum": {
+                    "properties": {
+                      "values": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "float" }
+            }
+          },
+          "then": {
+            "properties": {
+              "rules": {
+                "properties": {
+                  "equals": {
+                    "properties": { "value": { "type": "number" } }
+                  },
+                  "enum": {
+                    "properties": {
+                      "values": {
+                        "type": "array",
+                        "items": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "boolean" }
+            }
+          },
+          "then": {
+            "properties": {
+              "rules": {
+                "properties": {
+                  "equals": {
+                    "properties": { "value": { "type": "boolean" } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "enum": ["int", "float", "boolean"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "rules": {
+                "properties": {
+                  "minLen": false,
+                  "maxLen": false,
+                  "regex": false,
+                  "email": false,
+                  "iso8601": false,
+                  "json": false,
+                  "lowercase": false,
+                  "uppercase": false
+                }
+              }
+            }
+          }
         }
       ]
     },
