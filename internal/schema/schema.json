@@ -111,7 +111,13 @@
                     "properties": {
                       "values": {
                         "type": "array",
-                        "items": { "type": "string" },
+                        "items": {
+                          "oneOf": [
+                            { "type": "string" },
+                            { "type": "integer" },
+                            { "type": "number" }
+                          ]
+                        },
                         "minItems": 1
                       },
                       "errorMessage": { "type": "string" }
@@ -204,7 +210,13 @@
                     "properties": {
                       "values": {
                         "type": "array",
-                        "items": { "type": "integer" },
+                        "items": {
+                          "oneOf": [
+                            { "type": "string" },
+                            { "type": "integer" },
+                            { "type": "number" }
+                          ]
+                        },
                         "minItems": 1
                       },
                       "errorMessage": { "type": "string" }
@@ -255,7 +267,13 @@
                     "properties": {
                       "values": {
                         "type": "array",
-                        "items": { "type": "number" },
+                        "items": {
+                          "oneOf": [
+                            { "type": "string" },
+                            { "type": "integer" },
+                            { "type": "number" }
+                          ]
+                        },
                         "minItems": 1
                       },
                       "errorMessage": { "type": "string" }
@@ -292,15 +310,6 @@
               },
               "then": {
                 "properties": {
-                  "contains": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["value"],
-                    "properties": {
-                      "value": { "type": "object" },
-                      "errorMessage": { "type": "string" }
-                    }
-                  },
                   "minLen": {
                     "type": "object",
                     "additionalProperties": false,
