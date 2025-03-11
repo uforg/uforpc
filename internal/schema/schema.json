@@ -41,7 +41,6 @@
         },
         "rules": {
           "type": "object",
-          "additionalProperties": false,
           "properties": {
             "optional": {
               "type": "object",
@@ -367,7 +366,6 @@
       "required": ["type"],
       "properties": {
         "type": {
-          "type": "string",
           "enum": ["query", "mutation"]
         },
         "description": {
