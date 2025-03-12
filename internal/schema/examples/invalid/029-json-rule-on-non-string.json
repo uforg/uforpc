@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidJsonRule": {
+      "type": "object",
+      "fields": {
+        "jsonField": {
+          "type": "int",
+          "rules": {
+            "json": {
+              "errorMessage": "Must be valid JSON"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

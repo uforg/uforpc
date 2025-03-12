@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "types": {
+    "FloatEqualsValidation": {
+      "type": "object",
+      "fields": {
+        "pi": {
+          "type": "float",
+          "rules": {
+            "equals": {
+              "value": 3.14159,
+              "errorMessage": "Value must be equal to PI (3.14159)"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidatePI": {
+      "type": "query",
+      "input": {
+        "type": "FloatEqualsValidation"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidIso8601Rule": {
+      "type": "object",
+      "fields": {
+        "dateField": {
+          "type": "float",
+          "rules": {
+            "iso8601": {
+              "errorMessage": "Must be a valid ISO8601 date"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

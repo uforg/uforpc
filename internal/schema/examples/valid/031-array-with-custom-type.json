@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "types": {
+    "Product": {
+      "type": "object",
+      "fields": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "float",
+          "rules": {
+            "min": {
+              "value": 0,
+              "errorMessage": "Price cannot be negative"
+            }
+          }
+        }
+      }
+    },
+    "ProductList": {
+      "type": "object",
+      "fields": {
+        "products": {
+          "type": "array",
+          "arrayType": {
+            "type": "Product"
+          }
+        },
+        "totalCount": {
+          "type": "int"
+        }
+      }
+    }
+  },
+  "procedures": {
+    "GetProducts": {
+      "type": "query",
+      "output": {
+        "type": "ProductList"
+      }
+    }
+  }
+}

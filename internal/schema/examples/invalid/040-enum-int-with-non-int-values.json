@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidEnumIntRule": {
+      "type": "object",
+      "fields": {
+        "code": {
+          "type": "int",
+          "rules": {
+            "enum": {
+              "values": [200, "error", 404],
+              "errorMessage": "Code must be one of the allowed values"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

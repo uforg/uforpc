@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidEmailRule": {
+      "type": "object",
+      "fields": {
+        "emailField": {
+          "type": "int",
+          "rules": {
+            "email": {
+              "errorMessage": "Must be a valid email"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

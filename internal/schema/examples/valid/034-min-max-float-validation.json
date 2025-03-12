@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "types": {
+    "FloatRangeValidation": {
+      "type": "object",
+      "fields": {
+        "temperature": {
+          "type": "float",
+          "rules": {
+            "min": {
+              "value": -273.15,
+              "errorMessage": "Temperature cannot be below absolute zero"
+            },
+            "max": {
+              "value": 1000.0,
+              "errorMessage": "Temperature is too high"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateTemperature": {
+      "type": "query",
+      "input": {
+        "type": "FloatRangeValidation"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

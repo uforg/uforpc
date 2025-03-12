@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "types": {
+    "ArrayLengthValidation": {
+      "type": "object",
+      "fields": {
+        "items": {
+          "type": "array",
+          "arrayType": {
+            "type": "string"
+          },
+          "rules": {
+            "minLen": {
+              "value": 1,
+              "errorMessage": "Array must have at least 1 item"
+            },
+            "maxLen": {
+              "value": 5,
+              "errorMessage": "Array cannot have more than 5 items"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateArrayLength": {
+      "type": "query",
+      "input": {
+        "type": "ArrayLengthValidation"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidMaxRule": {
+      "type": "object",
+      "fields": {
+        "boolField": {
+          "type": "boolean",
+          "rules": {
+            "max": {
+              "value": 10,
+              "errorMessage": "Must be at most 10"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

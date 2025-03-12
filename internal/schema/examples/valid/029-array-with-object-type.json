@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "types": {
+    "ArrayWithObjectType": {
+      "type": "object",
+      "fields": {
+        "users": {
+          "type": "array",
+          "arrayType": {
+            "type": "object",
+            "fields": {
+              "id": {
+                "type": "string",
+                "rules": {
+                  "uuid": {
+                    "errorMessage": "Must be a valid UUID"
+                  }
+                }
+              },
+              "name": {
+                "type": "string"
+              },
+              "age": {
+                "type": "int",
+                "rules": {
+                  "min": {
+                    "value": 0,
+                    "errorMessage": "Age cannot be negative"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "GetUsers": {
+      "type": "query",
+      "output": {
+        "type": "ArrayWithObjectType"
+      }
+    }
+  }
+}

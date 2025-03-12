@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "types": {
+    "StringEnumValidation": {
+      "type": "object",
+      "fields": {
+        "status": {
+          "type": "string",
+          "rules": {
+            "enum": {
+              "values": ["pending", "active", "completed", "cancelled"],
+              "errorMessage": "Status must be one of: pending, active, completed, cancelled"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateStatus": {
+      "type": "query",
+      "input": {
+        "type": "StringEnumValidation"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

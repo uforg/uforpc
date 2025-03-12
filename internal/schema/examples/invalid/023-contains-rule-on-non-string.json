@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidContainsRule": {
+      "type": "object",
+      "fields": {
+        "number": {
+          "type": "int",
+          "rules": {
+            "contains": {
+              "value": "test",
+              "errorMessage": "Must contain the word 'test'"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}
