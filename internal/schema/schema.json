@@ -28,43 +28,161 @@
     }
   },
   "$defs": {
-    "ruleWithValue": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "value"
-      ],
-      "properties": {
-        "value": {},
-        "errorMessage": {
-          "type": "string"
-        }
-      }
+    "ruleBoolean": {
+      "type": "boolean"
     },
     "ruleSimple": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "errorMessage": {
-          "type": "string"
-        }
+        "errorMessage": { "type": "string" }
       }
     },
-    "enumRule": {
+    "ruleWithStringValue": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "values"
-      ],
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "string" },
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "ruleWithIntValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "integer" },
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "ruleWithNumberValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "number" },
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "ruleWithBooleanValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "boolean" },
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "ruleWithStringArray": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["values"],
       "properties": {
         "values": {
           "type": "array",
           "minItems": 1,
-          "items": {}
+          "items": { "type": "string" }
         },
-        "errorMessage": {
-          "type": "string"
-        }
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "ruleWithIntArray": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["values"],
+      "properties": {
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer" }
+        },
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "ruleWithNumberArray": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["values"],
+      "properties": {
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "number" }
+        },
+        "errorMessage": { "type": "string" }
+      }
+    },
+    "stringRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "optional": { "$ref": "#/$defs/ruleBoolean" },
+        "equals": { "$ref": "#/$defs/ruleWithStringValue" },
+        "contains": { "$ref": "#/$defs/ruleWithStringValue" },
+        "regex": { "$ref": "#/$defs/ruleWithStringValue" },
+        "minLen": { "$ref": "#/$defs/ruleWithIntValue" },
+        "maxLen": { "$ref": "#/$defs/ruleWithIntValue" },
+        "enum": { "$ref": "#/$defs/ruleWithStringArray" },
+        "email": { "$ref": "#/$defs/ruleSimple" },
+        "iso8601": { "$ref": "#/$defs/ruleSimple" },
+        "uuid": { "$ref": "#/$defs/ruleSimple" },
+        "json": { "$ref": "#/$defs/ruleSimple" },
+        "lowercase": { "$ref": "#/$defs/ruleSimple" },
+        "uppercase": { "$ref": "#/$defs/ruleSimple" }
+      }
+    },
+    "intRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "optional": { "$ref": "#/$defs/ruleBoolean" },
+        "equals": { "$ref": "#/$defs/ruleWithIntValue" },
+        "min": { "$ref": "#/$defs/ruleWithIntValue" },
+        "max": { "$ref": "#/$defs/ruleWithIntValue" },
+        "enum": { "$ref": "#/$defs/ruleWithIntArray" }
+      }
+    },
+    "floatRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "optional": { "$ref": "#/$defs/ruleBoolean" },
+        "equals": { "$ref": "#/$defs/ruleWithNumberValue" },
+        "min": { "$ref": "#/$defs/ruleWithNumberValue" },
+        "max": { "$ref": "#/$defs/ruleWithNumberValue" },
+        "enum": { "$ref": "#/$defs/ruleWithNumberArray" }
+      }
+    },
+    "booleanRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "optional": { "$ref": "#/$defs/ruleBoolean" },
+        "equals": { "$ref": "#/$defs/ruleWithBooleanValue" }
+      }
+    },
+    "objectRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "optional": { "$ref": "#/$defs/ruleBoolean" }
+      }
+    },
+    "arrayRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "optional": { "$ref": "#/$defs/ruleBoolean" },
+        "minLen": { "$ref": "#/$defs/ruleWithIntValue" },
+        "maxLen": { "$ref": "#/$defs/ruleWithIntValue" }
+      }
+    },
+    "customTypeRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "optional": { "$ref": "#/$defs/ruleBoolean" }
       }
     },
     "field": {
@@ -87,99 +205,14 @@
                 "array"
               ]
             },
-            {
-              "pattern": "^[A-Z][a-zA-Z0-9]*$"
-            }
+            { "pattern": "^[A-Z][a-zA-Z0-9]*$" }
           ]
         },
         "description": {
           "type": "string"
         },
         "rules": {
-          "type": "object",
-          "properties": {
-            "optional": {
-              "$ref": "#/$defs/ruleSimple"
-            },
-            "equals": {
-              "$ref": "#/$defs/ruleWithValue"
-            },
-            "min": {
-              "$ref": "#/$defs/ruleWithValue"
-            },
-            "max": {
-              "$ref": "#/$defs/ruleWithValue"
-            },
-            "contains": {
-              "$ref": "#/$defs/ruleWithValue"
-            },
-            "regex": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "pattern"
-              ],
-              "properties": {
-                "pattern": {
-                  "type": "string"
-                },
-                "errorMessage": {
-                  "type": "string"
-                }
-              }
-            },
-            "minLen": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "value"
-              ],
-              "properties": {
-                "value": {
-                  "type": "integer"
-                },
-                "errorMessage": {
-                  "type": "string"
-                }
-              }
-            },
-            "maxLen": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "value"
-              ],
-              "properties": {
-                "value": {
-                  "type": "integer"
-                },
-                "errorMessage": {
-                  "type": "string"
-                }
-              }
-            },
-            "enum": {
-              "$ref": "#/$defs/enumRule"
-            },
-            "email": {
-              "$ref": "#/$defs/ruleSimple"
-            },
-            "iso8601": {
-              "$ref": "#/$defs/ruleSimple"
-            },
-            "uuid": {
-              "$ref": "#/$defs/ruleSimple"
-            },
-            "json": {
-              "$ref": "#/$defs/ruleSimple"
-            },
-            "lowercase": {
-              "$ref": "#/$defs/ruleSimple"
-            },
-            "uppercase": {
-              "$ref": "#/$defs/ruleSimple"
-            }
-          }
+          "type": "object"
         },
         "fields": {
           "type": "object",
@@ -198,10 +231,7 @@
               "type": {
                 "const": "object"
               }
-            },
-            "required": [
-              "type"
-            ]
+            }
           },
           "then": {
             "required": [
@@ -215,10 +245,7 @@
               "type": {
                 "const": "array"
               }
-            },
-            "required": [
-              "type"
-            ]
+            }
           },
           "then": {
             "required": [
@@ -237,17 +264,7 @@
           "then": {
             "properties": {
               "rules": {
-                "properties": {
-                  "equals": {
-                    "properties": {
-                      "value": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "min": false,
-                  "max": false
-                }
+                "$ref": "#/$defs/stringRules"
               }
             }
           }
@@ -263,39 +280,7 @@
           "then": {
             "properties": {
               "rules": {
-                "properties": {
-                  "equals": {
-                    "properties": {
-                      "value": {
-                        "type": "integer"
-                      }
-                    }
-                  },
-                  "enum": {
-                    "properties": {
-                      "values": {
-                        "type": "array",
-                        "items": {
-                          "type": "integer"
-                        }
-                      }
-                    }
-                  },
-                  "min": {
-                    "properties": {
-                      "value": {
-                        "type": "integer"
-                      }
-                    }
-                  },
-                  "max": {
-                    "properties": {
-                      "value": {
-                        "type": "integer"
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/$defs/intRules"
               }
             }
           }
@@ -311,39 +296,7 @@
           "then": {
             "properties": {
               "rules": {
-                "properties": {
-                  "equals": {
-                    "properties": {
-                      "value": {
-                        "type": "number"
-                      }
-                    }
-                  },
-                  "enum": {
-                    "properties": {
-                      "values": {
-                        "type": "array",
-                        "items": {
-                          "type": "number"
-                        }
-                      }
-                    }
-                  },
-                  "min": {
-                    "properties": {
-                      "value": {
-                        "type": "number"
-                      }
-                    }
-                  },
-                  "max": {
-                    "properties": {
-                      "value": {
-                        "type": "number"
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/$defs/floatRules"
               }
             }
           }
@@ -359,15 +312,7 @@
           "then": {
             "properties": {
               "rules": {
-                "properties": {
-                  "equals": {
-                    "properties": {
-                      "value": {
-                        "type": "boolean"
-                      }
-                    }
-                  }
-                }
+                "$ref": "#/$defs/booleanRules"
               }
             }
           }
@@ -376,27 +321,46 @@
           "if": {
             "properties": {
               "type": {
-                "enum": [
-                  "int",
-                  "float",
-                  "boolean"
-                ]
+                "const": "object"
               }
             }
           },
           "then": {
             "properties": {
               "rules": {
-                "properties": {
-                  "minLen": false,
-                  "maxLen": false,
-                  "regex": false,
-                  "email": false,
-                  "iso8601": false,
-                  "json": false,
-                  "lowercase": false,
-                  "uppercase": false
-                }
+                "$ref": "#/$defs/objectRules"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "array"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rules": {
+                "$ref": "#/$defs/arrayRules"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "pattern": "^[A-Z][a-zA-Z0-9]*$"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rules": {
+                "$ref": "#/$defs/customTypeRules"
               }
             }
           }
