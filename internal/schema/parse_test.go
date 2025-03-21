@@ -18,7 +18,6 @@ func TestParseSchema(t *testing.T) {
 				parsedSchema, err := schema.ParseSchema(testCase.schema)
 
 				assert.NoError(t, err)
-				assert.NotNil(t, parsedSchema)
 				assert.Equal(t, 1, parsedSchema.Version)
 				assert.NotNil(t, parsedSchema.Types)
 				assert.NotNil(t, parsedSchema.Procedures)
@@ -35,7 +34,7 @@ func TestParseSchema(t *testing.T) {
 				parsedSchema, err := schema.ParseSchema(testCase.schema)
 
 				assert.Error(t, err)
-				assert.Nil(t, parsedSchema)
+				assert.Equal(t, schema.Schema{}, parsedSchema)
 			})
 		}
 	})
@@ -135,8 +134,6 @@ func TestParseSchema(t *testing.T) {
 		parsedSchema, err := schema.ParseSchema(customSchema)
 
 		require.NoError(t, err)
-		require.NotNil(t, parsedSchema)
-
 		assert.Equal(t, 1, parsedSchema.Version)
 
 		assert.Len(t, parsedSchema.Types, 2)
@@ -148,10 +145,10 @@ func TestParseSchema(t *testing.T) {
 		assert.Contains(t, parsedSchema.Procedures, "CreateUser")
 
 		getUserProc := parsedSchema.Procedures["GetUser"]
-		assert.Equal(t, "query", getUserProc.Type)
+		assert.Equal(t, schema.ProcedureTypeQuery, getUserProc.Type)
 
 		createUserProc := parsedSchema.Procedures["CreateUser"]
-		assert.Equal(t, "mutation", createUserProc.Type)
+		assert.Equal(t, schema.ProcedureTypeMutation, createUserProc.Type)
 
 		userType := parsedSchema.Types["User"]
 		assert.Equal(t, "object", userType.Type)
@@ -162,10 +159,10 @@ func TestParseSchema(t *testing.T) {
 		assert.Contains(t, userType.Fields, "isActive")
 
 		nameField := userType.Fields["name"]
-		nameRules, ok := nameField.Rules.(*schema.StringRules)
+		stringRules, ok := nameField.ProcessedRules.(schema.StringRules)
 		assert.True(t, ok)
-		assert.Equal(t, 3, nameRules.MinLen.Value)
-		assert.Equal(t, "Name must be at least 3 characters", nameRules.MinLen.ErrorMessage)
+		assert.Equal(t, 3, stringRules.MinLen.Value)
+		assert.Equal(t, "Name must be at least 3 characters", stringRules.MinLen.ErrorMessage)
 
 		addressesField := createUserProc.Input.Fields["addresses"]
 		assert.Equal(t, "array", addressesField.Type)
