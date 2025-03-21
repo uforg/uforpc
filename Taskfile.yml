@@ -4,8 +4,12 @@ version: "3"
 
 tasks:
   test:
-    desc: Run all tests
+    desc: Test all code on this repo
     cmd: go test ./...
+
+  lint:
+    desc: Lint all code on this repo
+    cmd: golangci-lint run ./...
 
   fmt:
     desc: Format all code on this repo
