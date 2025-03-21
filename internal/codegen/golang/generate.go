@@ -1,8 +1,24 @@
-package typescript
+package golang
 
-import "github.com/uforg/uforpc/internal/schema"
+import (
+	"github.com/uforg/uforpc/internal/codegen/genkit"
+	"github.com/uforg/uforpc/internal/schema"
+)
 
 // Generate takes a schema and a config and generates the Go code for the schema.
-func Generate(sch schema.Schema, config Config) error {
-	return nil
+func Generate(sch schema.Schema, config Config) (string, error) {
+	g := genkit.NewGenKit().WithTabs()
+
+	subGenerators := []func(*genkit.GenKit, schema.Schema, Config) error{
+		generatePackage,
+		generateCoreTypes,
+	}
+
+	for _, generator := range subGenerators {
+		if err := generator(g, sch, config); err != nil {
+			return "", err
+		}
+	}
+
+	return g.String(), nil
 }

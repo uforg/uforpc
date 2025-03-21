@@ -1,4 +1,4 @@
-package typescript
+package golang
 
 // Config is the configuration for the Go code generator.
 type Config struct {
