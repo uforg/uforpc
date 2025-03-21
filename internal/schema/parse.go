@@ -20,7 +20,86 @@ func ParseSchema(schemaStr string) (Schema, error) {
 		return Schema{}, fmt.Errorf("error post-processing schema: %w", err)
 	}
 
+	if err := validateCustomTypeReferences(schema); err != nil {
+		return Schema{}, fmt.Errorf("error validating custom type references: %w", err)
+	}
+
 	return schema, nil
+}
+
+// validateCustomTypeReferences ensures all custom types referenced in the schema are defined
+func validateCustomTypeReferences(schema Schema) error {
+	// Set of all defined types
+	definedTypes := make(map[string]bool)
+	for typeName := range schema.Types {
+		definedTypes[typeName] = true
+	}
+
+	// Check types referenced in custom type fields
+	for typeName, typeField := range schema.Types {
+		if err := validateFieldCustomTypes(typeName, typeField, definedTypes); err != nil {
+			return err
+		}
+	}
+
+	// Check types referenced in procedure input/output
+	for procName, proc := range schema.Procedures {
+		// Check input if defined
+		if proc.Input.Type != "" {
+			if err := validateFieldType(procName+".input", proc.Input, definedTypes); err != nil {
+				return err
+			}
+		}
+
+		// Check output if defined
+		if proc.Output.Type != "" {
+			if err := validateFieldType(procName+".output", proc.Output, definedTypes); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateFieldCustomTypes recursively validates that all custom types referenced in a field are defined
+func validateFieldCustomTypes(path string, field Field, definedTypes map[string]bool) error {
+	if err := validateFieldType(path, field, definedTypes); err != nil {
+		return err
+	}
+
+	// Recursively check fields of objects
+	if field.Type == FieldTypeObject.Value && len(field.Fields) > 0 {
+		for fieldName, subField := range field.Fields {
+			if err := validateFieldCustomTypes(path+"."+fieldName, subField, definedTypes); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Check array type
+	if field.Type == FieldTypeArray.Value && field.ArrayType != nil {
+		if err := validateFieldCustomTypes(path+".arrayType", *field.ArrayType, definedTypes); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// validateFieldType validates that a field's type exists if it's a custom type
+func validateFieldType(path string, field Field, definedTypes map[string]bool) error {
+	// Skip built-in types
+	if field.IsBuiltInType() {
+		return nil
+	}
+
+	// Check if the custom type is defined
+	if !definedTypes[field.Type] {
+		return fmt.Errorf("undefined custom type: %s in field %s", field.Type, path)
+	}
+
+	return nil
 }
 
 // processSchema processes the Schema structure after decoding from JSON

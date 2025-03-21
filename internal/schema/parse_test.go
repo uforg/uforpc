@@ -169,4 +169,153 @@ func TestParseSchema(t *testing.T) {
 		assert.NotNil(t, addressesField.ArrayType)
 		assert.Equal(t, "Address", addressesField.ArrayType.Type)
 	})
+
+	t.Run("schema with undefined custom type", func(t *testing.T) {
+		schemaWithUndefinedType := `{
+			"version": 1,
+			"types": {
+				"User": {
+					"type": "object",
+					"fields": {
+						"id": {
+							"type": "string"
+						},
+						"profile": {
+							"type": "Profile"
+						}
+					}
+				}
+			},
+			"procedures": {
+				"GetUser": {
+					"type": "query",
+					"output": {
+						"type": "User"
+					}
+				}
+			}
+		}`
+
+		_, err := schema.ParseSchema(schemaWithUndefinedType)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "undefined custom type: Profile")
+	})
+
+	t.Run("schema with circular reference", func(t *testing.T) {
+		schemaWithCircularReference := `{
+			"version": 1,
+			"types": {
+				"User": {
+					"type": "object",
+					"fields": {
+						"id": {
+							"type": "string"
+						},
+						"friend": {
+							"type": "User"
+						}
+					}
+				}
+			},
+			"procedures": {
+				"GetUser": {
+					"type": "query",
+					"output": {
+						"type": "User"
+					}
+				}
+			}
+		}`
+
+		parsedSchema, err := schema.ParseSchema(schemaWithCircularReference)
+		assert.NoError(t, err)
+		assert.NotEqual(t, schema.Schema{}, parsedSchema)
+
+		// Circular references are allowed and should parse correctly
+		userType := parsedSchema.Types["User"]
+		friendField := userType.Fields["friend"]
+		assert.Equal(t, "User", friendField.Type)
+	})
+
+	t.Run("schema with nested array of custom type", func(t *testing.T) {
+		schemaWithNestedArray := `{
+			"version": 1,
+			"types": {
+				"Item": {
+					"type": "object",
+					"fields": {
+						"name": {
+							"type": "string"
+						}
+					}
+				},
+				"Collection": {
+					"type": "object",
+					"fields": {
+						"items": {
+							"type": "array",
+							"arrayType": {
+								"type": "array",
+								"arrayType": {
+									"type": "Item"
+								}
+							}
+						}
+					}
+				}
+			},
+			"procedures": {
+				"GetCollection": {
+					"type": "query",
+					"output": {
+						"type": "Collection"
+					}
+				}
+			}
+		}`
+
+		parsedSchema, err := schema.ParseSchema(schemaWithNestedArray)
+		assert.NoError(t, err)
+		assert.NotEqual(t, schema.Schema{}, parsedSchema)
+
+		// Should validate nested array types correctly
+		collectionType := parsedSchema.Types["Collection"]
+		itemsField := collectionType.Fields["items"]
+		assert.Equal(t, "array", itemsField.Type)
+		assert.NotNil(t, itemsField.ArrayType)
+		assert.Equal(t, "array", itemsField.ArrayType.Type)
+		assert.NotNil(t, itemsField.ArrayType.ArrayType)
+		assert.Equal(t, "Item", itemsField.ArrayType.ArrayType.Type)
+	})
+
+	t.Run("schema with undeclared type in array", func(t *testing.T) {
+		schemaWithUndeclaredArrayType := `{
+			"version": 1,
+			"types": {
+				"Collection": {
+					"type": "object",
+					"fields": {
+						"items": {
+							"type": "array",
+							"arrayType": {
+								"type": "UndeclaredItem"
+							}
+						}
+					}
+				}
+			},
+			"procedures": {
+				"GetCollection": {
+					"type": "query",
+					"output": {
+						"type": "Collection"
+					}
+				}
+			}
+		}`
+
+		_, err := schema.ParseSchema(schemaWithUndeclaredArrayType)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "undefined custom type: UndeclaredItem")
+	})
 }
