@@ -1,8 +1,6 @@
 package strutil
 
-import (
-	"unicode"
-)
+import "unicode"
 
 // ToCamelCase converts a string to camelCase, it will interpret all
 // space like characters, underscores and dashes as word boundaries.
