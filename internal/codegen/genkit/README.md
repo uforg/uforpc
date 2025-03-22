@@ -12,6 +12,8 @@ properly formatted code.
 - Block-based code generation
 - String formatting support
 - Language-agnostic design
+- Raw content insertion
+- Manual line breaks
 
 ## Usage
 
@@ -19,11 +21,12 @@ properly formatted code.
 
 ```go
 g := genkit.NewGenKit()
-g.Line("function greet(name) {").
+g.Inline("function greet(name) {"). // First line without the line break of the previous line
     Indent().
     Line("console.log('Hello, ' + name)").
     Dedent().
-    Line("}")
+    Line("}").
+    Break() // If you want to add EOF line break
 
 fmt.Println(g.String())
 ```
@@ -111,6 +114,46 @@ Output:
 const greeting = "Hello, World!";
 ```
 
+### Raw Content
+
+```go
+g := genkit.NewGenKit()
+g.Raw("console.log('Hello, World!');")
+```
+
+Output:
+
+```javascript
+console.log("Hello, World!");
+```
+
+### Manual Line Breaks
+
+```go
+g := genkit.NewGenKit()
+g.Line("console.log('Hello')").Break().Line("console.log('World')")
+```
+
+Output:
+
+```javascript
+console.log("Hello");
+console.log("World");
+```
+
+### Inline Content
+
+```go
+g := genkit.NewGenKit()
+g.Inline("console.log('Hello')").Inline("console.log('World')")
+```
+
+Output:
+
+```javascript
+console.log('Hello')console.log('World')
+```
+
 ### Generating the Code
 
 ```go
@@ -126,7 +169,7 @@ result := g.String()
 
 ```go
 g := genkit.NewGenKit()
-g.Line("interface User {").
+g.Inline("interface User {").
     Indent().
     Line("id: string").
     Line("name: string").
@@ -139,7 +182,7 @@ g.Line("interface User {").
 
 ```go
 g := genkit.NewGenKit().WithSpaces(4)
-g.Line("class User:").
+g.Inline("class User:").
     Indent().
     Line("def __init__(self, name, age):").
     Indent().
@@ -157,7 +200,7 @@ g.Line("class User:").
 
 ```go
 g := genkit.NewGenKit()
-g.Line("type User struct {").
+g.Inline("type User struct {").
     Indent().
     Line("ID   int").
     Line("Name string").
