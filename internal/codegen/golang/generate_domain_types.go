@@ -104,7 +104,6 @@ func generateDomainTypes(g *genkit.GenKit, sch schema.Schema, config Config) err
 		g.Linef("// Null%s is the nullable version of %s", typeName, typeName)
 		g.Linef("type Null%s Null[%s]", typeName, typeName)
 		g.Break()
-
 	}
 
 	return nil
