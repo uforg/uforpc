@@ -46,8 +46,8 @@ func TestBasicIndentation(t *testing.T) {
 	t.Run("Empty lines", func(t *testing.T) {
 		g := NewGenKit().WithSpaces(2)
 		g.Line("// This is a comment").
-			Line().
-			Line().
+			Break().
+			Break().
 			Line("// This is other comment")
 
 		want := "\n// This is a comment\n\n\n// This is other comment"

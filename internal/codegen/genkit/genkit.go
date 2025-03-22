@@ -49,17 +49,28 @@ func (g *GenKit) Dedent() *GenKit {
 	return g
 }
 
+// Raw writes a raw content without any indentation or line breaks.
+func (g *GenKit) Raw(content string) *GenKit {
+	g.sb.WriteString(content)
+	return g
+}
+
+// Rawf writes a formatted raw content without any indentation or line breaks.
+func (g *GenKit) Rawf(format string, args ...any) *GenKit {
+	return g.Raw(fmt.Sprintf(format, args...))
+}
+
+// Break literally writes a line break.
+func (g *GenKit) Break() *GenKit {
+	return g.Raw("\n")
+}
+
 // Inline writes a line with the current indentation and does not add a line break
 // before the line content.
-func (g *GenKit) Inline(line ...string) *GenKit {
-	pickedLine := ""
-	if len(line) > 0 {
-		pickedLine = line[0]
-	}
-
-	if pickedLine != "" {
-		g.sb.WriteString(strings.Repeat(g.indentString, g.indentLevel))
-		g.sb.WriteString(pickedLine)
+func (g *GenKit) Inline(line string) *GenKit {
+	if line != "" {
+		g.Raw(strings.Repeat(g.indentString, g.indentLevel))
+		g.Raw(line)
 	}
 
 	return g
@@ -73,18 +84,15 @@ func (g *GenKit) Inlinef(format string, args ...any) *GenKit {
 
 // Line writes a line with the current indentation and adds a line break
 // before the line content.
-func (g *GenKit) Line(line ...string) *GenKit {
-	g.sb.WriteString("\n")
-	g.Inline(line...)
-	return g
+func (g *GenKit) Line(line string) *GenKit {
+	g.Break()
+	return g.Inline(line)
 }
 
 // Linef writes a formatted line with the current indentation and adds a line break
 // before the line content.
 func (g *GenKit) Linef(format string, args ...any) *GenKit {
-	g.sb.WriteString("\n")
-	g.Inlinef(format, args...)
-	return g
+	return g.Line(fmt.Sprintf(format, args...))
 }
 
 // Block executes a function within an indented block. In other words
