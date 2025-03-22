@@ -324,3 +324,20 @@ func TestInlinef(t *testing.T) {
 		assert.Equal(t, want, g.String())
 	})
 }
+
+func TestSublines(t *testing.T) {
+	t.Run("If a line contains newlines, each line will be properly indented", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Inline("function test() {")
+		g.Block(func() {
+			g.Line("console.log('hello')\nconsole.log('world')")
+		})
+		g.Line("}")
+
+		want := `function test() {
+  console.log('hello')
+  console.log('world')
+}`
+		assert.Equal(t, want, g.String())
+	})
+}

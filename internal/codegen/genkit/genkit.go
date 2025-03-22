@@ -66,13 +66,20 @@ func (g *GenKit) Break() *GenKit {
 }
 
 // Inline writes a line with the current indentation and does not add a line break
-// before the line content.
+// before the line content. If the line contains newlines, each line will be properly indented.
 func (g *GenKit) Inline(line string) *GenKit {
 	if line != "" {
-		g.Raw(strings.Repeat(g.indentString, g.indentLevel))
-		g.Raw(line)
+		sublines := strings.Split(line, "\n")
+		for idx, subline := range sublines {
+			if idx > 0 {
+				g.Raw("\n")
+			}
+			if subline != "" {
+				g.Raw(strings.Repeat(g.indentString, g.indentLevel))
+				g.Raw(subline)
+			}
+		}
 	}
-
 	return g
 }
 
