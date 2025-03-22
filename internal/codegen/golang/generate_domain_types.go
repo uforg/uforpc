@@ -77,7 +77,9 @@ func generateDomainTypesRenderField(name string, content schema.Field) string {
 	return result
 }
 
-func generateDomainTypes(g *genkit.GenKit, sch schema.Schema, config Config) error {
+func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
+	g := genkit.NewGenKit().WithTabs()
+
 	g.Inline("// -----------------------------------------------------------------------------")
 	g.Line("// Domain Types")
 	g.Line("// -----------------------------------------------------------------------------")
@@ -106,5 +108,5 @@ func generateDomainTypes(g *genkit.GenKit, sch schema.Schema, config Config) err
 		g.Break()
 	}
 
-	return nil
+	return g.String(), nil
 }

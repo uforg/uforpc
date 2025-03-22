@@ -5,7 +5,9 @@ import (
 	"github.com/uforg/uforpc/internal/schema"
 )
 
-func generatePackage(g *genkit.GenKit, _ schema.Schema, config Config) error {
+func generatePackage(_ schema.Schema, config Config) (string, error) {
+	g := genkit.NewGenKit().WithTabs()
+
 	g.Inline("// This file has been generated using UFO RPC. DO NOT EDIT.")
 	g.Line("// If you edit this file, it will be overwritten the next time it is generated.")
 	g.Break()
@@ -24,5 +26,5 @@ func generatePackage(g *genkit.GenKit, _ schema.Schema, config Config) error {
 	g.Line(")")
 	g.Break()
 
-	return nil
+	return g.String(), nil
 }

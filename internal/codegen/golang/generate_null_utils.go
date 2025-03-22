@@ -3,23 +3,18 @@ package golang
 import (
 	_ "embed"
 	"fmt"
-	"strings"
 
-	"github.com/uforg/uforpc/internal/codegen/genkit"
 	"github.com/uforg/uforpc/internal/schema"
+	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
 //go:embed pieces/nullutils/nullutils.go
 var nullUtilsRawPiece string
 
-func generateNullUtils(g *genkit.GenKit, _ schema.Schema, _ Config) error {
-	split := strings.Split(nullUtilsRawPiece, "/** START FROM HERE **/")
-	if len(split) < 2 {
-		return fmt.Errorf("nullutils.go: could not find start marker")
+func generateNullUtils(_ schema.Schema, _ Config) (string, error) {
+	piece := strutil.GetStrAfter(nullUtilsRawPiece, "/** START FROM HERE **/")
+	if piece == "" {
+		return "", fmt.Errorf("nullutils.go: could not find start delimiter")
 	}
-
-	g.Inline(split[1])
-	g.Break()
-
-	return nil
+	return piece, nil
 }
