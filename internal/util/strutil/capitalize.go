@@ -12,3 +12,12 @@ func Capitalize(str string) string {
 	}
 	return strings.ToUpper(str[:1]) + str[1:]
 }
+
+// CapitalizeStrict returns the string with the first letter capitalized
+// and the rest of the string always lowercase.
+func CapitalizeStrict(str string) string {
+	if len(str) == 0 {
+		return str
+	}
+	return Capitalize(strings.ToLower(str))
+}
