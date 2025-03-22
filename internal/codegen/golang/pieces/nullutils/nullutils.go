@@ -28,7 +28,7 @@ type (
 	NullFloat64 = Null[float64]
 )
 
-// UnmarshalJSON implements json.Unmarshaler
+// UnmarshalJSON implements json.Unmarshaler for Null[T]
 func (n *Null[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		n.Valid = false
@@ -45,7 +45,7 @@ func (n *Null[T]) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON implements json.Marshaler
+// MarshalJSON implements json.Marshaler for Null[T]
 func (n Null[T]) MarshalJSON() ([]byte, error) {
 	if !n.Valid {
 		return []byte("null"), nil
