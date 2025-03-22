@@ -67,7 +67,14 @@ func generateDomainTypesRenderField(name string, content schema.Field) string {
 		return typeLiteral
 	}
 
-	return fmt.Sprintf("%s %s `json:\"%s,omitempty,omitzero\"`", namePascal, typeLiteral, nameCamel)
+	result := ""
+
+	if content.Description != "" {
+		result += fmt.Sprintf("// %s\n", content.Description)
+	}
+
+	result += fmt.Sprintf("%s %s `json:\"%s,omitempty,omitzero\"`", namePascal, typeLiteral, nameCamel)
+	return result
 }
 
 func generateDomainTypes(g *genkit.GenKit, sch schema.Schema, config Config) error {
