@@ -21,6 +21,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		if err := generator(g, sch, config); err != nil {
 			return "", err
 		}
+		g.Break()
 	}
 
 	return g.String(), nil
