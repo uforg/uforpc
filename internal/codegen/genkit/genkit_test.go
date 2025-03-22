@@ -272,3 +272,55 @@ public class User {
 		assert.Equal(t, want, g.String())
 	})
 }
+
+func TestInline(t *testing.T) {
+	t.Run("SimpleInline", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Inline("console.log('hello')")
+
+		want := "console.log('hello')"
+		assert.Equal(t, want, g.String())
+	})
+
+	t.Run("InlineWithIndentation", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Indent().Inline("console.log('hello')")
+
+		want := "  console.log('hello')"
+		assert.Equal(t, want, g.String())
+	})
+
+	t.Run("InlineWithMultipleLines", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Inline("console.log('hello')").Inline("console.log('world')")
+
+		want := "console.log('hello')console.log('world')"
+		assert.Equal(t, want, g.String())
+	})
+}
+
+func TestInlinef(t *testing.T) {
+	t.Run("SimpleInlinef", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Inlinef("const greeting = %q", "Hello, World!")
+
+		want := "const greeting = \"Hello, World!\""
+		assert.Equal(t, want, g.String())
+	})
+
+	t.Run("InlinefWithIndentation", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Indent().Inlinef("const greeting = %q", "Hello, World!")
+
+		want := "  const greeting = \"Hello, World!\""
+		assert.Equal(t, want, g.String())
+	})
+
+	t.Run("InlinefWithMultipleLines", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Inlinef("const greeting = %q", "Hello, World!").Inlinef("console.log(%q)", "Hello, World!")
+
+		want := "const greeting = \"Hello, World!\"console.log(\"Hello, World!\")"
+		assert.Equal(t, want, g.String())
+	})
+}
