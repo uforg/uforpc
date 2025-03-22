@@ -181,6 +181,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("}")
 	})
 	g.Line("}")
+	g.Line()
 
 	return nil
 }
