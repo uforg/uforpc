@@ -12,6 +12,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 	subGenerators := []func(*genkit.GenKit, schema.Schema, Config) error{
 		generatePackage,
 		generateCoreTypes,
+		generateDomainTypes,
 	}
 
 	for _, generator := range subGenerators {
