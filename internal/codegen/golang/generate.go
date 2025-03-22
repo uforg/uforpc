@@ -13,6 +13,8 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generatePackage,
 		generateCoreTypes,
 		generateDomainTypes,
+		generateNullUtils,
+		generateValidator,
 	}
 
 	for _, generator := range subGenerators {
