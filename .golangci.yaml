@@ -1,6 +1,10 @@
 run:
   timeout: "5m"
 
+issues:
+  exclude-dirs:
+    - "internal/codegen/golang/pieces/coretypes"
+
 linters:
   disable-all: true
   enable:
