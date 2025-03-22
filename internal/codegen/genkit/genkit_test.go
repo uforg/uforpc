@@ -15,7 +15,7 @@ func TestBasicIndentation(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "if (true) {\n  console.log('hello')\n}\n"
+		want := "\nif (true) {\n  console.log('hello')\n}"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -27,7 +27,7 @@ func TestBasicIndentation(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "if (true) {\n    console.log('hello')\n}\n"
+		want := "\nif (true) {\n    console.log('hello')\n}"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -39,7 +39,7 @@ func TestBasicIndentation(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "if (true) {\n\tconsole.log('hello')\n}\n"
+		want := "\nif (true) {\n\tconsole.log('hello')\n}"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -50,7 +50,7 @@ func TestBasicIndentation(t *testing.T) {
 			Line().
 			Line("// This is other comment")
 
-		want := "// This is a comment\n\n\n// This is other comment\n"
+		want := "\n// This is a comment\n\n\n// This is other comment"
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -64,7 +64,7 @@ func TestChainable(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "if (true) {\n\tconsole.log('hello')\n}\n"
+		want := "\nif (true) {\n\tconsole.log('hello')\n}"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -76,7 +76,7 @@ func TestChainable(t *testing.T) {
 		g.Dedent()
 		g.Line("}")
 
-		want := "if (true) {\n\tconsole.log('hello')\n}\n"
+		want := "\nif (true) {\n\tconsole.log('hello')\n}"
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -91,11 +91,11 @@ func TestBlock(t *testing.T) {
 			}).
 			Line("}")
 
-		want := `if (true) {
+		want := `
+if (true) {
   console.log('hello')
   console.log('world')
-}
-`
+}`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -115,14 +115,14 @@ func TestBlock(t *testing.T) {
 			}).
 			Line("}")
 
-		want := `function example() {
+		want := `
+function example() {
   if (condition) {
     console.log('condition true')
   } else {
     console.log('condition false')
   }
-}
-`
+}`
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -132,8 +132,8 @@ func TestLinef(t *testing.T) {
 		g := NewGenKit().WithSpaces(2)
 		g.Linef("const greeting = %q", "Hello, World!")
 
-		want := `const greeting = "Hello, World!"
-`
+		want := `
+const greeting = "Hello, World!"`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -146,11 +146,11 @@ func TestLinef(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := `interface User {
+		want := `
+interface User {
   id: string
   age: number
-}
-`
+}`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -163,11 +163,11 @@ func TestLinef(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := `type User struct {
+		want := `
+type User struct {
   ID   int
   Name string
-}
-`
+}`
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -189,14 +189,14 @@ func TestMultiLanguageExamples(t *testing.T) {
 			Dedent().
 			Dedent()
 
-		want := `class User:
+		want := `
+class User:
     def __init__(self, name, age):
         self.name = name
         self.age = age
 
     def greet(self):
-        return f"Hello, {self.name}!"
-`
+        return f"Hello, {self.name}!"`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -219,7 +219,8 @@ func TestMultiLanguageExamples(t *testing.T) {
 			Dedent().
 			Line("end")
 
-		want := `class User
+		want := `
+class User
   def initialize(name, age)
     @name = name
     @age = age
@@ -228,8 +229,7 @@ func TestMultiLanguageExamples(t *testing.T) {
   def greet
     puts "Hello, #{@name}!"
   end
-end
-`
+end`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -255,7 +255,8 @@ end
 			Dedent().
 			Line("}")
 
-		want := `public class User {
+		want := `
+public class User {
     private String name;
     private int age;
 
@@ -267,8 +268,7 @@ end
     public String greet() {
         return "Hello, " + name + "!";
     }
-}
-`
+}`
 		assert.Equal(t, want, g.String())
 	})
 }

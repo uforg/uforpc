@@ -49,8 +49,9 @@ func (g *GenKit) Dedent() *GenKit {
 	return g
 }
 
-// Line writes a line with the current indentation.
-func (g *GenKit) Line(line ...string) *GenKit {
+// Inline writes a line with the current indentation and does not add a line break
+// before the line content.
+func (g *GenKit) Inline(line ...string) *GenKit {
 	pickedLine := ""
 	if len(line) > 0 {
 		pickedLine = line[0]
@@ -60,13 +61,30 @@ func (g *GenKit) Line(line ...string) *GenKit {
 		g.sb.WriteString(strings.Repeat(g.indentString, g.indentLevel))
 		g.sb.WriteString(pickedLine)
 	}
-	g.sb.WriteString("\n")
+
 	return g
 }
 
-// Linef writes a formatted line with the current indentation.
+// Inlinef writes a formatted line with the current indentation and does not add a line break
+// before the line content.
+func (g *GenKit) Inlinef(format string, args ...any) *GenKit {
+	return g.Inline(fmt.Sprintf(format, args...))
+}
+
+// Line writes a line with the current indentation and adds a line break
+// before the line content.
+func (g *GenKit) Line(line ...string) *GenKit {
+	g.sb.WriteString("\n")
+	g.Inline(line...)
+	return g
+}
+
+// Linef writes a formatted line with the current indentation and adds a line break
+// before the line content.
 func (g *GenKit) Linef(format string, args ...any) *GenKit {
-	return g.Line(fmt.Sprintf(format, args...))
+	g.sb.WriteString("\n")
+	g.Inlinef(format, args...)
+	return g
 }
 
 // Block executes a function within an indented block. In other words
