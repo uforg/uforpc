@@ -6,14 +6,14 @@ import (
 )
 
 func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
-	g.Line("// -----------------------------------------------------------------------------")
+	g.Inline("// -----------------------------------------------------------------------------")
 	g.Line("// Core Types")
 	g.Line("// -----------------------------------------------------------------------------")
-	g.Line()
+	g.Break()
 
 	g.Line("// UFOHTTPMethod represents an HTTP method.")
 	g.Line("type UFOHTTPMethod string")
-	g.Line()
+	g.Break()
 
 	g.Line("const (")
 	g.Block(func() {
@@ -23,7 +23,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("POST UFOHTTPMethod = \"POST\"")
 	})
 	g.Line(")")
-	g.Line()
+	g.Break()
 
 	g.Line("// UFOResponse represents the response of a UFO RPC call.")
 	g.Line("type UFOResponse[T any] struct {")
@@ -33,7 +33,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("Error  UFOError         `json:\"error,omitempty,omitzero\"`")
 	})
 	g.Line("}")
-	g.Line()
+	g.Break()
 
 	g.Line("// UFOError represents a standardized error in the UFO RPC system.")
 	g.Line("//")
@@ -57,7 +57,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("//   1. If localization is not implemented, Message can be directly shown to the user to inform them of the issue.")
 		g.Line("//   2. Developers can use Message in logs to diagnose problems during development or in production.")
 		g.Line("Message string `json:\"message\"`")
-		g.Line()
+		g.Break()
 
 		g.Line("// Category categorizes the error by its nature or source.")
 		g.Line("//")
@@ -72,7 +72,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("//   2. Clients can inspect the Category to decide whether to prompt the user for action,")
 		g.Line("//      such as re-authentication if the Category is \"AuthenticationError\".")
 		g.Line("Category string `json:\"category,omitempty,omitzero\"`")
-		g.Line()
+		g.Break()
 
 		g.Line("// Code is a machine-readable identifier for the specific error condition.")
 		g.Line("//")
@@ -87,7 +87,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("//   2. Clients or middleware can implement specific logic based on the Code,")
 		g.Line("//      such as retry mechanisms for \"TEMPORARY_FAILURE\" or showing captcha for \"RATE_LIMIT_EXCEEDED\".")
 		g.Line("Code string `json:\"code,omitempty,omitzero\"`")
-		g.Line()
+		g.Break()
 
 		g.Line("// Details contains optional additional information about the error.")
 		g.Line("//")
@@ -102,7 +102,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("Details map[string]any `json:\"details,omitempty,omitzero\"`")
 	})
 	g.Line("}")
-	g.Line()
+	g.Break()
 
 	// Add Error method
 	g.Line("// Error implements the error interface, returning the error message.")
@@ -111,7 +111,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("return e.Message")
 	})
 	g.Line("}")
-	g.Line()
+	g.Break()
 
 	// Add String method
 	g.Line("// String implements the fmt.Stringer interface, returning the error message.")
@@ -120,7 +120,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("return e.Message")
 	})
 	g.Line("}")
-	g.Line()
+	g.Break()
 
 	// Add ToJSON method
 	g.Line("// ToJSON returns the UFOError as a JSON-formatted string including all its fields.")
@@ -150,7 +150,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("return string(b)")
 	})
 	g.Line("}")
-	g.Line()
+	g.Break()
 
 	// Add asUFOError function
 	g.Line("// asUFOError converts any error into a UFOError.")
@@ -181,7 +181,7 @@ func generateCoreTypes(g *genkit.GenKit, _ schema.Schema, _ Config) error {
 		g.Line("}")
 	})
 	g.Line("}")
-	g.Line()
+	g.Break()
 
 	return nil
 }

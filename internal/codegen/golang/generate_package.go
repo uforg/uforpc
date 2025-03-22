@@ -6,13 +6,13 @@ import (
 )
 
 func generatePackage(g *genkit.GenKit, _ schema.Schema, config Config) error {
-	g.Line("// This file has been generated using UFO RPC. DO NOT EDIT.")
+	g.Inline("// This file has been generated using UFO RPC. DO NOT EDIT.")
 	g.Line("// If you edit this file, it will be overwritten the next time it is generated.")
-	g.Line()
+	g.Break()
 
 	g.Linef("// Package %s contains the generated code for the UFO RPC schema", config.PackageName)
 	g.Linef("package %s", config.PackageName)
-	g.Line()
+	g.Break()
 
 	g.Line("import (")
 	g.Block(func() {
@@ -22,7 +22,7 @@ func generatePackage(g *genkit.GenKit, _ schema.Schema, config Config) error {
 		g.Line(`"strings"`)
 	})
 	g.Line(")")
-	g.Line()
+	g.Break()
 
 	return nil
 }
