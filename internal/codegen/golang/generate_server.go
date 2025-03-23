@@ -21,7 +21,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// Server handles RPC requests.")
 	g.Line("type Server[T any] struct {")
 	g.Block(func() {
-		g.Line("handlers          map[ProcedureName]func(context T, input any) (any, error)")
+		g.Line("handlers          map[ProcedureName]func(context T, input json.RawMessage) (any, error)")
 		g.Line("beforeMiddlewares []MiddlewareBefore[T]")
 		g.Line("afterMiddlewares  []MiddlewareAfter[T]")
 	})
@@ -54,7 +54,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Block(func() {
 		g.Line("return &Server[T]{")
 		g.Block(func() {
-			g.Line("handlers:         	map[ProcedureName]func(T, any) (any, error){},")
+			g.Line("handlers:         	map[ProcedureName]func(T, json.RawMessage) (any, error){},")
 			g.Line("beforeMiddlewares: 	[]MiddlewareBefore[T]{},")
 			g.Line("afterMiddlewares:  	[]MiddlewareAfter[T]{},")
 		})
@@ -99,19 +99,22 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		})
 		g.Linef(") *Server[T] {")
 		g.Block(func() {
-			g.Linef("s.handlers[ProcedureNames.%s] = func(context T, input any) (any, error) {", namePascal)
+			g.Linef("s.handlers[ProcedureNames.%s] = func(context T, input json.RawMessage) (any, error) {", namePascal)
 			g.Block(func() {
-				g.Linef("typedInput, ok := input.(P%sInput)", name)
-				g.Linef("if !ok {")
+				g.Line("var typedInput P" + namePascal + "Input")
+				g.Line("if err := json.Unmarshal(input, &typedInput); err != nil {")
 				g.Block(func() {
 					g.Line("return nil, &Error{")
 					g.Block(func() {
-						g.Linef("Message: \"Invalid input for %s procedure\",", name)
-						g.Linef("Details: map[string]any{\"procedure\": \"%s\"},", name)
+						g.Line("Message: \"Invalid input for " + name + " procedure\",")
+						g.Line("Details: map[string]any{\"procedure\": \"" + name + "\", \"error\": err.Error()},")
 					})
 					g.Line("}")
 				})
 				g.Line("}")
+				g.Break()
+				g.Line("//TODO: Use rule validation utilities here")
+				g.Break()
 				g.Line("return handler(context, typedInput)")
 			})
 			g.Line("}")
@@ -124,15 +127,10 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// HandleRequest processes an incoming RPC request")
 	g.Line("func (s *Server[T]) HandleRequest(request ServerRequest[T]) Response[any] {")
 	g.Block(func() {
-		g.Line("var jsonBody = struct {")
+		g.Line("var jsonBody struct {")
 		g.Block(func() {
-			g.Line("Procedure ProcedureName	`json:\"procedure\"`")
-			g.Line("Input 		any						`json:\"input\"`")
-		})
-		g.Line("}{")
-		g.Block(func() {
-			g.Line("Procedure: \"\",")
-			g.Line("Input: map[string]any{}, // Initialize to avoid nil pointer dereference error")
+			g.Line("Procedure ProcedureName		`json:\"procedure\"`")
+			g.Line("Input 		json.RawMessage	`json:\"input\"`")
 		})
 		g.Line("}")
 		g.Line("if err := json.NewDecoder(request.RequestBody).Decode(&jsonBody); err != nil {")
@@ -208,9 +206,6 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 			g.Line("}")
 		})
 		g.Line("}")
-		g.Break()
-
-		g.Line("//TODO: Implement validation logic here")
 		g.Break()
 
 		g.Line("// Run handler if no errors have occurred")
