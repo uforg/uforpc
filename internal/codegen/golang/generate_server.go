@@ -104,7 +104,6 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Linef("typedInput, ok := input.(P%sInput)", name)
 				g.Linef("if !ok {")
 				g.Block(func() {
-					// g.Linef("return nil, &Error{Message: \"Invalid input type for %s\"}", name)
 					g.Line("return nil, &Error{")
 					g.Block(func() {
 						g.Linef("Message: \"Invalid input for %s procedure\",", name)
@@ -160,7 +159,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("Ok: false,")
 				g.Line("Error: Error{")
 				g.Block(func() {
-					g.Line("Message: \"Procedure not found\",")
+					g.Line("Message: string(jsonBody.Procedure) + \" procedure not found\",")
 					g.Line("Details: map[string]any{\"procedure\": jsonBody.Procedure},")
 				})
 				g.Line("},")
@@ -178,7 +177,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("Ok: false,")
 				g.Line("Error: Error{")
 				g.Block(func() {
-					g.Line("Message: \"Procedure not implemented\",")
+					g.Line("Message: string(jsonBody.Procedure) + \" procedure not implemented\",")
 					g.Line("Details: map[string]any{\"procedure\": jsonBody.Procedure},")
 				})
 				g.Line("},")
