@@ -8,7 +8,7 @@ import (
 	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
-//go:embed pieces/validator/validator.go
+//go:embed pieces/validator.go
 var validatorRawPiece string
 
 func generateValidator(_ schema.Schema, config Config) (string, error) {

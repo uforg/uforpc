@@ -8,7 +8,7 @@ import (
 	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
-//go:embed pieces/coretypes/coretypes.go
+//go:embed pieces/coretypes.go
 var coreTypesRawPiece string
 
 func generateCoreTypes(_ schema.Schema, _ Config) (string, error) {

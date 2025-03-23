@@ -1,4 +1,4 @@
-package coretypes
+package pieces
 
 import (
 	"encoding/json"

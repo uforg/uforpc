@@ -8,7 +8,7 @@ import (
 	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
-//go:embed pieces/nullutils/nullutils.go
+//go:embed pieces/nullutils.go
 var nullUtilsRawPiece string
 
 func generateNullUtils(_ schema.Schema, _ Config) (string, error) {
