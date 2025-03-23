@@ -16,6 +16,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generateProcedureTypes,
 		generateNullUtils,
 		generateValidator,
+		generateServer,
 	}
 
 	g := genkit.NewGenKit().WithTabs()
