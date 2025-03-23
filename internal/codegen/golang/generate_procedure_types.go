@@ -51,7 +51,7 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Break()
 
 		g.Linef("// %s represents the response for the %s procedure.", responseName, namePascal)
-		g.Linef("type %s = UFOResponse[%s]", responseName, outputName)
+		g.Linef("type %s = Response[%s]", responseName, outputName)
 		g.Break()
 	}
 
@@ -69,15 +69,15 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	g.Line("// UFOProcedureName represents the name of a procedure.")
-	g.Line("type UFOProcedureName string")
+	g.Line("// ProcedureName represents the name of a procedure.")
+	g.Line("type ProcedureName string")
 	g.Break()
 
-	g.Line("// UFOProcedureNames is a struct that contains all procedure names in its literal string form.")
-	g.Line("var UFOProcedureNames = struct {")
+	g.Line("// ProcedureNames is a struct that contains all procedure names in its literal string form.")
+	g.Line("var ProcedureNames = struct {")
 	g.Block(func() {
 		for name := range sch.Procedures {
-			g.Linef("%s UFOProcedureName", name)
+			g.Linef("%s ProcedureName", name)
 		}
 	})
 	g.Line("}{")

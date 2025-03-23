@@ -11,24 +11,24 @@ import (
 // Core Types
 // -----------------------------------------------------------------------------
 
-// UFOHTTPMethod represents an HTTP method.
-type UFOHTTPMethod string
+// HTTPMethod represents an HTTP method.
+type HTTPMethod string
 
 const (
 	// GET represents the HTTP GET method.
-	GET UFOHTTPMethod = "GET"
+	GET HTTPMethod = "GET"
 	// POST represents the HTTP POST method.
-	POST UFOHTTPMethod = "POST"
+	POST HTTPMethod = "POST"
 )
 
-// UFOResponse represents the response of a UFO RPC call.
-type UFOResponse[T any] struct {
-	Ok     bool     `json:"ok"`
-	Output T        `json:"output,omitempty,omitzero"`
-	Error  UFOError `json:"error,omitempty,omitzero"`
+// Response represents the response of a UFO RPC call.
+type Response[T any] struct {
+	Ok     bool  `json:"ok"`
+	Output T     `json:"output,omitempty,omitzero"`
+	Error  Error `json:"error,omitempty,omitzero"`
 }
 
-// UFOError represents a standardized error in the UFO RPC system.
+// Error represents a standardized error in the UFO RPC system.
 //
 // It provides structured information about errors that occur within the system,
 // enabling consistent error handling across servers and clients.
@@ -40,7 +40,7 @@ type UFOResponse[T any] struct {
 //   - Details: Optional. Additional information about the error.
 //
 // The struct implements the error interface.
-type UFOError struct {
+type Error struct {
 	// Message provides a human-readable description of the error.
 	//
 	// This message can be displayed to end-users or used for logging and debugging purposes.
@@ -92,21 +92,21 @@ type UFOError struct {
 }
 
 // Error implements the error interface, returning the error message.
-func (e UFOError) Error() string {
+func (e Error) Error() string {
 	return e.Message
 }
 
 // String implements the fmt.Stringer interface, returning the error message.
-func (e UFOError) String() string {
+func (e Error) String() string {
 	return e.Message
 }
 
-// ToJSON returns the UFOError as a JSON-formatted string including all its fields.
+// ToJSON returns the Error as a JSON-formatted string including all its fields.
 // This is useful for logging and debugging purposes.
 //
 // Example usage:
 //
-//	err := UFOError{
+//	err := Error{
 //	  Category: "ValidationError",
 //	  Code:     "INVALID_EMAIL",
 //	  Message:  "The email address provided is invalid.",
@@ -115,31 +115,31 @@ func (e UFOError) String() string {
 //	  },
 //	}
 //	log.Println(err.ToJSON())
-func (e UFOError) ToJSON() string {
+func (e Error) ToJSON() string {
 	b, err := json.Marshal(e)
 	if err != nil {
 		return fmt.Sprintf(
-			`{"message":%q,"error":"Failed to marshal UFOError: %s"}`,
+			`{"message":%q,"error":"Failed to marshal UFO RPC Error: %s"}`,
 			e.Message, err.Error(),
 		)
 	}
 	return string(b)
 }
 
-// asUFOError converts any error into a UFOError.
-// If the provided error is already a UFOError, it returns it as is.
-// Otherwise, it wraps the error message into a new UFOError.
+// asError converts any error into a Error.
+// If the provided error is already a Error, it returns it as is.
+// Otherwise, it wraps the error message into a new Error.
 //
-// This function ensures that all errors conform to the UFOError structure,
+// This function ensures that all errors conform to the Error structure,
 // facilitating consistent error handling across the system.
-func asUFOError(err error) UFOError { //nolint:unused
+func asError(err error) Error { //nolint:unused
 	switch e := err.(type) {
-	case UFOError:
+	case Error:
 		return e
-	case *UFOError:
+	case *Error:
 		return *e
 	default:
-		return UFOError{
+		return Error{
 			Message: err.Error(),
 		}
 	}
