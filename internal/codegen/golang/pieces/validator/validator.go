@@ -3,7 +3,7 @@ package validator
 /** START FROM HERE **/
 
 // -----------------------------------------------------------------------------
-// Validation utilities
+// Rule validation utilities
 // -----------------------------------------------------------------------------
 
-// TODO: Implement validation utilities
+// TODO: Implement rule validation utilities
