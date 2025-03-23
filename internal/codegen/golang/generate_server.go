@@ -150,7 +150,6 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 
 		g.Line("currentContext := request.InitialContext")
 		g.Line("response := Response[any]{Ok: true}")
-		g.Line("shouldSkipHandler := false")
 		g.Break()
 
 		g.Line("// Validate procedure name")
@@ -167,13 +166,12 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("},")
 			})
 			g.Line("}")
-			g.Line("shouldSkipHandler = true")
 		})
 		g.Line("}")
 		g.Break()
 
 		g.Line("// Validate procedure implementation")
-		g.Line("if _, ok := s.handlers[jsonBody.Procedure]; !ok {")
+		g.Line("if _, ok := s.handlers[jsonBody.Procedure]; response.Ok && !ok {")
 		g.Block(func() {
 			g.Line("response = Response[any]{")
 			g.Block(func() {
@@ -186,13 +184,12 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("},")
 			})
 			g.Line("}")
-			g.Line("shouldSkipHandler = true")
 		})
 		g.Line("}")
 		g.Break()
 
 		g.Line("// Execute Before middleware if we haven't encountered an error yet")
-		g.Line("if !shouldSkipHandler {")
+		g.Line("if response.Ok {")
 		g.Block(func() {
 			g.Line("for _, fn := range s.beforeMiddlewares {")
 			g.Block(func() {
@@ -205,7 +202,6 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 						g.Line("Error: asError(err),")
 					})
 					g.Line("}")
-					g.Line("shouldSkipHandler = true")
 					g.Line("break")
 				})
 				g.Line("}")
@@ -219,7 +215,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 
 		g.Line("// Run handler if no errors have occurred")
-		g.Line("if !shouldSkipHandler {")
+		g.Line("if response.Ok {")
 		g.Block(func() {
 			g.Line("if output, err := s.handlers[jsonBody.Procedure](currentContext, jsonBody.Input); err != nil {")
 			g.Block(func() {
