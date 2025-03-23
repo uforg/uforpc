@@ -125,10 +125,15 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// HandleRequest processes an incoming RPC request")
 	g.Line("func (s *Server[T]) HandleRequest(request ServerRequest[T]) Response[any] {")
 	g.Block(func() {
-		g.Line("var jsonBody struct {")
+		g.Line("var jsonBody = struct {")
 		g.Block(func() {
 			g.Line("Procedure ProcedureName	`json:\"procedure\"`")
 			g.Line("Input 		any						`json:\"input\"`")
+		})
+		g.Line("}{")
+		g.Block(func() {
+			g.Line("Procedure: \"\",")
+			g.Line("Input: map[string]any{}, // Initialize to avoid nil pointer dereference error")
 		})
 		g.Line("}")
 		g.Line("if err := json.NewDecoder(request.RequestBody).Decode(&jsonBody); err != nil {")
@@ -149,15 +154,33 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 
 		g.Line("// Validate procedure name")
-		g.Line("for _, procedureName := range ProcedureNamesList {")
+		g.Line("if !slices.Contains(ProcedureNamesList, jsonBody.Procedure) {")
 		g.Block(func() {
-			g.Line("if procedureName == jsonBody.Procedure { break }")
 			g.Line("response = Response[any]{")
 			g.Block(func() {
 				g.Line("Ok: false,")
 				g.Line("Error: Error{")
 				g.Block(func() {
 					g.Line("Message: \"Procedure not found\",")
+					g.Line("Details: map[string]any{\"procedure\": jsonBody.Procedure},")
+				})
+				g.Line("},")
+			})
+			g.Line("}")
+			g.Line("shouldSkipHandler = true")
+		})
+		g.Line("}")
+		g.Break()
+
+		g.Line("// Validate procedure implementation")
+		g.Line("if _, ok := s.handlers[jsonBody.Procedure]; !ok {")
+		g.Block(func() {
+			g.Line("response = Response[any]{")
+			g.Block(func() {
+				g.Line("Ok: false,")
+				g.Line("Error: Error{")
+				g.Block(func() {
+					g.Line("Message: \"Procedure not implemented\",")
 					g.Line("Details: map[string]any{\"procedure\": jsonBody.Procedure},")
 				})
 				g.Line("},")
