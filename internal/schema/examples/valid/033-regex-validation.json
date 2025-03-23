@@ -5,13 +5,7 @@
       "type": "object",
       "fields": {
         "zipCode": {
-          "type": "string",
-          "rules": {
-            "regex": {
-              "value": "^\\d{5}(-\\d{4})?$",
-              "errorMessage": "Must be a valid US zip code"
-            }
-          }
+          "type": "string"
         }
       }
     }

@@ -17,10 +17,6 @@
             },
             "uppercase": {
               "errorMessage": "Code must be in uppercase"
-            },
-            "regex": {
-              "value": "^[A-Z0-9]+$",
-              "errorMessage": "Code must contain only uppercase letters and numbers"
             }
           }
         }

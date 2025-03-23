@@ -6,6 +6,7 @@
       "fields": {
         "metadata": {
           "type": "object",
+          "optional": true,
           "fields": {
             "createdAt": {
               "type": "string",
@@ -15,9 +16,6 @@
                 }
               }
             }
-          },
-          "rules": {
-            "optional": true
           }
         }
       }

@@ -5,13 +5,7 @@
       "type": "object",
       "fields": {
         "code": {
-          "type": "string",
-          "rules": {
-            "regex": {
-              "value": "^[A-Z]{3}-\\d{4}$",
-              "errorMessage": "Format must be ABC-1234"
-            }
-          }
+          "type": "string"
         }
       }
     }

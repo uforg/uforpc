@@ -5,13 +5,7 @@
       "type": "object",
       "fields": {
         "endpoint": {
-          "type": "string",
-          "rules": {
-            "regex": {
-              "value": "^https?://.*$",
-              "errorMessage": "Must be a valid URL"
-            }
-          }
+          "type": "string"
         },
         "timeout": {
           "type": "int",

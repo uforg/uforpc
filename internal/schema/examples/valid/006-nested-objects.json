@@ -11,13 +11,7 @@
           "type": "string"
         },
         "zipCode": {
-          "type": "string",
-          "rules": {
-            "regex": {
-              "value": "^\\d{5}$",
-              "errorMessage": "Must be a 5-digit zip code"
-            }
-          }
+          "type": "string"
         }
       }
     },
@@ -33,13 +27,7 @@
           }
         },
         "phone": {
-          "type": "string",
-          "rules": {
-            "regex": {
-              "value": "^\\+?[0-9]{10,15}$",
-              "errorMessage": "Must be a valid phone number"
-            }
-          }
+          "type": "string"
         }
       }
     },

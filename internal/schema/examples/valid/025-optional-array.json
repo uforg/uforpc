@@ -9,9 +9,7 @@
           "arrayType": {
             "type": "int"
           },
-          "rules": {
-            "optional": true
-          }
+          "optional": true
         }
       }
     }

@@ -23,14 +23,12 @@
         },
         "displayName": {
           "type": "string",
-          "rules": {
-            "optional": true
-          }
+          "optional": true
         },
         "age": {
           "type": "int",
+          "optional": true,
           "rules": {
-            "optional": true,
             "min": {
               "value": 13,
               "errorMessage": "Must be at least 13 years old"
@@ -39,9 +37,7 @@
         },
         "preferences": {
           "type": "object",
-          "rules": {
-            "optional": true
-          },
+          "optional": true,
           "fields": {
             "theme": {
               "type": "string",

@@ -78,9 +78,7 @@
       "description": "Creates a new user",
       "input": {
         "type": "User",
-        "rules": {
-          "optional": true
-        }
+        "optional": true
       },
       "output": {
         "type": "boolean"
@@ -93,13 +91,7 @@
     "GetUserProfile": {
       "type": "query",
       "input": {
-        "type": "string",
-        "rules": {
-          "regex": {
-            "value": "^[a-f\\d]{24}$",
-            "errorMessage": "Invalid ID"
-          }
-        }
+        "type": "string"
       },
       "output": {
         "type": "User"
