@@ -117,7 +117,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "optional": { "$ref": "#/$defs/ruleBoolean" },
         "equals": { "$ref": "#/$defs/ruleWithStringValue" },
         "contains": { "$ref": "#/$defs/ruleWithStringValue" },
         "minLen": { "$ref": "#/$defs/ruleWithIntValue" },
@@ -135,7 +134,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "optional": { "$ref": "#/$defs/ruleBoolean" },
         "equals": { "$ref": "#/$defs/ruleWithIntValue" },
         "min": { "$ref": "#/$defs/ruleWithIntValue" },
         "max": { "$ref": "#/$defs/ruleWithIntValue" },
@@ -146,7 +144,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "optional": { "$ref": "#/$defs/ruleBoolean" },
         "equals": { "$ref": "#/$defs/ruleWithNumberValue" },
         "min": { "$ref": "#/$defs/ruleWithNumberValue" },
         "max": { "$ref": "#/$defs/ruleWithNumberValue" },
@@ -157,22 +154,18 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "optional": { "$ref": "#/$defs/ruleBoolean" },
         "equals": { "$ref": "#/$defs/ruleWithBooleanValue" }
       }
     },
     "objectRules": {
       "type": "object",
       "additionalProperties": false,
-      "properties": {
-        "optional": { "$ref": "#/$defs/ruleBoolean" }
-      }
+      "properties": {}
     },
     "arrayRules": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "optional": { "$ref": "#/$defs/ruleBoolean" },
         "minLen": { "$ref": "#/$defs/ruleWithIntValue" },
         "maxLen": { "$ref": "#/$defs/ruleWithIntValue" }
       }
@@ -180,9 +173,7 @@
     "customTypeRules": {
       "type": "object",
       "additionalProperties": false,
-      "properties": {
-        "optional": { "$ref": "#/$defs/ruleBoolean" }
-      }
+      "properties": {}
     },
     "field": {
       "type": "object",
@@ -209,6 +200,9 @@
         },
         "description": {
           "type": "string"
+        },
+        "optional": {
+          "type": "boolean"
         },
         "rules": {
           "type": "object"

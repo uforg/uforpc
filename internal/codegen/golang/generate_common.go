@@ -33,7 +33,7 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 
 	namePascal := strutil.ToPascalCase(name)
 	nameCamel := strutil.ToCamelCase(name)
-	isOptional := field.ProcessedRules.IsOptional()
+	isOptional := field.Optional
 	isCustomType := field.IsCustomType()
 	isBuiltInType := field.IsBuiltInType()
 

@@ -84,6 +84,7 @@ func NewSchema() Schema {
 type Field struct {
 	Type        string           `json:"type"`
 	Description string           `json:"description,omitempty"`
+	Optional    bool             `json:"optional,omitempty"`
 	Rules       json.RawMessage  `json:"rules,omitempty"`
 	Fields      map[string]Field `json:"fields,omitempty"`
 	ArrayType   *Field           `json:"arrayType,omitempty"`
@@ -127,14 +128,10 @@ type Procedure struct {
 }
 
 // Rules is the interface implemented by all rule types
-type Rules interface {
-	// IsOptional returns whether the field is optional
-	IsOptional() bool
-}
+type Rules any
 
 // StringRules defines validation rules for string fields
 type StringRules struct {
-	Optional  bool                `json:"optional,omitempty"`
 	Equals    RuleWithStringValue `json:"equals,omitzero"`
 	Contains  RuleWithStringValue `json:"contains,omitzero"`
 	MinLen    RuleWithIntValue    `json:"minLen,omitzero"`
@@ -148,81 +145,38 @@ type StringRules struct {
 	Uppercase RuleSimple          `json:"uppercase,omitzero"`
 }
 
-// IsOptional implements Rules interface
-func (r StringRules) IsOptional() bool {
-	return r.Optional
-}
-
 // IntRules defines validation rules for integer fields
 type IntRules struct {
-	Optional bool             `json:"optional,omitempty"`
-	Equals   RuleWithIntValue `json:"equals,omitzero"`
-	Min      RuleWithIntValue `json:"min,omitzero"`
-	Max      RuleWithIntValue `json:"max,omitzero"`
-	Enum     RuleWithIntArray `json:"enum,omitzero"`
-}
-
-// IsOptional implements Rules interface
-func (r IntRules) IsOptional() bool {
-	return r.Optional
+	Equals RuleWithIntValue `json:"equals,omitzero"`
+	Min    RuleWithIntValue `json:"min,omitzero"`
+	Max    RuleWithIntValue `json:"max,omitzero"`
+	Enum   RuleWithIntArray `json:"enum,omitzero"`
 }
 
 // FloatRules defines validation rules for float fields
 type FloatRules struct {
-	Optional bool                `json:"optional,omitempty"`
-	Equals   RuleWithNumberValue `json:"equals,omitzero"`
-	Min      RuleWithNumberValue `json:"min,omitzero"`
-	Max      RuleWithNumberValue `json:"max,omitzero"`
-	Enum     RuleWithNumberArray `json:"enum,omitzero"`
-}
-
-// IsOptional implements Rules interface
-func (r FloatRules) IsOptional() bool {
-	return r.Optional
+	Equals RuleWithNumberValue `json:"equals,omitzero"`
+	Min    RuleWithNumberValue `json:"min,omitzero"`
+	Max    RuleWithNumberValue `json:"max,omitzero"`
+	Enum   RuleWithNumberArray `json:"enum,omitzero"`
 }
 
 // BooleanRules defines validation rules for boolean fields
 type BooleanRules struct {
-	Optional bool                 `json:"optional,omitempty"`
-	Equals   RuleWithBooleanValue `json:"equals,omitzero"`
-}
-
-// IsOptional implements Rules interface
-func (r BooleanRules) IsOptional() bool {
-	return r.Optional
+	Equals RuleWithBooleanValue `json:"equals,omitzero"`
 }
 
 // ObjectRules defines validation rules for object fields
-type ObjectRules struct {
-	Optional bool `json:"optional,omitempty"`
-}
-
-// IsOptional implements Rules interface
-func (r ObjectRules) IsOptional() bool {
-	return r.Optional
-}
+type ObjectRules struct{}
 
 // ArrayRules defines validation rules for array fields
 type ArrayRules struct {
-	Optional bool             `json:"optional,omitempty"`
-	MinLen   RuleWithIntValue `json:"minLen,omitzero"`
-	MaxLen   RuleWithIntValue `json:"maxLen,omitzero"`
-}
-
-// IsOptional implements Rules interface
-func (r ArrayRules) IsOptional() bool {
-	return r.Optional
+	MinLen RuleWithIntValue `json:"minLen,omitzero"`
+	MaxLen RuleWithIntValue `json:"maxLen,omitzero"`
 }
 
 // CustomTypeRules defines validation rules for custom type fields
-type CustomTypeRules struct {
-	Optional bool `json:"optional,omitempty"`
-}
-
-// IsOptional implements Rules interface
-func (r CustomTypeRules) IsOptional() bool {
-	return r.Optional
-}
+type CustomTypeRules struct{}
 
 // RuleSimple represents a simple validation rule with an optional error message
 type RuleSimple struct {
@@ -253,19 +207,19 @@ type RuleWithBooleanValue struct {
 	ErrorMessage string `json:"errorMessage,omitempty"`
 }
 
-// RuleWithStringArray represents a validation rule with a string array
+// RuleWithStringArray represents a validation rule with an array of strings
 type RuleWithStringArray struct {
 	Values       []string `json:"values"`
 	ErrorMessage string   `json:"errorMessage,omitempty"`
 }
 
-// RuleWithIntArray represents a validation rule with an integer array
+// RuleWithIntArray represents a validation rule with an array of integers
 type RuleWithIntArray struct {
 	Values       []int  `json:"values"`
 	ErrorMessage string `json:"errorMessage,omitempty"`
 }
 
-// RuleWithNumberArray represents a validation rule with a float array
+// RuleWithNumberArray represents a validation rule with an array of floats
 type RuleWithNumberArray struct {
 	Values       []float64 `json:"values"`
 	ErrorMessage string    `json:"errorMessage,omitempty"`
