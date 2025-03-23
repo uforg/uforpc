@@ -43,11 +43,11 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		}
 
 		g.Linef("// %s represents the input parameters for the %s procedure.", inputName, namePascal)
-		g.Linef("type %s %s", inputName, inputType)
+		g.Linef("type %s = %s", inputName, inputType)
 		g.Break()
 
 		g.Linef("// %s represents the output results for the %s procedure.", outputName, namePascal)
-		g.Linef("type %s %s", outputName, outputType)
+		g.Linef("type %s = %s", outputName, outputType)
 		g.Break()
 
 		g.Linef("// %s represents the response for the %s procedure.", responseName, namePascal)
