@@ -3,6 +3,7 @@ package coretypes
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
 /** START FROM HERE **/
@@ -11,21 +12,25 @@ import (
 // Core Types
 // -----------------------------------------------------------------------------
 
-// HTTPMethod represents an HTTP method.
-type HTTPMethod string
-
-const (
-	// GET represents the HTTP GET method.
-	GET HTTPMethod = "GET"
-	// POST represents the HTTP POST method.
-	POST HTTPMethod = "POST"
-)
-
 // Response represents the response of a UFO RPC call.
 type Response[T any] struct {
 	Ok     bool  `json:"ok"`
 	Output T     `json:"output,omitempty,omitzero"`
 	Error  Error `json:"error,omitempty,omitzero"`
+}
+
+// Write writes the response as a JSON-formatted string to the given writer.
+func (r Response[T]) Write(w io.Writer) error {
+	return json.NewEncoder(w).Encode(r)
+}
+
+// String returns the Response as a JSON-formatted string including all its fields.
+func (r Response[T]) String() string {
+	b, err := json.Marshal(r)
+	if err != nil {
+		return fmt.Sprintf("failed to marshal UFO RPC Response: %s", err.Error())
+	}
+	return string(b)
 }
 
 // Error represents a standardized error in the UFO RPC system.
