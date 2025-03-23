@@ -1,8 +1,6 @@
 package golang
 
 import (
-	"fmt"
-
 	"github.com/uforg/uforpc/internal/codegen/genkit"
 	"github.com/uforg/uforpc/internal/schema"
 	"github.com/uforg/uforpc/internal/util/strutil"
@@ -26,7 +24,6 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("handlers          map[ProcedureName]func(context T, input any) (any, error)")
 		g.Line("beforeMiddlewares []MiddlewareBefore[T]")
 		g.Line("afterMiddlewares  []MiddlewareAfter[T]")
-		g.Line("methodMap         map[ProcedureName]HTTPMethod")
 	})
 	g.Line("}")
 	g.Break()
@@ -34,10 +31,8 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// ServerRequest represents an incoming RPC request")
 	g.Line("type ServerRequest[T any] struct {")
 	g.Block(func() {
-		g.Line("Method     HTTPMethod")
-		g.Line("Context    T")
-		g.Line("Procedure  string")
-		g.Line("Input      any")
+		g.Line("InitialContext	T")
+		g.Line("RequestBody			io.Reader")
 	})
 	g.Line("}")
 	g.Break()
@@ -62,15 +57,6 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 			g.Line("handlers:         	map[ProcedureName]func(T, any) (any, error){},")
 			g.Line("beforeMiddlewares: 	[]MiddlewareBefore[T]{},")
 			g.Line("afterMiddlewares:  	[]MiddlewareAfter[T]{},")
-			g.Line("methodMap: map[ProcedureName]HTTPMethod{")
-			g.Block(func() {
-				for name := range sch.Procedures {
-					namePascal := strutil.ToPascalCase(name)
-					method := "POST"
-					g.Line(fmt.Sprintf("ProcedureNames.%s: \"%s\",", namePascal, method))
-				}
-			})
-			g.Line("},")
 		})
 		g.Line("}")
 	})
@@ -118,7 +104,13 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Linef("typedInput, ok := input.(P%sInput)", name)
 				g.Linef("if !ok {")
 				g.Block(func() {
-					g.Linef("return nil, &Error{Message: \"Invalid input type for %s\"}", name)
+					// g.Linef("return nil, &Error{Message: \"Invalid input type for %s\"}", name)
+					g.Line("return nil, &Error{")
+					g.Block(func() {
+						g.Linef("Message: \"Invalid input for %s procedure\",", name)
+						g.Linef("Details: map[string]any{\"procedure\": \"%s\"},", name)
+					})
+					g.Line("}")
 				})
 				g.Line("}")
 				g.Line("return handler(context, typedInput)")
@@ -131,37 +123,42 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	}
 
 	g.Line("// HandleRequest processes an incoming RPC request")
-	g.Line("func (s *Server[T]) HandleRequest(request ServerRequest[T]) (Response[any], error) {")
+	g.Line("func (s *Server[T]) HandleRequest(request ServerRequest[T]) Response[any] {")
 	g.Block(func() {
-		g.Line("procedureName := ProcedureName(request.Procedure)")
-		g.Line("currentContext := request.Context")
+		g.Line("var jsonBody struct {")
+		g.Block(func() {
+			g.Line("Procedure ProcedureName	`json:\"procedure\"`")
+			g.Line("Input 		any						`json:\"input\"`")
+		})
+		g.Line("}")
+		g.Line("if err := json.NewDecoder(request.RequestBody).Decode(&jsonBody); err != nil {")
+		g.Block(func() {
+			g.Line("return Response[any]{")
+			g.Block(func() {
+				g.Line("Ok: false,")
+				g.Line("Error: Error{Message: \"Invalid request body\"},")
+			})
+			g.Line("}")
+		})
+		g.Line("}")
+		g.Break()
+
+		g.Line("currentContext := request.InitialContext")
 		g.Line("response := Response[any]{Ok: true}")
 		g.Line("shouldSkipHandler := false")
 		g.Break()
 
-		g.Line("// Initial validation for procedure and method")
-		g.Line("if _, exists := s.handlers[procedureName]; !exists {")
+		g.Line("// Validate procedure name")
+		g.Line("for _, procedureName := range ProcedureNamesList {")
 		g.Block(func() {
+			g.Line("if procedureName == jsonBody.Procedure { break }")
 			g.Line("response = Response[any]{")
 			g.Block(func() {
 				g.Line("Ok: false,")
 				g.Line("Error: Error{")
 				g.Block(func() {
-					g.Line("Message: fmt.Sprintf(\"Handler not defined for procedure %s\", request.Procedure),")
-				})
-				g.Line("},")
-			})
-			g.Line("}")
-			g.Line("shouldSkipHandler = true")
-		})
-		g.Line("} else if expectedMethod := s.methodMap[procedureName]; expectedMethod != request.Method {")
-		g.Block(func() {
-			g.Line("response = Response[any]{")
-			g.Block(func() {
-				g.Line("Ok: false,")
-				g.Line("Error: Error{")
-				g.Block(func() {
-					g.Line("Message: fmt.Sprintf(\"Method %s not allowed for %s procedure\", request.Method, request.Procedure),")
+					g.Line("Message: \"Procedure not found\",")
+					g.Line("Details: map[string]any{\"procedure\": jsonBody.Procedure},")
 				})
 				g.Line("},")
 			})
@@ -195,12 +192,13 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("}")
 		g.Break()
 
+		g.Line("//TODO: Implement validation logic here")
+		g.Break()
+
 		g.Line("// Run handler if no errors have occurred")
 		g.Line("if !shouldSkipHandler {")
 		g.Block(func() {
-			g.Line("//TODO: Implement validation logic here")
-			g.Break()
-			g.Line("if output, err := s.handlers[procedureName](currentContext, request.Input); err != nil {")
+			g.Line("if output, err := s.handlers[jsonBody.Procedure](currentContext, jsonBody.Input); err != nil {")
 			g.Block(func() {
 				g.Line("response = Response[any]{")
 				g.Block(func() {
@@ -231,7 +229,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("}")
 		g.Break()
 
-		g.Line("return response, nil")
+		g.Line("return response")
 	})
 	g.Line("}")
 	g.Break()

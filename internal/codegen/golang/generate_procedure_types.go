@@ -60,10 +60,10 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Block(func() {
 		for name := range sch.Procedures {
 			inputName := fmt.Sprintf("P%sInput", strutil.ToPascalCase(name))
-			outputName := fmt.Sprintf("P%sResponse", strutil.ToPascalCase(name))
+			responseName := fmt.Sprintf("P%sResponse", strutil.ToPascalCase(name))
 
 			g.Linef("// %s implements the %s procedure.", name, name)
-			g.Linef("%s(input %s) (%s, error)", name, inputName, outputName)
+			g.Linef("%s(input %s) %s", name, inputName, responseName)
 		}
 	})
 	g.Line("}")
@@ -84,6 +84,16 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Block(func() {
 		for name := range sch.Procedures {
 			g.Linef("%s: \"%s\",", name, name)
+		}
+	})
+	g.Line("}")
+	g.Break()
+
+	g.Line("// ProcedureNamesList is a list of all procedure names.")
+	g.Line("var ProcedureNamesList = []ProcedureName{")
+	g.Block(func() {
+		for name := range sch.Procedures {
+			g.Linef("ProcedureNames.%s,", name)
 		}
 	})
 	g.Line("}")
