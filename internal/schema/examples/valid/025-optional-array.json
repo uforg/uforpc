@@ -16,7 +16,7 @@
   },
   "procedures": {
     "ValidateOptionalArray": {
-      "type": "mutation",
+      
       "input": {
         "type": "OptionalArrayType"
       },

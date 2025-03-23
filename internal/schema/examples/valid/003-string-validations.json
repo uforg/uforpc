@@ -57,7 +57,7 @@
   },
   "procedures": {
     "ValidateStrings": {
-      "type": "query",
+      
       "input": {
         "type": "StringValidations"
       },

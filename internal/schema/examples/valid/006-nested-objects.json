@@ -81,7 +81,7 @@
   },
   "procedures": {
     "CreatePerson": {
-      "type": "mutation",
+      
       "input": {
         "type": "Person"
       },

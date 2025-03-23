@@ -43,7 +43,7 @@
   },
   "procedures": {
     "Login": {
-      "type": "mutation",
+      
       "description": "Authenticates a user and returns a token",
       "input": {
         "type": "UserInput"

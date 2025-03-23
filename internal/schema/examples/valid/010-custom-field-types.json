@@ -58,7 +58,7 @@
   },
   "procedures": {
     "CreateProduct": {
-      "type": "mutation",
+      
       "input": {
         "type": "Product"
       },

@@ -18,7 +18,7 @@
   },
   "procedures": {
     "ValidateUsername": {
-      "type": "query",
+      
       "input": {
         "type": "StringMaxLenValidation"
       },

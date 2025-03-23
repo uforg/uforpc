@@ -37,7 +37,7 @@
   },
   "procedures": {
     "UpdateFeatureFlags": {
-      "type": "mutation",
+      
       "input": {
         "type": "FeatureFlags"
       },

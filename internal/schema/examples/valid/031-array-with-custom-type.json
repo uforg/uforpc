@@ -38,7 +38,7 @@
   },
   "procedures": {
     "GetProducts": {
-      "type": "query",
+      
       "output": {
         "type": "ProductList"
       }

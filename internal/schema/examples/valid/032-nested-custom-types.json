@@ -60,7 +60,7 @@
   },
   "procedures": {
     "GetCustomer": {
-      "type": "query",
+      
       "input": {
         "type": "object",
         "fields": {

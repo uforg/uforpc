@@ -3,7 +3,7 @@
   "types": {},
   "procedures": {
     "createUser": {
-      "type": "mutation",
+      
       "input": {
         "type": "string"
       },

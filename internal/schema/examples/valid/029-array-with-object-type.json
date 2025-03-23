@@ -37,7 +37,7 @@
   },
   "procedures": {
     "GetUsers": {
-      "type": "query",
+      
       "output": {
         "type": "ArrayWithObjectType"
       }

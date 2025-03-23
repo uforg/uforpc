@@ -23,7 +23,7 @@
   },
   "procedures": {
     "ValidateOptionalObject": {
-      "type": "mutation",
+      
       "input": {
         "type": "OptionalObjectType"
       },

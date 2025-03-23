@@ -53,7 +53,7 @@
   },
   "procedures": {
     "ValidateNumbers": {
-      "type": "query",
+      
       "input": {
         "type": "NumericValidations"
       },

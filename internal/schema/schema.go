@@ -39,31 +39,6 @@ func (f *FieldType) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &f.Value)
 }
 
-// ProcedureType represents the type of a procedure (query or mutation)
-type ProcedureType enum.Member[string]
-
-// Procedure types enum values
-var (
-	ProcedureTypeQuery    = ProcedureType{"query"}
-	ProcedureTypeMutation = ProcedureType{"mutation"}
-
-	// ProcedureTypes is the enum containing all procedure types
-	ProcedureTypes = enum.New(
-		ProcedureTypeQuery,
-		ProcedureTypeMutation,
-	)
-)
-
-// MarshalJSON implements json.Marshaler for ProcedureType
-func (p ProcedureType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(p.Value)
-}
-
-// UnmarshalJSON implements json.Unmarshaler for ProcedureType
-func (p *ProcedureType) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &p.Value)
-}
-
 // Schema represents the main schema structure containing types and procedures
 type Schema struct {
 	Version    int                  `json:"version"`
@@ -118,9 +93,8 @@ func (f Field) GetFieldType() (FieldType, bool) {
 	return FieldType{}, false
 }
 
-// Procedure represents a procedure definition with its type, inputs, outputs and metadata
+// Procedure represents a procedure definition with its inputs, outputs and metadata
 type Procedure struct {
-	Type        ProcedureType  `json:"type"`
 	Description string         `json:"description,omitempty"`
 	Input       Field          `json:"input,omitzero"`
 	Output      Field          `json:"output,omitzero"`

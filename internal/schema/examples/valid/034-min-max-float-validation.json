@@ -22,7 +22,7 @@
   },
   "procedures": {
     "ValidateTemperature": {
-      "type": "query",
+      
       "input": {
         "type": "FloatRangeValidation"
       },

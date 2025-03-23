@@ -58,7 +58,7 @@
   },
   "procedures": {
     "UpdateProfile": {
-      "type": "mutation",
+      
       "input": {
         "type": "UserProfile"
       },

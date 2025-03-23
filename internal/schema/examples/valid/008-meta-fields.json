@@ -21,7 +21,7 @@
   },
   "procedures": {
     "ConfigureApi": {
-      "type": "mutation",
+      
       "description": "Actualiza la configuración de la API",
       "input": {
         "type": "ApiSettings"

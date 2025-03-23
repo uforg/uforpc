@@ -17,7 +17,7 @@
   },
   "procedures": {
     "ValidateConfig": {
-      "type": "query",
+      
       "input": {
         "type": "JsonValidation"
       },

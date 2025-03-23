@@ -45,7 +45,7 @@
   },
   "procedures": {
     "ProcessArrays": {
-      "type": "mutation",
+      
       "input": {
         "type": "ArrayTypes"
       },

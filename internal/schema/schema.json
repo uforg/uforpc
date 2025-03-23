@@ -363,16 +363,7 @@
     "procedure": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "type"
-      ],
       "properties": {
-        "type": {
-          "enum": [
-            "query",
-            "mutation"
-          ]
-        },
         "description": {
           "type": "string"
         },

@@ -64,13 +64,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 			g.Line("afterMiddlewares:  	[]MiddlewareAfter[T]{},")
 			g.Line("methodMap: map[ProcedureName]HTTPMethod{")
 			g.Block(func() {
-				for name, procedure := range sch.Procedures {
+				for name := range sch.Procedures {
 					namePascal := strutil.ToPascalCase(name)
-					method := "GET"
-					if procedure.Type == schema.ProcedureTypeMutation {
-						method = "POST"
-					}
-
+					method := "POST"
 					g.Line(fmt.Sprintf("ProcedureNames.%s: \"%s\",", namePascal, method))
 				}
 			})

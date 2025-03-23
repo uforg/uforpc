@@ -17,7 +17,7 @@
   },
   "procedures": {
     "ValidateUsername": {
-      "type": "query",
+      
       "input": {
         "type": "LowercaseValidation"
       },

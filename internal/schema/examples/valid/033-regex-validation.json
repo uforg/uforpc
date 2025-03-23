@@ -12,7 +12,7 @@
   },
   "procedures": {
     "ValidateZipCode": {
-      "type": "query",
+      
       "input": {
         "type": "RegexValidation"
       },

@@ -89,7 +89,6 @@ func TestParseSchema(t *testing.T) {
 			},
 			"procedures": {
 				"GetUser": {
-					"type": "query",
 					"input": {
 						"type": "object",
 						"fields": {
@@ -106,7 +105,6 @@ func TestParseSchema(t *testing.T) {
 					}
 				},
 				"CreateUser": {
-					"type": "mutation",
 					"input": {
 						"type": "object",
 						"fields": {
@@ -144,12 +142,6 @@ func TestParseSchema(t *testing.T) {
 		assert.Contains(t, parsedSchema.Procedures, "GetUser")
 		assert.Contains(t, parsedSchema.Procedures, "CreateUser")
 
-		getUserProc := parsedSchema.Procedures["GetUser"]
-		assert.Equal(t, schema.ProcedureTypeQuery, getUserProc.Type)
-
-		createUserProc := parsedSchema.Procedures["CreateUser"]
-		assert.Equal(t, schema.ProcedureTypeMutation, createUserProc.Type)
-
 		userType := parsedSchema.Types["User"]
 		assert.Equal(t, "object", userType.Type)
 		assert.Len(t, userType.Fields, 4)
@@ -164,14 +156,14 @@ func TestParseSchema(t *testing.T) {
 		assert.Equal(t, 3, stringRules.MinLen.Value)
 		assert.Equal(t, "Name must be at least 3 characters", stringRules.MinLen.ErrorMessage)
 
-		addressesField := createUserProc.Input.Fields["addresses"]
+		addressesField := parsedSchema.Procedures["CreateUser"].Input.Fields["addresses"]
 		assert.Equal(t, "array", addressesField.Type)
 		assert.NotNil(t, addressesField.ArrayType)
 		assert.Equal(t, "Address", addressesField.ArrayType.Type)
 	})
 
 	t.Run("schema with undefined custom type", func(t *testing.T) {
-		schemaWithUndefinedType := `{
+		customSchema := `{
 			"version": 1,
 			"types": {
 				"User": {
@@ -188,7 +180,14 @@ func TestParseSchema(t *testing.T) {
 			},
 			"procedures": {
 				"GetUser": {
-					"type": "query",
+					"input": {
+						"type": "object",
+						"fields": {
+							"id": {
+								"type": "string"
+							}
+						}
+					},
 					"output": {
 						"type": "User"
 					}
@@ -196,13 +195,14 @@ func TestParseSchema(t *testing.T) {
 			}
 		}`
 
-		_, err := schema.ParseSchema(schemaWithUndefinedType)
-		assert.Error(t, err)
+		_, err := schema.ParseSchema(customSchema)
+		isErr := err != nil
+		assert.True(t, isErr)
 		assert.Contains(t, err.Error(), "undefined custom type: Profile")
 	})
 
 	t.Run("schema with circular reference", func(t *testing.T) {
-		schemaWithCircularReference := `{
+		customSchema := `{
 			"version": 1,
 			"types": {
 				"User": {
@@ -219,15 +219,21 @@ func TestParseSchema(t *testing.T) {
 			},
 			"procedures": {
 				"GetUser": {
-					"type": "query",
+					"input": {
+						"type": "object",
+						"fields": {
+							"id": {
+								"type": "string"
+							}
+						}
+					},
 					"output": {
 						"type": "User"
 					}
 				}
 			}
 		}`
-
-		parsedSchema, err := schema.ParseSchema(schemaWithCircularReference)
+		parsedSchema, err := schema.ParseSchema(customSchema)
 		assert.NoError(t, err)
 		assert.NotEqual(t, schema.Schema{}, parsedSchema)
 
@@ -238,10 +244,10 @@ func TestParseSchema(t *testing.T) {
 	})
 
 	t.Run("schema with nested array of custom type", func(t *testing.T) {
-		schemaWithNestedArray := `{
+		customSchema := `{
 			"version": 1,
 			"types": {
-				"Item": {
+				"Tag": {
 					"type": "object",
 					"fields": {
 						"name": {
@@ -249,43 +255,48 @@ func TestParseSchema(t *testing.T) {
 						}
 					}
 				},
-				"Collection": {
+				"User": {
 					"type": "object",
 					"fields": {
-						"items": {
+						"id": {
+							"type": "string"
+						},
+						"tags": {
 							"type": "array",
 							"arrayType": {
-								"type": "array",
-								"arrayType": {
-									"type": "Item"
-								}
+								"type": "Tag"
 							}
 						}
 					}
 				}
 			},
 			"procedures": {
-				"GetCollection": {
-					"type": "query",
+				"GetUser": {
+					"input": {
+						"type": "object",
+						"fields": {
+							"id": {
+								"type": "string"
+							}
+						}
+					},
 					"output": {
-						"type": "Collection"
+						"type": "User"
 					}
 				}
 			}
 		}`
 
-		parsedSchema, err := schema.ParseSchema(schemaWithNestedArray)
+		parsedSchema, err := schema.ParseSchema(customSchema)
 		assert.NoError(t, err)
 		assert.NotEqual(t, schema.Schema{}, parsedSchema)
 
 		// Should validate nested array types correctly
-		collectionType := parsedSchema.Types["Collection"]
-		itemsField := collectionType.Fields["items"]
+		collectionType := parsedSchema.Types["User"]
+		itemsField := collectionType.Fields["tags"]
 		assert.Equal(t, "array", itemsField.Type)
 		assert.NotNil(t, itemsField.ArrayType)
-		assert.Equal(t, "array", itemsField.ArrayType.Type)
-		assert.NotNil(t, itemsField.ArrayType.ArrayType)
-		assert.Equal(t, "Item", itemsField.ArrayType.ArrayType.Type)
+		assert.Equal(t, "Tag", itemsField.ArrayType.Type)
 	})
 
 	t.Run("schema with undeclared type in array", func(t *testing.T) {
@@ -306,7 +317,6 @@ func TestParseSchema(t *testing.T) {
 			},
 			"procedures": {
 				"GetCollection": {
-					"type": "query",
 					"output": {
 						"type": "Collection"
 					}

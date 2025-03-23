@@ -25,7 +25,7 @@
   },
   "procedures": {
     "ValidateArrayLength": {
-      "type": "query",
+      
       "input": {
         "type": "ArrayLengthValidation"
       },

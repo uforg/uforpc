@@ -17,7 +17,7 @@
   },
   "procedures": {
     "ValidateCountryCode": {
-      "type": "query",
+      
       "input": {
         "type": "UppercaseValidation"
       },

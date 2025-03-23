@@ -18,7 +18,7 @@
   },
   "procedures": {
     "ValidateContains": {
-      "type": "query",
+      
       "input": {
         "type": "ContainsValidation"
       },

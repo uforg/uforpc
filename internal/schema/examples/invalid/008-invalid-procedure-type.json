@@ -3,7 +3,7 @@
   "types": {},
   "procedures": {
     "UpdateStatus": {
-      "type": "subscription",
+      "invalidField": "This field doesn't exist in the procedure definition",
       "input": {
         "type": "string"
       },
