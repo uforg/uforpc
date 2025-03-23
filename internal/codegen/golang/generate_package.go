@@ -20,8 +20,6 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 	g.Block(func() {
 		g.Line(`"encoding/json"`)
 		g.Line(`"fmt"`)
-		g.Line(`"regexp"`)
-		g.Line(`"strings"`)
 	})
 	g.Line(")")
 	g.Break()
