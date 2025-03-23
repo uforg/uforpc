@@ -21,6 +21,7 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 		g.Line(`"encoding/json"`)
 		g.Line(`"fmt"`)
 		g.Line(`"io"`)
+		g.Line(`"slices"`)
 	})
 	g.Line(")")
 	g.Break()
