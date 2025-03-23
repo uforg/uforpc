@@ -20,6 +20,7 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		namePascal := strutil.ToPascalCase(name)
 		inputName := fmt.Sprintf("P%sInput", namePascal)
 		outputName := fmt.Sprintf("P%sOutput", namePascal)
+		responseName := fmt.Sprintf("P%sResponse", namePascal)
 
 		inputType := generateCommonRenderField(generateCommonRenderFieldParams{
 			name:     inputName,
@@ -48,6 +49,10 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Linef("// %s represents the output results for the %s procedure.", outputName, namePascal)
 		g.Linef("type %s %s", outputName, outputType)
 		g.Break()
+
+		g.Linef("// %s represents the response for the %s procedure.", responseName, namePascal)
+		g.Linef("type %s = UFOResponse[%s]", responseName, outputName)
+		g.Break()
 	}
 
 	g.Line("// ProcedureTypes defines the interface for all procedure types.")
@@ -55,10 +60,10 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Block(func() {
 		for name := range sch.Procedures {
 			inputName := fmt.Sprintf("P%sInput", strutil.ToPascalCase(name))
-			outputName := fmt.Sprintf("P%sOutput", strutil.ToPascalCase(name))
+			responseName := fmt.Sprintf("P%sResponse", strutil.ToPascalCase(name))
 
 			g.Linef("// %s implements the %s procedure.", name, name)
-			g.Linef("%s(input %s) (UFOResponse[%s], error)", name, inputName, outputName)
+			g.Linef("%s(input %s) %s", name, inputName, responseName)
 		}
 	})
 	g.Line("}")
