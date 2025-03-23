@@ -1,6 +1,8 @@
 package golang
 
 import (
+	"fmt"
+	"go/format"
 	"strings"
 
 	"github.com/uforg/uforpc/internal/codegen/genkit"
@@ -32,5 +34,11 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 	}
 
-	return g.String(), nil
+	generatedCode := g.String()
+	formattedCode, err := format.Source([]byte(generatedCode))
+	if err != nil {
+		return "", fmt.Errorf("failed to format generated code: %w", err)
+	}
+
+	return string(formattedCode), nil
 }
