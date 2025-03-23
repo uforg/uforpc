@@ -50,55 +50,39 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Break()
 	}
 
+	g.Line("// ProcedureTypes defines the interface for all procedure types.")
+	g.Line("type ProcedureTypes interface {")
+	g.Block(func() {
+		for name := range sch.Procedures {
+			inputName := fmt.Sprintf("P%sInput", strutil.ToPascalCase(name))
+			outputName := fmt.Sprintf("P%sOutput", strutil.ToPascalCase(name))
+
+			g.Linef("// %s implements the %s procedure.", name, name)
+			g.Linef("%s(input %s) (UFOResponse[%s], error)", name, inputName, outputName)
+		}
+	})
+	g.Line("}")
+	g.Break()
+
+	g.Line("// UFOProcedureName represents the name of a procedure.")
+	g.Line("type UFOProcedureName string")
+	g.Break()
+
+	g.Line("// UFOProcedureNames is a struct that contains all procedure names in its literal string form.")
+	g.Line("var UFOProcedureNames = struct {")
+	g.Block(func() {
+		for name := range sch.Procedures {
+			g.Linef("%s UFOProcedureName", name)
+		}
+	})
+	g.Line("}{")
+	g.Block(func() {
+		for name := range sch.Procedures {
+			g.Linef("%s: \"%s\",", name, name)
+		}
+	})
+	g.Line("}")
+	g.Break()
+
 	return g.String(), nil
 }
-
-// function createProcedureTypesTemplate() {
-//   return `
-//     // -----------------------------------------------------------------------------
-//     // Procedure Types
-//     // -----------------------------------------------------------------------------
-
-//     {{#each procedures}}
-
-//     // P{{name}}Input represents the input parameters for the {{name}} procedure.
-//     {{#if input}}
-//     type P{{name}}Input struct {
-//       {{renderGoFields input}}
-//     }
-//     {{else}}
-//     type P{{name}}Input struct{}
-//     {{/if}}
-
-//     // P{{name}}Output represents the output results for the {{name}} procedure.
-//     {{#if output}}
-//     type P{{name}}Output struct {
-//       {{renderGoFields output}}
-//     }
-//     {{else}}
-//     type P{{name}}Output struct{}
-//     {{/if}}
-
-//     {{/each}}
-
-//     // ProcedureTypes defines the interface for all procedure types.
-//     type ProcedureTypes interface {
-//       {{#each procedures}}
-//         // {{name}} implements the {{name}} procedure.
-//         {{name}}(input P{{name}}Input) (UFOResponse[P{{name}}Output], error)
-//       {{/each}}
-//     }
-
-//     type UFOProcedureName string
-
-//     var UFOProcedureNames = struct {
-//       {{#each procedures}}
-//         {{name}} UFOProcedureName
-//       {{/each}}
-//     }{
-//       {{#each procedures}}
-//         {{name}}: "{{name}}",
-//       {{/each}}
-//     }
-//   `;
-// }
