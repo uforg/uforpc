@@ -137,7 +137,6 @@ type StringRules struct {
 	Optional  bool                `json:"optional,omitempty"`
 	Equals    RuleWithStringValue `json:"equals,omitzero"`
 	Contains  RuleWithStringValue `json:"contains,omitzero"`
-	Regex     RuleWithStringValue `json:"regex,omitzero"`
 	MinLen    RuleWithIntValue    `json:"minLen,omitzero"`
 	MaxLen    RuleWithIntValue    `json:"maxLen,omitzero"`
 	Enum      RuleWithStringArray `json:"enum,omitzero"`

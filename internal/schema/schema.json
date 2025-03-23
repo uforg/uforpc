@@ -120,7 +120,6 @@
         "optional": { "$ref": "#/$defs/ruleBoolean" },
         "equals": { "$ref": "#/$defs/ruleWithStringValue" },
         "contains": { "$ref": "#/$defs/ruleWithStringValue" },
-        "regex": { "$ref": "#/$defs/ruleWithStringValue" },
         "minLen": { "$ref": "#/$defs/ruleWithIntValue" },
         "maxLen": { "$ref": "#/$defs/ruleWithIntValue" },
         "enum": { "$ref": "#/$defs/ruleWithStringArray" },
