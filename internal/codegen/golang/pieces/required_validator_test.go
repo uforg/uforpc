@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestBasicValidation(t *testing.T) {
@@ -358,6 +357,171 @@ func TestRecursiveArrayValidation(t *testing.T) {
 	})
 }
 
+func TestRecursiveObjectValidation(t *testing.T) {
+	templates := map[string][]string{
+		"Company": {
+			"id",
+			"name",
+			"parent->Company",
+		},
+	}
+
+	t.Run("Valid recursive object structure", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "Parent Company",
+			"parent": {
+				"id": 2,
+				"name": "Grandparent Company",
+				"parent": null
+			}
+		}`
+		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Missing parent is valid", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "Parent Company"
+		}`
+		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Parent with missing required fields", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "Parent Company",
+			"parent": {
+				"id": 2
+			}
+		}`
+		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "parent.name: required field is missing")
+	})
+
+	templatesWithRequiredParent := map[string][]string{
+		"Company": {
+			"id",
+			"name",
+			"parent",
+			"parent->Company",
+		},
+	}
+
+	t.Run("Missing required parent fails", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "Parent Company"
+		}`
+		err := ValidateJSONPaths([]byte(json), templatesWithRequiredParent, "Company")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "parent: required field is missing")
+	})
+
+	t.Run("Recursive object structure with deep nesting", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "Level 1",
+			"parent": {
+				"id": 2,
+				"name": "Level 2",
+				"parent": {
+					"id": 3,
+					"name": "Level 3",
+					"parent": null
+				}
+			}
+		}`
+		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Large nested object (1000 levels)", func(t *testing.T) {
+		var genCompany func(depth int) string
+		genCompany = func(depth int) string {
+			if depth == 0 {
+				return `{"id": 1, "name": "Final Company", "parent": null}`
+			}
+			return fmt.Sprintf(`{"id": %d, "name": "Company %d", "parent": %s}`, depth, depth, genCompany(depth-1))
+		}
+
+		json := genCompany(1000)
+		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		assert.NoError(t, err)
+	})
+}
+
+func TestArrayTypeReferences(t *testing.T) {
+	templates := map[string][]string{
+		"User": {
+			"id",
+			"name",
+			"posts[*]->Post", // Validates the inner fields if posts exists
+		},
+		"Post": {
+			"id",
+			"title",
+			"author->User", // Validates the inner fields if author exists
+		},
+	}
+
+	t.Run("Missing array is valid", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "John Doe"
+		}`
+		err := ValidateJSONPaths([]byte(json), templates, "User")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Empty array is valid", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "John Doe",
+			"posts": []
+		}`
+		err := ValidateJSONPaths([]byte(json), templates, "User")
+		assert.NoError(t, err)
+	})
+
+	t.Run("Array with invalid items fails", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "John Doe",
+			"posts": [
+				{
+					"id": 1
+				}
+			]
+		}`
+		err := ValidateJSONPaths([]byte(json), templates, "User")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "posts[0].title: required field is missing")
+	})
+
+	templatesWithRequiredArray := map[string][]string{
+		"User": {
+			"id",
+			"name",
+			"posts",       // Makes posts required
+			"posts->Post", // Validates the inner fields of each post
+		},
+	}
+
+	t.Run("Missing required array fails", func(t *testing.T) {
+		json := `{
+			"id": 1,
+			"name": "John Doe"
+		}`
+		err := ValidateJSONPaths([]byte(json), templatesWithRequiredArray, "User")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "posts: required field is missing")
+	})
+}
+
 func TestEdgeCases(t *testing.T) {
 	t.Run("Empty object with no template should pass", func(t *testing.T) {
 		templates := map[string][]string{
@@ -644,47 +808,4 @@ func TestLargeDataSets(t *testing.T) {
 		err := ValidateJSONPaths(json, templates, "Large")
 		assert.NoError(t, err)
 	})
-}
-
-func TestBenchmarkValidation(t *testing.T) {
-	// Skip benchmarks unless we're explicitly running them
-	if testing.Short() {
-		t.Skip("Skipping benchmarks in short mode")
-	}
-
-	templates := map[string][]string{
-		"User": {
-			"id",
-			"name",
-			"posts[*]->Post",
-		},
-		"Post": {
-			"id",
-			"title",
-			"author->User",
-		},
-	}
-
-	json := `{
-		"id": 1,
-		"name": "John Doe",
-		"posts": [
-			{
-				"id": 101,
-				"title": "First Post",
-				"author": {
-					"id": 1,
-					"name": "John Doe",
-					"posts": []
-				}
-			}
-		]
-	}`
-
-	// Simple benchmark to ensure validation performance is reasonable
-	b := require.New(t)
-	for i := 0; i < 1000; i++ {
-		err := ValidateJSONPaths([]byte(json), templates, "User")
-		b.NoError(err)
-	}
 }
