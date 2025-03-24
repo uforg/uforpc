@@ -22,22 +22,12 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		outputName := fmt.Sprintf("P%sOutput", namePascal)
 		responseName := fmt.Sprintf("P%sResponse", namePascal)
 
-		inputType := generateCommonRenderField(generateCommonRenderFieldParams{
-			name:     inputName,
-			field:    procedure.Input,
-			typeOnly: true,
-			omitTag:  true,
-		})
+		inputType := generateCommonRenderStructFromFieldMap(procedure.Input)
 		if inputType == "" {
 			inputType = "struct{}"
 		}
 
-		outputType := generateCommonRenderField(generateCommonRenderFieldParams{
-			name:     outputName,
-			field:    procedure.Output,
-			typeOnly: true,
-			omitTag:  true,
-		})
+		outputType := generateCommonRenderStructFromFieldMap(procedure.Output)
 		if outputType == "" {
 			outputType = "struct{}"
 		}

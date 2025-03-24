@@ -44,7 +44,7 @@ func TestParseSchema(t *testing.T) {
 			"version": 1,
 			"types": {
 				"User": {
-					"type": "object",
+					"description": "A user of the system",
 					"fields": {
 						"id": {
 							"type": "string",
@@ -76,7 +76,6 @@ func TestParseSchema(t *testing.T) {
 					}
 				},
 				"Address": {
-					"type": "object",
 					"fields": {
 						"street": {
 							"type": "string"
@@ -90,40 +89,38 @@ func TestParseSchema(t *testing.T) {
 			"procedures": {
 				"GetUser": {
 					"input": {
-						"type": "object",
-						"fields": {
-							"id": {
-								"type": "string",
-								"rules": {
-									"uuid": {}
-								}
+						"id": {
+							"type": "string",
+							"rules": {
+								"uuid": {}
 							}
 						}
 					},
 					"output": {
-						"type": "User"
+						"user": {
+							"type": "User"
+						}
 					}
 				},
 				"CreateUser": {
 					"input": {
-						"type": "object",
-						"fields": {
-							"name": {
-								"type": "string"
-							},
-							"age": {
-								"type": "int"
-							},
-							"addresses": {
-								"type": "array",
-								"arrayType": {
-									"type": "Address"
-								}
+						"name": {
+							"type": "string"
+						},
+						"age": {
+							"type": "int"
+						},
+						"addresses": {
+							"type": "array",
+							"arrayType": {
+								"type": "Address"
 							}
 						}
 					},
 					"output": {
-						"type": "User"
+						"user": {
+							"type": "User"
+						}
 					}
 				}
 			}
@@ -143,7 +140,6 @@ func TestParseSchema(t *testing.T) {
 		assert.Contains(t, parsedSchema.Procedures, "CreateUser")
 
 		userType := parsedSchema.Types["User"]
-		assert.Equal(t, "object", userType.Type)
 		assert.Len(t, userType.Fields, 4)
 		assert.Contains(t, userType.Fields, "id")
 		assert.Contains(t, userType.Fields, "name")
@@ -156,7 +152,7 @@ func TestParseSchema(t *testing.T) {
 		assert.Equal(t, 3, stringRules.MinLen.Value)
 		assert.Equal(t, "Name must be at least 3 characters", stringRules.MinLen.ErrorMessage)
 
-		addressesField := parsedSchema.Procedures["CreateUser"].Input.Fields["addresses"]
+		addressesField := parsedSchema.Procedures["CreateUser"].Input["addresses"]
 		assert.Equal(t, "array", addressesField.Type)
 		assert.NotNil(t, addressesField.ArrayType)
 		assert.Equal(t, "Address", addressesField.ArrayType.Type)
@@ -167,7 +163,6 @@ func TestParseSchema(t *testing.T) {
 			"version": 1,
 			"types": {
 				"User": {
-					"type": "object",
 					"fields": {
 						"id": {
 							"type": "string"
@@ -181,15 +176,14 @@ func TestParseSchema(t *testing.T) {
 			"procedures": {
 				"GetUser": {
 					"input": {
-						"type": "object",
-						"fields": {
-							"id": {
-								"type": "string"
-							}
+						"id": {
+							"type": "string"
 						}
 					},
 					"output": {
-						"type": "User"
+						"user": {
+							"type": "User"
+						}
 					}
 				}
 			}
@@ -206,7 +200,6 @@ func TestParseSchema(t *testing.T) {
 			"version": 1,
 			"types": {
 				"User": {
-					"type": "object",
 					"fields": {
 						"id": {
 							"type": "string"
@@ -220,15 +213,14 @@ func TestParseSchema(t *testing.T) {
 			"procedures": {
 				"GetUser": {
 					"input": {
-						"type": "object",
-						"fields": {
-							"id": {
-								"type": "string"
-							}
+						"id": {
+							"type": "string"
 						}
 					},
 					"output": {
-						"type": "User"
+						"user": {
+							"type": "User"
+						}
 					}
 				}
 			}
@@ -248,15 +240,13 @@ func TestParseSchema(t *testing.T) {
 			"version": 1,
 			"types": {
 				"Tag": {
-					"type": "object",
 					"fields": {
 						"name": {
 							"type": "string"
 						}
 					}
 				},
-				"User": {
-					"type": "object",
+				"Post": {
 					"fields": {
 						"id": {
 							"type": "string"
@@ -271,17 +261,16 @@ func TestParseSchema(t *testing.T) {
 				}
 			},
 			"procedures": {
-				"GetUser": {
+				"GetPost": {
 					"input": {
-						"type": "object",
-						"fields": {
-							"id": {
-								"type": "string"
-							}
+						"id": {
+							"type": "string"
 						}
 					},
 					"output": {
-						"type": "User"
+						"post": {
+							"type": "Post"
+						}
 					}
 				}
 			}
@@ -291,12 +280,11 @@ func TestParseSchema(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEqual(t, schema.Schema{}, parsedSchema)
 
-		// Should validate nested array types correctly
-		collectionType := parsedSchema.Types["User"]
-		itemsField := collectionType.Fields["tags"]
-		assert.Equal(t, "array", itemsField.Type)
-		assert.NotNil(t, itemsField.ArrayType)
-		assert.Equal(t, "Tag", itemsField.ArrayType.Type)
+		postType := parsedSchema.Types["Post"]
+		tagsField := postType.Fields["tags"]
+		assert.Equal(t, "array", tagsField.Type)
+		assert.NotNil(t, tagsField.ArrayType)
+		assert.Equal(t, "Tag", tagsField.ArrayType.Type)
 	})
 
 	t.Run("schema with undeclared type in array", func(t *testing.T) {
@@ -304,7 +292,6 @@ func TestParseSchema(t *testing.T) {
 			"version": 1,
 			"types": {
 				"Collection": {
-					"type": "object",
 					"fields": {
 						"items": {
 							"type": "array",
@@ -317,8 +304,11 @@ func TestParseSchema(t *testing.T) {
 			},
 			"procedures": {
 				"GetCollection": {
+					"input": {},
 					"output": {
-						"type": "Collection"
+						"collection": {
+							"type": "Collection"
+						}
 					}
 				}
 			}

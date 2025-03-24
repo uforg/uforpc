@@ -111,3 +111,25 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
 	return description + result + jsonTag
 }
+
+// generateCommonRenderStructFromFieldMap generates the code for a map of fields
+func generateCommonRenderStructFromFieldMap(fieldMap map[string]schema.Field) string {
+	if len(fieldMap) == 0 {
+		return "struct{}"
+	}
+
+	og := genkit.NewGenKit().WithTabs()
+	og.Inline("struct {")
+	og.Block(func() {
+		for fieldName, field := range fieldMap {
+			og.Line(generateCommonRenderField(generateCommonRenderFieldParams{
+				name:     fieldName,
+				field:    field,
+				typeOnly: false,
+				omitTag:  false,
+			}))
+		}
+	})
+	og.Line("}")
+	return og.String()
+}

@@ -13,9 +13,12 @@
     },
     "types": {
       "type": "object",
-      "additionalProperties": {
-        "$ref": "#/$defs/field"
-      }
+      "patternProperties": {
+        "^[A-Z][a-zA-Z0-9]*$": {
+          "$ref": "#/$defs/type"
+        }
+      },
+      "additionalProperties": false
     },
     "procedures": {
       "type": "object",
@@ -360,18 +363,46 @@
         }
       ]
     },
+    "type": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fields"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
+        }
+      }
+    },
     "procedure": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "input",
+        "output"
+      ],
       "properties": {
         "description": {
           "type": "string"
         },
         "input": {
-          "$ref": "#/$defs/field"
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
         },
         "output": {
-          "$ref": "#/$defs/field"
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/field"
+          }
         },
         "meta": {
           "type": "object",

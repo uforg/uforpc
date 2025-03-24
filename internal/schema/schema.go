@@ -42,7 +42,7 @@ func (f *FieldType) UnmarshalJSON(data []byte) error {
 // Schema represents the main schema structure containing types and procedures
 type Schema struct {
 	Version    int                  `json:"version"`
-	Types      map[string]Field     `json:"types"`
+	Types      map[string]Type      `json:"types"`
 	Procedures map[string]Procedure `json:"procedures"`
 }
 
@@ -50,9 +50,14 @@ type Schema struct {
 func NewSchema() Schema {
 	return Schema{
 		Version:    1,
-		Types:      make(map[string]Field),
+		Types:      make(map[string]Type),
 		Procedures: make(map[string]Procedure),
 	}
+}
+
+type Type struct {
+	Description string           `json:"description,omitempty"`
+	Fields      map[string]Field `json:"fields,omitempty"`
 }
 
 // Field represents a schema field with its type, description, validation rules and subelements
@@ -60,10 +65,10 @@ type Field struct {
 	Type        string           `json:"type"`
 	Description string           `json:"description,omitempty"`
 	Optional    bool             `json:"optional,omitempty"`
-	Rules       json.RawMessage  `json:"rules,omitempty"`
 	Fields      map[string]Field `json:"fields,omitempty"`
 	ArrayType   *Field           `json:"arrayType,omitempty"`
 
+	Rules json.RawMessage `json:"rules,omitempty"`
 	// Processed rules - not directly marshaled/unmarshaled
 	ProcessedRules Rules `json:"-"`
 }
@@ -95,10 +100,10 @@ func (f Field) GetFieldType() (FieldType, bool) {
 
 // Procedure represents a procedure definition with its inputs, outputs and metadata
 type Procedure struct {
-	Description string         `json:"description,omitempty"`
-	Input       Field          `json:"input,omitzero"`
-	Output      Field          `json:"output,omitzero"`
-	Meta        map[string]any `json:"meta,omitempty"`
+	Description string           `json:"description,omitzero"`
+	Input       map[string]Field `json:"input,omitzero"`
+	Output      map[string]Field `json:"output,omitzero"`
+	Meta        map[string]any   `json:"meta,omitempty"`
 }
 
 // Rules is the interface implemented by all rule types
