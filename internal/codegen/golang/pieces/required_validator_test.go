@@ -17,27 +17,27 @@ func TestBasicValidation(t *testing.T) {
 
 	t.Run("Valid simple JSON", func(t *testing.T) {
 		json := `{"name": "John", "age": 30, "extra": "field"}`
-		err := ValidateJSONPaths([]byte(json), templates, "Person")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Person")
 		assert.NoError(t, err)
 	})
 
 	t.Run("Missing required field", func(t *testing.T) {
 		json := `{"name": "John"}`
-		err := ValidateJSONPaths([]byte(json), templates, "Person")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Person")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "age: required field is missing")
 	})
 
 	t.Run("Invalid JSON", func(t *testing.T) {
 		json := `{"name": "John", "age": 30`
-		err := ValidateJSONPaths([]byte(json), templates, "Person")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Person")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid JSON")
 	})
 
 	t.Run("Non-existent template", func(t *testing.T) {
 		json := `{"name": "John", "age": 30}`
-		err := ValidateJSONPaths([]byte(json), templates, "NonExistent")
+		err := validateRequiredJSONPaths([]byte(json), templates, "NonExistent")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "no template defined for type")
 	})
@@ -59,13 +59,13 @@ func TestArrayValidation(t *testing.T) {
 				{"id": 2, "name": "Item 2"}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Collection")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Collection")
 		assert.NoError(t, err)
 	})
 
 	t.Run("Empty array is valid", func(t *testing.T) {
 		json := `{"items": []}`
-		err := ValidateJSONPaths([]byte(json), templates, "Collection")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Collection")
 		assert.NoError(t, err)
 	})
 
@@ -76,14 +76,14 @@ func TestArrayValidation(t *testing.T) {
 				{"id": 2}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Collection")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Collection")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "name: required field is missing")
 	})
 
 	t.Run("Array expected but got something else", func(t *testing.T) {
 		json := `{"items": "not an array"}`
-		err := ValidateJSONPaths([]byte(json), templates, "Collection")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Collection")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "expected array")
 	})
@@ -112,7 +112,7 @@ func TestNestedObjectValidation(t *testing.T) {
 				}
 			}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.NoError(t, err)
 	})
 
@@ -128,7 +128,7 @@ func TestNestedObjectValidation(t *testing.T) {
 				}
 			}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "city: required field is missing")
 	})
@@ -139,7 +139,7 @@ func TestNestedObjectValidation(t *testing.T) {
 				"name": "John Doe"
 			}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "details: required field is missing")
 	})
@@ -188,7 +188,7 @@ func TestTypeReferenceValidation(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Order")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Order")
 		assert.NoError(t, err)
 	})
 
@@ -207,7 +207,7 @@ func TestTypeReferenceValidation(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Order")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Order")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "email: required field is missing")
 	})
@@ -227,7 +227,7 @@ func TestTypeReferenceValidation(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Order")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Order")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "price: required field is missing")
 	})
@@ -242,7 +242,7 @@ func TestTypeReferenceValidation(t *testing.T) {
 			},
 			"items": []
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Order")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Order")
 		assert.NoError(t, err)
 	})
 }
@@ -278,7 +278,7 @@ func TestRecursiveArrayValidation(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.NoError(t, err)
 	})
 
@@ -308,7 +308,7 @@ func TestRecursiveArrayValidation(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.NoError(t, err)
 	})
 
@@ -337,7 +337,7 @@ func TestRecursiveArrayValidation(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "title: required field is missing")
 	})
@@ -352,7 +352,7 @@ func TestRecursiveArrayValidation(t *testing.T) {
 		}
 
 		json := fmt.Sprintf(`{"id": 1, "name": "John Doe", "posts": [%s]}`, genPost(1000))
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.NoError(t, err)
 	})
 }
@@ -376,7 +376,7 @@ func TestRecursiveObjectValidation(t *testing.T) {
 				"parent": null
 			}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Company")
 		assert.NoError(t, err)
 	})
 
@@ -385,7 +385,7 @@ func TestRecursiveObjectValidation(t *testing.T) {
 			"id": 1,
 			"name": "Parent Company"
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Company")
 		assert.NoError(t, err)
 	})
 
@@ -397,7 +397,7 @@ func TestRecursiveObjectValidation(t *testing.T) {
 				"id": 2
 			}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Company")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "parent.name: required field is missing")
 	})
@@ -416,7 +416,7 @@ func TestRecursiveObjectValidation(t *testing.T) {
 			"id": 1,
 			"name": "Parent Company"
 		}`
-		err := ValidateJSONPaths([]byte(json), templatesWithRequiredParent, "Company")
+		err := validateRequiredJSONPaths([]byte(json), templatesWithRequiredParent, "Company")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "parent: required field is missing")
 	})
@@ -435,7 +435,7 @@ func TestRecursiveObjectValidation(t *testing.T) {
 				}
 			}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Company")
 		assert.NoError(t, err)
 	})
 
@@ -449,7 +449,7 @@ func TestRecursiveObjectValidation(t *testing.T) {
 		}
 
 		json := genCompany(1000)
-		err := ValidateJSONPaths([]byte(json), templates, "Company")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Company")
 		assert.NoError(t, err)
 	})
 }
@@ -473,7 +473,7 @@ func TestArrayTypeReferences(t *testing.T) {
 			"id": 1,
 			"name": "John Doe"
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.NoError(t, err)
 	})
 
@@ -483,7 +483,7 @@ func TestArrayTypeReferences(t *testing.T) {
 			"name": "John Doe",
 			"posts": []
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.NoError(t, err)
 	})
 
@@ -497,7 +497,7 @@ func TestArrayTypeReferences(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "User")
+		err := validateRequiredJSONPaths([]byte(json), templates, "User")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "posts[0].title: required field is missing")
 	})
@@ -516,7 +516,7 @@ func TestArrayTypeReferences(t *testing.T) {
 			"id": 1,
 			"name": "John Doe"
 		}`
-		err := ValidateJSONPaths([]byte(json), templatesWithRequiredArray, "User")
+		err := validateRequiredJSONPaths([]byte(json), templatesWithRequiredArray, "User")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "posts: required field is missing")
 	})
@@ -528,7 +528,7 @@ func TestEdgeCases(t *testing.T) {
 			"Empty": {},
 		}
 		json := `{}`
-		err := ValidateJSONPaths([]byte(json), templates, "Empty")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Empty")
 		assert.NoError(t, err)
 	})
 
@@ -551,7 +551,7 @@ func TestEdgeCases(t *testing.T) {
 				}
 			}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Deep")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Deep")
 		assert.NoError(t, err)
 	})
 
@@ -584,7 +584,7 @@ func TestEdgeCases(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "Complex")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Complex")
 		assert.NoError(t, err)
 	})
 
@@ -596,7 +596,7 @@ func TestEdgeCases(t *testing.T) {
 			},
 		}
 		json := `{}`
-		err := ValidateJSONPaths([]byte(json), templates, "MultiError")
+		err := validateRequiredJSONPaths([]byte(json), templates, "MultiError")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "required field is missing")
 	})
@@ -655,7 +655,7 @@ func TestComplexTypeReferences(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "API")
+		err := validateRequiredJSONPaths([]byte(json), templates, "API")
 		assert.NoError(t, err)
 	})
 
@@ -686,7 +686,7 @@ func TestComplexTypeReferences(t *testing.T) {
 				}
 			]
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "API")
+		err := validateRequiredJSONPaths([]byte(json), templates, "API")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "type: required field is missing")
 	})
@@ -713,7 +713,7 @@ func TestDataTypeVariations(t *testing.T) {
 			"array_value": [1, 2, 3],
 			"object_value": {"key": "value"}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "AllTypes")
+		err := validateRequiredJSONPaths([]byte(json), templates, "AllTypes")
 		assert.NoError(t, err)
 	})
 
@@ -726,7 +726,7 @@ func TestDataTypeVariations(t *testing.T) {
 			"array_value": [],
 			"object_value": {}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "AllTypes")
+		err := validateRequiredJSONPaths([]byte(json), templates, "AllTypes")
 		assert.NoError(t, err)
 	})
 
@@ -739,7 +739,7 @@ func TestDataTypeVariations(t *testing.T) {
 			"array_value": [],
 			"object_value": {}
 		}`
-		err := ValidateJSONPaths([]byte(json), templates, "AllTypes")
+		err := validateRequiredJSONPaths([]byte(json), templates, "AllTypes")
 		assert.NoError(t, err)
 	})
 }
@@ -752,7 +752,7 @@ func TestInvalidPathSyntax(t *testing.T) {
 			},
 		}
 		json := `{"field": {}}`
-		err := ValidateJSONPaths([]byte(json), templates, "Invalid")
+		err := validateRequiredJSONPaths([]byte(json), templates, "Invalid")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid type reference")
 	})
@@ -764,7 +764,7 @@ func TestInvalidPathSyntax(t *testing.T) {
 			},
 		}
 		json := `{"field": {}}`
-		err := ValidateJSONPaths([]byte(json), templates, "HasRef")
+		err := validateRequiredJSONPaths([]byte(json), templates, "HasRef")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "no template defined for type")
 	})
@@ -799,13 +799,13 @@ func TestLargeDataSets(t *testing.T) {
 
 	t.Run("Medium dataset (100 items)", func(t *testing.T) {
 		json := generateLargeJSON(100)
-		err := ValidateJSONPaths(json, templates, "Large")
+		err := validateRequiredJSONPaths(json, templates, "Large")
 		assert.NoError(t, err)
 	})
 
 	t.Run("Large dataset (1000 items)", func(t *testing.T) {
 		json := generateLargeJSON(1000)
-		err := ValidateJSONPaths(json, templates, "Large")
+		err := validateRequiredJSONPaths(json, templates, "Large")
 		assert.NoError(t, err)
 	})
 }
