@@ -260,3 +260,17 @@ func (l *Lexer) NextToken() token.Token {
 		Column:   l.currentColumn,
 	}
 }
+
+// ReadTokens reads all tokens from the input until the EOF is reached.
+func (l *Lexer) ReadTokens() []token.Token {
+	var tokens []token.Token
+	for {
+		nextToken := l.NextToken()
+		tokens = append(tokens, nextToken)
+
+		if nextToken.Type == token.EOF {
+			break
+		}
+	}
+	return tokens
+}

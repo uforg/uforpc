@@ -8,7 +8,7 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	t.Run("TestNextTokenBasic", func(t *testing.T) {
+	t.Run("TestLexerBasic", func(t *testing.T) {
 		input := ",:(){}[]@?"
 
 		tests := []token.Token{
@@ -25,18 +25,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 11},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenNewLines", func(t *testing.T) {
+	t.Run("TestLexerNewLines", func(t *testing.T) {
 		input := ",:\n(){\n}\n[]@?\n"
 
 		tests := []token.Token{
@@ -57,18 +61,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 5, Column: 1},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenKeywords", func(t *testing.T) {
+	t.Run("TestLexerKeywords", func(t *testing.T) {
 		input := "version type proc input output meta error true false"
 
 		tests := []token.Token{
@@ -84,18 +92,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 53},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenIdentifiers", func(t *testing.T) {
+	t.Run("TestLexerIdentifiers", func(t *testing.T) {
 		input := "hello world someIdentifier"
 
 		tests := []token.Token{
@@ -105,18 +117,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 27},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenNumbers", func(t *testing.T) {
+	t.Run("TestLexerNumbers", func(t *testing.T) {
 		input := "1 2 3 456 789"
 
 		tests := []token.Token{
@@ -128,18 +144,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 14},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenFloats", func(t *testing.T) {
+	t.Run("TestLexerFloats", func(t *testing.T) {
 		input := "1.2 3.45 67.89 1.2.3.4"
 
 		tests := []token.Token{
@@ -152,18 +172,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 23},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenStrings", func(t *testing.T) {
+	t.Run("TestLexerStrings", func(t *testing.T) {
 		input := `"hello" "world" "hello world!"test`
 
 		tests := []token.Token{
@@ -174,18 +198,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 35},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenIllegal", func(t *testing.T) {
+	t.Run("TestLexerIllegal", func(t *testing.T) {
 		input := "$ % ^ & ."
 
 		tests := []token.Token{
@@ -197,18 +225,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 10},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenUnterminatedString", func(t *testing.T) {
+	t.Run("TestLexerUnterminatedString", func(t *testing.T) {
 		input := `"hello`
 
 		tests := []token.Token{
@@ -216,18 +248,22 @@ func TestLexer(t *testing.T) {
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 7},
 		}
 
-		lex := NewLexer("test.urpc", input)
+		lex1 := NewLexer("test.urpc", input)
 		for i, test := range tests {
-			tok := lex.NextToken()
+			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
 			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
 			require.Equal(t, test.Line, tok.Line, "test %d", i)
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestNextTokenURPC", func(t *testing.T) {
+	t.Run("TestLexerURPC", func(t *testing.T) {
 		input := `
 			version: 1
 
