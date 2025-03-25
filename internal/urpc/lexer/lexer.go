@@ -95,6 +95,16 @@ func (l *Lexer) readIdentifier() string {
 	return ident
 }
 
+// readNumber reads a number from the current index to the next non-digit character.
+func (l *Lexer) readNumber() string {
+	var num string
+	for isDigit(l.currentChar) {
+		num += string(l.currentChar)
+		l.readNextChar()
+	}
+	return num
+}
+
 // skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.
 func (l *Lexer) skipWhitespace() {
 	for isWhitespace(l.currentChar) {
@@ -156,6 +166,21 @@ func (l *Lexer) NextToken() token.Token {
 		tok = token.Token{
 			Type:     tokenType,
 			Literal:  ident,
+			FileName: l.fileName,
+			Line:     line,
+			Column:   column,
+		}
+	}
+
+	// Handle numbers
+	if isDigit(l.currentChar) {
+		line := l.currentLine
+		column := l.currentColumn
+		num := l.readNumber()
+
+		tok = token.Token{
+			Type:     token.INT,
+			Literal:  num,
 			FileName: l.fileName,
 			Line:     line,
 			Column:   column,

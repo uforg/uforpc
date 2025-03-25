@@ -113,4 +113,27 @@ func TestLexer(t *testing.T) {
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
 	})
+
+	t.Run("TestNextTokenNumbers", func(t *testing.T) {
+		input := "1 2 3 456 789"
+
+		tests := []token.Token{
+			{Type: token.INT, Literal: "1", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.INT, Literal: "2", FileName: "test.urpc", Line: 1, Column: 3},
+			{Type: token.INT, Literal: "3", FileName: "test.urpc", Line: 1, Column: 5},
+			{Type: token.INT, Literal: "456", FileName: "test.urpc", Line: 1, Column: 7},
+			{Type: token.INT, Literal: "789", FileName: "test.urpc", Line: 1, Column: 11},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 14},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+	})
 }
