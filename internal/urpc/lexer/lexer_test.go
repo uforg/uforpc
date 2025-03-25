@@ -8,7 +8,7 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	t.Run("TestNextToken", func(t *testing.T) {
+	t.Run("TestNextTokenBasic", func(t *testing.T) {
 		input := ",:(){}[]@?"
 
 		tests := []token.Token{
@@ -55,6 +55,30 @@ func TestLexer(t *testing.T) {
 			{Type: token.QUESTION, Literal: "?", FileName: "test.urpc", Line: 4, Column: 4},
 			{Type: token.NEWLINE, Literal: "\n", FileName: "test.urpc", Line: 4, Column: 5},
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 5, Column: 1},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+	})
+
+	t.Run("TestNextTokenKeywords", func(t *testing.T) {
+		input := "version type proc input output meta error"
+
+		tests := []token.Token{
+			{Type: token.VERSION, Literal: "version", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.TYPE, Literal: "type", FileName: "test.urpc", Line: 1, Column: 9},
+			{Type: token.PROC, Literal: "proc", FileName: "test.urpc", Line: 1, Column: 14},
+			{Type: token.INPUT, Literal: "input", FileName: "test.urpc", Line: 1, Column: 19},
+			{Type: token.OUTPUT, Literal: "output", FileName: "test.urpc", Line: 1, Column: 25},
+			{Type: token.META, Literal: "meta", FileName: "test.urpc", Line: 1, Column: 32},
+			{Type: token.ERROR, Literal: "error", FileName: "test.urpc", Line: 1, Column: 37},
 		}
 
 		lex := NewLexer("test.urpc", input)

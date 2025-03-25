@@ -61,7 +61,7 @@ func (l *Lexer) readNextChar() {
 		return
 	}
 
-	if l.currentChar == '\n' {
+	if isNewline(l.currentChar) {
 		l.currentLine++
 		l.currentColumn = 1
 	} else {
@@ -85,6 +85,16 @@ func (l *Lexer) readNextChar() {
 	}
 }
 
+// readIdentifier reads an identifier from the current index to the next non-letter character.
+func (l *Lexer) readIdentifier() string {
+	var ident string
+	for isLetter(l.currentChar) {
+		ident += string(l.currentChar)
+		l.readNextChar()
+	}
+	return ident
+}
+
 func (l *Lexer) NextToken() token.Token {
 	if l.currentIndexIsEOF {
 		return token.Token{
@@ -98,30 +108,50 @@ func (l *Lexer) NextToken() token.Token {
 
 	var tok token.Token
 
+	// Handle delimiters
 	switch l.currentChar {
-	// Delimiters
 	case ',':
-		tok = token.NewToken(token.COMMA, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.COMMA, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case ':':
-		tok = token.NewToken(token.COLON, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.COLON, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '(':
-		tok = token.NewToken(token.LPAREN, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.LPAREN, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case ')':
-		tok = token.NewToken(token.RPAREN, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.RPAREN, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '{':
-		tok = token.NewToken(token.LBRACE, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.LBRACE, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '}':
-		tok = token.NewToken(token.RBRACE, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.RBRACE, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '[':
-		tok = token.NewToken(token.LBRACKET, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.LBRACKET, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case ']':
-		tok = token.NewToken(token.RBRACKET, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.RBRACKET, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '@':
-		tok = token.NewToken(token.AT, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.AT, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '?':
-		tok = token.NewToken(token.QUESTION, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.QUESTION, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '\n':
-		tok = token.NewToken(token.NEWLINE, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
+		tok = token.NewToken(token.NEWLINE, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
+	}
+
+	// Handle identifiers
+	if isLetter(l.currentChar) {
+		tokenType := token.IDENT
+		line := l.currentLine
+		column := l.currentColumn
+		ident := l.readIdentifier()
+
+		if token.IsKeyword(ident) {
+			tokenType = token.GetKeywordTokenType(ident)
+		}
+
+		tok = token.Token{
+			Type:     tokenType,
+			Literal:  ident,
+			FileName: l.fileName,
+			Line:     line,
+			Column:   column,
+		}
 	}
 
 	l.readNextChar()

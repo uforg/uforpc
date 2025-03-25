@@ -10,10 +10,10 @@ type Token struct {
 	Column   int
 }
 
-func NewToken(typ TokenType, lit byte, fileName string, line int, column int) Token {
+func NewToken(typ TokenType, lit string, fileName string, line int, column int) Token {
 	return Token{
 		Type:     typ,
-		Literal:  string(lit),
+		Literal:  lit,
 		FileName: fileName,
 		Line:     line,
 		Column:   column,
