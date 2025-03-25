@@ -24,31 +24,33 @@ const (
 	EOF     TokenType = "EOF"
 	ILLEGAL TokenType = "ILLEGAL"
 
-	// Identifiers
-	IDENT TokenType = "IDENT"
+	// Identifiers and literals
+	IDENT  TokenType = "IDENT"
+	STRING TokenType = "STRING"
+	INT    TokenType = "INT"
+	FLOAT  TokenType = "FLOAT"
+	TRUE   TokenType = "TRUE"
+	FALSE  TokenType = "FALSE"
 
-	// Literals
-	STRING  TokenType = "STRING"
-	INT     TokenType = "INT"
-	FLOAT   TokenType = "FLOAT"
-	BOOLEAN TokenType = "BOOLEAN"
-
-	// Delimiters
-	COMMA     TokenType = ","
-	SEMICOLON TokenType = ";"
-	COLON     TokenType = ":"
-	DOT       TokenType = "."
-	LPAREN    TokenType = "("
-	RPAREN    TokenType = ")"
-	LBRACE    TokenType = "{"
-	RBRACE    TokenType = "}"
-	LBRACKET  TokenType = "["
-	RBRACKET  TokenType = "]"
-	AT        TokenType = "@"
-	QUESTION  TokenType = "?"
-	NEWLINE   TokenType = "\n"
+	// Operators and delimiters
+	COLON    TokenType = ":"
+	COMMA    TokenType = ","
+	LPAREN   TokenType = "("
+	RPAREN   TokenType = ")"
+	LBRACE   TokenType = "{"
+	RBRACE   TokenType = "}"
+	LBRACKET TokenType = "["
+	RBRACKET TokenType = "]"
+	AT       TokenType = "@"
+	QUESTION TokenType = "?"
+	NEWLINE  TokenType = "\n"
 
 	// Keywords
-	TYPE TokenType = "TYPE"
-	PROC TokenType = "PROC"
+	VERSION TokenType = "VERSION"
+	TYPE    TokenType = "TYPE"
+	PROC    TokenType = "PROC"
+	INPUT   TokenType = "INPUT"
+	OUTPUT  TokenType = "OUTPUT"
+	META    TokenType = "META"
+	ERROR   TokenType = "ERROR"
 )

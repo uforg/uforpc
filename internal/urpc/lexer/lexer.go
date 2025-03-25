@@ -102,12 +102,8 @@ func (l *Lexer) NextToken() token.Token {
 	// Delimiters
 	case ',':
 		tok = token.NewToken(token.COMMA, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
-	case ';':
-		tok = token.NewToken(token.SEMICOLON, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
 	case ':':
 		tok = token.NewToken(token.COLON, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
-	case '.':
-		tok = token.NewToken(token.DOT, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
 	case '(':
 		tok = token.NewToken(token.LPAREN, l.currentChar, l.fileName, l.currentLine, l.currentColumn)
 	case ')':
