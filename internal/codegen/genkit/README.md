@@ -35,7 +35,7 @@ Output:
 
 ```javascript
 function greet(name) {
-    console.log("Hello, " + name);
+  console.log("Hello, " + name);
 }
 ```
 
@@ -70,9 +70,9 @@ Output:
 
 ```javascript
 class User {
-    constructor(name) {
-        this.name = name;
-    }
+  constructor(name) {
+    this.name = name;
+  }
 }
 ```
 
