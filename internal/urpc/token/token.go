@@ -29,8 +29,6 @@ const (
 	STRING TokenType = "STRING"
 	INT    TokenType = "INT"
 	FLOAT  TokenType = "FLOAT"
-	TRUE   TokenType = "TRUE"
-	FALSE  TokenType = "FALSE"
 
 	// Operators and delimiters
 	COLON    TokenType = ":"
@@ -53,6 +51,8 @@ const (
 	OUTPUT  TokenType = "OUTPUT"
 	META    TokenType = "META"
 	ERROR   TokenType = "ERROR"
+	TRUE    TokenType = "TRUE"
+	FALSE   TokenType = "FALSE"
 )
 
 // keywords is a map of keywords to their corresponding token types.
@@ -64,6 +64,8 @@ var keywords = map[string]TokenType{
 	"output":  OUTPUT,
 	"meta":    META,
 	"error":   ERROR,
+	"true":    TRUE,
+	"false":   FALSE,
 }
 
 // IsKeyword returns true if the identifier is a keyword.
