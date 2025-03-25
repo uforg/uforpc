@@ -95,6 +95,13 @@ func (l *Lexer) readIdentifier() string {
 	return ident
 }
 
+// skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.
+func (l *Lexer) skipWhitespace() {
+	for isWhitespace(l.currentChar) {
+		l.readNextChar()
+	}
+}
+
 func (l *Lexer) NextToken() token.Token {
 	if l.currentIndexIsEOF {
 		return token.Token{
@@ -107,6 +114,7 @@ func (l *Lexer) NextToken() token.Token {
 	}
 
 	var tok token.Token
+	l.skipWhitespace()
 
 	// Handle delimiters
 	switch l.currentChar {

@@ -35,8 +35,9 @@ func TestIsDigit(t *testing.T) {
 
 func TestIsWhitespace(t *testing.T) {
 	require.True(t, isWhitespace(' '))
+	require.True(t, isWhitespace('\t'))
+	require.True(t, isWhitespace('\r'))
 
-	require.False(t, isWhitespace('\t'))
 	require.False(t, isWhitespace('\n'))
 	require.False(t, isWhitespace('a'))
 	require.False(t, isWhitespace('z'))
