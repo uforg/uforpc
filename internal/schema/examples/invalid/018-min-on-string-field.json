@@ -2,7 +2,7 @@
   "version": 1,
   "types": {
     "TestMinRule": {
-      "type": "object",
+      
       "fields": {
         "username": {
           "type": "string",

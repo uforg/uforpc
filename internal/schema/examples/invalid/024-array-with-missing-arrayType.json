@@ -2,7 +2,7 @@
   "version": 1,
   "types": {
     "MissingArrayType": {
-      "type": "object",
+      
       "fields": {
         "items": {
           "type": "array"

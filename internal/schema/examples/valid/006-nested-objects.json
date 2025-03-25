@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "Address": {
-      "type": "object",
       "fields": {
         "street": {
           "type": "string"
@@ -16,7 +15,6 @@
       }
     },
     "Contact": {
-      "type": "object",
       "fields": {
         "email": {
           "type": "string",
@@ -32,7 +30,6 @@
       }
     },
     "Person": {
-      "type": "object",
       "fields": {
         "name": {
           "type": "string"
@@ -81,12 +78,15 @@
   },
   "procedures": {
     "CreatePerson": {
-      
       "input": {
-        "type": "Person"
+        "person": {
+          "type": "Person"
+        }
       },
       "output": {
-        "type": "boolean"
+        "success": {
+          "type": "boolean"
+        }
       }
     }
   }

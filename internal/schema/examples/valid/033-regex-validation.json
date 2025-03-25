@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "RegexValidation": {
-      "type": "object",
       "fields": {
         "zipCode": {
           "type": "string"
@@ -12,12 +11,15 @@
   },
   "procedures": {
     "ValidateZipCode": {
-      
       "input": {
-        "type": "RegexValidation"
+        "data": {
+          "type": "RegexValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

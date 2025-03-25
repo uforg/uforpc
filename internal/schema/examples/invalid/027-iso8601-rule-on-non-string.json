@@ -2,7 +2,7 @@
   "version": 1,
   "types": {
     "InvalidIso8601Rule": {
-      "type": "object",
+      
       "fields": {
         "dateField": {
           "type": "float",

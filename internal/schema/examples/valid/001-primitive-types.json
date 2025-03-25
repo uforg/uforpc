@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "BasicType": {
-      "type": "object",
       "fields": {
         "stringField": {
           "type": "string",
@@ -25,9 +24,11 @@
   },
   "procedures": {
     "GetBasicTypes": {
-      
+      "input": {},
       "output": {
-        "type": "BasicType"
+        "result": {
+          "type": "BasicType"
+        }
       }
     }
   }

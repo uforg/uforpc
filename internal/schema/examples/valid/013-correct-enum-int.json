@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ValidEnum": {
-      "type": "object",
       "fields": {
         "score": {
           "type": "int",

@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "FloatRangeValidation": {
-      "type": "object",
       "fields": {
         "temperature": {
           "type": "float",
@@ -22,12 +21,15 @@
   },
   "procedures": {
     "ValidateTemperature": {
-      
       "input": {
-        "type": "FloatRangeValidation"
+        "data": {
+          "type": "FloatRangeValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

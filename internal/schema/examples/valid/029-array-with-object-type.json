@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ArrayWithObjectType": {
-      "type": "object",
       "fields": {
         "users": {
           "type": "array",
@@ -37,9 +36,11 @@
   },
   "procedures": {
     "GetUsers": {
-      
+      "input": {},
       "output": {
-        "type": "ArrayWithObjectType"
+        "result": {
+          "type": "ArrayWithObjectType"
+        }
       }
     }
   }

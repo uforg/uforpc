@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ValidRegex": {
-      "type": "object",
       "fields": {
         "code": {
           "type": "string"

@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ValidArray": {
-      "type": "object",
       "fields": {
         "ids": {
           "type": "array",

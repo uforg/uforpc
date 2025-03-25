@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "Product": {
-      "type": "object",
       "fields": {
         "id": {
           "type": "string"
@@ -22,7 +21,6 @@
       }
     },
     "ProductList": {
-      "type": "object",
       "fields": {
         "products": {
           "type": "array",
@@ -38,9 +36,11 @@
   },
   "procedures": {
     "GetProducts": {
-      
+      "input": {},
       "output": {
-        "type": "ProductList"
+        "result": {
+          "type": "ProductList"
+        }
       }
     }
   }

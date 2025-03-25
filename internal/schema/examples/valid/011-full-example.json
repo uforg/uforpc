@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "User": {
-      "type": "object",
       "fields": {
         "id": {
           "type": "string",
@@ -41,7 +40,6 @@
       }
     },
     "CustomSettings": {
-      "type": "object",
       "fields": {
         "theme": {
           "type": "string",
@@ -74,14 +72,17 @@
   },
   "procedures": {
     "CreateUser": {
-      
       "description": "Creates a new user",
       "input": {
-        "type": "User",
-        "optional": true
+        "user": {
+          "type": "User",
+          "optional": true
+        }
       },
       "output": {
-        "type": "boolean"
+        "success": {
+          "type": "boolean"
+        }
       },
       "meta": {
         "audit": true,
@@ -89,12 +90,15 @@
       }
     },
     "GetUserProfile": {
-      
       "input": {
-        "type": "string"
+        "userId": {
+          "type": "string"
+        }
       },
       "output": {
-        "type": "User"
+        "user": {
+          "type": "User"
+        }
       }
     }
   }

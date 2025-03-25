@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "Address": {
-      "type": "object",
       "fields": {
         "street": {
           "type": "string"
@@ -19,7 +18,6 @@
       }
     },
     "Contact": {
-      "type": "object",
       "fields": {
         "email": {
           "type": "string",
@@ -36,7 +34,6 @@
       }
     },
     "Customer": {
-      "type": "object",
       "fields": {
         "id": {
           "type": "string",
@@ -56,26 +53,31 @@
           "type": "Contact"
         }
       }
+    },
+    "CustomerRequest": {
+      "fields": {
+        "id": {
+          "type": "string",
+          "rules": {
+            "uuid": {
+              "errorMessage": "Must be a valid UUID"
+            }
+          }
+        }
+      }
     }
   },
   "procedures": {
     "GetCustomer": {
-      
       "input": {
-        "type": "object",
-        "fields": {
-          "id": {
-            "type": "string",
-            "rules": {
-              "uuid": {
-                "errorMessage": "Must be a valid UUID"
-              }
-            }
-          }
+        "request": {
+          "type": "CustomerRequest"
         }
       },
       "output": {
-        "type": "Customer"
+        "customer": {
+          "type": "Customer"
+        }
       }
     }
   }

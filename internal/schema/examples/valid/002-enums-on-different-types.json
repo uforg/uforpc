@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "EnumTypes": {
-      "type": "object",
       "fields": {
         "stringEnum": {
           "type": "string",
@@ -36,12 +35,15 @@
   },
   "procedures": {
     "CheckEnums": {
-      
       "input": {
-        "type": "EnumTypes"
+        "enumData": {
+          "type": "EnumTypes"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

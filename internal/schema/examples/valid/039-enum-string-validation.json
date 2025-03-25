@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "StringEnumValidation": {
-      "type": "object",
       "fields": {
         "status": {
           "type": "string",
@@ -18,12 +17,15 @@
   },
   "procedures": {
     "ValidateStatus": {
-      
       "input": {
-        "type": "StringEnumValidation"
+        "data": {
+          "type": "StringEnumValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

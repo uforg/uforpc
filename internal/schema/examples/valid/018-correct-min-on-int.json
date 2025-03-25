@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ValidMin": {
-      "type": "object",
       "fields": {
         "age": {
           "type": "int",

@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ValidMinLen": {
-      "type": "object",
       "fields": {
         "description": {
           "type": "string",

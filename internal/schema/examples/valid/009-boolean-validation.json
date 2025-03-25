@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "FeatureFlags": {
-      "type": "object",
       "fields": {
         "darkMode": {
           "type": "boolean",
@@ -37,12 +36,15 @@
   },
   "procedures": {
     "UpdateFeatureFlags": {
-      
       "input": {
-        "type": "FeatureFlags"
+        "flags": {
+          "type": "FeatureFlags"
+        }
       },
       "output": {
-        "type": "boolean"
+        "success": {
+          "type": "boolean"
+        }
       }
     }
   }

@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ApiSettings": {
-      "type": "object",
       "fields": {
         "endpoint": {
           "type": "string"
@@ -21,13 +20,16 @@
   },
   "procedures": {
     "ConfigureApi": {
-      
       "description": "Actualiza la configuración de la API",
       "input": {
-        "type": "ApiSettings"
+        "settings": {
+          "type": "ApiSettings"
+        }
       },
       "output": {
-        "type": "boolean"
+        "success": {
+          "type": "boolean"
+        }
       },
       "meta": {
         "requiresAdmin": true,

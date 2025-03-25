@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "FloatEqualsValidation": {
-      "type": "object",
       "fields": {
         "pi": {
           "type": "float",
@@ -18,12 +17,15 @@
   },
   "procedures": {
     "ValidatePI": {
-      
       "input": {
-        "type": "FloatEqualsValidation"
+        "data": {
+          "type": "FloatEqualsValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

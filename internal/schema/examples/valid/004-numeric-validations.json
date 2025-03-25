@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "NumericValidations": {
-      "type": "object",
       "fields": {
         "intWithRange": {
           "type": "int",
@@ -53,12 +52,15 @@
   },
   "procedures": {
     "ValidateNumbers": {
-      
       "input": {
-        "type": "NumericValidations"
+        "data": {
+          "type": "NumericValidations"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

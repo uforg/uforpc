@@ -2,7 +2,7 @@
   "version": 1,
   "types": {
     "InvalidEnumStringRule": {
-      "type": "object",
+      
       "fields": {
         "status": {
           "type": "string",

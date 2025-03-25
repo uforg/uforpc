@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "UserInput": {
-      "type": "object",
       "fields": {
         "username": {
           "type": "string",
@@ -25,7 +24,6 @@
       }
     },
     "AuthResponse": {
-      "type": "object",
       "fields": {
         "token": {
           "type": "string"
@@ -43,13 +41,16 @@
   },
   "procedures": {
     "Login": {
-      
       "description": "Authenticates a user and returns a token",
       "input": {
-        "type": "UserInput"
+        "credentials": {
+          "type": "UserInput"
+        }
       },
       "output": {
-        "type": "AuthResponse"
+        "auth": {
+          "type": "AuthResponse"
+        }
       }
     }
   }

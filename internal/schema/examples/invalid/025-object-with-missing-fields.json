@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "MissingFields": {
-      "type": "object"
     }
   },
   "procedures": {}

@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "OptionalArrayType": {
-      "type": "object",
       "fields": {
         "optionalItems": {
           "type": "array",
@@ -16,12 +15,15 @@
   },
   "procedures": {
     "ValidateOptionalArray": {
-      
       "input": {
-        "type": "OptionalArrayType"
+        "data": {
+          "type": "OptionalArrayType"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

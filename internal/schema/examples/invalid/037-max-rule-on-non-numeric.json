@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "InvalidMaxRule": {
-      "type": "object",
       "fields": {
         "boolField": {
           "type": "boolean",

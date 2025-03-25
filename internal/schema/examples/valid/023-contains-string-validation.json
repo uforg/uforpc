@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ContainsValidation": {
-      "type": "object",
       "fields": {
         "text": {
           "type": "string",
@@ -18,12 +17,15 @@
   },
   "procedures": {
     "ValidateContains": {
-      
       "input": {
-        "type": "ContainsValidation"
+        "data": {
+          "type": "ContainsValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

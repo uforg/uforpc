@@ -2,7 +2,7 @@
   "version": 1,
   "types": {
     "TestRegex": {
-      "type": "object",
+      
       "fields": {
         "code": {
           "type": "string",

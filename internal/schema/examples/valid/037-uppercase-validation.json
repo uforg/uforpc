@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "UppercaseValidation": {
-      "type": "object",
       "fields": {
         "countryCode": {
           "type": "string",
@@ -17,12 +16,15 @@
   },
   "procedures": {
     "ValidateCountryCode": {
-      
       "input": {
-        "type": "UppercaseValidation"
+        "data": {
+          "type": "UppercaseValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

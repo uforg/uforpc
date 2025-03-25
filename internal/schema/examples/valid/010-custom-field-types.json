@@ -2,16 +2,19 @@
   "version": 1,
   "types": {
     "Currency": {
-      "type": "string",
-      "rules": {
-        "enum": {
-          "values": ["USD", "EUR", "GBP", "JPY"],
-          "errorMessage": "Unsupported currency"
+      "fields": {
+        "value": {
+          "type": "string",
+          "rules": {
+            "enum": {
+              "values": ["USD", "EUR", "GBP", "JPY"],
+              "errorMessage": "Unsupported currency"
+            }
+          }
         }
       }
     },
     "Money": {
-      "type": "object",
       "fields": {
         "amount": {
           "type": "float",
@@ -28,7 +31,6 @@
       }
     },
     "Product": {
-      "type": "object",
       "fields": {
         "id": {
           "type": "string",
@@ -58,13 +60,16 @@
   },
   "procedures": {
     "CreateProduct": {
-      
       "input": {
-        "type": "Product"
+        "product": {
+          "type": "Product"
+        }
       },
       "output": {
-        "type": "string",
-        "description": "Returns the ID of the created product"
+        "id": {
+          "type": "string",
+          "description": "Returns the ID of the created product"
+        }
       }
     }
   }

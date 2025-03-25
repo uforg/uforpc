@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "MultipleStringValidations": {
-      "type": "object",
       "fields": {
         "code": {
           "type": "string",
@@ -25,12 +24,15 @@
   },
   "procedures": {
     "ValidateCode": {
-      
       "input": {
-        "type": "MultipleStringValidations"
+        "data": {
+          "type": "MultipleStringValidations"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

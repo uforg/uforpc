@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "IntEnumValidation": {
-      "type": "object",
       "fields": {
         "httpStatus": {
           "type": "int",
@@ -18,12 +17,15 @@
   },
   "procedures": {
     "ValidateHttpStatus": {
-      
       "input": {
-        "type": "IntEnumValidation"
+        "data": {
+          "type": "IntEnumValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

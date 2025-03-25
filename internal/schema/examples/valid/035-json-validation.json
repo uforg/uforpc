@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "JsonValidation": {
-      "type": "object",
       "fields": {
         "config": {
           "type": "string",
@@ -17,12 +16,15 @@
   },
   "procedures": {
     "ValidateConfig": {
-      
       "input": {
-        "type": "JsonValidation"
+        "data": {
+          "type": "JsonValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

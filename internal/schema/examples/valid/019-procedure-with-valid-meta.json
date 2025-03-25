@@ -3,12 +3,15 @@
   "types": {},
   "procedures": {
     "ValidProcedure": {
-      
       "input": {
-        "type": "string"
+        "data": {
+          "type": "string"
+        }
       },
       "output": {
-        "type": "boolean"
+        "success": {
+          "type": "boolean"
+        }
       },
       "meta": {
         "audit": true,

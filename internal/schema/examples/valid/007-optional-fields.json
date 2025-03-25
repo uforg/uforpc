@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "UserProfile": {
-      "type": "object",
       "fields": {
         "username": {
           "type": "string",
@@ -58,12 +57,15 @@
   },
   "procedures": {
     "UpdateProfile": {
-      
       "input": {
-        "type": "UserProfile"
+        "profile": {
+          "type": "UserProfile"
+        }
       },
       "output": {
-        "type": "boolean"
+        "success": {
+          "type": "boolean"
+        }
       }
     }
   }

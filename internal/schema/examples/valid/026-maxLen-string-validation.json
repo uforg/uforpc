@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "StringMaxLenValidation": {
-      "type": "object",
       "fields": {
         "username": {
           "type": "string",
@@ -18,12 +17,15 @@
   },
   "procedures": {
     "ValidateUsername": {
-      
       "input": {
-        "type": "StringMaxLenValidation"
+        "data": {
+          "type": "StringMaxLenValidation"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

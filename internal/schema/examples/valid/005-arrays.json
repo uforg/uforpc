@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ArrayTypes": {
-      "type": "object",
       "fields": {
         "stringArray": {
           "type": "array",
@@ -45,12 +44,15 @@
   },
   "procedures": {
     "ProcessArrays": {
-      
       "input": {
-        "type": "ArrayTypes"
+        "arrays": {
+          "type": "ArrayTypes"
+        }
       },
       "output": {
-        "type": "boolean"
+        "success": {
+          "type": "boolean"
+        }
       }
     }
   }

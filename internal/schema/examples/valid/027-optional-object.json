@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "OptionalObjectType": {
-      "type": "object",
       "fields": {
         "metadata": {
           "type": "object",
@@ -23,12 +22,15 @@
   },
   "procedures": {
     "ValidateOptionalObject": {
-      
       "input": {
-        "type": "OptionalObjectType"
+        "data": {
+          "type": "OptionalObjectType"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

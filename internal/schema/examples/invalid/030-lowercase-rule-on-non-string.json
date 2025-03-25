@@ -2,7 +2,7 @@
   "version": 1,
   "types": {
     "InvalidLowercaseRule": {
-      "type": "object",
+      
       "fields": {
         "textField": {
           "type": "float",

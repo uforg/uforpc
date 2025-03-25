@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "StringValidations": {
-      "type": "object",
       "fields": {
         "email": {
           "type": "string",
@@ -57,12 +56,15 @@
   },
   "procedures": {
     "ValidateStrings": {
-      
       "input": {
-        "type": "StringValidations"
+        "data": {
+          "type": "StringValidations"
+        }
       },
       "output": {
-        "type": "boolean"
+        "isValid": {
+          "type": "boolean"
+        }
       }
     }
   }

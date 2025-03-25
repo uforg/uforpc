@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "ValidFloatEnum": {
-      "type": "object",
       "fields": {
         "ratio": {
           "type": "float",

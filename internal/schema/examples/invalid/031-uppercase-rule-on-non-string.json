@@ -2,7 +2,7 @@
   "version": 1,
   "types": {
     "InvalidUppercaseRule": {
-      "type": "object",
+      
       "fields": {
         "textField": {
           "type": "int",
