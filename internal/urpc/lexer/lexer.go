@@ -126,9 +126,6 @@ func (l *Lexer) readString() (string, bool) {
 		return str, true
 	}
 
-	// Skip the closing quote
-	l.readNextChar()
-
 	return str, false
 }
 
