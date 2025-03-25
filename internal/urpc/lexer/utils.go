@@ -19,3 +19,13 @@ func isWhitespace(ch byte) bool {
 func isNewline(ch byte) bool {
 	return ch == '\n'
 }
+
+// containsDecimalPoint returns true if the string contains a decimal point.
+func containsDecimalPoint(s string) bool {
+	for i := range len(s) {
+		if s[i] == '.' {
+			return true
+		}
+	}
+	return false
+}

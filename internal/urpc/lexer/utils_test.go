@@ -60,3 +60,12 @@ func TestIsNewline(t *testing.T) {
 	require.False(t, isNewline('@'))
 	require.False(t, isNewline('.'))
 }
+
+func TestContainsDecimalPoint(t *testing.T) {
+	require.True(t, containsDecimalPoint("123.456"))
+	require.True(t, containsDecimalPoint("123.456"))
+	require.True(t, containsDecimalPoint("123.456.789"))
+
+	require.False(t, containsDecimalPoint("123"))
+	require.False(t, containsDecimalPoint("abcde"))
+}
