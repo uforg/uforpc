@@ -138,4 +138,87 @@ func TestLexer(t *testing.T) {
 			require.Equal(t, test.Column, tok.Column, "test %d", i)
 		}
 	})
+
+	t.Run("TestNextTokenFloats", func(t *testing.T) {
+		input := "1.2 3.45 67.89"
+
+		tests := []token.Token{
+			{Type: token.FLOAT, Literal: "1.2", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.FLOAT, Literal: "3.45", FileName: "test.urpc", Line: 1, Column: 5},
+			{Type: token.FLOAT, Literal: "67.89", FileName: "test.urpc", Line: 1, Column: 10},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 15},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+	})
+
+	t.Run("TestNextTokenStrings", func(t *testing.T) {
+		input := `"hello" "world" "hello world!"`
+
+		tests := []token.Token{
+			{Type: token.STRING, Literal: "hello", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.STRING, Literal: "world", FileName: "test.urpc", Line: 1, Column: 9},
+			{Type: token.STRING, Literal: "hello world!", FileName: "test.urpc", Line: 1, Column: 17},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 31},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+	})
+
+	t.Run("TestNextTokenIllegal", func(t *testing.T) {
+		input := "$ % ^ &"
+
+		tests := []token.Token{
+			{Type: token.ILLEGAL, Literal: "$", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.ILLEGAL, Literal: "%", FileName: "test.urpc", Line: 1, Column: 3},
+			{Type: token.ILLEGAL, Literal: "^", FileName: "test.urpc", Line: 1, Column: 5},
+			{Type: token.ILLEGAL, Literal: "&", FileName: "test.urpc", Line: 1, Column: 7},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 8},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+	})
+
+	t.Run("TestNextTokenUnterminatedString", func(t *testing.T) {
+		input := `"hello`
+
+		tests := []token.Token{
+			{Type: token.ILLEGAL, Literal: "\"hello", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 7},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+	})
 }

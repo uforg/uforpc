@@ -102,7 +102,42 @@ func (l *Lexer) readNumber() string {
 		num += string(l.currentChar)
 		l.readNextChar()
 	}
+
+	// Check if the number is a float
+	if l.currentChar == '.' && !l.nextIndexIsEOF && isDigit(l.nextChar) {
+		num += string(l.currentChar) // Add the decimal point
+		l.readNextChar()
+
+		// Read the decimal part
+		for isDigit(l.currentChar) {
+			num += string(l.currentChar)
+			l.readNextChar()
+		}
+		return num
+	}
+
 	return num
+}
+
+// readString reads a string from the current index to the next double quote.
+func (l *Lexer) readString() (string, bool) {
+	if l.currentChar != '"' {
+		return "", false
+	}
+
+	l.readNextChar() // Skip the opening quote
+
+	var str string
+	for !l.currentIndexIsEOF && l.currentChar != '"' {
+		str += string(l.currentChar)
+		l.readNextChar()
+	}
+
+	if l.currentIndexIsEOF {
+		return str, true // Unterminated string
+	}
+
+	return str, false
 }
 
 // skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.
@@ -150,40 +185,76 @@ func (l *Lexer) NextToken() token.Token {
 		tok = token.NewToken(token.QUESTION, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
 	case '\n':
 		tok = token.NewToken(token.NEWLINE, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	}
-
-	// Handle identifiers
-	if isLetter(l.currentChar) {
-		tokenType := token.IDENT
+	case '"':
 		line := l.currentLine
 		column := l.currentColumn
-		ident := l.readIdentifier()
+		str, unterminated := l.readString()
 
-		if token.IsKeyword(ident) {
-			tokenType = token.GetKeywordTokenType(ident)
+		if unterminated {
+			tok = token.Token{
+				Type:     token.ILLEGAL,
+				Literal:  "\"" + str,
+				FileName: l.fileName,
+				Line:     line,
+				Column:   column,
+			}
+		} else {
+			tok = token.Token{
+				Type:     token.STRING,
+				Literal:  str,
+				FileName: l.fileName,
+				Line:     line,
+				Column:   column,
+			}
+			l.readNextChar() // Skip the closing quote
+			return tok
 		}
+	default:
+		// Handle identifiers
+		if isLetter(l.currentChar) {
+			tokenType := token.IDENT
+			line := l.currentLine
+			column := l.currentColumn
+			ident := l.readIdentifier()
 
-		tok = token.Token{
-			Type:     tokenType,
-			Literal:  ident,
-			FileName: l.fileName,
-			Line:     line,
-			Column:   column,
-		}
-	}
+			if token.IsKeyword(ident) {
+				tokenType = token.GetKeywordTokenType(ident)
+			}
 
-	// Handle numbers
-	if isDigit(l.currentChar) {
-		line := l.currentLine
-		column := l.currentColumn
-		num := l.readNumber()
+			tok = token.Token{
+				Type:     tokenType,
+				Literal:  ident,
+				FileName: l.fileName,
+				Line:     line,
+				Column:   column,
+			}
+			// Handle numbers (int or float)
+		} else if isDigit(l.currentChar) {
+			line := l.currentLine
+			column := l.currentColumn
+			num := l.readNumber()
 
-		tok = token.Token{
-			Type:     token.INT,
-			Literal:  num,
-			FileName: l.fileName,
-			Line:     line,
-			Column:   column,
+			tokenType := token.INT
+			if containsDecimalPoint(num) {
+				tokenType = token.FLOAT
+			}
+
+			tok = token.Token{
+				Type:     tokenType,
+				Literal:  num,
+				FileName: l.fileName,
+				Line:     line,
+				Column:   column,
+			}
+			// Handle illegal characters
+		} else {
+			tok = token.Token{
+				Type:     token.ILLEGAL,
+				Literal:  string(l.currentChar),
+				FileName: l.fileName,
+				Line:     l.currentLine,
+				Column:   l.currentColumn,
+			}
 		}
 	}
 
