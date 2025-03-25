@@ -55,6 +55,32 @@ const (
 	FALSE   TokenType = "FALSE"
 )
 
+// delimiters is a map of delimiters to their corresponding token types.
+var delimiters = map[string]TokenType{
+	":":  COLON,
+	",":  COMMA,
+	"(":  LPAREN,
+	")":  RPAREN,
+	"{":  LBRACE,
+	"}":  RBRACE,
+	"[":  LBRACKET,
+	"]":  RBRACKET,
+	"@":  AT,
+	"?":  QUESTION,
+	"\n": NEWLINE,
+}
+
+// IsDelimiter returns true if the character is a delimiter.
+func IsDelimiter(ch byte) bool {
+	_, ok := delimiters[string(ch)]
+	return ok
+}
+
+// GetDelimiterTokenType returns the token type for the given delimiter.
+func GetDelimiterTokenType(ch byte) TokenType {
+	return delimiters[string(ch)]
+}
+
 // keywords is a map of keywords to their corresponding token types.
 var keywords = map[string]TokenType{
 	"version": VERSION,
