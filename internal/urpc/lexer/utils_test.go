@@ -15,6 +15,7 @@ func TestIsLetter(t *testing.T) {
 	require.False(t, isLetter('1'))
 	require.False(t, isLetter('@'))
 	require.False(t, isLetter('.'))
+	require.False(t, isLetter(':'))
 	require.False(t, isLetter(' '))
 	require.False(t, isLetter('\n'))
 }
