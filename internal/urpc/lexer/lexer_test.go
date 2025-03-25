@@ -79,6 +79,28 @@ func TestLexer(t *testing.T) {
 			{Type: token.OUTPUT, Literal: "output", FileName: "test.urpc", Line: 1, Column: 25},
 			{Type: token.META, Literal: "meta", FileName: "test.urpc", Line: 1, Column: 32},
 			{Type: token.ERROR, Literal: "error", FileName: "test.urpc", Line: 1, Column: 37},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 42},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+	})
+
+	t.Run("TestNextTokenIdentifiers", func(t *testing.T) {
+		input := "hello world someIdentifier"
+
+		tests := []token.Token{
+			{Type: token.IDENT, Literal: "hello", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.IDENT, Literal: "world", FileName: "test.urpc", Line: 1, Column: 7},
+			{Type: token.IDENT, Literal: "someIdentifier", FileName: "test.urpc", Line: 1, Column: 13},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 27},
 		}
 
 		lex := NewLexer("test.urpc", input)
