@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "User": {
-      "type": "object",
       "description": "Represents a user.",
       "fields": {
         "email": {
@@ -27,7 +26,11 @@
           "description": "The gender of the user, male, female or other.",
           "rules": {
             "enum": {
-              "values": ["male", "female", "other"]
+              "values": [
+                "male",
+                "female",
+                "other"
+              ]
             }
           }
         },
@@ -71,7 +74,6 @@
       }
     },
     "Product": {
-      "type": "object",
       "description": "Represents a product.",
       "fields": {
         "productId": {
@@ -97,7 +99,6 @@
       }
     },
     "Order": {
-      "type": "object",
       "description": "Represents an order.",
       "fields": {
         "orderId": {
@@ -126,7 +127,6 @@
       }
     },
     "Address": {
-      "type": "object",
       "description": "Represents an address.",
       "fields": {
         "addressId": {
@@ -160,7 +160,6 @@
       }
     },
     "Payment": {
-      "type": "object",
       "description": "Represents a payment.",
       "fields": {
         "paymentId": {
@@ -186,7 +185,6 @@
       }
     },
     "Review": {
-      "type": "object",
       "description": "Represents a review.",
       "fields": {
         "reviewId": {
@@ -216,7 +214,6 @@
       }
     },
     "Category": {
-      "type": "object",
       "description": "Represents a category.",
       "fields": {
         "categoryId": {
@@ -234,7 +231,6 @@
       }
     },
     "Subscription": {
-      "type": "object",
       "description": "Represents a subscription.",
       "fields": {
         "subscriptionId": {
@@ -260,7 +256,6 @@
       }
     },
     "Notification": {
-      "type": "object",
       "description": "Represents a notification.",
       "fields": {
         "notificationId": {
@@ -282,7 +277,6 @@
       }
     },
     "Message": {
-      "type": "object",
       "description": "Represents a message.",
       "fields": {
         "messageId": {
@@ -308,7 +302,6 @@
       }
     },
     "Event": {
-      "type": "object",
       "description": "Represents an event.",
       "fields": {
         "eventId": {
@@ -334,7 +327,6 @@
       }
     },
     "Task": {
-      "type": "object",
       "description": "Represents a task.",
       "fields": {
         "taskId": {
@@ -364,7 +356,6 @@
       }
     },
     "Project": {
-      "type": "object",
       "description": "Represents a project.",
       "fields": {
         "projectId": {
@@ -397,7 +388,6 @@
       }
     },
     "Invoice": {
-      "type": "object",
       "description": "Represents an invoice.",
       "fields": {
         "invoiceId": {
@@ -423,7 +413,6 @@
       }
     },
     "Coupon": {
-      "type": "object",
       "description": "Represents a coupon.",
       "fields": {
         "couponId": {
@@ -445,7 +434,6 @@
       }
     },
     "Shipment": {
-      "type": "object",
       "description": "Represents a shipment.",
       "fields": {
         "shipmentId": {
@@ -471,7 +459,6 @@
       }
     },
     "Cart": {
-      "type": "object",
       "description": "Represents a shopping cart.",
       "fields": {
         "cartId": {
@@ -496,7 +483,6 @@
       }
     },
     "Wishlist": {
-      "type": "object",
       "description": "Represents a wishlist.",
       "fields": {
         "wishlistId": {
@@ -517,7 +503,6 @@
       }
     },
     "Promotion": {
-      "type": "object",
       "description": "Represents a promotion.",
       "fields": {
         "promotionId": {
@@ -547,7 +532,6 @@
       }
     },
     "Feedback": {
-      "type": "object",
       "description": "Represents feedback.",
       "fields": {
         "feedbackId": {
@@ -573,7 +557,6 @@
       }
     },
     "Ticket": {
-      "type": "object",
       "description": "Represents a support ticket.",
       "fields": {
         "ticketId": {
@@ -603,7 +586,6 @@
       }
     },
     "Comment": {
-      "type": "object",
       "description": "Represents a comment.",
       "fields": {
         "commentId": {
@@ -629,7 +611,6 @@
       }
     },
     "Post": {
-      "type": "object",
       "description": "Represents a post.",
       "fields": {
         "postId": {
@@ -662,7 +643,6 @@
       }
     },
     "Profile": {
-      "type": "object",
       "description": "Represents a user profile.",
       "fields": {
         "profileId": {
@@ -691,7 +671,6 @@
       }
     },
     "Membership": {
-      "type": "object",
       "description": "Represents a membership.",
       "fields": {
         "membershipId": {
@@ -717,7 +696,6 @@
       }
     },
     "Transaction": {
-      "type": "object",
       "description": "Represents a transaction.",
       "fields": {
         "transactionId": {
@@ -743,7 +721,6 @@
       }
     },
     "Activity": {
-      "type": "object",
       "description": "Represents an activity.",
       "fields": {
         "activityId": {
@@ -765,7 +742,6 @@
       }
     },
     "Session": {
-      "type": "object",
       "description": "Represents a session.",
       "fields": {
         "sessionId": {
@@ -787,7 +763,6 @@
       }
     },
     "Role": {
-      "type": "object",
       "description": "Represents a role.",
       "fields": {
         "roleId": {
@@ -808,7 +783,6 @@
       }
     },
     "Permission": {
-      "type": "object",
       "description": "Represents a permission.",
       "fields": {
         "permissionId": {
@@ -826,7 +800,6 @@
       }
     },
     "Group": {
-      "type": "object",
       "description": "Represents a group.",
       "fields": {
         "groupId": {
@@ -847,7 +820,6 @@
       }
     },
     "Device": {
-      "type": "object",
       "description": "Represents a device.",
       "fields": {
         "deviceId": {
@@ -869,7 +841,6 @@
       }
     },
     "Log": {
-      "type": "object",
       "description": "Represents a log entry.",
       "fields": {
         "logId": {
@@ -891,7 +862,6 @@
       }
     },
     "Audit": {
-      "type": "object",
       "description": "Represents an audit entry.",
       "fields": {
         "auditId": {
@@ -913,7 +883,6 @@
       }
     },
     "Metric": {
-      "type": "object",
       "description": "Represents a metric.",
       "fields": {
         "metricId": {
@@ -935,7 +904,6 @@
       }
     },
     "Alert": {
-      "type": "object",
       "description": "Represents an alert.",
       "fields": {
         "alertId": {
@@ -957,7 +925,6 @@
       }
     },
     "Report": {
-      "type": "object",
       "description": "Represents a report.",
       "fields": {
         "reportId": {
@@ -979,7 +946,6 @@
       }
     },
     "Integration": {
-      "type": "object",
       "description": "Represents an integration.",
       "fields": {
         "integrationId": {
@@ -1011,7 +977,6 @@
       }
     },
     "Webhook": {
-      "type": "object",
       "description": "Represents a webhook.",
       "fields": {
         "webhookId": {
@@ -1033,7 +998,6 @@
       }
     },
     "APIKey": {
-      "type": "object",
       "description": "Represents an API key.",
       "fields": {
         "apiKeyId": {
@@ -1055,7 +1019,6 @@
       }
     },
     "Token": {
-      "type": "object",
       "description": "Represents a token.",
       "fields": {
         "tokenId": {
@@ -1077,7 +1040,6 @@
       }
     },
     "SubscriptionPlan": {
-      "type": "object",
       "description": "Represents a subscription plan.",
       "fields": {
         "planId": {
@@ -1102,7 +1064,6 @@
       }
     },
     "DiscountCode": {
-      "type": "object",
       "description": "Represents a discount code.",
       "fields": {
         "discountCodeId": {
@@ -1124,7 +1085,6 @@
       }
     },
     "ShippingMethod": {
-      "type": "object",
       "description": "Represents a shipping method.",
       "fields": {
         "shippingMethodId": {
@@ -1146,7 +1106,6 @@
       }
     },
     "PaymentMethod": {
-      "type": "object",
       "description": "Represents a payment method.",
       "fields": {
         "paymentMethodId": {
@@ -1174,7 +1133,6 @@
       }
     },
     "TaxRate": {
-      "type": "object",
       "description": "Represents a tax rate.",
       "fields": {
         "taxRateId": {
@@ -1192,7 +1150,6 @@
       }
     },
     "Currency": {
-      "type": "object",
       "description": "Represents a currency.",
       "fields": {
         "currencyId": {
@@ -1214,7 +1171,6 @@
       }
     },
     "Language": {
-      "type": "object",
       "description": "Represents a language.",
       "fields": {
         "languageId": {
@@ -1232,7 +1188,6 @@
       }
     },
     "TimeZone": {
-      "type": "object",
       "description": "Represents a time zone.",
       "fields": {
         "timeZoneId": {
@@ -1250,7 +1205,6 @@
       }
     },
     "Country": {
-      "type": "object",
       "description": "Represents a country.",
       "fields": {
         "countryId": {
@@ -1268,7 +1222,6 @@
       }
     },
     "State": {
-      "type": "object",
       "description": "Represents a state.",
       "fields": {
         "stateId": {
@@ -1290,7 +1243,6 @@
       }
     },
     "City": {
-      "type": "object",
       "description": "Represents a city.",
       "fields": {
         "cityId": {
@@ -1308,7 +1260,6 @@
       }
     },
     "AddressType": {
-      "type": "object",
       "description": "Represents an address type.",
       "fields": {
         "addressTypeId": {
@@ -1322,7 +1273,6 @@
       }
     },
     "Contact": {
-      "type": "object",
       "description": "Represents a contact.",
       "fields": {
         "contactId": {
@@ -1348,7 +1298,6 @@
       }
     },
     "ContactGroup": {
-      "type": "object",
       "description": "Represents a contact group.",
       "fields": {
         "contactGroupId": {
@@ -1369,7 +1318,6 @@
       }
     },
     "ContactType": {
-      "type": "object",
       "description": "Represents a contact type.",
       "fields": {
         "contactTypeId": {
@@ -1383,7 +1331,6 @@
       }
     },
     "Communication": {
-      "type": "object",
       "description": "Represents a communication.",
       "fields": {
         "communicationId": {
@@ -1409,7 +1356,6 @@
       }
     },
     "CommunicationTemplate": {
-      "type": "object",
       "description": "Represents a communication template.",
       "fields": {
         "templateId": {
@@ -1427,7 +1373,6 @@
       }
     },
     "CommunicationChannel": {
-      "type": "object",
       "description": "Represents a communication channel.",
       "fields": {
         "channelId": {
@@ -1445,7 +1390,6 @@
       }
     },
     "CommunicationLog": {
-      "type": "object",
       "description": "Represents a communication log.",
       "fields": {
         "logId": {
@@ -1467,7 +1411,6 @@
       }
     },
     "CommunicationSettings": {
-      "type": "object",
       "description": "Represents communication settings.",
       "fields": {
         "settingsId": {
@@ -1495,7 +1438,6 @@
       }
     },
     "CommunicationPreferences": {
-      "type": "object",
       "description": "Represents communication preferences.",
       "fields": {
         "preferencesId": {
@@ -1521,76 +1463,66 @@
     "DummyProcedure": {
       "description": "This is a dummy procedure",
       "input": {
-        "type": "string"
+        "result": {
+          "type": "string"
+        }
       },
       "output": {
-        "type": "boolean"
+        "result": {
+          "type": "boolean"
+        }
       }
     },
     "CreateUser": {
       "description": "Creates a new user.",
       "input": {
-        "type": "object",
-        "fields": {
-          "user": {
-            "type": "User",
-            "description": "The user details."
-          }
+        "user": {
+          "type": "User",
+          "description": "The user details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "userId": {
-            "type": "string",
-            "description": "The new user's unique identifier."
-          }
+        "userId": {
+          "type": "string",
+          "description": "The new user's unique identifier."
         }
       }
     },
     "GetUser": {
       "description": "Retrieves user information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "userId": {
-            "type": "string",
-            "description": "The user's unique identifier."
-          }
+        "userId": {
+          "type": "string",
+          "description": "The user's unique identifier."
         }
       },
       "output": {
-        "type": "User",
-        "description": "The user details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "User",
+          "description": "The user details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListUsers": {
       "description": "List all users.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of users to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of users to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of users to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of users to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "users": {
-            "type": "array",
-            "description": "List of users.",
-            "arrayType": {
-              "type": "User"
-            }
+        "users": {
+          "type": "array",
+          "description": "List of users.",
+          "arrayType": {
+            "type": "User"
           }
         }
       }
@@ -1598,79 +1530,63 @@
     "LastUser": {
       "description": "Get the last user.",
       "output": {
-        "type": "object",
-        "fields": {
-          "user": {
-            "type": "User",
-            "description": "The last user."
-          }
+        "user": {
+          "type": "User",
+          "description": "The last user."
         }
-      }
+      },
+      "input": {}
     },
     "CreateProduct": {
       "description": "Creates a new product.",
       "input": {
-        "type": "object",
-        "fields": {
-          "product": {
-            "type": "Product",
-            "description": "The product details."
-          }
+        "product": {
+          "type": "Product",
+          "description": "The product details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "productId": {
-            "type": "string",
-            "description": "The new product's unique identifier."
-          }
+        "productId": {
+          "type": "string",
+          "description": "The new product's unique identifier."
         }
       }
     },
     "GetProduct": {
       "description": "Retrieves product information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "productId": {
-            "type": "string",
-            "description": "The product's unique identifier."
-          }
+        "productId": {
+          "type": "string",
+          "description": "The product's unique identifier."
         }
       },
       "output": {
-        "type": "Product",
-        "description": "The product details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Product",
+          "description": "The product details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListProducts": {
       "description": "List all products.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of products to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of products to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of products to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of products to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "products": {
-            "type": "array",
-            "description": "List of products.",
-            "arrayType": {
-              "type": "Product"
-            }
+        "products": {
+          "type": "array",
+          "description": "List of products.",
+          "arrayType": {
+            "type": "Product"
           }
         }
       }
@@ -1678,108 +1594,87 @@
     "UpdateProduct": {
       "description": "Updates an existing product.",
       "input": {
-        "type": "object",
-        "fields": {
-          "productId": {
-            "type": "string",
-            "description": "The product's unique identifier."
-          },
-          "product": {
-            "type": "Product",
-            "description": "The updated product details."
-          }
+        "productId": {
+          "type": "string",
+          "description": "The product's unique identifier."
+        },
+        "product": {
+          "type": "Product",
+          "description": "The updated product details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "productId": {
-            "type": "string",
-            "description": "The updated product's unique identifier."
-          }
+        "productId": {
+          "type": "string",
+          "description": "The updated product's unique identifier."
         }
       }
     },
     "DeleteProduct": {
       "description": "Deletes a product by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "productId": {
-            "type": "string",
-            "description": "The product's unique identifier."
-          }
+        "productId": {
+          "type": "string",
+          "description": "The product's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the product was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the product was successfully deleted."
+        }
       }
     },
     "CreateOrder": {
       "description": "Creates a new order.",
       "input": {
-        "type": "object",
-        "fields": {
-          "order": {
-            "type": "Order",
-            "description": "The order details."
-          }
+        "order": {
+          "type": "Order",
+          "description": "The order details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "orderId": {
-            "type": "string",
-            "description": "The new order's unique identifier."
-          }
+        "orderId": {
+          "type": "string",
+          "description": "The new order's unique identifier."
         }
       }
     },
     "GetOrder": {
       "description": "Retrieves order information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "orderId": {
-            "type": "string",
-            "description": "The order's unique identifier."
-          }
+        "orderId": {
+          "type": "string",
+          "description": "The order's unique identifier."
         }
       },
       "output": {
-        "type": "Order",
-        "description": "The order details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Order",
+          "description": "The order details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListOrders": {
       "description": "List all orders.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of orders to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of orders to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of orders to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of orders to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "orders": {
-            "type": "array",
-            "description": "List of orders.",
-            "arrayType": {
-              "type": "Order"
-            }
+        "orders": {
+          "type": "array",
+          "description": "List of orders.",
+          "arrayType": {
+            "type": "Order"
           }
         }
       }
@@ -1787,108 +1682,87 @@
     "UpdateOrder": {
       "description": "Updates an existing order.",
       "input": {
-        "type": "object",
-        "fields": {
-          "orderId": {
-            "type": "string",
-            "description": "The order's unique identifier."
-          },
-          "order": {
-            "type": "Order",
-            "description": "The updated order details."
-          }
+        "orderId": {
+          "type": "string",
+          "description": "The order's unique identifier."
+        },
+        "order": {
+          "type": "Order",
+          "description": "The updated order details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "orderId": {
-            "type": "string",
-            "description": "The updated order's unique identifier."
-          }
+        "orderId": {
+          "type": "string",
+          "description": "The updated order's unique identifier."
         }
       }
     },
     "DeleteOrder": {
       "description": "Deletes an order by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "orderId": {
-            "type": "string",
-            "description": "The order's unique identifier."
-          }
+        "orderId": {
+          "type": "string",
+          "description": "The order's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the order was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the order was successfully deleted."
+        }
       }
     },
     "CreateAddress": {
       "description": "Creates a new address.",
       "input": {
-        "type": "object",
-        "fields": {
-          "address": {
-            "type": "Address",
-            "description": "The address details."
-          }
+        "address": {
+          "type": "Address",
+          "description": "The address details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "addressId": {
-            "type": "string",
-            "description": "The new address's unique identifier."
-          }
+        "addressId": {
+          "type": "string",
+          "description": "The new address's unique identifier."
         }
       }
     },
     "GetAddress": {
       "description": "Retrieves address information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "addressId": {
-            "type": "string",
-            "description": "The address's unique identifier."
-          }
+        "addressId": {
+          "type": "string",
+          "description": "The address's unique identifier."
         }
       },
       "output": {
-        "type": "Address",
-        "description": "The address details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Address",
+          "description": "The address details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListAddresses": {
       "description": "List all addresses.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of addresses to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of addresses to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of addresses to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of addresses to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "addresses": {
-            "type": "array",
-            "description": "List of addresses.",
-            "arrayType": {
-              "type": "Address"
-            }
+        "addresses": {
+          "type": "array",
+          "description": "List of addresses.",
+          "arrayType": {
+            "type": "Address"
           }
         }
       }
@@ -1896,108 +1770,87 @@
     "UpdateAddress": {
       "description": "Updates an existing address.",
       "input": {
-        "type": "object",
-        "fields": {
-          "addressId": {
-            "type": "string",
-            "description": "The address's unique identifier."
-          },
-          "address": {
-            "type": "Address",
-            "description": "The updated address details."
-          }
+        "addressId": {
+          "type": "string",
+          "description": "The address's unique identifier."
+        },
+        "address": {
+          "type": "Address",
+          "description": "The updated address details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "addressId": {
-            "type": "string",
-            "description": "The updated address's unique identifier."
-          }
+        "addressId": {
+          "type": "string",
+          "description": "The updated address's unique identifier."
         }
       }
     },
     "DeleteAddress": {
       "description": "Deletes an address by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "addressId": {
-            "type": "string",
-            "description": "The address's unique identifier."
-          }
+        "addressId": {
+          "type": "string",
+          "description": "The address's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the address was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the address was successfully deleted."
+        }
       }
     },
     "CreatePayment": {
       "description": "Creates a new payment.",
       "input": {
-        "type": "object",
-        "fields": {
-          "payment": {
-            "type": "Payment",
-            "description": "The payment details."
-          }
+        "payment": {
+          "type": "Payment",
+          "description": "The payment details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "paymentId": {
-            "type": "string",
-            "description": "The new payment's unique identifier."
-          }
+        "paymentId": {
+          "type": "string",
+          "description": "The new payment's unique identifier."
         }
       }
     },
     "GetPayment": {
       "description": "Retrieves payment information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "paymentId": {
-            "type": "string",
-            "description": "The payment's unique identifier."
-          }
+        "paymentId": {
+          "type": "string",
+          "description": "The payment's unique identifier."
         }
       },
       "output": {
-        "type": "Payment",
-        "description": "The payment details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Payment",
+          "description": "The payment details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListPayments": {
       "description": "List all payments.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of payments to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of payments to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of payments to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of payments to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "payments": {
-            "type": "array",
-            "description": "List of payments.",
-            "arrayType": {
-              "type": "Payment"
-            }
+        "payments": {
+          "type": "array",
+          "description": "List of payments.",
+          "arrayType": {
+            "type": "Payment"
           }
         }
       }
@@ -2005,108 +1858,87 @@
     "UpdatePayment": {
       "description": "Updates an existing payment.",
       "input": {
-        "type": "object",
-        "fields": {
-          "paymentId": {
-            "type": "string",
-            "description": "The payment's unique identifier."
-          },
-          "payment": {
-            "type": "Payment",
-            "description": "The updated payment details."
-          }
+        "paymentId": {
+          "type": "string",
+          "description": "The payment's unique identifier."
+        },
+        "payment": {
+          "type": "Payment",
+          "description": "The updated payment details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "paymentId": {
-            "type": "string",
-            "description": "The updated payment's unique identifier."
-          }
+        "paymentId": {
+          "type": "string",
+          "description": "The updated payment's unique identifier."
         }
       }
     },
     "DeletePayment": {
       "description": "Deletes a payment by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "paymentId": {
-            "type": "string",
-            "description": "The payment's unique identifier."
-          }
+        "paymentId": {
+          "type": "string",
+          "description": "The payment's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the payment was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the payment was successfully deleted."
+        }
       }
     },
     "CreateReview": {
       "description": "Creates a new review.",
       "input": {
-        "type": "object",
-        "fields": {
-          "review": {
-            "type": "Review",
-            "description": "The review details."
-          }
+        "review": {
+          "type": "Review",
+          "description": "The review details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "reviewId": {
-            "type": "string",
-            "description": "The new review's unique identifier."
-          }
+        "reviewId": {
+          "type": "string",
+          "description": "The new review's unique identifier."
         }
       }
     },
     "GetReview": {
       "description": "Retrieves review information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "reviewId": {
-            "type": "string",
-            "description": "The review's unique identifier."
-          }
+        "reviewId": {
+          "type": "string",
+          "description": "The review's unique identifier."
         }
       },
       "output": {
-        "type": "Review",
-        "description": "The review details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Review",
+          "description": "The review details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListReviews": {
       "description": "List all reviews.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of reviews to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of reviews to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of reviews to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of reviews to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "reviews": {
-            "type": "array",
-            "description": "List of reviews.",
-            "arrayType": {
-              "type": "Review"
-            }
+        "reviews": {
+          "type": "array",
+          "description": "List of reviews.",
+          "arrayType": {
+            "type": "Review"
           }
         }
       }
@@ -2114,108 +1946,87 @@
     "UpdateReview": {
       "description": "Updates an existing review.",
       "input": {
-        "type": "object",
-        "fields": {
-          "reviewId": {
-            "type": "string",
-            "description": "The review's unique identifier."
-          },
-          "review": {
-            "type": "Review",
-            "description": "The updated review details."
-          }
+        "reviewId": {
+          "type": "string",
+          "description": "The review's unique identifier."
+        },
+        "review": {
+          "type": "Review",
+          "description": "The updated review details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "reviewId": {
-            "type": "string",
-            "description": "The updated review's unique identifier."
-          }
+        "reviewId": {
+          "type": "string",
+          "description": "The updated review's unique identifier."
         }
       }
     },
     "DeleteReview": {
       "description": "Deletes a review by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "reviewId": {
-            "type": "string",
-            "description": "The review's unique identifier."
-          }
+        "reviewId": {
+          "type": "string",
+          "description": "The review's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the review was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the review was successfully deleted."
+        }
       }
     },
     "CreateCategory": {
       "description": "Creates a new category.",
       "input": {
-        "type": "object",
-        "fields": {
-          "category": {
-            "type": "Category",
-            "description": "The category details."
-          }
+        "category": {
+          "type": "Category",
+          "description": "The category details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "categoryId": {
-            "type": "string",
-            "description": "The new category's unique identifier."
-          }
+        "categoryId": {
+          "type": "string",
+          "description": "The new category's unique identifier."
         }
       }
     },
     "GetCategory": {
       "description": "Retrieves category information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "categoryId": {
-            "type": "string",
-            "description": "The category's unique identifier."
-          }
+        "categoryId": {
+          "type": "string",
+          "description": "The category's unique identifier."
         }
       },
       "output": {
-        "type": "Category",
-        "description": "The category details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Category",
+          "description": "The category details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListCategories": {
       "description": "List all categories.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of categories to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of categories to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of categories to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of categories to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "categories": {
-            "type": "array",
-            "description": "List of categories.",
-            "arrayType": {
-              "type": "Category"
-            }
+        "categories": {
+          "type": "array",
+          "description": "List of categories.",
+          "arrayType": {
+            "type": "Category"
           }
         }
       }
@@ -2223,108 +2034,87 @@
     "UpdateCategory": {
       "description": "Updates an existing category.",
       "input": {
-        "type": "object",
-        "fields": {
-          "categoryId": {
-            "type": "string",
-            "description": "The category's unique identifier."
-          },
-          "category": {
-            "type": "Category",
-            "description": "The updated category details."
-          }
+        "categoryId": {
+          "type": "string",
+          "description": "The category's unique identifier."
+        },
+        "category": {
+          "type": "Category",
+          "description": "The updated category details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "categoryId": {
-            "type": "string",
-            "description": "The updated category's unique identifier."
-          }
+        "categoryId": {
+          "type": "string",
+          "description": "The updated category's unique identifier."
         }
       }
     },
     "DeleteCategory": {
       "description": "Deletes a category by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "categoryId": {
-            "type": "string",
-            "description": "The category's unique identifier."
-          }
+        "categoryId": {
+          "type": "string",
+          "description": "The category's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the category was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the category was successfully deleted."
+        }
       }
     },
     "CreateSubscription": {
       "description": "Creates a new subscription.",
       "input": {
-        "type": "object",
-        "fields": {
-          "subscription": {
-            "type": "Subscription",
-            "description": "The subscription details."
-          }
+        "subscription": {
+          "type": "Subscription",
+          "description": "The subscription details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "subscriptionId": {
-            "type": "string",
-            "description": "The new subscription's unique identifier."
-          }
+        "subscriptionId": {
+          "type": "string",
+          "description": "The new subscription's unique identifier."
         }
       }
     },
     "GetSubscription": {
       "description": "Retrieves subscription information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "subscriptionId": {
-            "type": "string",
-            "description": "The subscription's unique identifier."
-          }
+        "subscriptionId": {
+          "type": "string",
+          "description": "The subscription's unique identifier."
         }
       },
       "output": {
-        "type": "Subscription",
-        "description": "The subscription details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Subscription",
+          "description": "The subscription details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListSubscriptions": {
       "description": "List all subscriptions.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of subscriptions to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of subscriptions to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of subscriptions to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of subscriptions to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "subscriptions": {
-            "type": "array",
-            "description": "List of subscriptions.",
-            "arrayType": {
-              "type": "Subscription"
-            }
+        "subscriptions": {
+          "type": "array",
+          "description": "List of subscriptions.",
+          "arrayType": {
+            "type": "Subscription"
           }
         }
       }
@@ -2332,108 +2122,87 @@
     "UpdateSubscription": {
       "description": "Updates an existing subscription.",
       "input": {
-        "type": "object",
-        "fields": {
-          "subscriptionId": {
-            "type": "string",
-            "description": "The subscription's unique identifier."
-          },
-          "subscription": {
-            "type": "Subscription",
-            "description": "The updated subscription details."
-          }
+        "subscriptionId": {
+          "type": "string",
+          "description": "The subscription's unique identifier."
+        },
+        "subscription": {
+          "type": "Subscription",
+          "description": "The updated subscription details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "subscriptionId": {
-            "type": "string",
-            "description": "The updated subscription's unique identifier."
-          }
+        "subscriptionId": {
+          "type": "string",
+          "description": "The updated subscription's unique identifier."
         }
       }
     },
     "DeleteSubscription": {
       "description": "Deletes a subscription by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "subscriptionId": {
-            "type": "string",
-            "description": "The subscription's unique identifier."
-          }
+        "subscriptionId": {
+          "type": "string",
+          "description": "The subscription's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the subscription was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the subscription was successfully deleted."
+        }
       }
     },
     "CreateNotification": {
       "description": "Creates a new notification.",
       "input": {
-        "type": "object",
-        "fields": {
-          "notification": {
-            "type": "Notification",
-            "description": "The notification details."
-          }
+        "notification": {
+          "type": "Notification",
+          "description": "The notification details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "notificationId": {
-            "type": "string",
-            "description": "The new notification's unique identifier."
-          }
+        "notificationId": {
+          "type": "string",
+          "description": "The new notification's unique identifier."
         }
       }
     },
     "GetNotification": {
       "description": "Retrieves notification information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "notificationId": {
-            "type": "string",
-            "description": "The notification's unique identifier."
-          }
+        "notificationId": {
+          "type": "string",
+          "description": "The notification's unique identifier."
         }
       },
       "output": {
-        "type": "Notification",
-        "description": "The notification details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Notification",
+          "description": "The notification details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListNotifications": {
       "description": "List all notifications.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of notifications to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of notifications to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of notifications to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of notifications to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "notifications": {
-            "type": "array",
-            "description": "List of notifications.",
-            "arrayType": {
-              "type": "Notification"
-            }
+        "notifications": {
+          "type": "array",
+          "description": "List of notifications.",
+          "arrayType": {
+            "type": "Notification"
           }
         }
       }
@@ -2441,108 +2210,87 @@
     "UpdateNotification": {
       "description": "Updates an existing notification.",
       "input": {
-        "type": "object",
-        "fields": {
-          "notificationId": {
-            "type": "string",
-            "description": "The notification's unique identifier."
-          },
-          "notification": {
-            "type": "Notification",
-            "description": "The updated notification details."
-          }
+        "notificationId": {
+          "type": "string",
+          "description": "The notification's unique identifier."
+        },
+        "notification": {
+          "type": "Notification",
+          "description": "The updated notification details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "notificationId": {
-            "type": "string",
-            "description": "The updated notification's unique identifier."
-          }
+        "notificationId": {
+          "type": "string",
+          "description": "The updated notification's unique identifier."
         }
       }
     },
     "DeleteNotification": {
       "description": "Deletes a notification by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "notificationId": {
-            "type": "string",
-            "description": "The notification's unique identifier."
-          }
+        "notificationId": {
+          "type": "string",
+          "description": "The notification's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the notification was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the notification was successfully deleted."
+        }
       }
     },
     "CreateMessage": {
       "description": "Creates a new message.",
       "input": {
-        "type": "object",
-        "fields": {
-          "message": {
-            "type": "Message",
-            "description": "The message details."
-          }
+        "message": {
+          "type": "Message",
+          "description": "The message details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "messageId": {
-            "type": "string",
-            "description": "The new message's unique identifier."
-          }
+        "messageId": {
+          "type": "string",
+          "description": "The new message's unique identifier."
         }
       }
     },
     "GetMessage": {
       "description": "Retrieves message information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "messageId": {
-            "type": "string",
-            "description": "The message's unique identifier."
-          }
+        "messageId": {
+          "type": "string",
+          "description": "The message's unique identifier."
         }
       },
       "output": {
-        "type": "Message",
-        "description": "The message details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Message",
+          "description": "The message details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListMessages": {
       "description": "List all messages.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of messages to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of messages to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of messages to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of messages to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "messages": {
-            "type": "array",
-            "description": "List of messages.",
-            "arrayType": {
-              "type": "Message"
-            }
+        "messages": {
+          "type": "array",
+          "description": "List of messages.",
+          "arrayType": {
+            "type": "Message"
           }
         }
       }
@@ -2550,108 +2298,87 @@
     "UpdateMessage": {
       "description": "Updates an existing message.",
       "input": {
-        "type": "object",
-        "fields": {
-          "messageId": {
-            "type": "string",
-            "description": "The message's unique identifier."
-          },
-          "message": {
-            "type": "Message",
-            "description": "The updated message details."
-          }
+        "messageId": {
+          "type": "string",
+          "description": "The message's unique identifier."
+        },
+        "message": {
+          "type": "Message",
+          "description": "The updated message details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "messageId": {
-            "type": "string",
-            "description": "The updated message's unique identifier."
-          }
+        "messageId": {
+          "type": "string",
+          "description": "The updated message's unique identifier."
         }
       }
     },
     "DeleteMessage": {
       "description": "Deletes a message by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "messageId": {
-            "type": "string",
-            "description": "The message's unique identifier."
-          }
+        "messageId": {
+          "type": "string",
+          "description": "The message's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the message was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the message was successfully deleted."
+        }
       }
     },
     "CreateEvent": {
       "description": "Creates a new event.",
       "input": {
-        "type": "object",
-        "fields": {
-          "event": {
-            "type": "Event",
-            "description": "The event details."
-          }
+        "event": {
+          "type": "Event",
+          "description": "The event details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "eventId": {
-            "type": "string",
-            "description": "The new event's unique identifier."
-          }
+        "eventId": {
+          "type": "string",
+          "description": "The new event's unique identifier."
         }
       }
     },
     "GetEvent": {
       "description": "Retrieves event information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "eventId": {
-            "type": "string",
-            "description": "The event's unique identifier."
-          }
+        "eventId": {
+          "type": "string",
+          "description": "The event's unique identifier."
         }
       },
       "output": {
-        "type": "Event",
-        "description": "The event details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Event",
+          "description": "The event details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListEvents": {
       "description": "List all events.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of events to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of events to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of events to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of events to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "events": {
-            "type": "array",
-            "description": "List of events.",
-            "arrayType": {
-              "type": "Event"
-            }
+        "events": {
+          "type": "array",
+          "description": "List of events.",
+          "arrayType": {
+            "type": "Event"
           }
         }
       }
@@ -2659,108 +2386,87 @@
     "UpdateEvent": {
       "description": "Updates an existing event.",
       "input": {
-        "type": "object",
-        "fields": {
-          "eventId": {
-            "type": "string",
-            "description": "The event's unique identifier."
-          },
-          "event": {
-            "type": "Event",
-            "description": "The updated event details."
-          }
+        "eventId": {
+          "type": "string",
+          "description": "The event's unique identifier."
+        },
+        "event": {
+          "type": "Event",
+          "description": "The updated event details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "eventId": {
-            "type": "string",
-            "description": "The updated event's unique identifier."
-          }
+        "eventId": {
+          "type": "string",
+          "description": "The updated event's unique identifier."
         }
       }
     },
     "DeleteEvent": {
       "description": "Deletes an event by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "eventId": {
-            "type": "string",
-            "description": "The event's unique identifier."
-          }
+        "eventId": {
+          "type": "string",
+          "description": "The event's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the event was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the event was successfully deleted."
+        }
       }
     },
     "CreateTask": {
       "description": "Creates a new task.",
       "input": {
-        "type": "object",
-        "fields": {
-          "task": {
-            "type": "Task",
-            "description": "The task details."
-          }
+        "task": {
+          "type": "Task",
+          "description": "The task details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "taskId": {
-            "type": "string",
-            "description": "The new task's unique identifier."
-          }
+        "taskId": {
+          "type": "string",
+          "description": "The new task's unique identifier."
         }
       }
     },
     "GetTask": {
       "description": "Retrieves task information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "taskId": {
-            "type": "string",
-            "description": "The task's unique identifier."
-          }
+        "taskId": {
+          "type": "string",
+          "description": "The task's unique identifier."
         }
       },
       "output": {
-        "type": "Task",
-        "description": "The task details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Task",
+          "description": "The task details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListTasks": {
       "description": "List all tasks.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of tasks to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of tasks to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of tasks to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of tasks to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "tasks": {
-            "type": "array",
-            "description": "List of tasks.",
-            "arrayType": {
-              "type": "Task"
-            }
+        "tasks": {
+          "type": "array",
+          "description": "List of tasks.",
+          "arrayType": {
+            "type": "Task"
           }
         }
       }
@@ -2768,108 +2474,87 @@
     "UpdateTask": {
       "description": "Updates an existing task.",
       "input": {
-        "type": "object",
-        "fields": {
-          "taskId": {
-            "type": "string",
-            "description": "The task's unique identifier."
-          },
-          "task": {
-            "type": "Task",
-            "description": "The updated task details."
-          }
+        "taskId": {
+          "type": "string",
+          "description": "The task's unique identifier."
+        },
+        "task": {
+          "type": "Task",
+          "description": "The updated task details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "taskId": {
-            "type": "string",
-            "description": "The updated task's unique identifier."
-          }
+        "taskId": {
+          "type": "string",
+          "description": "The updated task's unique identifier."
         }
       }
     },
     "DeleteTask": {
       "description": "Deletes a task by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "taskId": {
-            "type": "string",
-            "description": "The task's unique identifier."
-          }
+        "taskId": {
+          "type": "string",
+          "description": "The task's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the task was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the task was successfully deleted."
+        }
       }
     },
     "CreateProject": {
       "description": "Creates a new project.",
       "input": {
-        "type": "object",
-        "fields": {
-          "project": {
-            "type": "Project",
-            "description": "The project details."
-          }
+        "project": {
+          "type": "Project",
+          "description": "The project details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "projectId": {
-            "type": "string",
-            "description": "The new project's unique identifier."
-          }
+        "projectId": {
+          "type": "string",
+          "description": "The new project's unique identifier."
         }
       }
     },
     "GetProject": {
       "description": "Retrieves project information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "projectId": {
-            "type": "string",
-            "description": "The project's unique identifier."
-          }
+        "projectId": {
+          "type": "string",
+          "description": "The project's unique identifier."
         }
       },
       "output": {
-        "type": "Project",
-        "description": "The project details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Project",
+          "description": "The project details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListProjects": {
       "description": "List all projects.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of projects to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of projects to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of projects to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of projects to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "projects": {
-            "type": "array",
-            "description": "List of projects.",
-            "arrayType": {
-              "type": "Project"
-            }
+        "projects": {
+          "type": "array",
+          "description": "List of projects.",
+          "arrayType": {
+            "type": "Project"
           }
         }
       }
@@ -2877,108 +2562,87 @@
     "UpdateProject": {
       "description": "Updates an existing project.",
       "input": {
-        "type": "object",
-        "fields": {
-          "projectId": {
-            "type": "string",
-            "description": "The project's unique identifier."
-          },
-          "project": {
-            "type": "Project",
-            "description": "The updated project details."
-          }
+        "projectId": {
+          "type": "string",
+          "description": "The project's unique identifier."
+        },
+        "project": {
+          "type": "Project",
+          "description": "The updated project details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "projectId": {
-            "type": "string",
-            "description": "The updated project's unique identifier."
-          }
+        "projectId": {
+          "type": "string",
+          "description": "The updated project's unique identifier."
         }
       }
     },
     "DeleteProject": {
       "description": "Deletes a project by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "projectId": {
-            "type": "string",
-            "description": "The project's unique identifier."
-          }
+        "projectId": {
+          "type": "string",
+          "description": "The project's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the project was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the project was successfully deleted."
+        }
       }
     },
     "CreateInvoice": {
       "description": "Creates a new invoice.",
       "input": {
-        "type": "object",
-        "fields": {
-          "invoice": {
-            "type": "Invoice",
-            "description": "The invoice details."
-          }
+        "invoice": {
+          "type": "Invoice",
+          "description": "The invoice details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "invoiceId": {
-            "type": "string",
-            "description": "The new invoice's unique identifier."
-          }
+        "invoiceId": {
+          "type": "string",
+          "description": "The new invoice's unique identifier."
         }
       }
     },
     "GetInvoice": {
       "description": "Retrieves invoice information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "invoiceId": {
-            "type": "string",
-            "description": "The invoice's unique identifier."
-          }
+        "invoiceId": {
+          "type": "string",
+          "description": "The invoice's unique identifier."
         }
       },
       "output": {
-        "type": "Invoice",
-        "description": "The invoice details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Invoice",
+          "description": "The invoice details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListInvoices": {
       "description": "List all invoices.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of invoices to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of invoices to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of invoices to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of invoices to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "invoices": {
-            "type": "array",
-            "description": "List of invoices.",
-            "arrayType": {
-              "type": "Invoice"
-            }
+        "invoices": {
+          "type": "array",
+          "description": "List of invoices.",
+          "arrayType": {
+            "type": "Invoice"
           }
         }
       }
@@ -2986,108 +2650,87 @@
     "UpdateInvoice": {
       "description": "Updates an existing invoice.",
       "input": {
-        "type": "object",
-        "fields": {
-          "invoiceId": {
-            "type": "string",
-            "description": "The invoice's unique identifier."
-          },
-          "invoice": {
-            "type": "Invoice",
-            "description": "The updated invoice details."
-          }
+        "invoiceId": {
+          "type": "string",
+          "description": "The invoice's unique identifier."
+        },
+        "invoice": {
+          "type": "Invoice",
+          "description": "The updated invoice details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "invoiceId": {
-            "type": "string",
-            "description": "The updated invoice's unique identifier."
-          }
+        "invoiceId": {
+          "type": "string",
+          "description": "The updated invoice's unique identifier."
         }
       }
     },
     "DeleteInvoice": {
       "description": "Deletes an invoice by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "invoiceId": {
-            "type": "string",
-            "description": "The invoice's unique identifier."
-          }
+        "invoiceId": {
+          "type": "string",
+          "description": "The invoice's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the invoice was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the invoice was successfully deleted."
+        }
       }
     },
     "CreateCoupon": {
       "description": "Creates a new coupon.",
       "input": {
-        "type": "object",
-        "fields": {
-          "coupon": {
-            "type": "Coupon",
-            "description": "The coupon details."
-          }
+        "coupon": {
+          "type": "Coupon",
+          "description": "The coupon details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "couponId": {
-            "type": "string",
-            "description": "The new coupon's unique identifier."
-          }
+        "couponId": {
+          "type": "string",
+          "description": "The new coupon's unique identifier."
         }
       }
     },
     "GetCoupon": {
       "description": "Retrieves coupon information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "couponId": {
-            "type": "string",
-            "description": "The coupon's unique identifier."
-          }
+        "couponId": {
+          "type": "string",
+          "description": "The coupon's unique identifier."
         }
       },
       "output": {
-        "type": "Coupon",
-        "description": "The coupon details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Coupon",
+          "description": "The coupon details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListCoupons": {
       "description": "List all coupons.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of coupons to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of coupons to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of coupons to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of coupons to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "coupons": {
-            "type": "array",
-            "description": "List of coupons.",
-            "arrayType": {
-              "type": "Coupon"
-            }
+        "coupons": {
+          "type": "array",
+          "description": "List of coupons.",
+          "arrayType": {
+            "type": "Coupon"
           }
         }
       }
@@ -3095,108 +2738,87 @@
     "UpdateCoupon": {
       "description": "Updates an existing coupon.",
       "input": {
-        "type": "object",
-        "fields": {
-          "couponId": {
-            "type": "string",
-            "description": "The coupon's unique identifier."
-          },
-          "coupon": {
-            "type": "Coupon",
-            "description": "The updated coupon details."
-          }
+        "couponId": {
+          "type": "string",
+          "description": "The coupon's unique identifier."
+        },
+        "coupon": {
+          "type": "Coupon",
+          "description": "The updated coupon details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "couponId": {
-            "type": "string",
-            "description": "The updated coupon's unique identifier."
-          }
+        "couponId": {
+          "type": "string",
+          "description": "The updated coupon's unique identifier."
         }
       }
     },
     "DeleteCoupon": {
       "description": "Deletes a coupon by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "couponId": {
-            "type": "string",
-            "description": "The coupon's unique identifier."
-          }
+        "couponId": {
+          "type": "string",
+          "description": "The coupon's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the coupon was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the coupon was successfully deleted."
+        }
       }
     },
     "CreateShipment": {
       "description": "Creates a new shipment.",
       "input": {
-        "type": "object",
-        "fields": {
-          "shipment": {
-            "type": "Shipment",
-            "description": "The shipment details."
-          }
+        "shipment": {
+          "type": "Shipment",
+          "description": "The shipment details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "shipmentId": {
-            "type": "string",
-            "description": "The new shipment's unique identifier."
-          }
+        "shipmentId": {
+          "type": "string",
+          "description": "The new shipment's unique identifier."
         }
       }
     },
     "GetShipment": {
       "description": "Retrieves shipment information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "shipmentId": {
-            "type": "string",
-            "description": "The shipment's unique identifier."
-          }
+        "shipmentId": {
+          "type": "string",
+          "description": "The shipment's unique identifier."
         }
       },
       "output": {
-        "type": "Shipment",
-        "description": "The shipment details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Shipment",
+          "description": "The shipment details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListShipments": {
       "description": "List all shipments.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of shipments to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of shipments to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of shipments to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of shipments to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "shipments": {
-            "type": "array",
-            "description": "List of shipments.",
-            "arrayType": {
-              "type": "Shipment"
-            }
+        "shipments": {
+          "type": "array",
+          "description": "List of shipments.",
+          "arrayType": {
+            "type": "Shipment"
           }
         }
       }
@@ -3204,108 +2826,87 @@
     "UpdateShipment": {
       "description": "Updates an existing shipment.",
       "input": {
-        "type": "object",
-        "fields": {
-          "shipmentId": {
-            "type": "string",
-            "description": "The shipment's unique identifier."
-          },
-          "shipment": {
-            "type": "Shipment",
-            "description": "The updated shipment details."
-          }
+        "shipmentId": {
+          "type": "string",
+          "description": "The shipment's unique identifier."
+        },
+        "shipment": {
+          "type": "Shipment",
+          "description": "The updated shipment details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "shipmentId": {
-            "type": "string",
-            "description": "The updated shipment's unique identifier."
-          }
+        "shipmentId": {
+          "type": "string",
+          "description": "The updated shipment's unique identifier."
         }
       }
     },
     "DeleteShipment": {
       "description": "Deletes a shipment by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "shipmentId": {
-            "type": "string",
-            "description": "The shipment's unique identifier."
-          }
+        "shipmentId": {
+          "type": "string",
+          "description": "The shipment's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the shipment was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the shipment was successfully deleted."
+        }
       }
     },
     "CreateCart": {
       "description": "Creates a new cart.",
       "input": {
-        "type": "object",
-        "fields": {
-          "cart": {
-            "type": "Cart",
-            "description": "The cart details."
-          }
+        "cart": {
+          "type": "Cart",
+          "description": "The cart details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "cartId": {
-            "type": "string",
-            "description": "The new cart's unique identifier."
-          }
+        "cartId": {
+          "type": "string",
+          "description": "The new cart's unique identifier."
         }
       }
     },
     "GetCart": {
       "description": "Retrieves cart information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "cartId": {
-            "type": "string",
-            "description": "The cart's unique identifier."
-          }
+        "cartId": {
+          "type": "string",
+          "description": "The cart's unique identifier."
         }
       },
       "output": {
-        "type": "Cart",
-        "description": "The cart details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Cart",
+          "description": "The cart details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListCarts": {
       "description": "List all carts.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of carts to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of carts to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of carts to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of carts to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "carts": {
-            "type": "array",
-            "description": "List of carts.",
-            "arrayType": {
-              "type": "Cart"
-            }
+        "carts": {
+          "type": "array",
+          "description": "List of carts.",
+          "arrayType": {
+            "type": "Cart"
           }
         }
       }
@@ -3313,108 +2914,87 @@
     "UpdateCart": {
       "description": "Updates an existing cart.",
       "input": {
-        "type": "object",
-        "fields": {
-          "cartId": {
-            "type": "string",
-            "description": "The cart's unique identifier."
-          },
-          "cart": {
-            "type": "Cart",
-            "description": "The updated cart details."
-          }
+        "cartId": {
+          "type": "string",
+          "description": "The cart's unique identifier."
+        },
+        "cart": {
+          "type": "Cart",
+          "description": "The updated cart details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "cartId": {
-            "type": "string",
-            "description": "The updated cart's unique identifier."
-          }
+        "cartId": {
+          "type": "string",
+          "description": "The updated cart's unique identifier."
         }
       }
     },
     "DeleteCart": {
       "description": "Deletes a cart by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "cartId": {
-            "type": "string",
-            "description": "The cart's unique identifier."
-          }
+        "cartId": {
+          "type": "string",
+          "description": "The cart's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the cart was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the cart was successfully deleted."
+        }
       }
     },
     "CreateWishlist": {
       "description": "Creates a new wishlist.",
       "input": {
-        "type": "object",
-        "fields": {
-          "wishlist": {
-            "type": "Wishlist",
-            "description": "The wishlist details."
-          }
+        "wishlist": {
+          "type": "Wishlist",
+          "description": "The wishlist details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "wishlistId": {
-            "type": "string",
-            "description": "The new wishlist's unique identifier."
-          }
+        "wishlistId": {
+          "type": "string",
+          "description": "The new wishlist's unique identifier."
         }
       }
     },
     "GetWishlist": {
       "description": "Retrieves wishlist information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "wishlistId": {
-            "type": "string",
-            "description": "The wishlist's unique identifier."
-          }
+        "wishlistId": {
+          "type": "string",
+          "description": "The wishlist's unique identifier."
         }
       },
       "output": {
-        "type": "Wishlist",
-        "description": "The wishlist details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Wishlist",
+          "description": "The wishlist details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListWishlists": {
       "description": "List all wishlists.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of wishlists to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of wishlists to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of wishlists to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of wishlists to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "wishlists": {
-            "type": "array",
-            "description": "List of wishlists.",
-            "arrayType": {
-              "type": "Wishlist"
-            }
+        "wishlists": {
+          "type": "array",
+          "description": "List of wishlists.",
+          "arrayType": {
+            "type": "Wishlist"
           }
         }
       }
@@ -3422,108 +3002,87 @@
     "UpdateWishlist": {
       "description": "Updates an existing wishlist.",
       "input": {
-        "type": "object",
-        "fields": {
-          "wishlistId": {
-            "type": "string",
-            "description": "The wishlist's unique identifier."
-          },
-          "wishlist": {
-            "type": "Wishlist",
-            "description": "The updated wishlist details."
-          }
+        "wishlistId": {
+          "type": "string",
+          "description": "The wishlist's unique identifier."
+        },
+        "wishlist": {
+          "type": "Wishlist",
+          "description": "The updated wishlist details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "wishlistId": {
-            "type": "string",
-            "description": "The updated wishlist's unique identifier."
-          }
+        "wishlistId": {
+          "type": "string",
+          "description": "The updated wishlist's unique identifier."
         }
       }
     },
     "DeleteWishlist": {
       "description": "Deletes a wishlist by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "wishlistId": {
-            "type": "string",
-            "description": "The wishlist's unique identifier."
-          }
+        "wishlistId": {
+          "type": "string",
+          "description": "The wishlist's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the wishlist was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the wishlist was successfully deleted."
+        }
       }
     },
     "CreatePromotion": {
       "description": "Creates a new promotion.",
       "input": {
-        "type": "object",
-        "fields": {
-          "promotion": {
-            "type": "Promotion",
-            "description": "The promotion details."
-          }
+        "promotion": {
+          "type": "Promotion",
+          "description": "The promotion details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "promotionId": {
-            "type": "string",
-            "description": "The new promotion's unique identifier."
-          }
+        "promotionId": {
+          "type": "string",
+          "description": "The new promotion's unique identifier."
         }
       }
     },
     "GetPromotion": {
       "description": "Retrieves promotion information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "promotionId": {
-            "type": "string",
-            "description": "The promotion's unique identifier."
-          }
+        "promotionId": {
+          "type": "string",
+          "description": "The promotion's unique identifier."
         }
       },
       "output": {
-        "type": "Promotion",
-        "description": "The promotion details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Promotion",
+          "description": "The promotion details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListPromotions": {
       "description": "List all promotions.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of promotions to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of promotions to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of promotions to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of promotions to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "promotions": {
-            "type": "array",
-            "description": "List of promotions.",
-            "arrayType": {
-              "type": "Promotion"
-            }
+        "promotions": {
+          "type": "array",
+          "description": "List of promotions.",
+          "arrayType": {
+            "type": "Promotion"
           }
         }
       }
@@ -3531,108 +3090,87 @@
     "UpdatePromotion": {
       "description": "Updates an existing promotion.",
       "input": {
-        "type": "object",
-        "fields": {
-          "promotionId": {
-            "type": "string",
-            "description": "The promotion's unique identifier."
-          },
-          "promotion": {
-            "type": "Promotion",
-            "description": "The updated promotion details."
-          }
+        "promotionId": {
+          "type": "string",
+          "description": "The promotion's unique identifier."
+        },
+        "promotion": {
+          "type": "Promotion",
+          "description": "The updated promotion details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "promotionId": {
-            "type": "string",
-            "description": "The updated promotion's unique identifier."
-          }
+        "promotionId": {
+          "type": "string",
+          "description": "The updated promotion's unique identifier."
         }
       }
     },
     "DeletePromotion": {
       "description": "Deletes a promotion by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "promotionId": {
-            "type": "string",
-            "description": "The promotion's unique identifier."
-          }
+        "promotionId": {
+          "type": "string",
+          "description": "The promotion's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the promotion was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the promotion was successfully deleted."
+        }
       }
     },
     "CreateFeedback": {
       "description": "Creates a new feedback.",
       "input": {
-        "type": "object",
-        "fields": {
-          "feedback": {
-            "type": "Feedback",
-            "description": "The feedback details."
-          }
+        "feedback": {
+          "type": "Feedback",
+          "description": "The feedback details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "feedbackId": {
-            "type": "string",
-            "description": "The new feedback's unique identifier."
-          }
+        "feedbackId": {
+          "type": "string",
+          "description": "The new feedback's unique identifier."
         }
       }
     },
     "GetFeedback": {
       "description": "Retrieves feedback information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "feedbackId": {
-            "type": "string",
-            "description": "The feedback's unique identifier."
-          }
+        "feedbackId": {
+          "type": "string",
+          "description": "The feedback's unique identifier."
         }
       },
       "output": {
-        "type": "Feedback",
-        "description": "The feedback details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Feedback",
+          "description": "The feedback details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListFeedbacks": {
       "description": "List all feedbacks.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of feedbacks to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of feedbacks to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of feedbacks to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of feedbacks to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "feedbacks": {
-            "type": "array",
-            "description": "List of feedbacks.",
-            "arrayType": {
-              "type": "Feedback"
-            }
+        "feedbacks": {
+          "type": "array",
+          "description": "List of feedbacks.",
+          "arrayType": {
+            "type": "Feedback"
           }
         }
       }
@@ -3640,108 +3178,87 @@
     "UpdateFeedback": {
       "description": "Updates an existing feedback.",
       "input": {
-        "type": "object",
-        "fields": {
-          "feedbackId": {
-            "type": "string",
-            "description": "The feedback's unique identifier."
-          },
-          "feedback": {
-            "type": "Feedback",
-            "description": "The updated feedback details."
-          }
+        "feedbackId": {
+          "type": "string",
+          "description": "The feedback's unique identifier."
+        },
+        "feedback": {
+          "type": "Feedback",
+          "description": "The updated feedback details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "feedbackId": {
-            "type": "string",
-            "description": "The updated feedback's unique identifier."
-          }
+        "feedbackId": {
+          "type": "string",
+          "description": "The updated feedback's unique identifier."
         }
       }
     },
     "DeleteFeedback": {
       "description": "Deletes a feedback by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "feedbackId": {
-            "type": "string",
-            "description": "The feedback's unique identifier."
-          }
+        "feedbackId": {
+          "type": "string",
+          "description": "The feedback's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the feedback was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the feedback was successfully deleted."
+        }
       }
     },
     "CreateTicket": {
       "description": "Creates a new ticket.",
       "input": {
-        "type": "object",
-        "fields": {
-          "ticket": {
-            "type": "Ticket",
-            "description": "The ticket details."
-          }
+        "ticket": {
+          "type": "Ticket",
+          "description": "The ticket details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "ticketId": {
-            "type": "string",
-            "description": "The new ticket's unique identifier."
-          }
+        "ticketId": {
+          "type": "string",
+          "description": "The new ticket's unique identifier."
         }
       }
     },
     "GetTicket": {
       "description": "Retrieves ticket information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "ticketId": {
-            "type": "string",
-            "description": "The ticket's unique identifier."
-          }
+        "ticketId": {
+          "type": "string",
+          "description": "The ticket's unique identifier."
         }
       },
       "output": {
-        "type": "Ticket",
-        "description": "The ticket details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Ticket",
+          "description": "The ticket details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListTickets": {
       "description": "List all tickets.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of tickets to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of tickets to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of tickets to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of tickets to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "tickets": {
-            "type": "array",
-            "description": "List of tickets.",
-            "arrayType": {
-              "type": "Ticket"
-            }
+        "tickets": {
+          "type": "array",
+          "description": "List of tickets.",
+          "arrayType": {
+            "type": "Ticket"
           }
         }
       }
@@ -3749,108 +3266,87 @@
     "UpdateTicket": {
       "description": "Updates an existing ticket.",
       "input": {
-        "type": "object",
-        "fields": {
-          "ticketId": {
-            "type": "string",
-            "description": "The ticket's unique identifier."
-          },
-          "ticket": {
-            "type": "Ticket",
-            "description": "The updated ticket details."
-          }
+        "ticketId": {
+          "type": "string",
+          "description": "The ticket's unique identifier."
+        },
+        "ticket": {
+          "type": "Ticket",
+          "description": "The updated ticket details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "ticketId": {
-            "type": "string",
-            "description": "The updated ticket's unique identifier."
-          }
+        "ticketId": {
+          "type": "string",
+          "description": "The updated ticket's unique identifier."
         }
       }
     },
     "DeleteTicket": {
       "description": "Deletes a ticket by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "ticketId": {
-            "type": "string",
-            "description": "The ticket's unique identifier."
-          }
+        "ticketId": {
+          "type": "string",
+          "description": "The ticket's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the ticket was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the ticket was successfully deleted."
+        }
       }
     },
     "CreateComment": {
       "description": "Creates a new comment.",
       "input": {
-        "type": "object",
-        "fields": {
-          "comment": {
-            "type": "Comment",
-            "description": "The comment details."
-          }
+        "comment": {
+          "type": "Comment",
+          "description": "The comment details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "commentId": {
-            "type": "string",
-            "description": "The new comment's unique identifier."
-          }
+        "commentId": {
+          "type": "string",
+          "description": "The new comment's unique identifier."
         }
       }
     },
     "GetComment": {
       "description": "Retrieves comment information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "commentId": {
-            "type": "string",
-            "description": "The comment's unique identifier."
-          }
+        "commentId": {
+          "type": "string",
+          "description": "The comment's unique identifier."
         }
       },
       "output": {
-        "type": "Comment",
-        "description": "The comment details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Comment",
+          "description": "The comment details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListComments": {
       "description": "List all comments.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of comments to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of comments to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of comments to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of comments to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "comments": {
-            "type": "array",
-            "description": "List of comments.",
-            "arrayType": {
-              "type": "Comment"
-            }
+        "comments": {
+          "type": "array",
+          "description": "List of comments.",
+          "arrayType": {
+            "type": "Comment"
           }
         }
       }
@@ -3858,108 +3354,87 @@
     "UpdateComment": {
       "description": "Updates an existing comment.",
       "input": {
-        "type": "object",
-        "fields": {
-          "commentId": {
-            "type": "string",
-            "description": "The comment's unique identifier."
-          },
-          "comment": {
-            "type": "Comment",
-            "description": "The updated comment details."
-          }
+        "commentId": {
+          "type": "string",
+          "description": "The comment's unique identifier."
+        },
+        "comment": {
+          "type": "Comment",
+          "description": "The updated comment details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "commentId": {
-            "type": "string",
-            "description": "The updated comment's unique identifier."
-          }
+        "commentId": {
+          "type": "string",
+          "description": "The updated comment's unique identifier."
         }
       }
     },
     "DeleteComment": {
       "description": "Deletes a comment by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "commentId": {
-            "type": "string",
-            "description": "The comment's unique identifier."
-          }
+        "commentId": {
+          "type": "string",
+          "description": "The comment's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the comment was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the comment was successfully deleted."
+        }
       }
     },
     "CreatePost": {
       "description": "Creates a new post.",
       "input": {
-        "type": "object",
-        "fields": {
-          "post": {
-            "type": "Post",
-            "description": "The post details."
-          }
+        "post": {
+          "type": "Post",
+          "description": "The post details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "postId": {
-            "type": "string",
-            "description": "The new post's unique identifier."
-          }
+        "postId": {
+          "type": "string",
+          "description": "The new post's unique identifier."
         }
       }
     },
     "GetPost": {
       "description": "Retrieves post information by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "postId": {
-            "type": "string",
-            "description": "The post's unique identifier."
-          }
+        "postId": {
+          "type": "string",
+          "description": "The post's unique identifier."
         }
       },
       "output": {
-        "type": "Post",
-        "description": "The post details.",
-        "optional": true,
-        "rules": {
+        "result": {
+          "type": "Post",
+          "description": "The post details.",
+          "optional": true,
+          "rules": {}
         }
       }
     },
     "ListPosts": {
       "description": "List all posts.",
       "input": {
-        "type": "object",
-        "fields": {
-          "limit": {
-            "type": "int",
-            "description": "The number of posts to return."
-          },
-          "offset": {
-            "type": "int",
-            "description": "The number of posts to skip."
-          }
+        "limit": {
+          "type": "int",
+          "description": "The number of posts to return."
+        },
+        "offset": {
+          "type": "int",
+          "description": "The number of posts to skip."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "posts": {
-            "type": "array",
-            "description": "List of posts.",
-            "arrayType": {
-              "type": "Post"
-            }
+        "posts": {
+          "type": "array",
+          "description": "List of posts.",
+          "arrayType": {
+            "type": "Post"
           }
         }
       }
@@ -3967,62 +3442,49 @@
     "UpdatePost": {
       "description": "Updates an existing post.",
       "input": {
-        "type": "object",
-        "fields": {
-          "postId": {
-            "type": "string",
-            "description": "The post's unique identifier."
-          },
-          "post": {
-            "type": "Post",
-            "description": "The updated post details."
-          }
+        "postId": {
+          "type": "string",
+          "description": "The post's unique identifier."
+        },
+        "post": {
+          "type": "Post",
+          "description": "The updated post details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "postId": {
-            "type": "string",
-            "description": "The updated post's unique identifier."
-          }
+        "postId": {
+          "type": "string",
+          "description": "The updated post's unique identifier."
         }
       }
     },
     "DeletePost": {
       "description": "Deletes a post by ID.",
       "input": {
-        "type": "object",
-        "fields": {
-          "postId": {
-            "type": "string",
-            "description": "The post's unique identifier."
-          }
+        "postId": {
+          "type": "string",
+          "description": "The post's unique identifier."
         }
       },
       "output": {
-        "type": "boolean",
-        "description": "Whether the post was successfully deleted."
+        "result": {
+          "type": "boolean",
+          "description": "Whether the post was successfully deleted."
+        }
       }
     },
     "CreateProfile": {
       "description": "Creates a new profile.",
       "input": {
-        "type": "object",
-        "fields": {
-          "profile": {
-            "type": "Profile",
-            "description": "The profile details."
-          }
+        "profile": {
+          "type": "Profile",
+          "description": "The profile details."
         }
       },
       "output": {
-        "type": "object",
-        "fields": {
-          "profileId": {
-            "type": "string",
-            "description": "The new profile's unique identifier."
-          }
+        "profileId": {
+          "type": "string",
+          "description": "The new profile's unique identifier."
         }
       }
     }
