@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "InvalidContainsRule": {
-      
       "fields": {
         "number": {
           "type": "int",

@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "InvalidUuidRule": {
-      
       "fields": {
         "idField": {
           "type": "boolean",

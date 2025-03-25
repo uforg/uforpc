@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "TestArray": {
-      
       "fields": {
         "ids": {
           "type": "array",

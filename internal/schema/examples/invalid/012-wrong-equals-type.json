@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "TestEquals": {
-      
       "fields": {
         "title": {
           "type": "string",

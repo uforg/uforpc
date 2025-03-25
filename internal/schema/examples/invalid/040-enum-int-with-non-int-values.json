@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "InvalidEnumIntRule": {
-      
       "fields": {
         "code": {
           "type": "int",

@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "TestMaxRule": {
-      
       "fields": {
         "description": {
           "type": "string",

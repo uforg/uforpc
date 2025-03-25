@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "TestBooleanEquals": {
-      
       "fields": {
         "flag": {
           "type": "boolean",

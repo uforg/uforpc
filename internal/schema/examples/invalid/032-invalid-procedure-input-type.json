@@ -3,7 +3,6 @@
   "types": {},
   "procedures": {
     "InvalidInput": {
-      
       "input": "string",
       "output": {
         "type": "boolean"

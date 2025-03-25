@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "TestRules": {
-      
       "fields": {
         "fieldWithInvalidRule": {
           "type": "string",

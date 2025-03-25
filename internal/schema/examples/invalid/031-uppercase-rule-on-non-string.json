@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "InvalidUppercaseRule": {
-      
       "fields": {
         "textField": {
           "type": "int",

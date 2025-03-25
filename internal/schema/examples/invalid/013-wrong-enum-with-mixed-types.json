@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "TestEnum": {
-      
       "fields": {
         "score": {
           "type": "int",

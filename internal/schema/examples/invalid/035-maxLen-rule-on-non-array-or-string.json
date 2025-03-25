@@ -2,7 +2,6 @@
   "version": 1,
   "types": {
     "InvalidMaxLenRule": {
-      
       "fields": {
         "boolField": {
           "type": "boolean",
