@@ -54,3 +54,25 @@ const (
 	META    TokenType = "META"
 	ERROR   TokenType = "ERROR"
 )
+
+// keywords is a map of keywords to their corresponding token types.
+var keywords = map[string]TokenType{
+	"version": VERSION,
+	"type":    TYPE,
+	"proc":    PROC,
+	"input":   INPUT,
+	"output":  OUTPUT,
+	"meta":    META,
+	"error":   ERROR,
+}
+
+// IsKeyword returns true if the identifier is a keyword.
+func IsKeyword(ident string) bool {
+	_, ok := keywords[ident]
+	return ok
+}
+
+// GetKeywordTokenType returns the token type for the given keyword.
+func GetKeywordTokenType(ident string) TokenType {
+	return keywords[ident]
+}
