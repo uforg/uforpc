@@ -20,18 +20,18 @@ func TestIsLetter(t *testing.T) {
 	require.False(t, isLetter('\n'))
 }
 
-func TestIsDigit(t *testing.T) {
-	require.True(t, isDigit('0'))
-	require.True(t, isDigit('9'))
+func TestIsNumber(t *testing.T) {
+	require.True(t, isNumber('0'))
+	require.True(t, isNumber('9'))
 
-	require.False(t, isDigit('a'))
-	require.False(t, isDigit('z'))
-	require.False(t, isDigit('A'))
-	require.False(t, isDigit('Z'))
-	require.False(t, isDigit('@'))
-	require.False(t, isDigit('.'))
-	require.False(t, isDigit(' '))
-	require.False(t, isDigit('\n'))
+	require.False(t, isNumber('a'))
+	require.False(t, isNumber('z'))
+	require.False(t, isNumber('A'))
+	require.False(t, isNumber('Z'))
+	require.False(t, isNumber('@'))
+	require.False(t, isNumber('.'))
+	require.False(t, isNumber(' '))
+	require.False(t, isNumber('\n'))
 }
 
 func TestIsWhitespace(t *testing.T) {

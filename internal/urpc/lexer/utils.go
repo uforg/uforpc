@@ -5,8 +5,8 @@ func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z'
 }
 
-// isDigit returns true if the character is a digit.
-func isDigit(ch byte) bool {
+// isNumber returns true if the character is a number.
+func isNumber(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
 
