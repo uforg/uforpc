@@ -11,9 +11,6 @@ type Lexer struct {
 	currentIndex      int
 	currentIndexIsEOF bool
 	currentChar       byte
-	nextIndex         int
-	nextIndexIsEOF    bool
-	nextChar          byte
 }
 
 // NewLexer creates a new Lexer and initializes it with the given file
@@ -37,18 +34,6 @@ func NewLexer(fileName, input string) *Lexer {
 		l.currentChar = 0
 	} else {
 		l.currentChar = input[l.currentIndex]
-	}
-
-	l.nextIndex = 1
-	if l.maxIndex <= 1 {
-		l.nextIndexIsEOF = true
-	} else {
-		l.nextIndexIsEOF = false
-	}
-	if l.nextIndexIsEOF {
-		l.nextChar = 0
-	} else {
-		l.nextChar = input[l.nextIndex]
 	}
 
 	return l
@@ -75,14 +60,17 @@ func (l *Lexer) readNextChar() {
 	} else {
 		l.currentChar = l.input[l.currentIndex]
 	}
+}
 
-	l.nextIndex++
-	if l.nextIndex > l.maxIndex {
-		l.nextIndexIsEOF = true
-		l.nextChar = 0
-	} else {
-		l.nextChar = l.input[l.nextIndex]
+// peekChar peeks the character at the next index + depth without moving the current index.
+//
+// Returns the character and a boolean indicating if the EOF was reached.
+func (l *Lexer) peekChar(depth int) (byte, bool) {
+	indexToPeek := l.currentIndex + depth
+	if indexToPeek > l.maxIndex {
+		return 0, true
 	}
+	return l.input[indexToPeek], false
 }
 
 // readIdentifier reads an identifier from the current index to the next non-letter character.
@@ -90,6 +78,12 @@ func (l *Lexer) readIdentifier() string {
 	var ident string
 	for isLetter(l.currentChar) {
 		ident += string(l.currentChar)
+
+		nextChar, eofReached := l.peekChar(1)
+		if eofReached || !isLetter(nextChar) {
+			break
+		}
+
 		l.readNextChar()
 	}
 	return ident
@@ -98,34 +92,29 @@ func (l *Lexer) readIdentifier() string {
 // readNumber reads a number from the current index to the next non-digit character.
 func (l *Lexer) readNumber() string {
 	var num string
-	for isDigit(l.currentChar) {
+	for isNumber(l.currentChar) {
 		num += string(l.currentChar)
-		l.readNextChar()
-	}
 
-	// Check if the number is a float
-	if l.currentChar == '.' && !l.nextIndexIsEOF && isDigit(l.nextChar) {
-		num += string(l.currentChar) // Add the decimal point
-		l.readNextChar()
-
-		// Read the decimal part
-		for isDigit(l.currentChar) {
-			num += string(l.currentChar)
-			l.readNextChar()
+		nextChar, eofReached := l.peekChar(1)
+		if eofReached || !isNumber(nextChar) {
+			break
 		}
-		return num
-	}
 
+		l.readNextChar()
+	}
 	return num
 }
 
 // readString reads a string from the current index to the next double quote.
+//
+// Returns the string and a boolean indicating if the string is unterminated.
 func (l *Lexer) readString() (string, bool) {
 	if l.currentChar != '"' {
 		return "", false
 	}
 
-	l.readNextChar() // Skip the opening quote
+	// Skip the opening quote
+	l.readNextChar()
 
 	var str string
 	for !l.currentIndexIsEOF && l.currentChar != '"' {
@@ -134,8 +123,11 @@ func (l *Lexer) readString() (string, bool) {
 	}
 
 	if l.currentIndexIsEOF {
-		return str, true // Unterminated string
+		return str, true
 	}
+
+	// Skip the closing quote
+	l.readNextChar()
 
 	return str, false
 }
@@ -147,6 +139,7 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
+// NextToken returns the next token from the input.
 func (l *Lexer) NextToken() token.Token {
 	if l.currentIndexIsEOF {
 		return token.Token{
@@ -158,106 +151,115 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	}
 
-	var tok token.Token
+	defer l.readNextChar()
 	l.skipWhitespace()
 
 	// Handle delimiters
-	switch l.currentChar {
-	case ',':
-		tok = token.NewToken(token.COMMA, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case ':':
-		tok = token.NewToken(token.COLON, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '(':
-		tok = token.NewToken(token.LPAREN, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case ')':
-		tok = token.NewToken(token.RPAREN, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '{':
-		tok = token.NewToken(token.LBRACE, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '}':
-		tok = token.NewToken(token.RBRACE, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '[':
-		tok = token.NewToken(token.LBRACKET, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case ']':
-		tok = token.NewToken(token.RBRACKET, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '@':
-		tok = token.NewToken(token.AT, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '?':
-		tok = token.NewToken(token.QUESTION, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '\n':
-		tok = token.NewToken(token.NEWLINE, string(l.currentChar), l.fileName, l.currentLine, l.currentColumn)
-	case '"':
-		line := l.currentLine
-		column := l.currentColumn
-		str, unterminated := l.readString()
-
-		if unterminated {
-			tok = token.Token{
-				Type:     token.ILLEGAL,
-				Literal:  "\"" + str,
-				FileName: l.fileName,
-				Line:     line,
-				Column:   column,
-			}
-		} else {
-			tok = token.Token{
-				Type:     token.STRING,
-				Literal:  str,
-				FileName: l.fileName,
-				Line:     line,
-				Column:   column,
-			}
-			l.readNextChar() // Skip the closing quote
-			return tok
-		}
-	default:
-		// Handle identifiers
-		if isLetter(l.currentChar) {
-			tokenType := token.IDENT
-			line := l.currentLine
-			column := l.currentColumn
-			ident := l.readIdentifier()
-
-			if token.IsKeyword(ident) {
-				tokenType = token.GetKeywordTokenType(ident)
-			}
-
-			tok = token.Token{
-				Type:     tokenType,
-				Literal:  ident,
-				FileName: l.fileName,
-				Line:     line,
-				Column:   column,
-			}
-			// Handle numbers (int or float)
-		} else if isDigit(l.currentChar) {
-			line := l.currentLine
-			column := l.currentColumn
-			num := l.readNumber()
-
-			tokenType := token.INT
-			if containsDecimalPoint(num) {
-				tokenType = token.FLOAT
-			}
-
-			tok = token.Token{
-				Type:     tokenType,
-				Literal:  num,
-				FileName: l.fileName,
-				Line:     line,
-				Column:   column,
-			}
-			// Handle illegal characters
-		} else {
-			tok = token.Token{
-				Type:     token.ILLEGAL,
-				Literal:  string(l.currentChar),
-				FileName: l.fileName,
-				Line:     l.currentLine,
-				Column:   l.currentColumn,
-			}
+	if token.IsDelimiter(l.currentChar) {
+		return token.Token{
+			Type:     token.GetDelimiterTokenType(l.currentChar),
+			Literal:  string(l.currentChar),
+			FileName: l.fileName,
+			Line:     l.currentLine,
+			Column:   l.currentColumn,
 		}
 	}
 
-	l.readNextChar()
-	return tok
+	// Handle strings
+	if l.currentChar == '"' {
+		startLine := l.currentLine
+		startColumn := l.currentColumn
+		str, unterminated := l.readString()
+
+		if unterminated {
+			return token.Token{
+				Type:     token.ILLEGAL,
+				Literal:  "\"" + str,
+				FileName: l.fileName,
+				Line:     startLine,
+				Column:   startColumn,
+			}
+		}
+
+		return token.Token{
+			Type:     token.STRING,
+			Literal:  str,
+			FileName: l.fileName,
+			Line:     startLine,
+			Column:   startColumn,
+		}
+	}
+
+	// Handle ints and floats
+	if isNumber(l.currentChar) {
+		startLine := l.currentLine
+		startColumn := l.currentColumn
+		num := l.readNumber()
+
+		tok := token.Token{
+			Type:     token.INT,
+			Literal:  num,
+			FileName: l.fileName,
+			Line:     startLine,
+			Column:   startColumn,
+		}
+
+		nextChar, eofReached := l.peekChar(1)
+		if eofReached || nextChar != '.' {
+			return tok
+		}
+
+		nextChar, eofReached = l.peekChar(2)
+		if eofReached || !isNumber(nextChar) {
+			return tok
+		}
+
+		// Double read, one for the dot (should be ignored) and one for the start
+		// of the next number
+		l.readNextChar()
+		l.readNextChar()
+
+		num += "." + l.readNumber()
+		return token.Token{
+			Type:     token.FLOAT,
+			Literal:  num,
+			FileName: l.fileName,
+			Line:     startLine,
+			Column:   startColumn,
+		}
+	}
+
+	// Handle identifiers
+	if isLetter(l.currentChar) {
+		startLine := l.currentLine
+		startColumn := l.currentColumn
+		ident := l.readIdentifier()
+
+		if token.IsKeyword(ident) {
+			return token.Token{
+				Type:     token.GetKeywordTokenType(ident),
+				Literal:  ident,
+				FileName: l.fileName,
+				Line:     startLine,
+				Column:   startColumn,
+			}
+		}
+
+		return token.Token{
+			Type:     token.IDENT,
+			Literal:  ident,
+			FileName: l.fileName,
+			Line:     startLine,
+			Column:   startColumn,
+		}
+	}
+
+	// Everything else is illegal
+	return token.Token{
+		Type:     token.ILLEGAL,
+		Literal:  string(l.currentChar),
+		FileName: l.fileName,
+		Line:     l.currentLine,
+		Column:   l.currentColumn,
+	}
 }
