@@ -88,6 +88,44 @@ func (p *Parser) peekToken(depth int) (token.Token, bool) {
 	return p.tokens[indexToPeek], false
 }
 
+// appendError appends an error to the parser's errors list.
+//
+// The error message is formatted with the current token's file name, line, and column.
+func (p *Parser) appendError(message string) {
+	fileName := p.currentToken.FileName
+	line := p.currentToken.Line
+	column := p.currentToken.Column
+	err := fmt.Errorf("%s Ln %d Col %d: %s", fileName, line, column, message)
+	p.errors = append(p.errors, err)
+}
+
+// expectToken expects the current token to be of the given type.
+//
+// If the current token is not of the given type, an error is added to the parser's errors list.
+//
+// If a message is provided, it is appended to the error message.
+//
+// Returns:
+//   - bool: indicating if the token was encountered.
+func (p *Parser) expectToken(expectedType token.TokenType, message ...string) bool {
+	if p.currentToken.Type != expectedType {
+		msg := fmt.Sprintf("expected token \"%s\", got \"%s\"", expectedType, p.currentToken.Type)
+		if len(message) > 0 {
+			msg += fmt.Sprintf(": %s", message[0])
+		}
+		p.appendError(msg)
+		return false
+	}
+	return true
+}
+
+// skipNewlines skips all newline tokens from the current index to the next non-newline token.
+func (p *Parser) skipNewlines() {
+	for p.currentToken.Type == token.NEWLINE {
+		p.readNextToken()
+	}
+}
+
 // Parse parses the tokens provided by the Lexer.
 //
 // Returns:
@@ -130,37 +168,6 @@ func (p *Parser) Parse() (ast.Schema, []error, error) {
 	return schema, nil, nil
 }
 
-// appendError appends an error to the parser's errors list.
-//
-// The error message is formatted with the current token's file name, line, and column.
-func (p *Parser) appendError(message string) {
-	fileName := p.currentToken.FileName
-	line := p.currentToken.Line
-	column := p.currentToken.Column
-	err := fmt.Errorf("%s Ln %d Col %d: %s", fileName, line, column, message)
-	p.errors = append(p.errors, err)
-}
-
-// expectToken expects the current token to be of the given type.
-//
-// If the current token is not of the given type, an error is added to the parser's errors list.
-//
-// If a message is provided, it is appended to the error message.
-//
-// Returns:
-//   - bool: indicating if the token was encountered.
-func (p *Parser) expectToken(expectedType token.TokenType, message ...string) bool {
-	if p.currentToken.Type != expectedType {
-		msg := fmt.Sprintf("expected token \"%s\", got \"%s\"", expectedType, p.currentToken.Type)
-		if len(message) > 0 {
-			msg += fmt.Sprintf(": %s", message[0])
-		}
-		p.appendError(msg)
-		return false
-	}
-	return true
-}
-
 // parseVersion parses the version token, should exist exactly once in the input, otherwise
 // an error is added to the parser's errors list.
 func (p *Parser) parseVersion(currSchema ast.Schema) ast.Version {
@@ -201,6 +208,7 @@ func (p *Parser) parseDocstring() (*ast.TypeDeclaration, *ast.ProcDeclaration) {
 
 	docstring := p.currentToken.Literal
 	p.readNextToken()
+	p.skipNewlines()
 
 	if p.currentToken.Type == token.TYPE {
 		return p.parseTypeDeclaration(docstring), nil
@@ -216,11 +224,98 @@ func (p *Parser) parseDocstring() (*ast.TypeDeclaration, *ast.ProcDeclaration) {
 
 // parseTypeDeclaration parses a type declaration and returns it to be added to the schema.
 func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
-	if !p.expectToken(token.TYPE) {
+	if !p.expectToken(token.TYPE, "missing type keyword") {
 		return nil
 	}
 
-	return &ast.TypeDeclaration{}
+	p.readNextToken()
+	if !p.expectToken(token.IDENT, "missing type name") {
+		return nil
+	}
+
+	// TODO: Validate type name PascalCase
+	typeName := p.currentToken.Literal
+	p.readNextToken()
+	if !p.expectToken(token.LBRACE, "missing type opening brace") {
+		return nil
+	}
+	p.skipNewlines()
+
+	var fields []ast.Field
+	for {
+		p.readNextToken()
+		p.skipNewlines()
+
+		if p.currentToken.Type == token.RBRACE {
+			break
+		}
+		if p.currentToken.Type == token.EOF {
+			p.appendError("missing type closing brace, unexpected EOF while parsing type fields")
+			return nil
+		}
+
+		field := p.parseField()
+		if field != nil {
+			fields = append(fields, *field)
+		}
+	}
+
+	return &ast.TypeDeclaration{
+		Name:   typeName,
+		Doc:    docstring,
+		Fields: fields,
+	}
+}
+
+func (p *Parser) parseField() *ast.Field {
+	p.skipNewlines()
+	if !p.expectToken(token.IDENT, "missing field name") {
+		return nil
+	}
+
+	fieldName := p.currentToken.Literal
+	p.readNextToken()
+
+	isOptional := false
+	if p.currentToken.Type == token.QUESTION {
+		isOptional = true
+		p.readNextToken()
+	}
+
+	if !p.expectToken(token.COLON, "missing field type colon for "+fieldName) {
+		return nil
+	}
+	p.readNextToken()
+
+	typeLiteral := p.currentToken.Literal
+	var fieldType ast.Type
+
+	switch typeLiteral {
+	case "string":
+		fieldType = &ast.TypeString{}
+	case "int":
+		fieldType = &ast.TypeInt{}
+	case "float":
+		fieldType = &ast.TypeFloat{}
+	case "boolean":
+		fieldType = &ast.TypeBoolean{}
+	default:
+		// TODO: Validate type name PascalCase
+		fieldType = &ast.TypeCustom{
+			Name: typeLiteral,
+		}
+	}
+
+	nextToken, eofReached := p.peekToken(1)
+	if !eofReached && nextToken.Type == token.AT {
+		// TODO: Parse field rules
+	}
+
+	return &ast.Field{
+		Name:     fieldName,
+		Optional: isOptional,
+		Type:     fieldType,
+	}
 }
 
 // parseProcDeclaration parses a procedure declaration and returns it to be added to the schema.

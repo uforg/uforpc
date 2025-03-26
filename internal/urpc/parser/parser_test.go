@@ -40,4 +40,132 @@ func TestParser(t *testing.T) {
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "version already set")
 	})
+
+	t.Run("Parse type declaration basic", func(t *testing.T) {
+		input := `
+			type User {}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse type declaration with docstring", func(t *testing.T) {
+		input := `
+			""" Product type documentation """
+			type Product {}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Doc:  "Product type documentation",
+					Name: "Product",
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse type declaration with primitive type fields", func(t *testing.T) {
+		input := `
+			type User {
+				name: string
+				age?: int
+				height: float
+				isActive: boolean
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "name",
+							Optional: false,
+							Type:     &ast.TypeString{},
+						},
+						{
+							Name:     "age",
+							Optional: true,
+							Type:     &ast.TypeInt{},
+						},
+						{
+							Name:     "height",
+							Optional: false,
+							Type:     &ast.TypeFloat{},
+						},
+						{
+							Name:     "isActive",
+							Optional: false,
+							Type:     &ast.TypeBoolean{},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse type declaration with field using other custom type", func(t *testing.T) {
+		input := `
+			type User {
+				name: string
+				address?: Address
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "name",
+							Optional: false,
+							Type:     &ast.TypeString{},
+						},
+						{
+							Name:     "address",
+							Optional: true,
+							Type:     &ast.TypeCustom{Name: "Address"},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
 }
