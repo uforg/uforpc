@@ -204,8 +204,7 @@ func (l *Lexer) readDocstring() (string, bool) {
 		return docstring, true
 	}
 
-	// Skip the closing quotes
-	l.readNextChar()
+	// Skip the 2 remaining closing quotes
 	l.readNextChar()
 	l.readNextChar()
 
