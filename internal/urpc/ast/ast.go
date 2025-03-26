@@ -19,6 +19,7 @@ const (
 	NodeTypeTypeReference
 )
 
+// Node is the interface that all AST nodes implement.
 type Node interface {
 	NodeType() NodeType
 }
@@ -101,36 +102,60 @@ type KeyValue struct {
 	Value any // string|number|boolean
 }
 
+type TypeName string
+
+const (
+	TypeNameString  TypeName = "string"
+	TypeNameInt     TypeName = "int"
+	TypeNameFloat   TypeName = "float"
+	TypeNameBoolean TypeName = "boolean"
+	TypeNameObject  TypeName = "object"
+	TypeNameArray   TypeName = "array"
+	TypeNameCustom  TypeName = "custom"
+)
+
 // Type system implementations
 type Type interface {
-	Node
-	TypeName() string
+	TypeName() TypeName
 }
 
-type PrimitiveType struct {
-	Name string // "string", "int", etc.
-}
+type TypeString struct{}
 
-func (p *PrimitiveType) NodeType() NodeType { return NodeTypePrimitiveType }
-func (p *PrimitiveType) TypeName() string   { return p.Name }
+func (t *TypeString) NodeType() NodeType { return NodeTypePrimitiveType }
+func (t *TypeString) TypeName() TypeName { return TypeNameString }
 
-type ArrayType struct {
-	Element Type
-}
+type TypeInt struct{}
 
-func (a *ArrayType) NodeType() NodeType { return NodeTypeArrayType }
-func (a *ArrayType) TypeName() string   { return "array" }
+func (t *TypeInt) NodeType() NodeType { return NodeTypePrimitiveType }
+func (t *TypeInt) TypeName() TypeName { return TypeNameInt }
 
-type InlineObjectType struct {
+type TypeFloat struct{}
+
+func (t *TypeFloat) NodeType() NodeType { return NodeTypePrimitiveType }
+func (t *TypeFloat) TypeName() TypeName { return TypeNameFloat }
+
+type TypeBoolean struct{}
+
+func (t *TypeBoolean) NodeType() NodeType { return NodeTypePrimitiveType }
+func (t *TypeBoolean) TypeName() TypeName { return TypeNameBoolean }
+
+type TypeObject struct {
 	Fields []Field
 }
 
-func (o *InlineObjectType) NodeType() NodeType { return NodeTypeInlineObjectType }
-func (o *InlineObjectType) TypeName() string   { return "object" }
+func (o *TypeObject) NodeType() NodeType { return NodeTypeInlineObjectType }
+func (o *TypeObject) TypeName() TypeName { return TypeNameObject }
 
-type TypeReference struct {
+type TypeArray struct {
+	ArrayType Type
+}
+
+func (a *TypeArray) NodeType() NodeType { return NodeTypeArrayType }
+func (a *TypeArray) TypeName() TypeName { return TypeNameArray }
+
+type TypeCustom struct {
 	Name string
 }
 
-func (t *TypeReference) NodeType() NodeType { return NodeTypeTypeReference }
-func (t *TypeReference) TypeName() string   { return t.Name }
+func (t *TypeCustom) NodeType() NodeType { return NodeTypeTypeReference }
+func (t *TypeCustom) TypeName() TypeName { return TypeNameCustom }
