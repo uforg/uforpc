@@ -3,10 +3,11 @@ package lexer
 import "github.com/uforg/uforpc/internal/urpc/token"
 
 type Lexer struct {
+	FileName      string
+	CurrentLine   int
+	CurrentColumn int
+
 	input             string
-	fileName          string
-	currentLine       int
-	currentColumn     int
 	maxIndex          int
 	currentIndex      int
 	currentIndexIsEOF bool
@@ -18,10 +19,10 @@ type Lexer struct {
 func NewLexer(fileName, input string) *Lexer {
 	l := &Lexer{}
 
+	l.FileName = fileName
+	l.CurrentLine = 1
+	l.CurrentColumn = 1
 	l.input = input
-	l.fileName = fileName
-	l.currentLine = 1
-	l.currentColumn = 1
 	l.maxIndex = len(input) - 1
 
 	l.currentIndex = 0
@@ -47,10 +48,10 @@ func (l *Lexer) readNextChar() {
 	}
 
 	if isNewline(l.currentChar) {
-		l.currentLine++
-		l.currentColumn = 1
+		l.CurrentLine++
+		l.CurrentColumn = 1
 	} else {
-		l.currentColumn++
+		l.CurrentColumn++
 	}
 
 	l.currentIndex++
@@ -255,9 +256,9 @@ func (l *Lexer) NextToken() token.Token {
 		return token.Token{
 			Type:     token.EOF,
 			Literal:  "",
-			FileName: l.fileName,
-			Line:     l.currentLine,
-			Column:   l.currentColumn,
+			FileName: l.FileName,
+			Line:     l.CurrentLine,
+			Column:   l.CurrentColumn,
 		}
 	}
 
@@ -269,16 +270,16 @@ func (l *Lexer) NextToken() token.Token {
 		return token.Token{
 			Type:     token.GetDelimiterTokenType(l.currentChar),
 			Literal:  string(l.currentChar),
-			FileName: l.fileName,
-			Line:     l.currentLine,
-			Column:   l.currentColumn,
+			FileName: l.FileName,
+			Line:     l.CurrentLine,
+			Column:   l.CurrentColumn,
 		}
 	}
 
 	// Handle strings and docstrings
 	if l.currentChar == '"' {
-		startLine := l.currentLine
-		startColumn := l.currentColumn
+		startLine := l.CurrentLine
+		startColumn := l.CurrentColumn
 
 		isDocstring := func() bool {
 			nextChar, eofReached := l.peekChar(1)
@@ -300,7 +301,7 @@ func (l *Lexer) NextToken() token.Token {
 				return token.Token{
 					Type:     token.ILLEGAL,
 					Literal:  `"""` + docstring,
-					FileName: l.fileName,
+					FileName: l.FileName,
 					Line:     startLine,
 					Column:   startColumn,
 				}
@@ -309,7 +310,7 @@ func (l *Lexer) NextToken() token.Token {
 			return token.Token{
 				Type:     token.DOCSTRING,
 				Literal:  docstring,
-				FileName: l.fileName,
+				FileName: l.FileName,
 				Line:     startLine,
 				Column:   startColumn,
 			}
@@ -321,7 +322,7 @@ func (l *Lexer) NextToken() token.Token {
 			return token.Token{
 				Type:     token.ILLEGAL,
 				Literal:  `"` + str,
-				FileName: l.fileName,
+				FileName: l.FileName,
 				Line:     startLine,
 				Column:   startColumn,
 			}
@@ -330,7 +331,7 @@ func (l *Lexer) NextToken() token.Token {
 		return token.Token{
 			Type:     token.STRING,
 			Literal:  str,
-			FileName: l.fileName,
+			FileName: l.FileName,
 			Line:     startLine,
 			Column:   startColumn,
 		}
@@ -338,14 +339,14 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Handle ints and floats
 	if isNumber(l.currentChar) {
-		startLine := l.currentLine
-		startColumn := l.currentColumn
+		startLine := l.CurrentLine
+		startColumn := l.CurrentColumn
 		num := l.readNumber()
 
 		tok := token.Token{
 			Type:     token.INT,
 			Literal:  num,
-			FileName: l.fileName,
+			FileName: l.FileName,
 			Line:     startLine,
 			Column:   startColumn,
 		}
@@ -369,7 +370,7 @@ func (l *Lexer) NextToken() token.Token {
 		return token.Token{
 			Type:     token.FLOAT,
 			Literal:  num,
-			FileName: l.fileName,
+			FileName: l.FileName,
 			Line:     startLine,
 			Column:   startColumn,
 		}
@@ -377,15 +378,15 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Handle identifiers
 	if isLetter(l.currentChar) {
-		startLine := l.currentLine
-		startColumn := l.currentColumn
+		startLine := l.CurrentLine
+		startColumn := l.CurrentColumn
 		ident := l.readIdentifier()
 
 		if token.IsKeyword(ident) {
 			return token.Token{
 				Type:     token.GetKeywordTokenType(ident),
 				Literal:  ident,
-				FileName: l.fileName,
+				FileName: l.FileName,
 				Line:     startLine,
 				Column:   startColumn,
 			}
@@ -394,7 +395,7 @@ func (l *Lexer) NextToken() token.Token {
 		return token.Token{
 			Type:     token.IDENT,
 			Literal:  ident,
-			FileName: l.fileName,
+			FileName: l.FileName,
 			Line:     startLine,
 			Column:   startColumn,
 		}
@@ -407,19 +408,19 @@ func (l *Lexer) NextToken() token.Token {
 			return token.Token{
 				Type:     token.ILLEGAL,
 				Literal:  string(l.currentChar) + string(nextChar),
-				FileName: l.fileName,
-				Line:     l.currentLine,
-				Column:   l.currentColumn,
+				FileName: l.FileName,
+				Line:     l.CurrentLine,
+				Column:   l.CurrentColumn,
 			}
 		}
 
-		startLine := l.currentLine
-		startColumn := l.currentColumn
+		startLine := l.CurrentLine
+		startColumn := l.CurrentColumn
 		comment := l.readComment()
 		return token.Token{
 			Type:     token.COMMENT,
 			Literal:  comment,
-			FileName: l.fileName,
+			FileName: l.FileName,
 			Line:     startLine,
 			Column:   startColumn,
 		}
@@ -429,9 +430,9 @@ func (l *Lexer) NextToken() token.Token {
 	return token.Token{
 		Type:     token.ILLEGAL,
 		Literal:  string(l.currentChar),
-		FileName: l.fileName,
-		Line:     l.currentLine,
-		Column:   l.currentColumn,
+		FileName: l.FileName,
+		Line:     l.CurrentLine,
+		Column:   l.CurrentColumn,
 	}
 }
 
