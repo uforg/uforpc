@@ -92,12 +92,12 @@ func (o *ProcOutput) NodeType() NodeType { return NodeTypeOutput }
 
 // ProcMeta
 type ProcMeta struct {
-	Entries []KeyValue
+	Entries []ProcMetaKV
 }
 
 func (m *ProcMeta) NodeType() NodeType { return NodeTypeMetadata }
 
-type KeyValue struct {
+type ProcMetaKV struct {
 	Key   string
 	Value any // string|int|float|boolean
 }
