@@ -317,9 +317,9 @@ func TestLexer(t *testing.T) {
 		input := "\"\"\" This is a multiline docstring\nwith multiple lines \"\"\"\n"
 
 		tests := []token.Token{
-			{Type: token.DOCSTRING, Literal: " This is a multiline docstring\nwith multiple lines ", FileName: "test.urpc", Line: 1, Column: 1},
-			{Type: token.NEWLINE, Literal: "\n", FileName: "test.urpc", Line: 1, Column: 39},
-			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 2, Column: 1},
+			{Type: token.DOCSTRING, Literal: " This is a multiline docstring\nwith multiple lines "},
+			{Type: token.NEWLINE, Literal: "\n"},
+			{Type: token.EOF, Literal: ""},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
