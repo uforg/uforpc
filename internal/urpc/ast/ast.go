@@ -71,35 +71,35 @@ func (v *ValidationRule) NodeType() NodeType { return NodeTypeValidationRule }
 type ProcDeclaration struct {
 	Name     string
 	Doc      string
-	Input    Input
-	Output   Output
-	Metadata Metadata
+	Input    ProcInput
+	Output   ProcOutput
+	Metadata ProcMeta
 }
 
 func (p *ProcDeclaration) NodeType() NodeType { return NodeTypeProcDeclaration }
 
-type Input struct {
+type ProcInput struct {
 	Fields []Field
 }
 
-func (i *Input) NodeType() NodeType { return NodeTypeInput }
+func (i *ProcInput) NodeType() NodeType { return NodeTypeInput }
 
-type Output struct {
+type ProcOutput struct {
 	Fields []Field
 }
 
-func (o *Output) NodeType() NodeType { return NodeTypeOutput }
+func (o *ProcOutput) NodeType() NodeType { return NodeTypeOutput }
 
-// Metadata
-type Metadata struct {
+// ProcMeta
+type ProcMeta struct {
 	Entries []KeyValue
 }
 
-func (m *Metadata) NodeType() NodeType { return NodeTypeMetadata }
+func (m *ProcMeta) NodeType() NodeType { return NodeTypeMetadata }
 
 type KeyValue struct {
 	Key   string
-	Value any // string|number|boolean
+	Value any // string|int|float|boolean
 }
 
 type TypeName string
