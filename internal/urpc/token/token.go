@@ -10,16 +10,6 @@ type Token struct {
 	Column   int
 }
 
-func NewToken(typ TokenType, lit string, fileName string, line int, column int) Token {
-	return Token{
-		Type:     typ,
-		Literal:  lit,
-		FileName: fileName,
-		Line:     line,
-		Column:   column,
-	}
-}
-
 const (
 	EOF     TokenType = "EOF"
 	ILLEGAL TokenType = "ILLEGAL"
