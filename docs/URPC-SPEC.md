@@ -14,11 +14,17 @@ version: <number>
 
 // <comment>
 
+"""
+<Type documentation>
+"""
 type <TypeName> {
   <field>[?]: <Type>
     [@<validationRule>(<params>, [error: <"message">])...]
 }
 
+"""
+<Procedure documentation>
+"""
 proc <ProcedureName> {
   input {
     <field>[?]: <Type>
@@ -129,9 +135,12 @@ input {
 
 ## 5. Procedures
 
-### 5.1 Mandatory Structure
+### 5.1 Structure
 
 ```urpc
+"""
+<Procedure documentation>
+"""
 proc <Name> {
   input {
     <field>: <Type>
@@ -139,6 +148,10 @@ proc <Name> {
   
   output {
     <field>: <Type>
+  }
+
+  meta {
+    <key>: <value>
   }
 }
 ```
@@ -162,6 +175,9 @@ meta {
 ```urpc
 version: 1
 
+"""
+Represents a product in the catalog
+"""
 type Product {
   id: string
     @uuid
@@ -178,6 +194,9 @@ type Product {
     @maxItems(5)
 }
 
+"""
+Creates a new product in the system and returns the product id.
+"""
 proc CreateProduct {
   input {
     product: Product
