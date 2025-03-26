@@ -25,11 +25,12 @@ const (
 	ILLEGAL TokenType = "ILLEGAL"
 
 	// Identifiers and literals
-	IDENT   TokenType = "IDENT"
-	STRING  TokenType = "STRING"
-	INT     TokenType = "INT"
-	FLOAT   TokenType = "FLOAT"
-	COMMENT TokenType = "COMMENT"
+	IDENT     TokenType = "IDENT"
+	STRING    TokenType = "STRING"
+	INT       TokenType = "INT"
+	FLOAT     TokenType = "FLOAT"
+	COMMENT   TokenType = "COMMENT"
+	DOCSTRING TokenType = "DOCSTRING"
 
 	// Operators and delimiters
 	COLON    TokenType = ":"
