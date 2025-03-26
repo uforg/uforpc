@@ -1,6 +1,10 @@
 package lexer
 
-import "github.com/uforg/uforpc/internal/urpc/token"
+import (
+	"strings"
+
+	"github.com/uforg/uforpc/internal/urpc/token"
+)
 
 type Lexer struct {
 	FileName      string
@@ -201,6 +205,9 @@ func (l *Lexer) readDocstring() (string, bool) {
 		l.readNextChar()
 	}
 
+	// Trim beginning and ending space characters
+	docstring = strings.TrimSpace(docstring)
+
 	if l.currentIndexIsEOF {
 		return docstring, true
 	}
@@ -240,7 +247,7 @@ func (l *Lexer) readComment() string {
 		l.readNextChar()
 	}
 
-	return comment
+	return strings.TrimSpace(comment)
 }
 
 // skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.

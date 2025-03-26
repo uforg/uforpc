@@ -244,7 +244,7 @@ func TestLexer(t *testing.T) {
 		input := "// This is a comment\nversion: 1"
 
 		tests := []token.Token{
-			{Type: token.COMMENT, Literal: " This is a comment", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.COMMENT, Literal: "This is a comment", FileName: "test.urpc", Line: 1, Column: 1},
 			{Type: token.NEWLINE, Literal: "\n", FileName: "test.urpc", Line: 1, Column: 21},
 			{Type: token.VERSION, Literal: "version", FileName: "test.urpc", Line: 2, Column: 1},
 			{Type: token.COLON, Literal: ":", FileName: "test.urpc", Line: 2, Column: 8},
@@ -294,7 +294,7 @@ func TestLexer(t *testing.T) {
 		input := `""" This is a docstring """`
 
 		tests := []token.Token{
-			{Type: token.DOCSTRING, Literal: " This is a docstring ", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.DOCSTRING, Literal: "This is a docstring", FileName: "test.urpc", Line: 1, Column: 1},
 			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 28},
 		}
 
@@ -317,7 +317,7 @@ func TestLexer(t *testing.T) {
 		input := "\"\"\" This is a multiline docstring\nwith multiple lines \"\"\"\n"
 
 		tests := []token.Token{
-			{Type: token.DOCSTRING, Literal: " This is a multiline docstring\nwith multiple lines "},
+			{Type: token.DOCSTRING, Literal: "This is a multiline docstring\nwith multiple lines"},
 			{Type: token.NEWLINE, Literal: "\n"},
 			{Type: token.EOF, Literal: ""},
 		}
@@ -376,9 +376,9 @@ func TestLexer(t *testing.T) {
 
 		tests := []token.Token{
 			{Type: token.NEWLINE, Literal: "\n"},
-			{Type: token.COMMENT, Literal: " This test evaluates the lexer with a full URPC file."},
+			{Type: token.COMMENT, Literal: "This test evaluates the lexer with a full URPC file."},
 			{Type: token.NEWLINE, Literal: "\n"},
-			{Type: token.COMMENT, Literal: " It is used to ensure that the lexer is working correctly."},
+			{Type: token.COMMENT, Literal: "It is used to ensure that the lexer is working correctly."},
 			{Type: token.NEWLINE, Literal: "\n"},
 			{Type: token.NEWLINE, Literal: "\n"},
 			{Type: token.VERSION, Literal: "version"},
@@ -386,7 +386,7 @@ func TestLexer(t *testing.T) {
 			{Type: token.INT, Literal: "1"},
 			{Type: token.NEWLINE, Literal: "\n"},
 			{Type: token.NEWLINE, Literal: "\n"},
-			{Type: token.DOCSTRING, Literal: " Product is a type that represents a product. "},
+			{Type: token.DOCSTRING, Literal: "Product is a type that represents a product."},
 			{Type: token.NEWLINE, Literal: "\n"},
 			{Type: token.TYPE, Literal: "type"},
 			{Type: token.IDENT, Literal: "Product"},
@@ -450,7 +450,7 @@ func TestLexer(t *testing.T) {
 			{Type: token.RBRACE, Literal: "}"},
 			{Type: token.NEWLINE, Literal: "\n"},
 			{Type: token.NEWLINE, Literal: "\n"},
-			{Type: token.DOCSTRING, Literal: " Creates a product and returns the product id. "},
+			{Type: token.DOCSTRING, Literal: "Creates a product and returns the product id."},
 			{Type: token.NEWLINE, Literal: "\n"},
 			{Type: token.PROC, Literal: "proc"},
 			{Type: token.IDENT, Literal: "CreateProduct"},
