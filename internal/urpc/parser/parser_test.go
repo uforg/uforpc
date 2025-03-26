@@ -182,9 +182,9 @@ func TestParser(t *testing.T) {
 			Procedures: []ast.ProcDeclaration{
 				{
 					Name:     "CreateUser",
-					Input:    ast.Input{},
-					Output:   ast.Output{},
-					Metadata: ast.Metadata{},
+					Input:    ast.ProcInput{},
+					Output:   ast.ProcOutput{},
+					Metadata: ast.ProcMeta{},
 				},
 			},
 		}
@@ -208,9 +208,9 @@ func TestParser(t *testing.T) {
 				{
 					Doc:      "Create user procedure documentation",
 					Name:     "CreateUser",
-					Input:    ast.Input{},
-					Output:   ast.Output{},
-					Metadata: ast.Metadata{},
+					Input:    ast.ProcInput{},
+					Output:   ast.ProcOutput{},
+					Metadata: ast.ProcMeta{},
 				},
 			},
 		}
@@ -236,9 +236,95 @@ func TestParser(t *testing.T) {
 			Procedures: []ast.ProcDeclaration{
 				{
 					Name:     "CreateUser",
-					Input:    ast.Input{},
-					Output:   ast.Output{},
-					Metadata: ast.Metadata{},
+					Input:    ast.ProcInput{},
+					Output:   ast.ProcOutput{},
+					Metadata: ast.ProcMeta{},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse procedure declaration with docstring, input, output and meta", func(t *testing.T) {
+		input := `
+			""" Creates a product with the given stock and returns the product id. """
+			proc CreateProduct {
+				input {
+					product: Product
+					stock: int
+				}
+				
+				output {
+					productId: string
+				}
+				
+				meta {
+					versionNumber: "1.0.0"
+					maxRetries: 3
+					waitMinutes: 10.5
+					audit: true
+				}
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Procedures: []ast.ProcDeclaration{
+				{
+					Doc:  "Creates a product with the given stock and returns the product id.",
+					Name: "CreateProduct",
+					Input: ast.ProcInput{
+						Fields: []ast.Field{
+							{
+								Name:     "product",
+								Optional: false,
+								Type:     &ast.TypeCustom{Name: "Product"},
+							},
+							{
+								Name:     "stock",
+								Optional: false,
+								Type:     &ast.TypeInt{},
+							},
+						},
+					},
+					Output: ast.ProcOutput{
+						Fields: []ast.Field{
+							{
+								Name:     "productId",
+								Optional: false,
+								Type:     &ast.TypeString{},
+							},
+						},
+					},
+					Metadata: ast.ProcMeta{
+						Entries: []ast.ProcMetaKV{
+							{
+								Type:  ast.ProcMetaValueTypeString,
+								Key:   "versionNumber",
+								Value: "1.0.0",
+							},
+							{
+								Type:  ast.ProcMetaValueTypeInt,
+								Key:   "maxRetries",
+								Value: "3",
+							},
+							{
+								Type:  ast.ProcMetaValueTypeFloat,
+								Key:   "waitMinutes",
+								Value: "10.5",
+							},
+							{
+								Type:  ast.ProcMetaValueTypeBoolean,
+								Key:   "audit",
+								Value: "true",
+							},
+						},
+					},
 				},
 			},
 		}

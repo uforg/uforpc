@@ -330,16 +330,19 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 	}
 
 	// TODO: Validate procedure name PascalCase
-	typeName := p.currentToken.Literal
+	procName := p.currentToken.Literal
 	p.readNextToken()
 	if !p.expectToken(token.LBRACE, "missing procedure opening brace") {
 		return nil
 	}
 	p.skipNewlines()
 
-	input := ast.Input{}
-	output := ast.Output{}
-	metadata := ast.Metadata{}
+	input := ast.ProcInput{}
+	inputSet := false
+	output := ast.ProcOutput{}
+	outputSet := false
+	meta := ast.ProcMeta{}
+	metaSet := false
 
 	for {
 		p.readNextToken()
@@ -352,13 +355,190 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 			p.appendError("missing procedure closing brace, unexpected EOF while parsing procedure children nodes")
 			return nil
 		}
+		if p.currentToken.Type == token.INPUT {
+			if inputSet {
+				p.appendError("input already set for procedure " + procName)
+				continue
+			}
+
+			inputRes := p.parseProcInput()
+			if inputRes != nil {
+				input = *inputRes
+				inputSet = true
+			}
+		}
+		if p.currentToken.Type == token.OUTPUT {
+			if outputSet {
+				p.appendError("output already set for procedure " + procName)
+				continue
+			}
+
+			outputRes := p.parseProcOutput()
+			if outputRes != nil {
+				output = *outputRes
+				outputSet = true
+			}
+		}
+		if p.currentToken.Type == token.META {
+			if metaSet {
+				p.appendError("meta already set for procedure " + procName)
+				continue
+			}
+
+			metaRes := p.parseProcMeta()
+			if metaRes != nil {
+				meta = *metaRes
+				metaSet = true
+			}
+		}
 	}
 
 	return &ast.ProcDeclaration{
-		Name:     typeName,
+		Name:     procName,
 		Doc:      docstring,
 		Input:    input,
 		Output:   output,
-		Metadata: metadata,
+		Metadata: meta,
+	}
+}
+
+func (p *Parser) parseProcInput() *ast.ProcInput {
+	if !p.expectToken(token.INPUT, "missing input keyword") {
+		return nil
+	}
+
+	p.readNextToken()
+	if !p.expectToken(token.LBRACE, "missing input opening brace") {
+		return nil
+	}
+	p.skipNewlines()
+
+	var fields []ast.Field
+	for {
+		p.readNextToken()
+		p.skipNewlines()
+
+		if p.currentToken.Type == token.RBRACE {
+			break
+		}
+		if p.currentToken.Type == token.EOF {
+			p.appendError("missing input closing brace, unexpected EOF while parsing input fields")
+			return nil
+		}
+
+		field := p.parseField()
+		if field != nil {
+			fields = append(fields, *field)
+		}
+	}
+
+	return &ast.ProcInput{
+		Fields: fields,
+	}
+}
+
+func (p *Parser) parseProcOutput() *ast.ProcOutput {
+	if !p.expectToken(token.OUTPUT, "missing output keyword") {
+		return nil
+	}
+
+	p.readNextToken()
+	if !p.expectToken(token.LBRACE, "missing output opening brace") {
+		return nil
+	}
+	p.skipNewlines()
+
+	var fields []ast.Field
+	for {
+		p.readNextToken()
+		p.skipNewlines()
+
+		if p.currentToken.Type == token.RBRACE {
+			break
+		}
+		if p.currentToken.Type == token.EOF {
+			p.appendError("missing output closing brace, unexpected EOF while parsing output fields")
+			return nil
+		}
+
+		field := p.parseField()
+		if field != nil {
+			fields = append(fields, *field)
+		}
+	}
+
+	return &ast.ProcOutput{
+		Fields: fields,
+	}
+}
+
+func (p *Parser) parseProcMeta() *ast.ProcMeta {
+	if !p.expectToken(token.META, "missing meta keyword") {
+		return nil
+	}
+
+	p.readNextToken()
+	if !p.expectToken(token.LBRACE, "missing meta opening brace") {
+		return nil
+	}
+	p.skipNewlines()
+
+	var entries []ast.ProcMetaKV
+	for {
+		p.readNextToken()
+		p.skipNewlines()
+
+		if p.currentToken.Type == token.RBRACE {
+			break
+		}
+		if p.currentToken.Type == token.EOF {
+			p.appendError("missing meta closing brace, unexpected EOF while parsing meta entries")
+			return nil
+		}
+
+		entry := p.parseProcMetaEntry()
+		if entry != nil {
+			entries = append(entries, *entry)
+		}
+	}
+
+	return &ast.ProcMeta{
+		Entries: entries,
+	}
+}
+
+func (p *Parser) parseProcMetaEntry() *ast.ProcMetaKV {
+	p.skipNewlines()
+	if !p.expectToken(token.IDENT, "missing meta key") {
+		return nil
+	}
+
+	key := p.currentToken.Literal
+	p.readNextToken()
+
+	if !p.expectToken(token.COLON, "missing meta key colon for "+key) {
+		return nil
+	}
+	p.readNextToken()
+
+	var procMetaType ast.ProcMetaValueTypeName
+	switch p.currentToken.Type {
+	case token.STRING:
+		procMetaType = ast.ProcMetaValueTypeString
+	case token.INT:
+		procMetaType = ast.ProcMetaValueTypeInt
+	case token.FLOAT:
+		procMetaType = ast.ProcMetaValueTypeFloat
+	case token.TRUE, token.FALSE:
+		procMetaType = ast.ProcMetaValueTypeBoolean
+	default:
+		p.appendError(fmt.Sprintf("invalid meta type %s for key %s", p.currentToken.Type, key))
+		return nil
+	}
+
+	return &ast.ProcMetaKV{
+		Type:  procMetaType,
+		Key:   key,
+		Value: p.currentToken.Literal,
 	}
 }
