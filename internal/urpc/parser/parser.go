@@ -101,6 +101,24 @@ func (p *Parser) Parse() (ast.Schema, []error, error) {
 		switch p.currentToken.Type {
 		case token.VERSION:
 			schema.Version = p.parseVersion(schema)
+		case token.DOCSTRING:
+			typeDecl, procDecl := p.parseDocstring()
+			if typeDecl != nil {
+				schema.Types = append(schema.Types, *typeDecl)
+			}
+			if procDecl != nil {
+				schema.Procedures = append(schema.Procedures, *procDecl)
+			}
+		case token.TYPE:
+			typeDecl := p.parseTypeDeclaration("")
+			if typeDecl != nil {
+				schema.Types = append(schema.Types, *typeDecl)
+			}
+		case token.PROC:
+			procDecl := p.parseProcDeclaration("")
+			if procDecl != nil {
+				schema.Procedures = append(schema.Procedures, *procDecl)
+			}
 		}
 
 		p.readNextToken()
@@ -172,4 +190,44 @@ func (p *Parser) parseVersion(currSchema ast.Schema) ast.Version {
 		IsSet: true,
 		Value: versionNumber,
 	}
+}
+
+// parseDocstring parses a docstring token and returns the underlying field or type
+// to be added to the schema.
+func (p *Parser) parseDocstring() (*ast.TypeDeclaration, *ast.ProcDeclaration) {
+	if !p.expectToken(token.DOCSTRING) {
+		return nil, nil
+	}
+
+	docstring := p.currentToken.Literal
+	p.readNextToken()
+
+	if p.currentToken.Type == token.TYPE {
+		return p.parseTypeDeclaration(docstring), nil
+	}
+
+	if p.currentToken.Type == token.PROC {
+		return nil, p.parseProcDeclaration(docstring)
+	}
+
+	p.appendError("docstring can be only added to type or procedure declaration")
+	return nil, nil
+}
+
+// parseTypeDeclaration parses a type declaration and returns it to be added to the schema.
+func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
+	if !p.expectToken(token.TYPE) {
+		return nil
+	}
+
+	return &ast.TypeDeclaration{}
+}
+
+// parseProcDeclaration parses a procedure declaration and returns it to be added to the schema.
+func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
+	if !p.expectToken(token.PROC) {
+		return nil
+	}
+
+	return &ast.ProcDeclaration{}
 }
