@@ -320,9 +320,45 @@ func (p *Parser) parseField() *ast.Field {
 
 // parseProcDeclaration parses a procedure declaration and returns it to be added to the schema.
 func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
-	if !p.expectToken(token.PROC) {
+	if !p.expectToken(token.PROC, "missing proc keyword") {
 		return nil
 	}
 
-	return &ast.ProcDeclaration{}
+	p.readNextToken()
+	if !p.expectToken(token.IDENT, "missing procedure name") {
+		return nil
+	}
+
+	// TODO: Validate procedure name PascalCase
+	typeName := p.currentToken.Literal
+	p.readNextToken()
+	if !p.expectToken(token.LBRACE, "missing procedure opening brace") {
+		return nil
+	}
+	p.skipNewlines()
+
+	input := ast.Input{}
+	output := ast.Output{}
+	metadata := ast.Metadata{}
+
+	for {
+		p.readNextToken()
+		p.skipNewlines()
+
+		if p.currentToken.Type == token.RBRACE {
+			break
+		}
+		if p.currentToken.Type == token.EOF {
+			p.appendError("missing procedure closing brace, unexpected EOF while parsing procedure children nodes")
+			return nil
+		}
+	}
+
+	return &ast.ProcDeclaration{
+		Name:     typeName,
+		Doc:      docstring,
+		Input:    input,
+		Output:   output,
+		Metadata: metadata,
+	}
 }

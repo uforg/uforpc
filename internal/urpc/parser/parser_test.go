@@ -168,4 +168,82 @@ func TestParser(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, expected, schema)
 	})
+
+	t.Run("Parse procedure declaration basic", func(t *testing.T) {
+		input := `
+			proc CreateUser {}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Procedures: []ast.ProcDeclaration{
+				{
+					Name:     "CreateUser",
+					Input:    ast.Input{},
+					Output:   ast.Output{},
+					Metadata: ast.Metadata{},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse procedure declaration with docstring", func(t *testing.T) {
+		input := `
+			""" Create user procedure documentation """
+			proc CreateUser {}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Procedures: []ast.ProcDeclaration{
+				{
+					Doc:      "Create user procedure documentation",
+					Name:     "CreateUser",
+					Input:    ast.Input{},
+					Output:   ast.Output{},
+					Metadata: ast.Metadata{},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse procedure declaration with empty input, output and meta", func(t *testing.T) {
+		input := `
+			proc CreateUser {
+				input {}
+				output {}
+				meta {}
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Procedures: []ast.ProcDeclaration{
+				{
+					Name:     "CreateUser",
+					Input:    ast.Input{},
+					Output:   ast.Output{},
+					Metadata: ast.Metadata{},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
 }
