@@ -97,9 +97,19 @@ type ProcMeta struct {
 
 func (m *ProcMeta) NodeType() NodeType { return NodeTypeMetadata }
 
+type ProcMetaValueTypeName string
+
+const (
+	ProcMetaValueTypeString  ProcMetaValueTypeName = "string"
+	ProcMetaValueTypeInt     ProcMetaValueTypeName = "int"
+	ProcMetaValueTypeFloat   ProcMetaValueTypeName = "float"
+	ProcMetaValueTypeBoolean ProcMetaValueTypeName = "boolean"
+)
+
 type ProcMetaKV struct {
+	Type  ProcMetaValueTypeName
 	Key   string
-	Value any // string|int|float|boolean
+	Value string
 }
 
 type TypeName string
