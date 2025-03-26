@@ -129,6 +129,89 @@ func (l *Lexer) readString() (string, bool) {
 	return str, false
 }
 
+// readDocstring reads a docstring from the current index to the next triple quote.
+//
+// Returns the docstring and a boolean indicating if the docstring is unterminated.
+func (l *Lexer) readDocstring() (string, bool) {
+	if l.currentChar != '"' {
+		return "", false
+	}
+
+	nextChar, eofReached := l.peekChar(1)
+	if eofReached || nextChar != '"' {
+		return "", false
+	}
+
+	nextChar2, eofReached2 := l.peekChar(2)
+	if eofReached2 || nextChar2 != '"' {
+		return "", false
+	}
+
+	// Skip the opening quotes
+	l.readNextChar()
+	l.readNextChar()
+	l.readNextChar()
+
+	var docstring string
+	for {
+		isEOF := func() bool {
+			if l.currentIndexIsEOF {
+				return true
+			}
+
+			_, eofReached := l.peekChar(1)
+			if eofReached || eofReached2 {
+				return true
+			}
+
+			_, eofReached2 := l.peekChar(2)
+			if eofReached2 || nextChar2 != '"' {
+				return true
+			}
+
+			return false
+		}()
+		if isEOF {
+			break
+		}
+
+		isEndOfDocstring := func() bool {
+			if l.currentChar != '"' {
+				return false
+			}
+
+			nextChar, eofReached := l.peekChar(1)
+			if eofReached || nextChar != '"' {
+				return false
+			}
+
+			nextChar2, eofReached2 := l.peekChar(2)
+			if eofReached2 || nextChar2 != '"' {
+				return false
+			}
+
+			return true
+		}()
+		if isEndOfDocstring {
+			break
+		}
+
+		docstring += string(l.currentChar)
+		l.readNextChar()
+	}
+
+	if l.currentIndexIsEOF {
+		return docstring, true
+	}
+
+	// Skip the closing quotes
+	l.readNextChar()
+	l.readNextChar()
+	l.readNextChar()
+
+	return docstring, false
+}
+
 // readComment reads a comment from the current index to the next newline or EOF.
 // it does not skip the end newline character.
 func (l *Lexer) readComment() string {
@@ -193,16 +276,52 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	}
 
-	// Handle strings
+	// Handle strings and docstrings
 	if l.currentChar == '"' {
 		startLine := l.currentLine
 		startColumn := l.currentColumn
+
+		isDocstring := func() bool {
+			nextChar, eofReached := l.peekChar(1)
+			if eofReached || nextChar != '"' {
+				return false
+			}
+
+			nextChar2, eofReached2 := l.peekChar(2)
+			if eofReached2 || nextChar2 != '"' {
+				return false
+			}
+
+			return true
+		}()
+
+		if isDocstring {
+			docstring, unterminated := l.readDocstring()
+			if unterminated {
+				return token.Token{
+					Type:     token.ILLEGAL,
+					Literal:  `"""` + docstring,
+					FileName: l.fileName,
+					Line:     startLine,
+					Column:   startColumn,
+				}
+			}
+
+			return token.Token{
+				Type:     token.DOCSTRING,
+				Literal:  docstring,
+				FileName: l.fileName,
+				Line:     startLine,
+				Column:   startColumn,
+			}
+		}
+
 		str, unterminated := l.readString()
 
 		if unterminated {
 			return token.Token{
 				Type:     token.ILLEGAL,
-				Literal:  "\"" + str,
+				Literal:  `"` + str,
 				FileName: l.fileName,
 				Line:     startLine,
 				Column:   startColumn,

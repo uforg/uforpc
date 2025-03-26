@@ -290,6 +290,45 @@ func TestLexer(t *testing.T) {
 		require.Equal(t, tests, tokens)
 	})
 
+	t.Run("TestLexerDocstrings", func(t *testing.T) {
+		input := `""" This is a docstring """`
+
+		tests := []token.Token{
+			{Type: token.DOCSTRING, Literal: " This is a docstring ", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 28},
+		}
+
+		lex1 := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex1.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
+	})
+
+	t.Run("TestLexerMultilineDocstrings", func(t *testing.T) {
+		input := "\"\"\" This is a multiline docstring\nwith multiple lines \"\"\""
+
+		tests := []token.Token{
+			{Type: token.DOCSTRING, Literal: " This is a multiline docstring\nwith multiple lines ", FileName: "test.urpc", Line: 1},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 2},
+		}
+
+		lex1 := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex1.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+		}
+	})
+
 	t.Run("TestLexerURPC", func(t *testing.T) {
 		input := `
 			version: 1
