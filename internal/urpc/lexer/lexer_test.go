@@ -240,6 +240,33 @@ func TestLexer(t *testing.T) {
 		require.Equal(t, tests, tokens)
 	})
 
+	t.Run("TestLexerComments", func(t *testing.T) {
+		input := "// This is a comment\nversion: 1"
+
+		tests := []token.Token{
+			{Type: token.COMMENT, Literal: " This is a comment", FileName: "test.urpc", Line: 1, Column: 1},
+			{Type: token.NEWLINE, Literal: "\n", FileName: "test.urpc", Line: 1, Column: 21},
+			{Type: token.VERSION, Literal: "version", FileName: "test.urpc", Line: 2, Column: 1},
+			{Type: token.COLON, Literal: ":", FileName: "test.urpc", Line: 2, Column: 8},
+			{Type: token.INT, Literal: "1", FileName: "test.urpc", Line: 2, Column: 10},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 2, Column: 11},
+		}
+
+		lex1 := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex1.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.Line, tok.Line, "test %d", i)
+			require.Equal(t, test.Column, tok.Column, "test %d", i)
+		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
+	})
+
 	t.Run("TestLexerUnterminatedString", func(t *testing.T) {
 		input := `"hello`
 

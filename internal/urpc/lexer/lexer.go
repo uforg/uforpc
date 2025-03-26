@@ -129,6 +129,37 @@ func (l *Lexer) readString() (string, bool) {
 	return str, false
 }
 
+// readComment reads a comment from the current index to the next newline or EOF.
+// it does not skip the end newline character.
+func (l *Lexer) readComment() string {
+	if l.currentChar != '/' {
+		return ""
+	}
+
+	nextChar, eofReached := l.peekChar(1)
+	if eofReached || nextChar != '/' {
+		return ""
+	}
+
+	// Skip the opening slashes
+	l.readNextChar()
+	l.readNextChar()
+
+	var comment string
+	for {
+		comment += string(l.currentChar)
+
+		nextChar, eofReached := l.peekChar(1)
+		if eofReached || nextChar == '\n' {
+			break
+		}
+
+		l.readNextChar()
+	}
+
+	return comment
+}
+
 // skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.
 func (l *Lexer) skipWhitespace() {
 	for isWhitespace(l.currentChar) {
@@ -245,6 +276,31 @@ func (l *Lexer) NextToken() token.Token {
 		return token.Token{
 			Type:     token.IDENT,
 			Literal:  ident,
+			FileName: l.fileName,
+			Line:     startLine,
+			Column:   startColumn,
+		}
+	}
+
+	// Handle comments
+	if l.currentChar == '/' {
+		nextChar, eofReached := l.peekChar(1)
+		if eofReached || nextChar != '/' {
+			return token.Token{
+				Type:     token.ILLEGAL,
+				Literal:  string(l.currentChar) + string(nextChar),
+				FileName: l.fileName,
+				Line:     l.currentLine,
+				Column:   l.currentColumn,
+			}
+		}
+
+		startLine := l.currentLine
+		startColumn := l.currentColumn
+		comment := l.readComment()
+		return token.Token{
+			Type:     token.COMMENT,
+			Literal:  comment,
 			FileName: l.fileName,
 			Line:     startLine,
 			Column:   startColumn,
