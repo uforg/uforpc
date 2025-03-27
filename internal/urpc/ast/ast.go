@@ -60,14 +60,81 @@ type Field struct {
 
 func (f *Field) NodeType() NodeType { return NodeTypeField }
 
+// ValidationRuleShape represents the shape of a validation rule.
+type ValidationRuleShape int
+
+const (
+	_ ValidationRuleShape = iota
+	ValidationRuleShapeSimple
+	ValidationRuleShapeWithValue
+	ValidationRuleShapeWithArray
+)
+
+// ValidationRuleValueType represents the type of a validation rule value.
+type ValidationRuleValueType int
+
+const (
+	ValidationRuleValueTypeNone ValidationRuleValueType = iota
+	ValidationRuleValueTypeString
+	ValidationRuleValueTypeInt
+	ValidationRuleValueTypeFloat
+	ValidationRuleValueTypeBoolean
+)
+
 // ValidationRule represents a validation rule for a field.
-type ValidationRule struct {
-	Name     string
-	Params   []any
-	ErrorMsg string
+type ValidationRule interface {
+	NodeType() NodeType
+	ValidationRuleShape() ValidationRuleShape
+	ValidationRuleValueType() ValidationRuleValueType
 }
 
-func (v *ValidationRule) NodeType() NodeType { return NodeTypeValidationRule }
+// ValidationRuleSimple represents a simple validation rule that contains an error message.
+type ValidationRuleSimple struct {
+	RuleName     string
+	ErrorMessage string
+}
+
+func (v *ValidationRuleSimple) NodeType() NodeType { return NodeTypeValidationRule }
+func (v *ValidationRuleSimple) ValidationRuleShape() ValidationRuleShape {
+	return ValidationRuleShapeSimple
+}
+func (v *ValidationRuleSimple) ValidationRuleValueType() ValidationRuleValueType {
+	return ValidationRuleValueTypeNone
+}
+
+// ValidationRuleWithValue represents a validation rule that contains a string value
+// and an error message.
+type ValidationRuleWithValue struct {
+	RuleName     string
+	Value        string
+	ValueType    ValidationRuleValueType
+	ErrorMessage string
+}
+
+func (v *ValidationRuleWithValue) NodeType() NodeType { return NodeTypeValidationRule }
+func (v *ValidationRuleWithValue) ValidationRuleShape() ValidationRuleShape {
+	return ValidationRuleShapeWithValue
+}
+func (v *ValidationRuleWithValue) ValidationRuleValueType() ValidationRuleValueType {
+	return v.ValueType
+}
+
+// ValidationRuleWithArray represents a validation rule that contains an array of values
+// and an error message.
+type ValidationRuleWithArray struct {
+	RuleName     string
+	Values       []string
+	ValueType    ValidationRuleValueType
+	ErrorMessage string
+}
+
+func (v *ValidationRuleWithArray) NodeType() NodeType { return NodeTypeValidationRule }
+func (v *ValidationRuleWithArray) ValidationRuleShape() ValidationRuleShape {
+	return ValidationRuleShapeWithArray
+}
+func (v *ValidationRuleWithArray) ValidationRuleValueType() ValidationRuleValueType {
+	return v.ValueType
+}
 
 // ProcDeclaration represents a procedure declaration in the URPC schema.
 type ProcDeclaration struct {
