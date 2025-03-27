@@ -261,26 +261,35 @@ func (p *Parser) parseField() *ast.Field {
 	}
 	p.readNextToken()
 
-	typeLiteral := p.currentToken.Literal
 	var fieldType ast.Type
 
-	switch typeLiteral {
-	case "string":
-		fieldType = &ast.TypeString{}
-	case "int":
-		fieldType = &ast.TypeInt{}
-	case "float":
-		fieldType = &ast.TypeFloat{}
-	case "boolean":
-		fieldType = &ast.TypeBoolean{}
-	default:
-		// TODO: Validate type name PascalCase
-		fieldType = &ast.TypeCustom{
-			Name: typeLiteral,
+	// Handle object type
+	if p.currentToken.Type == token.LBRACE {
+		fieldType = p.parseObjectType()
+		if fieldType == nil {
+			return nil
 		}
+	} else {
+		typeLiteral := p.currentToken.Literal
+
+		switch typeLiteral {
+		case "string":
+			fieldType = &ast.TypeString{}
+		case "int":
+			fieldType = &ast.TypeInt{}
+		case "float":
+			fieldType = &ast.TypeFloat{}
+		case "boolean":
+			fieldType = &ast.TypeBoolean{}
+		default:
+			// TODO: Validate type name PascalCase
+			fieldType = &ast.TypeCustom{
+				Name: typeLiteral,
+			}
+		}
+		p.readNextToken()
 	}
 
-	p.readNextToken()
 	if p.currentToken.Type == token.LBRACKET {
 		fieldType = &ast.TypeArray{
 			ArrayType: fieldType,
@@ -308,6 +317,43 @@ func (p *Parser) parseField() *ast.Field {
 		Optional:        isOptional,
 		Type:            fieldType,
 		ValidationRules: fieldValidationRules,
+	}
+}
+
+// parseObjectType parses an inline object type.
+//
+// The parser expects the current token to be an opening brace.
+// Returns a TypeObject that contains the fields of the inline object.
+func (p *Parser) parseObjectType() ast.Type {
+	if !p.expectToken(token.LBRACE, "missing object type opening brace") {
+		return nil
+	}
+	p.readNextToken()
+
+	var fields []ast.Field
+	for {
+		if p.currentToken.Type == token.RBRACE {
+			break
+		}
+		if p.currentToken.Type == token.EOF {
+			p.appendError("missing object type closing brace, unexpected EOF while parsing object fields")
+			return nil
+		}
+		if !p.expectToken(token.IDENT, "missing field name") {
+			return nil
+		}
+
+		field := p.parseField()
+		if field != nil {
+			fields = append(fields, *field)
+		}
+	}
+
+	// Skip the closing brace
+	p.readNextToken()
+
+	return &ast.TypeObject{
+		Fields: fields,
 	}
 }
 

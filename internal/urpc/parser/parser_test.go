@@ -169,7 +169,173 @@ func TestParser(t *testing.T) {
 		require.Equal(t, expected, schema)
 	})
 
-	//TODO: Add test for parsing object types
+	t.Run("Parse type declaration with object type field", func(t *testing.T) {
+		input := `
+			type User {
+				objField: {
+					name: string
+					age: int
+				}
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "objField",
+							Optional: false,
+							Type: &ast.TypeObject{
+								Fields: []ast.Field{
+									{
+										Name:     "name",
+										Optional: false,
+										Type:     &ast.TypeString{},
+									},
+									{
+										Name:     "age",
+										Optional: false,
+										Type:     &ast.TypeInt{},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse type declaration with nested object type field", func(t *testing.T) {
+		input := `
+			type User {
+				objField: {
+					name: string
+					age: int
+					address: {
+						street: string
+						city: string
+						zip: string
+					}
+				}
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "objField",
+							Optional: false,
+							Type: &ast.TypeObject{
+								Fields: []ast.Field{
+									{
+										Name:     "name",
+										Optional: false,
+										Type:     &ast.TypeString{},
+									},
+									{
+										Name:     "age",
+										Optional: false,
+										Type:     &ast.TypeInt{},
+									},
+									{
+										Name:     "address",
+										Optional: false,
+										Type: &ast.TypeObject{
+											Fields: []ast.Field{
+												{
+													Name:     "street",
+													Optional: false,
+													Type:     &ast.TypeString{},
+												},
+												{
+													Name:     "city",
+													Optional: false,
+													Type:     &ast.TypeString{},
+												},
+												{
+													Name:     "zip",
+													Optional: false,
+													Type:     &ast.TypeString{},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse type declaration with array of objects", func(t *testing.T) {
+		input := `
+			type User {
+				objField: {
+					name: string
+					age: int
+				}[]
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "objField",
+							Optional: false,
+							Type: &ast.TypeArray{
+								ArrayType: &ast.TypeObject{
+									Fields: []ast.Field{
+										{
+											Name:     "name",
+											Optional: false,
+											Type:     &ast.TypeString{},
+										},
+										{
+											Name:     "age",
+											Optional: false,
+											Type:     &ast.TypeInt{},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
 
 	t.Run("Parse type declaration with array type field", func(t *testing.T) {
 		input := `
