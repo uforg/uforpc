@@ -473,46 +473,74 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		}
 		p.readNextToken()
 
+	case token.IDENT, token.ERROR:
+		// Check if it's directly starting with an "error" parameter
+		isErrorParam := (p.currentToken.Type == token.ERROR) ||
+			(p.currentToken.Type == token.IDENT && p.currentToken.Literal == "error")
+
+		if isErrorParam {
+			p.readNextToken()
+			if !p.expectToken(token.COLON, "missing colon after 'error' keyword in validation rule") {
+				return nil
+			}
+
+			p.readNextToken()
+			if !p.expectToken(token.STRING, "missing error message string in validation rule") {
+				return nil
+			}
+
+			errorMsg := p.currentToken.Literal
+			rule = &ast.ValidationRuleSimple{
+				RuleName:     ruleName,
+				ErrorMessage: errorMsg,
+			}
+			p.readNextToken()
+		} else {
+			p.appendError(fmt.Sprintf("unexpected identifier %s in validation rule parameters", p.currentToken.Literal))
+			return nil
+		}
+
 	default:
 		p.appendError(fmt.Sprintf("unexpected token %s in validation rule parameters", p.currentToken.Type))
 		return nil
 	}
 
-	// Look for error message after the initial parameter
+	// Look for additional parameters (error message) after comma
 	if p.currentToken.Type == token.COMMA {
 		p.readNextToken()
-		if !p.expectToken(token.IDENT, "missing error keyword after comma in validation rule") {
+
+		// Check for error parameter
+		isErrorParam := (p.currentToken.Type == token.ERROR) ||
+			(p.currentToken.Type == token.IDENT && p.currentToken.Literal == "error")
+
+		if isErrorParam {
+			p.readNextToken()
+			if !p.expectToken(token.COLON, "missing colon after 'error' keyword in validation rule") {
+				return nil
+			}
+
+			p.readNextToken()
+			if !p.expectToken(token.STRING, "missing error message string in validation rule") {
+				return nil
+			}
+
+			errorMsg := p.currentToken.Literal
+
+			// Update the error message based on rule type
+			switch r := rule.(type) {
+			case *ast.ValidationRuleSimple:
+				r.ErrorMessage = errorMsg
+			case *ast.ValidationRuleWithValue:
+				r.ErrorMessage = errorMsg
+			case *ast.ValidationRuleWithArray:
+				r.ErrorMessage = errorMsg
+			}
+
+			p.readNextToken()
+		} else {
+			p.appendError(fmt.Sprintf("unexpected token %s after comma in validation rule, expected 'error'", p.currentToken.Type))
 			return nil
 		}
-
-		if p.currentToken.Literal != "error" {
-			p.appendError("expected 'error' keyword after comma in validation rule")
-			return nil
-		}
-
-		p.readNextToken()
-		if !p.expectToken(token.COLON, "missing colon after 'error' keyword in validation rule") {
-			return nil
-		}
-
-		p.readNextToken()
-		if !p.expectToken(token.STRING, "missing error message string in validation rule") {
-			return nil
-		}
-
-		errorMsg := p.currentToken.Literal
-
-		// Update the error message based on rule type
-		switch r := rule.(type) {
-		case *ast.ValidationRuleSimple:
-			r.ErrorMessage = errorMsg
-		case *ast.ValidationRuleWithValue:
-			r.ErrorMessage = errorMsg
-		case *ast.ValidationRuleWithArray:
-			r.ErrorMessage = errorMsg
-		}
-
-		p.readNextToken()
 	}
 
 	// Expect closing parenthesis
