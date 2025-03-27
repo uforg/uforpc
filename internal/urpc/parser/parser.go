@@ -71,23 +71,6 @@ func (p *Parser) readNextToken() {
 	}
 }
 
-// peekToken peeks the token at the next index + depth without moving the current index.
-//
-// Returns the token and a boolean indicating if the EOF was reached.
-func (p *Parser) peekToken(depth int) (token.Token, bool) {
-	indexToPeek := p.currentIndex + depth
-	if indexToPeek > p.maxIndex {
-		return token.Token{
-			Type:     token.EOF,
-			Literal:  "",
-			FileName: p.lex.FileName,
-			Line:     p.lex.CurrentLine,
-			Column:   p.lex.CurrentColumn,
-		}, true
-	}
-	return p.tokens[indexToPeek], false
-}
-
 // appendError appends an error to the parser's errors list.
 //
 // The error message is formatted with the current token's file name, line, and column.
@@ -239,13 +222,11 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 	if !p.expectToken(token.LBRACE, "missing type opening brace") {
 		return nil
 	}
+	p.readNextToken()
 	p.skipNewlines()
 
 	var fields []ast.Field
 	for {
-		p.readNextToken()
-		p.skipNewlines()
-
 		if p.currentToken.Type == token.RBRACE {
 			break
 		}
@@ -258,6 +239,7 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 		if field != nil {
 			fields = append(fields, *field)
 		}
+		p.skipNewlines()
 	}
 
 	return &ast.TypeDeclaration{
@@ -268,7 +250,6 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 }
 
 func (p *Parser) parseField() *ast.Field {
-	p.skipNewlines()
 	if !p.expectToken(token.IDENT, "missing field name") {
 		return nil
 	}
@@ -306,16 +287,194 @@ func (p *Parser) parseField() *ast.Field {
 		}
 	}
 
-	nextToken, eofReached := p.peekToken(1)
-	if !eofReached && nextToken.Type == token.AT {
-		// TODO: Parse field rules
+	p.readNextToken()
+
+	// Parse field rules
+	var fieldValidationRules []ast.ValidationRule
+	p.skipNewlines()
+
+	for p.currentToken.Type == token.AT {
+		rule := p.parseFieldRule()
+		if rule != nil {
+			fieldValidationRules = append(fieldValidationRules, *rule)
+		}
+		p.skipNewlines()
 	}
 
 	return &ast.Field{
-		Name:     fieldName,
-		Optional: isOptional,
-		Type:     fieldType,
+		Name:            fieldName,
+		Optional:        isOptional,
+		Type:            fieldType,
+		ValidationRules: fieldValidationRules,
 	}
+}
+
+func (p *Parser) parseFieldRule() *ast.ValidationRule {
+	p.skipNewlines()
+	if !p.expectToken(token.AT, "missing field rule at") {
+		return nil
+	}
+
+	p.readNextToken()
+	if !p.expectToken(token.IDENT, "missing field rule name") {
+		return nil
+	}
+	ruleName := p.currentToken.Literal
+
+	// Default to simple rule with no parameters
+	var rule ast.ValidationRule = &ast.ValidationRuleSimple{
+		RuleName:     ruleName,
+		ErrorMessage: "",
+	}
+
+	// Check if there are parameters (starting with parenthesis)
+	p.readNextToken()
+	if p.currentToken.Type != token.LPAREN {
+		return &rule
+	}
+
+	// Process rule parameters
+	p.readNextToken()
+
+	// Handle different parameter types
+	switch p.currentToken.Type {
+	case token.RPAREN:
+		// Empty parentheses, still a simple rule
+		p.readNextToken()
+		return &rule
+
+	case token.STRING:
+		// String value
+		valueStr := p.currentToken.Literal
+		rule = &ast.ValidationRuleWithValue{
+			RuleName:     ruleName,
+			Value:        valueStr,
+			ValueType:    ast.ValidationRuleValueTypeString,
+			ErrorMessage: "",
+		}
+		p.readNextToken()
+
+	case token.INT:
+		// Integer value
+		valueStr := p.currentToken.Literal
+		rule = &ast.ValidationRuleWithValue{
+			RuleName:     ruleName,
+			Value:        valueStr,
+			ValueType:    ast.ValidationRuleValueTypeInt,
+			ErrorMessage: "",
+		}
+		p.readNextToken()
+
+	case token.FLOAT:
+		// Float value
+		valueStr := p.currentToken.Literal
+		rule = &ast.ValidationRuleWithValue{
+			RuleName:     ruleName,
+			Value:        valueStr,
+			ValueType:    ast.ValidationRuleValueTypeFloat,
+			ErrorMessage: "",
+		}
+		p.readNextToken()
+
+	case token.TRUE, token.FALSE:
+		// Boolean value
+		valueStr := p.currentToken.Literal
+		rule = &ast.ValidationRuleWithValue{
+			RuleName:     ruleName,
+			Value:        valueStr,
+			ValueType:    ast.ValidationRuleValueTypeBoolean,
+			ErrorMessage: "",
+		}
+		p.readNextToken()
+
+	case token.LBRACKET:
+		// Array values
+		var values []string
+		var valueType ast.ValidationRuleValueType = ast.ValidationRuleValueTypeString // Default
+
+		p.readNextToken()
+		for p.currentToken.Type != token.RBRACKET {
+			switch p.currentToken.Type {
+			case token.STRING:
+				values = append(values, p.currentToken.Literal)
+				valueType = ast.ValidationRuleValueTypeString
+			case token.INT:
+				values = append(values, p.currentToken.Literal)
+				valueType = ast.ValidationRuleValueTypeInt
+			case token.FLOAT:
+				values = append(values, p.currentToken.Literal)
+				valueType = ast.ValidationRuleValueTypeFloat
+			case token.TRUE, token.FALSE:
+				values = append(values, p.currentToken.Literal)
+				valueType = ast.ValidationRuleValueTypeBoolean
+			}
+
+			p.readNextToken()
+			if p.currentToken.Type == token.COMMA {
+				p.readNextToken()
+			} else if p.currentToken.Type != token.RBRACKET {
+				p.appendError("expected comma or closing bracket in enum values")
+				return nil
+			}
+		}
+
+		rule = &ast.ValidationRuleWithArray{
+			RuleName:     ruleName,
+			Values:       values,
+			ValueType:    valueType,
+			ErrorMessage: "",
+		}
+		p.readNextToken()
+
+	default:
+		p.appendError(fmt.Sprintf("unexpected token %s in validation rule parameters", p.currentToken.Type))
+		return nil
+	}
+
+	// Look for error message after the initial parameter
+	if p.currentToken.Type == token.COMMA {
+		p.readNextToken()
+		if !p.expectToken(token.IDENT, "missing error keyword after comma in validation rule") {
+			return nil
+		}
+
+		if p.currentToken.Literal != "error" {
+			p.appendError("expected 'error' keyword after comma in validation rule")
+			return nil
+		}
+
+		p.readNextToken()
+		if !p.expectToken(token.COLON, "missing colon after 'error' keyword in validation rule") {
+			return nil
+		}
+
+		p.readNextToken()
+		if !p.expectToken(token.STRING, "missing error message string in validation rule") {
+			return nil
+		}
+
+		errorMsg := p.currentToken.Literal
+
+		// Update the error message based on rule type
+		switch r := rule.(type) {
+		case *ast.ValidationRuleSimple:
+			r.ErrorMessage = errorMsg
+		case *ast.ValidationRuleWithValue:
+			r.ErrorMessage = errorMsg
+		case *ast.ValidationRuleWithArray:
+			r.ErrorMessage = errorMsg
+		}
+
+		p.readNextToken()
+	}
+
+	// Expect closing parenthesis
+	if !p.expectToken(token.RPAREN, "missing closing parenthesis in validation rule") {
+		return nil
+	}
+	p.readNextToken()
+
+	return &rule
 }
 
 // parseProcDeclaration parses a procedure declaration and returns it to be added to the schema.
