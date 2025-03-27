@@ -584,13 +584,11 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 	if !p.expectToken(token.LBRACE, "missing input opening brace") {
 		return nil
 	}
+	p.readNextToken()
 	p.skipNewlines()
 
 	var fields []ast.Field
 	for {
-		p.readNextToken()
-		p.skipNewlines()
-
 		if p.currentToken.Type == token.RBRACE {
 			break
 		}
@@ -598,11 +596,15 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 			p.appendError("missing input closing brace, unexpected EOF while parsing input fields")
 			return nil
 		}
+		if !p.expectToken(token.IDENT, "missing field name") {
+			return nil
+		}
 
 		field := p.parseField()
 		if field != nil {
 			fields = append(fields, *field)
 		}
+		p.skipNewlines()
 	}
 
 	return &ast.ProcInput{
@@ -619,13 +621,11 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 	if !p.expectToken(token.LBRACE, "missing output opening brace") {
 		return nil
 	}
+	p.readNextToken()
 	p.skipNewlines()
 
 	var fields []ast.Field
 	for {
-		p.readNextToken()
-		p.skipNewlines()
-
 		if p.currentToken.Type == token.RBRACE {
 			break
 		}
@@ -633,11 +633,15 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 			p.appendError("missing output closing brace, unexpected EOF while parsing output fields")
 			return nil
 		}
+		if !p.expectToken(token.IDENT, "missing field name") {
+			return nil
+		}
 
 		field := p.parseField()
 		if field != nil {
 			fields = append(fields, *field)
 		}
+		p.skipNewlines()
 	}
 
 	return &ast.ProcOutput{
