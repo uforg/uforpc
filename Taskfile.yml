@@ -5,7 +5,7 @@ version: "3"
 tasks:
   test:
     desc: Test all code on this repo
-    cmd: go test ./...
+    cmd: go test -v ./...
 
   lint:
     desc: Lint all code on this repo
