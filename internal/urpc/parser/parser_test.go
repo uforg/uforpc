@@ -726,6 +726,144 @@ func TestParser(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, expected, schema)
 	})
+
+	t.Run("Parse validation rule with error message", func(t *testing.T) {
+		input := `
+			type User {
+				name: string @required(error: "Name is required")
+				age: int @min(18, error: "Must be an adult")
+				email: string @email(error: "Invalid email format")
+				options: string[] @enum(["a", "b", "c"], error: "Invalid option selected")
+				tag: string @pattern("^[a-z]+$", error: "Only lowercase letters allowed")
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "name",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleSimple{
+									RuleName:     "required",
+									ErrorMessage: "Name is required",
+								},
+							},
+						},
+						{
+							Name:     "age",
+							Optional: false,
+							Type:     &ast.TypeInt{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithValue{
+									RuleName:     "min",
+									Value:        "18",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "Must be an adult",
+								},
+							},
+						},
+						{
+							Name:     "email",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleSimple{
+									RuleName:     "email",
+									ErrorMessage: "Invalid email format",
+								},
+							},
+						},
+						{
+							Name:     "options",
+							Optional: false,
+							Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithArray{
+									RuleName:     "enum",
+									Values:       []string{"a", "b", "c"},
+									ValueType:    ast.ValidationRuleValueTypeString,
+									ErrorMessage: "Invalid option selected",
+								},
+							},
+						},
+						{
+							Name:     "tag",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithValue{
+									RuleName:     "pattern",
+									Value:        "^[a-z]+$",
+									ValueType:    ast.ValidationRuleValueTypeString,
+									ErrorMessage: "Only lowercase letters allowed",
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse validation rule with error only", func(t *testing.T) {
+		input := `
+			type User {
+				name: string @required(error: "This field cannot be empty")
+				email: string @email(error: "Please enter a valid email address")
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "name",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleSimple{
+									RuleName:     "required",
+									ErrorMessage: "This field cannot be empty",
+								},
+							},
+						},
+						{
+							Name:     "email",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleSimple{
+									RuleName:     "email",
+									ErrorMessage: "Please enter a valid email address",
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
 }
 
 func TestParserFullExample(t *testing.T) {
@@ -740,11 +878,11 @@ func TestParserFullExample(t *testing.T) {
 		"""
 		type Category {
 			id: string
-				@uuid
+				@uuid(error: "Must be a valid UUID")
 				@minlen(36)
-				@maxlen(36)
+				@maxlen(36, error: "UUID must be exactly 36 characters")
 			name: string
-				@minlen(3)
+				@minlen(3, error: "Name must be at least 3 characters long")
 			description?: string
 			isActive: boolean
 				@equals(true)
@@ -763,27 +901,27 @@ func TestParserFullExample(t *testing.T) {
 				@uuid
 			name: string
 				@minlen(2)
-				@maxlen(100)
+				@maxlen(100, error: "Name cannot exceed 100 characters")
 			price: float
-				@min(0.01)
+				@min(0.01, error: "Price must be greater than zero")
 			stock: int
 				@min(0)
 			category: Category
 			tags?: string[]
-				@minlen(1)
+				@minlen(1, error: "At least one tag is required")
 				@maxlen(10)
 			
 			details: {
 				dimensions: {
 					width: float
-						@min(0.0)
+						@min(0.0, error: "Width cannot be negative")
 					height: float
 						@min(0.0)
 					depth?: float
 				}
 				weight?: float
 				colors: string[]
-					@enum(["red", "green", "blue", "black", "white"])
+					@enum(["red", "green", "blue", "black", "white"], error: "Color must be one of the allowed values")
 				attributes?: {
 					name: string
 					value: string
@@ -793,7 +931,7 @@ func TestParserFullExample(t *testing.T) {
 			variations: {
 				sku: string
 				price: float
-					@min(0.01)
+					@min(0.01, error: "Variation price must be greater than zero")
 				attributes: {
 					name: string
 					value: string
@@ -809,7 +947,7 @@ func TestParserFullExample(t *testing.T) {
 		proc GetCategory {
 			input {
 				id: string
-					@uuid
+					@uuid(error: "Category ID must be a valid UUID")
 			}
 			
 			output {
@@ -838,7 +976,7 @@ func TestParserFullExample(t *testing.T) {
 					draft: boolean
 					notify: boolean
 					scheduledFor?: string
-						@iso8601
+						@iso8601(error: "Must be a valid ISO8601 date")
 					tags?: string[]
 				}
 				
@@ -847,7 +985,7 @@ func TestParserFullExample(t *testing.T) {
 					customRules?: {
 						name: string
 						severity: int
-							@enum([1, 2, 3])
+							@enum([1, 2, 3], error: "Severity must be 1, 2, or 3")
 						message: string
 					}[]
 				}
@@ -856,7 +994,7 @@ func TestParserFullExample(t *testing.T) {
 			output {
 				success: boolean
 				productId: string
-					@uuid
+					@uuid(error: "Product ID must be a valid UUID")
 				errors?: {
 					code: int
 					message: string
@@ -875,7 +1013,7 @@ func TestParserFullExample(t *testing.T) {
 						region: string
 						load: float
 							@min(0.0)
-							@max(1.0)
+							@max(1.0, error: "Load factor cannot exceed 1.0")
 					}
 				}
 			}
@@ -912,7 +1050,7 @@ func TestParserFullExample(t *testing.T) {
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleSimple{
 								RuleName:     "uuid",
-								ErrorMessage: "",
+								ErrorMessage: "Must be a valid UUID",
 							},
 							&ast.ValidationRuleWithValue{
 								RuleName:     "minlen",
@@ -924,7 +1062,7 @@ func TestParserFullExample(t *testing.T) {
 								RuleName:     "maxlen",
 								Value:        "36",
 								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								ErrorMessage: "UUID must be exactly 36 characters",
 							},
 						},
 					},
@@ -937,7 +1075,7 @@ func TestParserFullExample(t *testing.T) {
 								RuleName:     "minlen",
 								Value:        "3",
 								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								ErrorMessage: "Name must be at least 3 characters long",
 							},
 						},
 					},
@@ -1002,7 +1140,7 @@ func TestParserFullExample(t *testing.T) {
 								RuleName:     "maxlen",
 								Value:        "100",
 								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								ErrorMessage: "Name cannot exceed 100 characters",
 							},
 						},
 					},
@@ -1015,7 +1153,7 @@ func TestParserFullExample(t *testing.T) {
 								RuleName:     "min",
 								Value:        "0.01",
 								ValueType:    ast.ValidationRuleValueTypeFloat,
-								ErrorMessage: "",
+								ErrorMessage: "Price must be greater than zero",
 							},
 						},
 					},
@@ -1046,7 +1184,7 @@ func TestParserFullExample(t *testing.T) {
 								RuleName:     "minlen",
 								Value:        "1",
 								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								ErrorMessage: "At least one tag is required",
 							},
 							&ast.ValidationRuleWithValue{
 								RuleName:     "maxlen",
@@ -1075,7 +1213,7 @@ func TestParserFullExample(t *testing.T) {
 														RuleName:     "min",
 														Value:        "0.0",
 														ValueType:    ast.ValidationRuleValueTypeFloat,
-														ErrorMessage: "",
+														ErrorMessage: "Width cannot be negative",
 													},
 												},
 											},
@@ -1114,7 +1252,7 @@ func TestParserFullExample(t *testing.T) {
 											RuleName:     "enum",
 											Values:       []string{"red", "green", "blue", "black", "white"},
 											ValueType:    ast.ValidationRuleValueTypeString,
-											ErrorMessage: "",
+											ErrorMessage: "Color must be one of the allowed values",
 										},
 									},
 								},
@@ -1161,7 +1299,7 @@ func TestParserFullExample(t *testing.T) {
 												RuleName:     "min",
 												Value:        "0.01",
 												ValueType:    ast.ValidationRuleValueTypeFloat,
-												ErrorMessage: "",
+												ErrorMessage: "Variation price must be greater than zero",
 											},
 										},
 									},
@@ -1205,7 +1343,7 @@ func TestParserFullExample(t *testing.T) {
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
 									RuleName:     "uuid",
-									ErrorMessage: "",
+									ErrorMessage: "Category ID must be a valid UUID",
 								},
 							},
 						},
@@ -1282,7 +1420,7 @@ func TestParserFullExample(t *testing.T) {
 										ValidationRules: []ast.ValidationRule{
 											&ast.ValidationRuleSimple{
 												RuleName:     "iso8601",
-												ErrorMessage: "",
+												ErrorMessage: "Must be a valid ISO8601 date",
 											},
 										},
 									},
@@ -1324,7 +1462,7 @@ func TestParserFullExample(t *testing.T) {
 																RuleName:     "enum",
 																Values:       []string{"1", "2", "3"},
 																ValueType:    ast.ValidationRuleValueTypeInt,
-																ErrorMessage: "",
+																ErrorMessage: "Severity must be 1, 2, or 3",
 															},
 														},
 													},
@@ -1356,7 +1494,7 @@ func TestParserFullExample(t *testing.T) {
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
 									RuleName:     "uuid",
-									ErrorMessage: "",
+									ErrorMessage: "Product ID must be a valid UUID",
 								},
 							},
 						},
@@ -1450,7 +1588,7 @@ func TestParserFullExample(t *testing.T) {
 															RuleName:     "max",
 															Value:        "1.0",
 															ValueType:    ast.ValidationRuleValueTypeFloat,
-															ErrorMessage: "",
+															ErrorMessage: "Load factor cannot exceed 1.0",
 														},
 													},
 												},
