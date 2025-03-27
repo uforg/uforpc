@@ -169,7 +169,37 @@ func TestParser(t *testing.T) {
 		require.Equal(t, expected, schema)
 	})
 
-	//TODO: Add test for parsing object and array types
+	//TODO: Add test for parsing object types
+
+	t.Run("Parse type declaration with array type field", func(t *testing.T) {
+		input := `
+			type User {
+				arrayField: string[]
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "arrayField",
+							Optional: false,
+							Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
 
 	t.Run("Parse type declaration with fields containing validation rules", func(t *testing.T) {
 		input := `

@@ -234,6 +234,9 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 			p.appendError("missing type closing brace, unexpected EOF while parsing type fields")
 			return nil
 		}
+		if !p.expectToken(token.IDENT, "missing field name") {
+			return nil
+		}
 
 		field := p.parseField()
 		if field != nil {
@@ -288,6 +291,17 @@ func (p *Parser) parseField() *ast.Field {
 	}
 
 	p.readNextToken()
+	if p.currentToken.Type == token.LBRACKET {
+		fieldType = &ast.TypeArray{
+			ArrayType: fieldType,
+		}
+		p.readNextToken()
+
+		if !p.expectToken(token.RBRACKET, "missing array closing bracket") {
+			return nil
+		}
+		p.readNextToken()
+	}
 
 	// Parse field rules
 	var fieldValidationRules []ast.ValidationRule
