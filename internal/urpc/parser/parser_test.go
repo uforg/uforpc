@@ -169,6 +169,204 @@ func TestParser(t *testing.T) {
 		require.Equal(t, expected, schema)
 	})
 
+	//TODO: Add test for parsing object and array types
+
+	t.Run("Parse type declaration with fields containing validation rules", func(t *testing.T) {
+		input := `
+			type User {
+				stringField: string
+					@equals("Foo")
+					@contains("Bar")
+					@minlen(3)
+					@maxlen(100)
+					@enum(["Foo", "Bar"])
+					@email
+					@iso8601
+					@uuid
+					@json
+					@lowercase
+					@uppercase
+
+				intField: int
+					@equals(1)
+					@min(0)
+					@max(100)
+					@enum([1, 2, 3])
+
+				floatField: float
+					@min(0.0)
+					@max(100.0)
+
+				booleanField: boolean
+					@equals(true)
+
+				arrayField: string[]
+					@minlen(1)
+					@maxlen(100)
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "User",
+					Fields: []ast.Field{
+						{
+							Name:     "stringField",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithValue{
+									RuleName:     "equals",
+									Value:        "Foo",
+									ValueType:    ast.ValidationRuleValueTypeString,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithValue{
+									RuleName:     "contains",
+									Value:        "Bar",
+									ValueType:    ast.ValidationRuleValueTypeString,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithValue{
+									RuleName:     "minlen",
+									Value:        "3",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithValue{
+									RuleName:     "maxlen",
+									Value:        "100",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithArray{
+									RuleName:     "enum",
+									Values:       []string{"Foo", "Bar"},
+									ValueType:    ast.ValidationRuleValueTypeString,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleSimple{
+									RuleName:     "email",
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleSimple{
+									RuleName:     "iso8601",
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleSimple{
+									RuleName:     "uuid",
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleSimple{
+									RuleName:     "json",
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleSimple{
+									RuleName:     "lowercase",
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleSimple{
+									RuleName:     "uppercase",
+									ErrorMessage: "",
+								},
+							},
+						},
+						{
+							Name:     "intField",
+							Optional: false,
+							Type:     &ast.TypeInt{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithValue{
+									RuleName:     "equals",
+									Value:        "1",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithValue{
+									RuleName:     "min",
+									Value:        "0",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithValue{
+									RuleName:     "max",
+									Value:        "100",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithArray{
+									RuleName:     "enum",
+									Values:       []string{"1", "2", "3"},
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+							},
+						},
+						{
+							Name:     "floatField",
+							Optional: false,
+							Type:     &ast.TypeFloat{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithValue{
+									RuleName:     "min",
+									Value:        "0.0",
+									ValueType:    ast.ValidationRuleValueTypeFloat,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithValue{
+									RuleName:     "max",
+									Value:        "100.0",
+									ValueType:    ast.ValidationRuleValueTypeFloat,
+									ErrorMessage: "",
+								},
+							},
+						},
+						{
+							Name:     "booleanField",
+							Optional: false,
+							Type:     &ast.TypeBoolean{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithValue{
+									RuleName:     "equals",
+									Value:        "true",
+									ValueType:    ast.ValidationRuleValueTypeBoolean,
+									ErrorMessage: "",
+								},
+							},
+						},
+						{
+							Name:     "arrayField",
+							Optional: false,
+							Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleWithValue{
+									RuleName:     "minlen",
+									Value:        "1",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+								&ast.ValidationRuleWithValue{
+									RuleName:     "maxlen",
+									Value:        "100",
+									ValueType:    ast.ValidationRuleValueTypeInt,
+									ErrorMessage: "",
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
 	t.Run("Parse procedure declaration basic", func(t *testing.T) {
 		input := `
 			proc CreateUser {}
