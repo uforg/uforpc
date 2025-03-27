@@ -99,39 +99,48 @@ input {
 
 #### String (`@rule`)
 
-| Rule        | Parameters   | Example                      |
-| ----------- | ------------ | ---------------------------- |
-| `minLen`    | integer      | `@minLen(5)`                 |
-| `maxLen`    | integer      | `@maxLen(100, error: "...")` |
-| `enum`      | [string,...] | `@enum(["yes", "no"])`       |
-| `email`     | -            | `@email`                     |
-| `uuid`      | -            | `@uuid(error: "Invalid ID")` |
-| `iso8601`   | -            | `@iso8601`                   |
-| `lowercase` | -            | `@lowercase`                 |
-| `uppercase` | -            | `@uppercase`                 |
+| Rule        | Parameters   | Example                 |
+| ----------- | ------------ | ----------------------- |
+| `equals`    | string       | `@equals("Foo")`        |
+| `contains`  | string       | `@contains("Bar")`      |
+| `minlen`    | integer      | `@minlen(3)`            |
+| `maxlen`    | integer      | `@maxlen(100)`          |
+| `enum`      | [string,...] | `@enum(["Foo", "Bar"])` |
+| `email`     | -            | `@email`                |
+| `uuid`      | -            | `@uuid`                 |
+| `iso8601`   | -            | `@iso8601`              |
+| `json`      | -            | `@json`                 |
+| `lowercase` | -            | `@lowercase`            |
+| `uppercase` | -            | `@uppercase`            |
 
 #### Int (`@rule`)
 
-| Rule   | Parameters    | Example            |
-| ------ | ------------- | ------------------ |
-| `min`  | integer       | `@min(18)`         |
-| `max`  | integer       | `@max(100)`        |
-| `enum` | [integer,...] | `@enum([1, 2, 3])` |
+| Rule     | Parameters    | Example            |
+| -------- | ------------- | ------------------ |
+| `equals` | integer       | `@equals(1)`       |
+| `min`    | integer       | `@min(0)`          |
+| `max`    | integer       | `@max(100)`        |
+| `enum`   | [integer,...] | `@enum([1, 2, 3])` |
 
 #### Float (`@rule`)
 
-| Rule   | Parameters   | Example             |
-| ------ | ------------ | ------------------- |
-| `min`  | number       | `@min(0.5)`         |
-| `max`  | number       | `@max(999.99)`      |
-| `enum` | [number,...] | `@enum([1.1, 2.0])` |
+| Rule  | Parameters | Example       |
+| ----- | ---------- | ------------- |
+| `min` | number     | `@min(0.0)`   |
+| `max` | number     | `@max(100.0)` |
+
+#### Boolean (`@rule`)
+
+| Rule     | Parameters | Example         |
+| -------- | ---------- | --------------- |
+| `equals` | boolean    | `@equals(true)` |
 
 #### Array (`@rule`)
 
-| Rule       | Parameters | Example          |
-| ---------- | ---------- | ---------------- |
-| `minItems` | integer    | `@minItems(1)`   |
-| `maxItems` | integer    | `@maxItems(100)` |
+| Rule     | Parameters | Example        |
+| -------- | ---------- | -------------- |
+| `minlen` | integer    | `@minlen(1)`   |
+| `maxlen` | integer    | `@maxlen(100)` |
 
 ## 5. Procedures
 
@@ -181,11 +190,11 @@ Represents a product in the catalog
 type Product {
   id: string
     @uuid
-    @minLen(36)
+    @minlen(36)
   
   name: string
-    @minLen(3)
-    @maxLen(100)
+    @minlen(3)
+    @maxlen(100)
   
   price: float
     @min(0.01)
