@@ -78,14 +78,14 @@ func (l *Lexer) peekChar(depth int) (byte, bool) {
 	return l.input[indexToPeek], false
 }
 
-// readIdentifier reads an identifier from the current index to the next non-letter character.
+// readIdentifier reads an identifier from the current index to the next non-letter/non-number character.
 func (l *Lexer) readIdentifier() string {
 	var ident string
-	for isLetter(l.currentChar) {
+	for isLetter(l.currentChar) || isNumber(l.currentChar) {
 		ident += string(l.currentChar)
 
 		nextChar, eofReached := l.peekChar(1)
-		if eofReached || !isLetter(nextChar) {
+		if eofReached || (!isLetter(nextChar) && !isNumber(nextChar)) {
 			break
 		}
 

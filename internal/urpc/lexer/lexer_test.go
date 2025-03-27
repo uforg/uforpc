@@ -132,6 +132,24 @@ func TestLexer(t *testing.T) {
 		require.Equal(t, tests, tokens)
 	})
 
+	t.Run("TestLexerIdentifiersWithNumbers", func(t *testing.T) {
+		input := "hello123 world456 someIdentifier789"
+
+		tests := []token.Token{
+			{Type: token.IDENT, Literal: "hello123"},
+			{Type: token.IDENT, Literal: "world456"},
+			{Type: token.IDENT, Literal: "someIdentifier789"},
+			{Type: token.EOF, Literal: ""},
+		}
+
+		lex1 := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex1.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+		}
+	})
+
 	t.Run("TestLexerNumbers", func(t *testing.T) {
 		input := "1 2 3 456 789"
 
