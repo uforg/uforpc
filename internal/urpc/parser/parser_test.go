@@ -727,3 +727,779 @@ func TestParser(t *testing.T) {
 		require.Equal(t, expected, schema)
 	})
 }
+
+func TestParserFullExample(t *testing.T) {
+	input := `
+		// Version declaration
+		version 1
+
+		// Simple type with documentation
+		"""
+		Category represents a product category in the system.
+		This type is used across the catalog module.
+		"""
+		type Category {
+			id: string
+				@uuid
+				@minlen(36)
+				@maxlen(36)
+			name: string
+				@minlen(3)
+			description?: string
+			isActive: boolean
+				@equals(true)
+			parentId?: string
+				@uuid
+		}
+
+		// Type with nested objects and arrays
+		"""
+		Product represents a sellable item in the store.
+		Products have complex validation rules and can be
+		nested inside catalogs.
+		"""
+		type Product {
+			id: string
+				@uuid
+			name: string
+				@minlen(2)
+				@maxlen(100)
+			price: float
+				@min(0.01)
+			stock: int
+				@min(0)
+			category: Category
+			tags?: string[]
+				@minlen(1)
+				@maxlen(10)
+			
+			details: {
+				dimensions: {
+					width: float
+						@min(0.0)
+					height: float
+						@min(0.0)
+					depth?: float
+				}
+				weight?: float
+				colors: string[]
+					@enum(["red", "green", "blue", "black", "white"])
+				attributes?: {
+					name: string
+					value: string
+				}[]
+			}
+			
+			variations: {
+				sku: string
+				price: float
+					@min(0.01)
+				attributes: {
+					name: string
+					value: string
+				}[]
+			}[]
+		}
+
+		// Simple procedure 
+		"""
+		GetCategory retrieves a category by its ID.
+		This is a basic read operation.
+		"""
+		proc GetCategory {
+			input {
+				id: string
+					@uuid
+			}
+			
+			output {
+				category: Category
+				exists: boolean
+			}
+			
+			meta {
+				cache: true
+				cacheTime: 300
+				requiresAuth: false
+				apiVersion: "1.0.0"
+			}
+		}
+
+		// Complex procedure with nested types
+		"""
+		CreateProduct adds a new product to the catalog.
+		This procedure handles complex validation and returns
+		detailed success information.
+		"""
+		proc CreateProduct {
+			input {
+				product: Product
+				options?: {
+					draft: boolean
+					notify: boolean
+					scheduledFor?: string
+						@iso8601
+					tags?: string[]
+				}
+				
+				validation: {
+					skipValidation?: boolean
+					customRules?: {
+						name: string
+						severity: int
+							@enum([1, 2, 3])
+						message: string
+					}[]
+				}
+			}
+			
+			output {
+				success: boolean
+				productId: string
+					@uuid
+				errors?: {
+					code: int
+					message: string
+					field?: string
+				}[]
+				
+				analytics: {
+					duration: float
+					processingSteps: {
+						name: string
+						duration: float
+						success: boolean
+					}[]
+					serverInfo: {
+						id: string
+						region: string
+						load: float
+							@min(0.0)
+							@max(1.0)
+					}
+				}
+			}
+			
+			meta {
+				auth: "required"
+				roles: "admin,product-manager"
+				rateLimit: 100
+				timeout: 30.5
+				audit: true
+				apiVersion: "1.2.0"
+			}
+		}
+	`
+
+	lexer := lexer.NewLexer("comprehensive.urpc", input)
+	parser := New(lexer)
+	schema, _, err := parser.Parse()
+
+	expected := ast.Schema{
+		Version: ast.Version{
+			IsSet: true,
+			Value: 1,
+		},
+		Types: []ast.TypeDeclaration{
+			{
+				Name: "Category",
+				Doc:  "Category represents a product category in the system.\n\t\tThis type is used across the catalog module.",
+				Fields: []ast.Field{
+					{
+						Name:     "id",
+						Optional: false,
+						Type:     &ast.TypeString{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleSimple{
+								RuleName:     "uuid",
+								ErrorMessage: "",
+							},
+							&ast.ValidationRuleWithValue{
+								RuleName:     "minlen",
+								Value:        "36",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+							&ast.ValidationRuleWithValue{
+								RuleName:     "maxlen",
+								Value:        "36",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "name",
+						Optional: false,
+						Type:     &ast.TypeString{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleWithValue{
+								RuleName:     "minlen",
+								Value:        "3",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "description",
+						Optional: true,
+						Type:     &ast.TypeString{},
+					},
+					{
+						Name:     "isActive",
+						Optional: false,
+						Type:     &ast.TypeBoolean{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleWithValue{
+								RuleName:     "equals",
+								Value:        "true",
+								ValueType:    ast.ValidationRuleValueTypeBoolean,
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "parentId",
+						Optional: true,
+						Type:     &ast.TypeString{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleSimple{
+								RuleName:     "uuid",
+								ErrorMessage: "",
+							},
+						},
+					},
+				},
+			},
+			{
+				Name: "Product",
+				Doc:  "Product represents a sellable item in the store.\n\t\tProducts have complex validation rules and can be\n\t\tnested inside catalogs.",
+				Fields: []ast.Field{
+					{
+						Name:     "id",
+						Optional: false,
+						Type:     &ast.TypeString{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleSimple{
+								RuleName:     "uuid",
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "name",
+						Optional: false,
+						Type:     &ast.TypeString{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleWithValue{
+								RuleName:     "minlen",
+								Value:        "2",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+							&ast.ValidationRuleWithValue{
+								RuleName:     "maxlen",
+								Value:        "100",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "price",
+						Optional: false,
+						Type:     &ast.TypeFloat{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleWithValue{
+								RuleName:     "min",
+								Value:        "0.01",
+								ValueType:    ast.ValidationRuleValueTypeFloat,
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "stock",
+						Optional: false,
+						Type:     &ast.TypeInt{},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleWithValue{
+								RuleName:     "min",
+								Value:        "0",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "category",
+						Optional: false,
+						Type:     &ast.TypeCustom{Name: "Category"},
+					},
+					{
+						Name:     "tags",
+						Optional: true,
+						Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleWithValue{
+								RuleName:     "minlen",
+								Value:        "1",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+							&ast.ValidationRuleWithValue{
+								RuleName:     "maxlen",
+								Value:        "10",
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "",
+							},
+						},
+					},
+					{
+						Name:     "details",
+						Optional: false,
+						Type: &ast.TypeObject{
+							Fields: []ast.Field{
+								{
+									Name:     "dimensions",
+									Optional: false,
+									Type: &ast.TypeObject{
+										Fields: []ast.Field{
+											{
+												Name:     "width",
+												Optional: false,
+												Type:     &ast.TypeFloat{},
+												ValidationRules: []ast.ValidationRule{
+													&ast.ValidationRuleWithValue{
+														RuleName:     "min",
+														Value:        "0.0",
+														ValueType:    ast.ValidationRuleValueTypeFloat,
+														ErrorMessage: "",
+													},
+												},
+											},
+											{
+												Name:     "height",
+												Optional: false,
+												Type:     &ast.TypeFloat{},
+												ValidationRules: []ast.ValidationRule{
+													&ast.ValidationRuleWithValue{
+														RuleName:     "min",
+														Value:        "0.0",
+														ValueType:    ast.ValidationRuleValueTypeFloat,
+														ErrorMessage: "",
+													},
+												},
+											},
+											{
+												Name:     "depth",
+												Optional: true,
+												Type:     &ast.TypeFloat{},
+											},
+										},
+									},
+								},
+								{
+									Name:     "weight",
+									Optional: true,
+									Type:     &ast.TypeFloat{},
+								},
+								{
+									Name:     "colors",
+									Optional: false,
+									Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+									ValidationRules: []ast.ValidationRule{
+										&ast.ValidationRuleWithArray{
+											RuleName:     "enum",
+											Values:       []string{"red", "green", "blue", "black", "white"},
+											ValueType:    ast.ValidationRuleValueTypeString,
+											ErrorMessage: "",
+										},
+									},
+								},
+								{
+									Name:     "attributes",
+									Optional: true,
+									Type: &ast.TypeArray{
+										ArrayType: &ast.TypeObject{
+											Fields: []ast.Field{
+												{
+													Name:     "name",
+													Optional: false,
+													Type:     &ast.TypeString{},
+												},
+												{
+													Name:     "value",
+													Optional: false,
+													Type:     &ast.TypeString{},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					{
+						Name:     "variations",
+						Optional: false,
+						Type: &ast.TypeArray{
+							ArrayType: &ast.TypeObject{
+								Fields: []ast.Field{
+									{
+										Name:     "sku",
+										Optional: false,
+										Type:     &ast.TypeString{},
+									},
+									{
+										Name:     "price",
+										Optional: false,
+										Type:     &ast.TypeFloat{},
+										ValidationRules: []ast.ValidationRule{
+											&ast.ValidationRuleWithValue{
+												RuleName:     "min",
+												Value:        "0.01",
+												ValueType:    ast.ValidationRuleValueTypeFloat,
+												ErrorMessage: "",
+											},
+										},
+									},
+									{
+										Name:     "attributes",
+										Optional: false,
+										Type: &ast.TypeArray{
+											ArrayType: &ast.TypeObject{
+												Fields: []ast.Field{
+													{
+														Name:     "name",
+														Optional: false,
+														Type:     &ast.TypeString{},
+													},
+													{
+														Name:     "value",
+														Optional: false,
+														Type:     &ast.TypeString{},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Procedures: []ast.ProcDeclaration{
+			{
+				Name: "GetCategory",
+				Doc:  "GetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.",
+				Input: ast.ProcInput{
+					Fields: []ast.Field{
+						{
+							Name:     "id",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleSimple{
+									RuleName:     "uuid",
+									ErrorMessage: "",
+								},
+							},
+						},
+					},
+				},
+				Output: ast.ProcOutput{
+					Fields: []ast.Field{
+						{
+							Name:     "category",
+							Optional: false,
+							Type:     &ast.TypeCustom{Name: "Category"},
+						},
+						{
+							Name:     "exists",
+							Optional: false,
+							Type:     &ast.TypeBoolean{},
+						},
+					},
+				},
+				Metadata: ast.ProcMeta{
+					Entries: []ast.ProcMetaKV{
+						{
+							Type:  ast.ProcMetaValueTypeBoolean,
+							Key:   "cache",
+							Value: "true",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeInt,
+							Key:   "cacheTime",
+							Value: "300",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeBoolean,
+							Key:   "requiresAuth",
+							Value: "false",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeString,
+							Key:   "apiVersion",
+							Value: "1.0.0",
+						},
+					},
+				},
+			},
+			{
+				Name: "CreateProduct",
+				Doc:  "CreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.",
+				Input: ast.ProcInput{
+					Fields: []ast.Field{
+						{
+							Name:     "product",
+							Optional: false,
+							Type:     &ast.TypeCustom{Name: "Product"},
+						},
+						{
+							Name:     "options",
+							Optional: true,
+							Type: &ast.TypeObject{
+								Fields: []ast.Field{
+									{
+										Name:     "draft",
+										Optional: false,
+										Type:     &ast.TypeBoolean{},
+									},
+									{
+										Name:     "notify",
+										Optional: false,
+										Type:     &ast.TypeBoolean{},
+									},
+									{
+										Name:     "scheduledFor",
+										Optional: true,
+										Type:     &ast.TypeString{},
+										ValidationRules: []ast.ValidationRule{
+											&ast.ValidationRuleSimple{
+												RuleName:     "iso8601",
+												ErrorMessage: "",
+											},
+										},
+									},
+									{
+										Name:     "tags",
+										Optional: true,
+										Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+									},
+								},
+							},
+						},
+						{
+							Name:     "validation",
+							Optional: false,
+							Type: &ast.TypeObject{
+								Fields: []ast.Field{
+									{
+										Name:     "skipValidation",
+										Optional: true,
+										Type:     &ast.TypeBoolean{},
+									},
+									{
+										Name:     "customRules",
+										Optional: true,
+										Type: &ast.TypeArray{
+											ArrayType: &ast.TypeObject{
+												Fields: []ast.Field{
+													{
+														Name:     "name",
+														Optional: false,
+														Type:     &ast.TypeString{},
+													},
+													{
+														Name:     "severity",
+														Optional: false,
+														Type:     &ast.TypeInt{},
+														ValidationRules: []ast.ValidationRule{
+															&ast.ValidationRuleWithArray{
+																RuleName:     "enum",
+																Values:       []string{"1", "2", "3"},
+																ValueType:    ast.ValidationRuleValueTypeInt,
+																ErrorMessage: "",
+															},
+														},
+													},
+													{
+														Name:     "message",
+														Optional: false,
+														Type:     &ast.TypeString{},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				Output: ast.ProcOutput{
+					Fields: []ast.Field{
+						{
+							Name:     "success",
+							Optional: false,
+							Type:     &ast.TypeBoolean{},
+						},
+						{
+							Name:     "productId",
+							Optional: false,
+							Type:     &ast.TypeString{},
+							ValidationRules: []ast.ValidationRule{
+								&ast.ValidationRuleSimple{
+									RuleName:     "uuid",
+									ErrorMessage: "",
+								},
+							},
+						},
+						{
+							Name:     "errors",
+							Optional: true,
+							Type: &ast.TypeArray{
+								ArrayType: &ast.TypeObject{
+									Fields: []ast.Field{
+										{
+											Name:     "code",
+											Optional: false,
+											Type:     &ast.TypeInt{},
+										},
+										{
+											Name:     "message",
+											Optional: false,
+											Type:     &ast.TypeString{},
+										},
+										{
+											Name:     "field",
+											Optional: true,
+											Type:     &ast.TypeString{},
+										},
+									},
+								},
+							},
+						},
+						{
+							Name:     "analytics",
+							Optional: false,
+							Type: &ast.TypeObject{
+								Fields: []ast.Field{
+									{
+										Name:     "duration",
+										Optional: false,
+										Type:     &ast.TypeFloat{},
+									},
+									{
+										Name:     "processingSteps",
+										Optional: false,
+										Type: &ast.TypeArray{
+											ArrayType: &ast.TypeObject{
+												Fields: []ast.Field{
+													{
+														Name:     "name",
+														Optional: false,
+														Type:     &ast.TypeString{},
+													},
+													{
+														Name:     "duration",
+														Optional: false,
+														Type:     &ast.TypeFloat{},
+													},
+													{
+														Name:     "success",
+														Optional: false,
+														Type:     &ast.TypeBoolean{},
+													},
+												},
+											},
+										},
+									},
+									{
+										Name:     "serverInfo",
+										Optional: false,
+										Type: &ast.TypeObject{
+											Fields: []ast.Field{
+												{
+													Name:     "id",
+													Optional: false,
+													Type:     &ast.TypeString{},
+												},
+												{
+													Name:     "region",
+													Optional: false,
+													Type:     &ast.TypeString{},
+												},
+												{
+													Name:     "load",
+													Optional: false,
+													Type:     &ast.TypeFloat{},
+													ValidationRules: []ast.ValidationRule{
+														&ast.ValidationRuleWithValue{
+															RuleName:     "min",
+															Value:        "0.0",
+															ValueType:    ast.ValidationRuleValueTypeFloat,
+															ErrorMessage: "",
+														},
+														&ast.ValidationRuleWithValue{
+															RuleName:     "max",
+															Value:        "1.0",
+															ValueType:    ast.ValidationRuleValueTypeFloat,
+															ErrorMessage: "",
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				Metadata: ast.ProcMeta{
+					Entries: []ast.ProcMetaKV{
+						{
+							Type:  ast.ProcMetaValueTypeString,
+							Key:   "auth",
+							Value: "required",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeString,
+							Key:   "roles",
+							Value: "admin,product-manager",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeInt,
+							Key:   "rateLimit",
+							Value: "100",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeFloat,
+							Key:   "timeout",
+							Value: "30.5",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeBoolean,
+							Key:   "audit",
+							Value: "true",
+						},
+						{
+							Type:  ast.ProcMetaValueTypeString,
+							Key:   "apiVersion",
+							Value: "1.2.0",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, err)
+	require.Equal(t, expected, schema)
+}
