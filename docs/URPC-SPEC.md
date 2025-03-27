@@ -170,7 +170,7 @@ proc <Name> {
 ```urpc
 meta {
   // Allowed values
-  <key>: string|number|boolean
+  <key>: string|int|float|boolean
   
   // Examples
   cache: true
@@ -200,7 +200,7 @@ type Product {
     @min(0.01)
   
   tags?: string[]
-    @maxItems(5)
+    @maxlen(5)
 }
 
 """
