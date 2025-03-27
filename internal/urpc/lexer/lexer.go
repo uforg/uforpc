@@ -259,6 +259,7 @@ func (l *Lexer) skipWhitespace() {
 
 // NextToken returns the next token from the input.
 func (l *Lexer) NextToken() token.Token {
+	l.skipWhitespace()
 	if l.currentIndexIsEOF {
 		return token.Token{
 			Type:     token.EOF,
@@ -269,8 +270,8 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	}
 
+	// Prepare the next character when the function returns
 	defer l.readNextChar()
-	l.skipWhitespace()
 
 	// Handle delimiters
 	if token.IsDelimiter(l.currentChar) {

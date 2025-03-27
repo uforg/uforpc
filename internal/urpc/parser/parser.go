@@ -102,13 +102,6 @@ func (p *Parser) expectToken(expectedType token.TokenType, message ...string) bo
 	return true
 }
 
-// skipNewlines skips all newline tokens from the current index to the next non-newline token.
-func (p *Parser) skipNewlines() {
-	for p.currentToken.Type == token.NEWLINE {
-		p.readNextToken()
-	}
-}
-
 // Parse parses the tokens provided by the Lexer.
 //
 // Returns:
@@ -191,7 +184,6 @@ func (p *Parser) parseDocstring() (*ast.TypeDeclaration, *ast.ProcDeclaration) {
 
 	docstring := p.currentToken.Literal
 	p.readNextToken()
-	p.skipNewlines()
 
 	if p.currentToken.Type == token.TYPE {
 		return p.parseTypeDeclaration(docstring), nil
@@ -223,7 +215,6 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 		return nil
 	}
 	p.readNextToken()
-	p.skipNewlines()
 
 	var fields []ast.Field
 	for {
@@ -242,7 +233,6 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 		if field != nil {
 			fields = append(fields, *field)
 		}
-		p.skipNewlines()
 	}
 
 	return &ast.TypeDeclaration{
@@ -305,14 +295,12 @@ func (p *Parser) parseField() *ast.Field {
 
 	// Parse field rules
 	var fieldValidationRules []ast.ValidationRule
-	p.skipNewlines()
 
 	for p.currentToken.Type == token.AT {
 		rule := p.parseFieldRule()
 		if rule != nil {
 			fieldValidationRules = append(fieldValidationRules, *rule)
 		}
-		p.skipNewlines()
 	}
 
 	return &ast.Field{
@@ -324,7 +312,6 @@ func (p *Parser) parseField() *ast.Field {
 }
 
 func (p *Parser) parseFieldRule() *ast.ValidationRule {
-	p.skipNewlines()
 	if !p.expectToken(token.AT, "missing field rule at") {
 		return nil
 	}
@@ -508,7 +495,6 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 	if !p.expectToken(token.LBRACE, "missing procedure opening brace") {
 		return nil
 	}
-	p.skipNewlines()
 
 	input := ast.ProcInput{}
 	inputSet := false
@@ -519,7 +505,6 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 
 	for {
 		p.readNextToken()
-		p.skipNewlines()
 
 		if p.currentToken.Type == token.RBRACE {
 			break
@@ -585,7 +570,6 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 		return nil
 	}
 	p.readNextToken()
-	p.skipNewlines()
 
 	var fields []ast.Field
 	for {
@@ -604,7 +588,6 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 		if field != nil {
 			fields = append(fields, *field)
 		}
-		p.skipNewlines()
 	}
 
 	return &ast.ProcInput{
@@ -622,7 +605,6 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 		return nil
 	}
 	p.readNextToken()
-	p.skipNewlines()
 
 	var fields []ast.Field
 	for {
@@ -641,7 +623,6 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 		if field != nil {
 			fields = append(fields, *field)
 		}
-		p.skipNewlines()
 	}
 
 	return &ast.ProcOutput{
@@ -658,12 +639,10 @@ func (p *Parser) parseProcMeta() *ast.ProcMeta {
 	if !p.expectToken(token.LBRACE, "missing meta opening brace") {
 		return nil
 	}
-	p.skipNewlines()
 
 	var entries []ast.ProcMetaKV
 	for {
 		p.readNextToken()
-		p.skipNewlines()
 
 		if p.currentToken.Type == token.RBRACE {
 			break
@@ -685,7 +664,6 @@ func (p *Parser) parseProcMeta() *ast.ProcMeta {
 }
 
 func (p *Parser) parseProcMetaEntry() *ast.ProcMetaKV {
-	p.skipNewlines()
 	if !p.expectToken(token.IDENT, "missing meta key") {
 		return nil
 	}

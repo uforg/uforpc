@@ -38,8 +38,8 @@ func TestIsWhitespace(t *testing.T) {
 	require.True(t, isWhitespace(' '))
 	require.True(t, isWhitespace('\t'))
 	require.True(t, isWhitespace('\r'))
+	require.True(t, isWhitespace('\n'))
 
-	require.False(t, isWhitespace('\n'))
 	require.False(t, isWhitespace('a'))
 	require.False(t, isWhitespace('z'))
 	require.False(t, isWhitespace('A'))

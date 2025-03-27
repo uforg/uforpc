@@ -33,7 +33,6 @@ const (
 	RBRACKET TokenType = "]"
 	AT       TokenType = "@"
 	QUESTION TokenType = "?"
-	NEWLINE  TokenType = "\n"
 
 	// Keywords
 	VERSION TokenType = "VERSION"
@@ -49,17 +48,16 @@ const (
 
 // delimiters is a map of delimiters to their corresponding token types.
 var delimiters = map[string]TokenType{
-	":":  COLON,
-	",":  COMMA,
-	"(":  LPAREN,
-	")":  RPAREN,
-	"{":  LBRACE,
-	"}":  RBRACE,
-	"[":  LBRACKET,
-	"]":  RBRACKET,
-	"@":  AT,
-	"?":  QUESTION,
-	"\n": NEWLINE,
+	":": COLON,
+	",": COMMA,
+	"(": LPAREN,
+	")": RPAREN,
+	"{": LBRACE,
+	"}": RBRACE,
+	"[": LBRACKET,
+	"]": RBRACKET,
+	"@": AT,
+	"?": QUESTION,
 }
 
 // IsDelimiter returns true if the character is a delimiter.

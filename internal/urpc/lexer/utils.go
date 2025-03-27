@@ -12,7 +12,7 @@ func isNumber(ch byte) bool {
 
 // isWhitespace returns true if the character is a whitespace.
 func isWhitespace(ch byte) bool {
-	return ch == ' ' || ch == '\t' || ch == '\r'
+	return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n'
 }
 
 // isNewline returns true if the character is a newline.
