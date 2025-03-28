@@ -73,7 +73,7 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false"
+		input := "version rule type proc input output meta error true false for param"
 
 		tests := []token.Token{
 			{Type: token.VERSION, Literal: "version", FileName: "test.urpc", Line: 1, Column: 1},
@@ -86,7 +86,9 @@ func TestLexer(t *testing.T) {
 			{Type: token.ERROR, Literal: "error", FileName: "test.urpc", Line: 1, Column: 42},
 			{Type: token.TRUE, Literal: "true", FileName: "test.urpc", Line: 1, Column: 48},
 			{Type: token.FALSE, Literal: "false", FileName: "test.urpc", Line: 1, Column: 53},
-			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 58},
+			{Type: token.FOR, Literal: "for", FileName: "test.urpc", Line: 1, Column: 59},
+			{Type: token.PARAM, Literal: "param", FileName: "test.urpc", Line: 1, Column: 63},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 68},
 		}
 
 		lex1 := NewLexer("test.urpc", input)

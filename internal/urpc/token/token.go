@@ -45,6 +45,8 @@ const (
 	ERROR   TokenType = "ERROR"
 	TRUE    TokenType = "TRUE"
 	FALSE   TokenType = "FALSE"
+	FOR     TokenType = "FOR"
+	PARAM   TokenType = "PARAM"
 )
 
 // delimiters is a map of delimiters to their corresponding token types.
@@ -84,6 +86,8 @@ var keywords = map[string]TokenType{
 	"error":   ERROR,
 	"true":    TRUE,
 	"false":   FALSE,
+	"for":     FOR,
+	"param":   PARAM,
 }
 
 // IsKeyword returns true if the identifier is a keyword.
