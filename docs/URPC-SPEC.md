@@ -192,6 +192,7 @@ rule @<RuleName> {
 #### Example
 
 ```urpc
+""" This is a custom rule that validates if the field matches a regular expression """
 rule @regex {
   for: string
   param: string
