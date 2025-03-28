@@ -866,10 +866,222 @@ func TestParser(t *testing.T) {
 	})
 }
 
+func TestParserCustomRuleDeclaration(t *testing.T) {
+	t.Run("Parse custom rule declaration basic", func(t *testing.T) {
+		input := `
+			rule @minlen {
+				for: string
+				param: int
+				error: "Value is too short"
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			CustomRules: []ast.CustomRuleDeclaration{
+				{
+					Name: "minlen",
+					Doc:  "",
+					For:  ast.TypeNameString,
+					Param: ast.CustomRuleParamType{
+						IsArray: false,
+						Type:    ast.CustomRulePrimitiveTypeInt,
+					},
+					ErrorMsg: "Value is too short",
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse custom rule declaration with array param", func(t *testing.T) {
+		input := `
+			rule @enum {
+				for: string
+				param: string[]
+				error: "Value must be one of the allowed options"
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			CustomRules: []ast.CustomRuleDeclaration{
+				{
+					Name: "enum",
+					Doc:  "",
+					For:  ast.TypeNameString,
+					Param: ast.CustomRuleParamType{
+						IsArray: true,
+						Type:    ast.CustomRulePrimitiveTypeString,
+					},
+					ErrorMsg: "Value must be one of the allowed options",
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse custom rule declaration with docstring", func(t *testing.T) {
+		input := `
+			"""
+			Validates if a string matches a regular expression pattern.
+			This rule is useful for format validation like emails, etc.
+			"""
+			rule @regex {
+				for: string
+				param: string
+				error: "Invalid format"
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			CustomRules: []ast.CustomRuleDeclaration{
+				{
+					Name: "regex",
+					Doc:  "Validates if a string matches a regular expression pattern.\n\t\t\tThis rule is useful for format validation like emails, etc.",
+					For:  ast.TypeNameString,
+					Param: ast.CustomRuleParamType{
+						IsArray: false,
+						Type:    ast.CustomRulePrimitiveTypeString,
+					},
+					ErrorMsg: "Invalid format",
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse custom rule declaration with multiple rules", func(t *testing.T) {
+		input := `
+			rule @lowercase {
+				for: string
+				error: "Must be lowercase"
+			}
+
+			rule @uppercase {
+				for: string
+				error: "Must be uppercase"
+			}
+
+			rule @range {
+				for: int
+				param: int[]
+				error: "Value out of range"
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			CustomRules: []ast.CustomRuleDeclaration{
+				{
+					Name:     "lowercase",
+					Doc:      "",
+					For:      ast.TypeNameString,
+					Param:    ast.CustomRuleParamType{},
+					ErrorMsg: "Must be lowercase",
+				},
+				{
+					Name:     "uppercase",
+					Doc:      "",
+					For:      ast.TypeNameString,
+					Param:    ast.CustomRuleParamType{},
+					ErrorMsg: "Must be uppercase",
+				},
+				{
+					Name: "range",
+					Doc:  "",
+					For:  ast.TypeNameInt,
+					Param: ast.CustomRuleParamType{
+						IsArray: true,
+						Type:    ast.CustomRulePrimitiveTypeInt,
+					},
+					ErrorMsg: "Value out of range",
+				},
+			},
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
+	})
+
+	t.Run("Parse custom rule declaration invalid for type", func(t *testing.T) {
+		input := `
+			rule @invalid {
+				for: unknowntype
+				param: int
+				error: "Test error"
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		_, _, err := parser.Parse()
+
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "invalid 'for' type: unknowntype")
+	})
+
+	t.Run("Parse custom rule declaration invalid param type", func(t *testing.T) {
+		input := `
+			rule @invalid {
+				for: string
+				param: unknowntype
+				error: "Test error"
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		_, _, err := parser.Parse()
+
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "invalid param type: unknowntype")
+	})
+}
+
 func TestParserFullExample(t *testing.T) {
 	input := `
 		// Version declaration
 		version 1
+
+		// Custom rule declarations
+		"""
+		This rule validates if a string matches a regular expression pattern.
+		Useful for emails, URLs, and other formatted strings.
+		"""
+		rule @regex {
+			for: string
+			param: string
+			error: "Invalid format"
+		}
+
+		"""
+		Validates if a value is within a specified range.
+		"""
+		rule @range {
+			for: int
+			param: int[]
+			error: "Value out of range"
+		}
 
 		// Simple type with documentation
 		"""
@@ -906,6 +1118,7 @@ func TestParserFullExample(t *testing.T) {
 				@min(0.01, error: "Price must be greater than zero")
 			stock: int
 				@min(0)
+				@range([0, 1000], error: "Stock must be between 0 and 1000")
 			category: Category
 			tags?: string[]
 				@minlen(1, error: "At least one tag is required")
@@ -1038,6 +1251,28 @@ func TestParserFullExample(t *testing.T) {
 			IsSet: true,
 			Value: 1,
 		},
+		CustomRules: []ast.CustomRuleDeclaration{
+			{
+				Name: "regex",
+				Doc:  "This rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.",
+				For:  ast.TypeNameString,
+				Param: ast.CustomRuleParamType{
+					IsArray: false,
+					Type:    ast.CustomRulePrimitiveTypeString,
+				},
+				ErrorMsg: "Invalid format",
+			},
+			{
+				Name: "range",
+				Doc:  "",
+				For:  ast.TypeNameInt,
+				Param: ast.CustomRuleParamType{
+					IsArray: true,
+					Type:    ast.CustomRulePrimitiveTypeInt,
+				},
+				ErrorMsg: "Value out of range",
+			},
+		},
 		Types: []ast.TypeDeclaration{
 			{
 				Name: "Category",
@@ -1167,6 +1402,12 @@ func TestParserFullExample(t *testing.T) {
 								Value:        "0",
 								ValueType:    ast.ValidationRuleValueTypeInt,
 								ErrorMessage: "",
+							},
+							&ast.ValidationRuleWithArray{
+								RuleName:     "range",
+								Values:       []string{"0", "1000"},
+								ValueType:    ast.ValidationRuleValueTypeInt,
+								ErrorMessage: "Stock must be between 0 and 1000",
 							},
 						},
 					},
