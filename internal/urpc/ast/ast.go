@@ -6,6 +6,7 @@ const (
 	_ NodeType = iota
 	NodeTypeSchema
 	NodeTypeVersion
+	NodeTypeCustomRuleDeclaration
 	NodeTypeTypeDeclaration
 	NodeTypeProcDeclaration
 	NodeTypeField
@@ -26,9 +27,10 @@ type Node interface {
 
 // Schema is the root node of the AST representing an entire URPC schema.
 type Schema struct {
-	Version    Version
-	Types      []TypeDeclaration
-	Procedures []ProcDeclaration
+	Version     Version
+	CustomRules []CustomRuleDeclaration
+	Types       []TypeDeclaration
+	Procedures  []ProcDeclaration
 }
 
 func (s *Schema) NodeType() NodeType { return NodeTypeSchema }
@@ -40,6 +42,34 @@ type Version struct {
 }
 
 func (v *Version) NodeType() NodeType { return NodeTypeVersion }
+
+// CustomRulePrimitiveType represents the primitive types allowed in custom rule parameters.
+type CustomRulePrimitiveType int
+
+const (
+	_ CustomRulePrimitiveType = iota
+	CustomRulePrimitiveTypeString
+	CustomRulePrimitiveTypeInt
+	CustomRulePrimitiveTypeFloat
+	CustomRulePrimitiveTypeBoolean
+)
+
+// CustomRuleParamType represents the allowed parameter types for custom rules.
+type CustomRuleParamType struct {
+	IsArray bool
+	Type    CustomRulePrimitiveType // Only primitive types are allowed
+}
+
+// CustomRuleDeclaration represents a custom validation rule declaration in the URPC schema.
+type CustomRuleDeclaration struct {
+	Doc      string
+	Name     string
+	For      TypeName
+	Param    CustomRuleParamType
+	ErrorMsg string
+}
+
+func (c *CustomRuleDeclaration) NodeType() NodeType { return NodeTypeCustomRuleDeclaration }
 
 // TypeDeclaration represents a type declaration in the URPC schema.
 type TypeDeclaration struct {
