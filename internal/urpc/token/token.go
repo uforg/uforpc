@@ -36,6 +36,7 @@ const (
 
 	// Keywords
 	VERSION TokenType = "VERSION"
+	RULE    TokenType = "RULE"
 	TYPE    TokenType = "TYPE"
 	PROC    TokenType = "PROC"
 	INPUT   TokenType = "INPUT"
@@ -74,6 +75,7 @@ func GetDelimiterTokenType(ch byte) TokenType {
 // keywords is a map of keywords to their corresponding token types.
 var keywords = map[string]TokenType{
 	"version": VERSION,
+	"rule":    RULE,
 	"type":    TYPE,
 	"proc":    PROC,
 	"input":   INPUT,

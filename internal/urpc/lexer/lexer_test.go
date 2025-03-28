@@ -73,19 +73,20 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version type proc input output meta error true false"
+		input := "version rule type proc input output meta error true false"
 
 		tests := []token.Token{
 			{Type: token.VERSION, Literal: "version", FileName: "test.urpc", Line: 1, Column: 1},
-			{Type: token.TYPE, Literal: "type", FileName: "test.urpc", Line: 1, Column: 9},
-			{Type: token.PROC, Literal: "proc", FileName: "test.urpc", Line: 1, Column: 14},
-			{Type: token.INPUT, Literal: "input", FileName: "test.urpc", Line: 1, Column: 19},
-			{Type: token.OUTPUT, Literal: "output", FileName: "test.urpc", Line: 1, Column: 25},
-			{Type: token.META, Literal: "meta", FileName: "test.urpc", Line: 1, Column: 32},
-			{Type: token.ERROR, Literal: "error", FileName: "test.urpc", Line: 1, Column: 37},
-			{Type: token.TRUE, Literal: "true", FileName: "test.urpc", Line: 1, Column: 43},
-			{Type: token.FALSE, Literal: "false", FileName: "test.urpc", Line: 1, Column: 48},
-			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 53},
+			{Type: token.RULE, Literal: "rule", FileName: "test.urpc", Line: 1, Column: 9},
+			{Type: token.TYPE, Literal: "type", FileName: "test.urpc", Line: 1, Column: 14},
+			{Type: token.PROC, Literal: "proc", FileName: "test.urpc", Line: 1, Column: 19},
+			{Type: token.INPUT, Literal: "input", FileName: "test.urpc", Line: 1, Column: 24},
+			{Type: token.OUTPUT, Literal: "output", FileName: "test.urpc", Line: 1, Column: 30},
+			{Type: token.META, Literal: "meta", FileName: "test.urpc", Line: 1, Column: 37},
+			{Type: token.ERROR, Literal: "error", FileName: "test.urpc", Line: 1, Column: 42},
+			{Type: token.TRUE, Literal: "true", FileName: "test.urpc", Line: 1, Column: 48},
+			{Type: token.FALSE, Literal: "false", FileName: "test.urpc", Line: 1, Column: 53},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", Line: 1, Column: 58},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
