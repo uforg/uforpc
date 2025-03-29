@@ -1104,6 +1104,8 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 					Name: "CustomType",
 					Fields: []ast.Field{
 						{Name: "field1", Optional: false, Type: &ast.TypeString{}},
+						{Name: "field2", Optional: false, Type: &ast.TypeInt{}},
+						{Name: "field3", Optional: false, Type: &ast.TypeFloat{}},
 					},
 				},
 			},
