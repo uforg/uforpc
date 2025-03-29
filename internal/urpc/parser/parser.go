@@ -116,12 +116,20 @@ func (p *Parser) Parse() (ast.Schema, []error, error) {
 		case token.VERSION:
 			schema.Version = p.parseVersion(schema)
 		case token.DOCSTRING:
-			typeDecl, procDecl := p.parseDocstring()
+			ruleDecl, typeDecl, procDecl := p.parseDocstring()
+			if ruleDecl != nil {
+				schema.CustomRules = append(schema.CustomRules, *ruleDecl)
+			}
 			if typeDecl != nil {
 				schema.Types = append(schema.Types, *typeDecl)
 			}
 			if procDecl != nil {
 				schema.Procedures = append(schema.Procedures, *procDecl)
+			}
+		case token.RULE:
+			ruleDecl := p.parseCustomRuleDeclaration("")
+			if ruleDecl != nil {
+				schema.CustomRules = append(schema.CustomRules, *ruleDecl)
 			}
 		case token.TYPE:
 			typeDecl := p.parseTypeDeclaration("")
@@ -177,24 +185,163 @@ func (p *Parser) parseVersion(currSchema ast.Schema) ast.Version {
 
 // parseDocstring parses a docstring token and returns the underlying field or type
 // to be added to the schema.
-func (p *Parser) parseDocstring() (*ast.TypeDeclaration, *ast.ProcDeclaration) {
+func (p *Parser) parseDocstring() (*ast.CustomRuleDeclaration, *ast.TypeDeclaration, *ast.ProcDeclaration) {
 	if !p.expectToken(token.DOCSTRING) {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	docstring := p.currentToken.Literal
 	p.readNextToken()
 
+	if p.currentToken.Type == token.RULE {
+		return p.parseCustomRuleDeclaration(docstring), nil, nil
+	}
+
 	if p.currentToken.Type == token.TYPE {
-		return p.parseTypeDeclaration(docstring), nil
+		return nil, p.parseTypeDeclaration(docstring), nil
 	}
 
 	if p.currentToken.Type == token.PROC {
-		return nil, p.parseProcDeclaration(docstring)
+		return nil, nil, p.parseProcDeclaration(docstring)
 	}
 
-	p.appendError("docstring can be only added to type or procedure declaration")
-	return nil, nil
+	p.appendError("docstring can be only added to custom rule, type or procedure declaration")
+	return nil, nil, nil
+}
+
+// parseCustomRuleDeclaration parses a custom validation rule declaration.
+func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDeclaration {
+	if !p.expectToken(token.RULE, "missing rule keyword") {
+		return nil
+	}
+
+	p.readNextToken()
+	if !p.expectToken(token.AT, "missing @ in rule name") {
+		return nil
+	}
+
+	p.readNextToken()
+	if !p.expectToken(token.IDENT, "missing rule name") {
+		return nil
+	}
+
+	ruleName := p.currentToken.Literal
+	p.readNextToken()
+	if !p.expectToken(token.LBRACE, "missing rule opening brace") {
+		return nil
+	}
+	p.readNextToken()
+
+	// Initialize defaults
+	var forType ast.TypeName
+	var paramType ast.CustomRuleParamType
+	var errorMsg string
+
+	// Parse rule fields
+	for p.currentToken.Type != token.RBRACE {
+		if p.currentToken.Type == token.EOF {
+			p.appendError("missing rule closing brace, unexpected EOF while parsing rule fields")
+			return nil
+		}
+
+		switch p.currentToken.Type {
+		case token.FOR:
+			p.readNextToken()
+			if !p.expectToken(token.COLON, "missing colon after 'for' keyword") {
+				return nil
+			}
+			p.readNextToken()
+
+			switch p.currentToken.Literal {
+			case "string":
+				forType = ast.TypeNameString
+			case "int":
+				forType = ast.TypeNameInt
+			case "float":
+				forType = ast.TypeNameFloat
+			case "boolean":
+				forType = ast.TypeNameBoolean
+			default:
+				p.appendError(fmt.Sprintf("invalid 'for' type: %s", p.currentToken.Literal))
+				return nil
+			}
+			p.readNextToken()
+
+		case token.PARAM:
+			p.readNextToken()
+			if !p.expectToken(token.COLON, "missing colon after 'param' keyword") {
+				return nil
+			}
+			p.readNextToken()
+
+			// Check if it's an array type
+			isArray := false
+			var primitiveType ast.CustomRulePrimitiveType
+
+			// Parse the type
+			switch p.currentToken.Literal {
+			case "string":
+				primitiveType = ast.CustomRulePrimitiveTypeString
+			case "int":
+				primitiveType = ast.CustomRulePrimitiveTypeInt
+			case "float":
+				primitiveType = ast.CustomRulePrimitiveTypeFloat
+			case "boolean":
+				primitiveType = ast.CustomRulePrimitiveTypeBoolean
+			default:
+				p.appendError(fmt.Sprintf("invalid param type: %s", p.currentToken.Literal))
+				return nil
+			}
+
+			p.readNextToken()
+
+			// Check for array brackets
+			if p.currentToken.Type == token.LBRACKET {
+				isArray = true
+				p.readNextToken()
+				if !p.expectToken(token.RBRACKET, "missing closing bracket in param type") {
+					return nil
+				}
+				p.readNextToken()
+			}
+
+			paramType = ast.CustomRuleParamType{
+				IsArray: isArray,
+				Type:    primitiveType,
+			}
+
+		case token.ERROR:
+			p.readNextToken()
+			if !p.expectToken(token.COLON, "missing colon after 'error' keyword") {
+				return nil
+			}
+			p.readNextToken()
+			if !p.expectToken(token.STRING, "missing default error message string") {
+				return nil
+			}
+
+			errorMsg = p.currentToken.Literal
+			p.readNextToken()
+
+		default:
+			p.appendError(fmt.Sprintf("unexpected token %s in custom rule declaration, expected 'for', 'param' or 'error'", p.currentToken.Type))
+			return nil
+		}
+	}
+
+	// Validate required fields
+	if forType == "" {
+		p.appendError("missing required 'for' field in custom rule declaration")
+		return nil
+	}
+
+	return &ast.CustomRuleDeclaration{
+		Doc:      docstring,
+		Name:     ruleName,
+		For:      forType,
+		Param:    paramType,
+		ErrorMsg: errorMsg,
+	}
 }
 
 // parseTypeDeclaration parses a type declaration and returns it to be added to the schema.
