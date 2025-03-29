@@ -1264,7 +1264,7 @@ func TestParserFullExample(t *testing.T) {
 			},
 			{
 				Name: "range",
-				Doc:  "",
+				Doc:  "Validates if a value is within a specified range.",
 				For:  ast.TypeNameInt,
 				Param: ast.CustomRuleParamType{
 					IsArray: true,
