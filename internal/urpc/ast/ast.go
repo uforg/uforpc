@@ -64,7 +64,7 @@ type CustomRuleParamType struct {
 type CustomRuleDeclaration struct {
 	Doc      string
 	Name     string
-	For      TypeName
+	For      Type
 	Param    CustomRuleParamType
 	ErrorMsg string
 }
