@@ -233,7 +233,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 	p.readNextToken()
 
 	// Initialize defaults
-	var forType ast.TypeName
+	var forType ast.Type
 	var paramType ast.CustomRuleParamType
 	var errorMsg string
 
@@ -254,13 +254,13 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 
 			switch p.currentToken.Literal {
 			case "string":
-				forType = ast.TypeNameString
+				forType = &ast.TypeString{}
 			case "int":
-				forType = ast.TypeNameInt
+				forType = &ast.TypeInt{}
 			case "float":
-				forType = ast.TypeNameFloat
+				forType = &ast.TypeFloat{}
 			case "boolean":
-				forType = ast.TypeNameBoolean
+				forType = &ast.TypeBoolean{}
 			default:
 				p.appendError(fmt.Sprintf("invalid 'for' type: %s", p.currentToken.Literal))
 				return nil
@@ -330,7 +330,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 	}
 
 	// Validate required fields
-	if forType == "" {
+	if forType == nil {
 		p.appendError("missing required 'for' field in custom rule declaration")
 		return nil
 	}

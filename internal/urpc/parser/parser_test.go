@@ -885,7 +885,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 				{
 					Name: "minlen",
 					Doc:  "",
-					For:  ast.TypeNameString,
+					For:  &ast.TypeString{},
 					Param: ast.CustomRuleParamType{
 						IsArray: false,
 						Type:    ast.CustomRulePrimitiveTypeInt,
@@ -917,7 +917,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 				{
 					Name: "enum",
 					Doc:  "",
-					For:  ast.TypeNameString,
+					For:  &ast.TypeString{},
 					Param: ast.CustomRuleParamType{
 						IsArray: true,
 						Type:    ast.CustomRulePrimitiveTypeString,
@@ -953,7 +953,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 				{
 					Name: "regex",
 					Doc:  "Validates if a string matches a regular expression pattern.\n\t\t\tThis rule is useful for format validation like emails, etc.",
-					For:  ast.TypeNameString,
+					For:  &ast.TypeString{},
 					Param: ast.CustomRuleParamType{
 						IsArray: false,
 						Type:    ast.CustomRulePrimitiveTypeString,
@@ -995,21 +995,21 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 				{
 					Name:     "lowercase",
 					Doc:      "",
-					For:      ast.TypeNameString,
+					For:      &ast.TypeString{},
 					Param:    ast.CustomRuleParamType{},
 					ErrorMsg: "Must be lowercase",
 				},
 				{
 					Name:     "uppercase",
 					Doc:      "",
-					For:      ast.TypeNameString,
+					For:      &ast.TypeString{},
 					Param:    ast.CustomRuleParamType{},
 					ErrorMsg: "Must be uppercase",
 				},
 				{
 					Name: "range",
 					Doc:  "",
-					For:  ast.TypeNameInt,
+					For:  &ast.TypeInt{},
 					Param: ast.CustomRuleParamType{
 						IsArray: true,
 						Type:    ast.CustomRulePrimitiveTypeInt,
@@ -1055,6 +1055,83 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "invalid param type: unknowntype")
+	})
+
+	t.Run("Parse custom rule declaration for complex types", func(t *testing.T) {
+		input := `
+			type CustomType {
+				field1: string
+				field2: int
+				field3: float
+			}
+
+			rule @rule1 {
+				for: string
+			}
+			
+			rule @rule2 {
+				for: int
+			}
+			
+			rule @rule3 {
+				for: float
+			}
+
+			rule @rule4 {
+				for: boolean
+			}
+
+			rule @rule5 {
+				for: string[]
+			}
+
+			rule @rule6 {
+				for: CustomType
+			}
+		`
+
+		lexer := lexer.NewLexer("test.urpc", input)
+		parser := New(lexer)
+		schema, _, err := parser.Parse()
+
+		expected := ast.Schema{
+			Types: []ast.TypeDeclaration{
+				{
+					Name: "CustomType",
+					Fields: []ast.Field{
+						{Name: "field1", Optional: false, Type: &ast.TypeString{}},
+					},
+				},
+			},
+			CustomRules: []ast.CustomRuleDeclaration{
+				{
+					Name: "rule1",
+					For:  &ast.TypeString{},
+				},
+				{
+					Name: "rule2",
+					For:  &ast.TypeInt{},
+				},
+				{
+					Name: "rule3",
+					For:  &ast.TypeFloat{},
+				},
+				{
+					Name: "rule4",
+					For:  &ast.TypeBoolean{},
+				},
+				{
+					Name: "rule5",
+					For:  &ast.TypeArray{ArrayType: &ast.TypeString{}},
+				},
+				{
+					Name: "rule6",
+					For:  &ast.TypeCustom{Name: "CustomType"},
+				},
+			},
+		}
+		require.NoError(t, err)
+		require.Equal(t, expected, schema)
 	})
 }
 
@@ -1102,6 +1179,12 @@ func TestParserFullExample(t *testing.T) {
 				@uuid
 		}
 
+		""" Validate category with custom logic """
+		rule @validateCategory {
+			for: Category
+			error: "Invalid category"
+		}
+
 		// Type with nested objects and arrays
 		"""
 		Product represents a sellable item in the store.
@@ -1120,6 +1203,7 @@ func TestParserFullExample(t *testing.T) {
 				@min(0)
 				@range([0, 1000], error: "Stock must be between 0 and 1000")
 			category: Category
+				@validateCategory(error: "Invalid category custom message")
 			tags?: string[]
 				@minlen(1, error: "At least one tag is required")
 				@maxlen(10)
@@ -1255,7 +1339,7 @@ func TestParserFullExample(t *testing.T) {
 			{
 				Name: "regex",
 				Doc:  "This rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.",
-				For:  ast.TypeNameString,
+				For:  &ast.TypeString{},
 				Param: ast.CustomRuleParamType{
 					IsArray: false,
 					Type:    ast.CustomRulePrimitiveTypeString,
@@ -1265,12 +1349,18 @@ func TestParserFullExample(t *testing.T) {
 			{
 				Name: "range",
 				Doc:  "Validates if a value is within a specified range.",
-				For:  ast.TypeNameInt,
+				For:  &ast.TypeInt{},
 				Param: ast.CustomRuleParamType{
 					IsArray: true,
 					Type:    ast.CustomRulePrimitiveTypeInt,
 				},
 				ErrorMsg: "Value out of range",
+			},
+			{
+				Name:     "validateCategory",
+				Doc:      "Validate category with custom logic",
+				For:      &ast.TypeCustom{Name: "Category"},
+				ErrorMsg: "Invalid category",
 			},
 		},
 		Types: []ast.TypeDeclaration{
@@ -1415,6 +1505,12 @@ func TestParserFullExample(t *testing.T) {
 						Name:     "category",
 						Optional: false,
 						Type:     &ast.TypeCustom{Name: "Category"},
+						ValidationRules: []ast.ValidationRule{
+							&ast.ValidationRuleSimple{
+								RuleName:     "validateCategory",
+								ErrorMessage: "Invalid category custom message",
+							},
+						},
 					},
 					{
 						Name:     "tags",
