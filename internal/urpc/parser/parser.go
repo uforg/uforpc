@@ -7,8 +7,11 @@ import (
 	"github.com/uforg/uforpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/internal/urpc/lexer"
 	"github.com/uforg/uforpc/internal/urpc/token"
+	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
+// Parser analyzes tokens from a Lexer and constructs an AST representation of the URPC schema.
+// It tracks errors encountered during parsing and maintains the current parsing position.
 type Parser struct {
 	lex               *lexer.Lexer
 	tokens            []token.Token
@@ -20,6 +23,7 @@ type Parser struct {
 }
 
 // New creates and initializes a new Parser from a Lexer.
+// It reads all tokens from the lexer and sets up the initial parsing state.
 func New(lex *lexer.Lexer) *Parser {
 	p := &Parser{}
 
@@ -49,8 +53,8 @@ func New(lex *lexer.Lexer) *Parser {
 	return p
 }
 
-// readNextToken reads the next token from the tokens list and updates the
-// current Parser state.
+// readNextToken advances the parser to the next token in the token list.
+// If the end of the token list is reached, it sets the current token to EOF.
 func (p *Parser) readNextToken() {
 	if p.currentIndexIsEOF {
 		return
@@ -71,9 +75,8 @@ func (p *Parser) readNextToken() {
 	}
 }
 
-// appendError appends an error to the parser's errors list.
-//
-// The error message is formatted with the current token's file name, line, and column.
+// appendError adds a new error message to the parser's error list.
+// The error message is formatted with the current token's location information.
 func (p *Parser) appendError(message string) {
 	fileName := p.currentToken.FileName
 	line := p.currentToken.Line
@@ -82,14 +85,8 @@ func (p *Parser) appendError(message string) {
 	p.errors = append(p.errors, err)
 }
 
-// expectToken expects the current token to be of the given type.
-//
-// If the current token is not of the given type, an error is added to the parser's errors list.
-//
-// If a message is provided, it is appended to the error message.
-//
-// Returns:
-//   - bool: indicating if the token was encountered.
+// expectToken checks if the current token matches the expected type.
+// If not, it adds an error to the parser's error list and returns false.
 func (p *Parser) expectToken(expectedType token.TokenType, message ...string) bool {
 	if p.currentToken.Type != expectedType {
 		msg := fmt.Sprintf("expected token \"%s\", got \"%s\"", expectedType, p.currentToken.Type)
@@ -102,12 +99,8 @@ func (p *Parser) expectToken(expectedType token.TokenType, message ...string) bo
 	return true
 }
 
-// Parse parses the tokens provided by the Lexer.
-//
-// Returns:
-//   - ast.Schema: The parsed AST.
-//   - []error: A list of all errors encountered during parsing.
-//   - error: The first error encountered during parsing, or nil if no errors were encountered.
+// Parse processes all tokens from the lexer and constructs a complete AST.
+// It returns the parsed schema, all errors encountered, and the first error (if any).
 func (p *Parser) Parse() (ast.Schema, []error, error) {
 	schema := ast.Schema{}
 
@@ -152,8 +145,8 @@ func (p *Parser) Parse() (ast.Schema, []error, error) {
 	return schema, nil, nil
 }
 
-// parseVersion parses the version token, should exist exactly once in the input, otherwise
-// an error is added to the parser's errors list.
+// parseVersion processes a version declaration in the schema.
+// It validates that the version is a valid integer and is only declared once.
 func (p *Parser) parseVersion(currSchema ast.Schema) ast.Version {
 	if !p.expectToken(token.VERSION) {
 		return ast.Version{}
@@ -183,8 +176,8 @@ func (p *Parser) parseVersion(currSchema ast.Schema) ast.Version {
 	}
 }
 
-// parseDocstring parses a docstring token and returns the underlying field or type
-// to be added to the schema.
+// parseDocstring handles a documentation string followed by a rule, type, or procedure declaration.
+// It routes to the appropriate parser function based on what follows the docstring.
 func (p *Parser) parseDocstring() (*ast.CustomRuleDeclaration, *ast.TypeDeclaration, *ast.ProcDeclaration) {
 	if !p.expectToken(token.DOCSTRING) {
 		return nil, nil, nil
@@ -210,6 +203,7 @@ func (p *Parser) parseDocstring() (*ast.CustomRuleDeclaration, *ast.TypeDeclarat
 }
 
 // parseCustomRuleDeclaration parses a custom validation rule declaration.
+// It validates that the rule follows the correct syntax and that any referenced types exist.
 func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDeclaration {
 	if !p.expectToken(token.RULE, "missing rule keyword") {
 		return nil
@@ -226,6 +220,10 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 	}
 
 	ruleName := p.currentToken.Literal
+	if !strutil.IsCamelCase(ruleName) {
+		p.appendError(fmt.Sprintf("rule name '%s' must be in camelCase", ruleName))
+	}
+
 	p.readNextToken()
 	if !p.expectToken(token.LBRACE, "missing rule opening brace") {
 		return nil
@@ -252,25 +250,21 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 			}
 			p.readNextToken()
 
-			// Check for primitive types first
-			var baseType ast.Type
 			typeName := p.currentToken.Literal
-
 			switch typeName {
 			case "string":
-				baseType = &ast.TypeString{}
+				forType = &ast.TypeString{}
 			case "int":
-				baseType = &ast.TypeInt{}
+				forType = &ast.TypeInt{}
 			case "float":
-				baseType = &ast.TypeFloat{}
+				forType = &ast.TypeFloat{}
 			case "boolean":
-				baseType = &ast.TypeBoolean{}
-			case "unknowntype": // Special case for tests
-				p.appendError(fmt.Sprintf("invalid 'for' type: %s", typeName))
-				return nil
+				forType = &ast.TypeBoolean{}
 			default:
-				// Allow any custom type without validation - will be checked at runtime
-				baseType = &ast.TypeCustom{Name: typeName}
+				if !strutil.IsPascalCase(typeName) {
+					p.appendError(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeName))
+				}
+				forType = &ast.TypeCustom{Name: typeName}
 			}
 
 			p.readNextToken()
@@ -281,10 +275,8 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 				if !p.expectToken(token.RBRACKET, "missing closing bracket in type") {
 					return nil
 				}
-				forType = &ast.TypeArray{ArrayType: baseType}
+				forType = &ast.TypeArray{ArrayType: forType}
 				p.readNextToken()
-			} else {
-				forType = baseType
 			}
 
 		case token.PARAM:
@@ -309,7 +301,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 			case "boolean":
 				primitiveType = ast.CustomRulePrimitiveTypeBoolean
 			default:
-				p.appendError(fmt.Sprintf("invalid param type: %s", p.currentToken.Literal))
+				p.appendError(fmt.Sprintf(`invalid "%s" param type, must be one of "string", "int", "float", "boolean" or array of one of them`, p.currentToken.Literal))
 				return nil
 			}
 
@@ -349,12 +341,6 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 		}
 	}
 
-	// Validate required fields
-	if forType == nil {
-		p.appendError("missing required 'for' field in custom rule declaration")
-		return nil
-	}
-
 	return &ast.CustomRuleDeclaration{
 		Doc:      docstring,
 		Name:     ruleName,
@@ -364,7 +350,8 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 	}
 }
 
-// parseTypeDeclaration parses a type declaration and returns it to be added to the schema.
+// parseTypeDeclaration processes a type declaration in the schema.
+// It validates the type name, fields, and their validation rules.
 func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 	if !p.expectToken(token.TYPE, "missing type keyword") {
 		return nil
@@ -375,8 +362,12 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 		return nil
 	}
 
-	// TODO: Validate type name PascalCase
 	typeName := p.currentToken.Literal
+	if !strutil.IsPascalCase(typeName) {
+		p.appendError(fmt.Sprintf("type name '%s' must be in PascalCase", typeName))
+		return nil
+	}
+
 	p.readNextToken()
 	if !p.expectToken(token.LBRACE, "missing type opening brace") {
 		return nil
@@ -409,6 +400,8 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 	}
 }
 
+// parseField processes a field declaration within a type, input, or output block.
+// It handles the field name, type, optional flag, and validation rules.
 func (p *Parser) parseField() *ast.Field {
 	if !p.expectToken(token.IDENT, "missing field name") {
 		return nil
@@ -449,7 +442,10 @@ func (p *Parser) parseField() *ast.Field {
 		case "boolean":
 			fieldType = &ast.TypeBoolean{}
 		default:
-			// TODO: Validate type name PascalCase
+			if !strutil.IsPascalCase(typeLiteral) {
+				p.appendError(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeLiteral))
+				return nil
+			}
 			fieldType = &ast.TypeCustom{
 				Name: typeLiteral,
 			}
@@ -487,10 +483,8 @@ func (p *Parser) parseField() *ast.Field {
 	}
 }
 
-// parseObjectType parses an inline object type.
-//
-// The parser expects the current token to be an opening brace.
-// Returns a TypeObject that contains the fields of the inline object.
+// parseObjectType processes an inline object type declaration.
+// It handles the object's fields and their validation rules.
 func (p *Parser) parseObjectType() ast.Type {
 	if !p.expectToken(token.LBRACE, "missing object type opening brace") {
 		return nil
@@ -524,6 +518,8 @@ func (p *Parser) parseObjectType() ast.Type {
 	}
 }
 
+// parseFieldRule processes a validation rule applied to a field.
+// It handles simple rules, rules with values, and rules with arrays of values.
 func (p *Parser) parseFieldRule() *ast.ValidationRule {
 	if !p.expectToken(token.AT, "missing field rule at") {
 		return nil
@@ -534,6 +530,9 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		return nil
 	}
 	ruleName := p.currentToken.Literal
+	if !strutil.IsCamelCase(ruleName) {
+		p.appendError(fmt.Sprintf("rule name '%s' must be in camelCase", ruleName))
+	}
 
 	// Default to simple rule with no parameters
 	var rule ast.ValidationRule = &ast.ValidationRuleSimple{
@@ -549,6 +548,33 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 
 	// Process rule parameters
 	p.readNextToken()
+
+	// Special case for error-only rules
+	if p.currentToken.Type == token.ERROR {
+		p.readNextToken()
+		if !p.expectToken(token.COLON, "missing colon after 'error' keyword") {
+			return nil
+		}
+		p.readNextToken()
+		if !p.expectToken(token.STRING, "missing error message string") {
+			return nil
+		}
+
+		// Create simple rule with just an error message
+		errorMsg := p.currentToken.Literal
+		rule = &ast.ValidationRuleSimple{
+			RuleName:     ruleName,
+			ErrorMessage: errorMsg,
+		}
+		p.readNextToken()
+
+		// Expect closing parenthesis
+		if !p.expectToken(token.RPAREN, "missing closing parenthesis in validation rule") {
+			return nil
+		}
+		p.readNextToken()
+		return &rule
+	}
 
 	// Handle different parameter types
 	switch p.currentToken.Type {
@@ -602,34 +628,59 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		p.readNextToken()
 
 	case token.LBRACKET:
-		// Array values
+		// Array of values
 		var values []string
-		var valueType ast.ValidationRuleValueType = ast.ValidationRuleValueTypeString // Default
+		var valueType ast.ValidationRuleValueType
 
 		p.readNextToken()
+
+		// Parse array values
+		firstValue := true
 		for p.currentToken.Type != token.RBRACKET {
-			switch p.currentToken.Type {
-			case token.STRING:
-				values = append(values, p.currentToken.Literal)
-				valueType = ast.ValidationRuleValueTypeString
-			case token.INT:
-				values = append(values, p.currentToken.Literal)
-				valueType = ast.ValidationRuleValueTypeInt
-			case token.FLOAT:
-				values = append(values, p.currentToken.Literal)
-				valueType = ast.ValidationRuleValueTypeFloat
-			case token.TRUE, token.FALSE:
-				values = append(values, p.currentToken.Literal)
-				valueType = ast.ValidationRuleValueTypeBoolean
+			if !firstValue {
+				if !p.expectToken(token.COMMA, "missing comma between array values") {
+					return nil
+				}
+				p.readNextToken()
 			}
 
-			p.readNextToken()
-			if p.currentToken.Type == token.COMMA {
-				p.readNextToken()
-			} else if p.currentToken.Type != token.RBRACKET {
-				p.appendError("expected comma or closing bracket in enum values")
+			switch p.currentToken.Type {
+			case token.STRING:
+				if firstValue {
+					valueType = ast.ValidationRuleValueTypeString
+				} else if valueType != ast.ValidationRuleValueTypeString {
+					p.appendError("mixed types in validation rule array")
+					return nil
+				}
+			case token.INT:
+				if firstValue {
+					valueType = ast.ValidationRuleValueTypeInt
+				} else if valueType != ast.ValidationRuleValueTypeInt {
+					p.appendError("mixed types in validation rule array")
+					return nil
+				}
+			case token.FLOAT:
+				if firstValue {
+					valueType = ast.ValidationRuleValueTypeFloat
+				} else if valueType != ast.ValidationRuleValueTypeFloat {
+					p.appendError("mixed types in validation rule array")
+					return nil
+				}
+			case token.TRUE, token.FALSE:
+				if firstValue {
+					valueType = ast.ValidationRuleValueTypeBoolean
+				} else if valueType != ast.ValidationRuleValueTypeBoolean {
+					p.appendError("mixed types in validation rule array")
+					return nil
+				}
+			default:
+				p.appendError(fmt.Sprintf("unexpected token %s in validation rule array", p.currentToken.Type))
 				return nil
 			}
+
+			values = append(values, p.currentToken.Literal)
+			firstValue = false
+			p.readNextToken()
 		}
 
 		rule = &ast.ValidationRuleWithArray{
@@ -640,54 +691,21 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		}
 		p.readNextToken()
 
-	case token.IDENT, token.ERROR:
-		// Check if it's directly starting with an "error" parameter
-		isErrorParam := (p.currentToken.Type == token.ERROR) ||
-			(p.currentToken.Type == token.IDENT && p.currentToken.Literal == "error")
-
-		if isErrorParam {
-			p.readNextToken()
-			if !p.expectToken(token.COLON, "missing colon after 'error' keyword in validation rule") {
-				return nil
-			}
-
-			p.readNextToken()
-			if !p.expectToken(token.STRING, "missing error message string in validation rule") {
-				return nil
-			}
-
-			errorMsg := p.currentToken.Literal
-			rule = &ast.ValidationRuleSimple{
-				RuleName:     ruleName,
-				ErrorMessage: errorMsg,
-			}
-			p.readNextToken()
-		} else {
-			p.appendError(fmt.Sprintf("unexpected identifier %s in validation rule parameters", p.currentToken.Literal))
-			return nil
-		}
-
 	default:
-		p.appendError(fmt.Sprintf("unexpected token %s in validation rule parameters", p.currentToken.Type))
+		p.appendError(fmt.Sprintf("unexpected token %s in validation rule parameter", p.currentToken.Type))
 		return nil
 	}
 
-	// Look for additional parameters (error message) after comma
+	// Check for comma followed by error message
 	if p.currentToken.Type == token.COMMA {
 		p.readNextToken()
-
-		// Check for error parameter
-		isErrorParam := (p.currentToken.Type == token.ERROR) ||
-			(p.currentToken.Type == token.IDENT && p.currentToken.Literal == "error")
-
-		if isErrorParam {
+		if p.currentToken.Type == token.ERROR {
 			p.readNextToken()
-			if !p.expectToken(token.COLON, "missing colon after 'error' keyword in validation rule") {
+			if !p.expectToken(token.COLON, "missing colon after 'error' keyword") {
 				return nil
 			}
-
 			p.readNextToken()
-			if !p.expectToken(token.STRING, "missing error message string in validation rule") {
+			if !p.expectToken(token.STRING, "missing error message string") {
 				return nil
 			}
 
@@ -719,7 +737,8 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 	return &rule
 }
 
-// parseProcDeclaration parses a procedure declaration and returns it to be added to the schema.
+// parseProcDeclaration processes a procedure declaration in the schema.
+// It validates the procedure name, input, output, and metadata sections.
 func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 	if !p.expectToken(token.PROC, "missing proc keyword") {
 		return nil
@@ -730,8 +749,11 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 		return nil
 	}
 
-	// TODO: Validate procedure name PascalCase
 	procName := p.currentToken.Literal
+	if !strutil.IsPascalCase(procName) {
+		p.appendError(fmt.Sprintf("procedure name '%s' must be in PascalCase", procName))
+	}
+
 	p.readNextToken()
 	if !p.expectToken(token.LBRACE, "missing procedure opening brace") {
 		return nil
@@ -801,6 +823,8 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 	}
 }
 
+// parseProcInput processes an input block within a procedure declaration.
+// It handles the input fields and their validation rules.
 func (p *Parser) parseProcInput() *ast.ProcInput {
 	if !p.expectToken(token.INPUT, "missing input keyword") {
 		return nil
@@ -836,6 +860,8 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 	}
 }
 
+// parseProcOutput processes an output block within a procedure declaration.
+// It handles the output fields and their validation rules.
 func (p *Parser) parseProcOutput() *ast.ProcOutput {
 	if !p.expectToken(token.OUTPUT, "missing output keyword") {
 		return nil
@@ -871,6 +897,8 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 	}
 }
 
+// parseProcMeta processes a metadata block within a procedure declaration.
+// It handles the key-value pairs that define the procedure's metadata.
 func (p *Parser) parseProcMeta() *ast.ProcMeta {
 	if !p.expectToken(token.META, "missing meta keyword") {
 		return nil
@@ -904,6 +932,8 @@ func (p *Parser) parseProcMeta() *ast.ProcMeta {
 	}
 }
 
+// parseProcMetaEntry processes a single key-value pair in a procedure's metadata block.
+// It validates the key and value types.
 func (p *Parser) parseProcMetaEntry() *ast.ProcMetaKV {
 	if !p.expectToken(token.IDENT, "missing meta key") {
 		return nil
