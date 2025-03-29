@@ -453,16 +453,16 @@ func (p *Parser) parseField() *ast.Field {
 		p.readNextToken()
 	}
 
-	if p.currentToken.Type == token.LBRACKET {
-		fieldType = &ast.TypeArray{
-			ArrayType: fieldType,
-		}
+	for p.currentToken.Type == token.LBRACKET {
 		p.readNextToken()
-
 		if !p.expectToken(token.RBRACKET, "missing array closing bracket") {
 			return nil
 		}
 		p.readNextToken()
+
+		fieldType = &ast.TypeArray{
+			ArrayType: fieldType,
+		}
 	}
 
 	// Parse field rules
