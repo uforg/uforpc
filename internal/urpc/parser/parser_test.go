@@ -1026,7 +1026,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 	t.Run("Parse custom rule declaration invalid for type", func(t *testing.T) {
 		input := `
 			rule @invalid {
-				for: unknowntype
+				for: invalidType
 				param: int
 				error: "Test error"
 			}
@@ -1037,7 +1037,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		_, _, err := parser.Parse()
 
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "invalid 'for' type: unknowntype")
+		require.Contains(t, err.Error(), "must be in PascalCase")
 	})
 
 	t.Run("Parse custom rule declaration invalid param type", func(t *testing.T) {
@@ -1054,7 +1054,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		_, _, err := parser.Parse()
 
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "invalid param type: unknowntype")
+		require.Contains(t, err.Error(), `invalid "invalidType" param type`)
 	})
 
 	t.Run("Parse custom rule declaration for complex types", func(t *testing.T) {
