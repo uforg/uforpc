@@ -1044,7 +1044,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		input := `
 			rule @invalid {
 				for: string
-				param: unknowntype
+				param: invalidType
 				error: "Test error"
 			}
 		`
