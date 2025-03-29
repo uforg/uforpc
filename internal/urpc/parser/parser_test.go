@@ -1088,6 +1088,10 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 			rule @rule6 {
 				for: CustomType
 			}
+			
+			rule @rule7 {
+				for: CustomType[]
+			}
 		`
 
 		lexer := lexer.NewLexer("test.urpc", input)
@@ -1127,6 +1131,10 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 				{
 					Name: "rule6",
 					For:  &ast.TypeCustom{Name: "CustomType"},
+				},
+				{
+					Name: "rule7",
+					For:  &ast.TypeArray{ArrayType: &ast.TypeCustom{Name: "CustomType"}},
 				},
 			},
 		}
