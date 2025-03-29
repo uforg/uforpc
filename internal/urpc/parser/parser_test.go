@@ -53,7 +53,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 				},
@@ -75,7 +75,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Doc:  "Product type documentation",
 					Name: "Product",
@@ -102,29 +102,29 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "name",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 						},
 						{
 							Name:     "age",
 							Optional: true,
-							Type:     &ast.TypeInt{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 						},
 						{
 							Name:     "height",
 							Optional: false,
-							Type:     &ast.TypeFloat{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 						},
 						{
 							Name:     "isActive",
 							Optional: false,
-							Type:     &ast.TypeBoolean{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 						},
 					},
 				},
@@ -148,19 +148,19 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "name",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 						},
 						{
 							Name:     "address",
 							Optional: true,
-							Type:     &ast.TypeCustom{Name: "Address"},
+							Type:     ast.TypeCustom{Name: "Address"},
 						},
 					},
 				},
@@ -186,24 +186,24 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "objField",
 							Optional: false,
-							Type: &ast.TypeObject{
+							Type: ast.TypeObject{
 								Fields: []ast.Field{
 									{
 										Name:     "name",
 										Optional: false,
-										Type:     &ast.TypeString{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 									},
 									{
 										Name:     "age",
 										Optional: false,
-										Type:     &ast.TypeInt{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 									},
 								},
 							},
@@ -237,44 +237,44 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "objField",
 							Optional: false,
-							Type: &ast.TypeObject{
+							Type: ast.TypeObject{
 								Fields: []ast.Field{
 									{
 										Name:     "name",
 										Optional: false,
-										Type:     &ast.TypeString{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 									},
 									{
 										Name:     "age",
 										Optional: false,
-										Type:     &ast.TypeInt{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 									},
 									{
 										Name:     "address",
 										Optional: false,
-										Type: &ast.TypeObject{
+										Type: ast.TypeObject{
 											Fields: []ast.Field{
 												{
 													Name:     "street",
 													Optional: false,
-													Type:     &ast.TypeString{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 												},
 												{
 													Name:     "city",
 													Optional: false,
-													Type:     &ast.TypeString{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 												},
 												{
 													Name:     "zip",
 													Optional: false,
-													Type:     &ast.TypeString{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 												},
 											},
 										},
@@ -306,25 +306,25 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "objField",
 							Optional: false,
-							Type: &ast.TypeArray{
-								ArrayType: &ast.TypeObject{
+							Type: ast.TypeArray{
+								ElementsType: ast.TypeObject{
 									Fields: []ast.Field{
 										{
 											Name:     "name",
 											Optional: false,
-											Type:     &ast.TypeString{},
+											Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 										},
 										{
 											Name:     "age",
 											Optional: false,
-											Type:     &ast.TypeInt{},
+											Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 										},
 									},
 								},
@@ -351,14 +351,14 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "arrayField",
 							Optional: false,
-							Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+							Type:     ast.TypeArray{ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
 						},
 					},
 				},
@@ -381,17 +381,17 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "arrayField",
 							Optional: false,
-							Type: &ast.TypeArray{
-								ArrayType: &ast.TypeArray{
-									ArrayType: &ast.TypeArray{
-										ArrayType: &ast.TypeString{},
+							Type: ast.TypeArray{
+								ElementsType: ast.TypeArray{
+									ElementsType: ast.TypeArray{
+										ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 									},
 								},
 							},
@@ -445,150 +445,150 @@ func TestParserTypeDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "stringField",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithValue{
-									RuleName:     "equals",
-									Value:        "Foo",
-									ValueType:    ast.ValidationRuleValueTypeString,
-									ErrorMessage: "",
+									Name:      "equals",
+									Value:     "Foo",
+									ValueType: ast.ValidationRuleValueTypeString,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
-									RuleName:     "contains",
-									Value:        "Bar",
-									ValueType:    ast.ValidationRuleValueTypeString,
-									ErrorMessage: "",
+									Name:      "contains",
+									Value:     "Bar",
+									ValueType: ast.ValidationRuleValueTypeString,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
-									RuleName:     "minlen",
-									Value:        "3",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "minlen",
+									Value:     "3",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
-									RuleName:     "maxlen",
-									Value:        "100",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "maxlen",
+									Value:     "100",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithArray{
-									RuleName:     "enum",
-									Values:       []string{"Foo", "Bar"},
-									ValueType:    ast.ValidationRuleValueTypeString,
-									ErrorMessage: "",
+									Name:      "enum",
+									Values:    []string{"Foo", "Bar"},
+									ValueType: ast.ValidationRuleValueTypeString,
+									Error:     "",
 								},
 								&ast.ValidationRuleSimple{
-									RuleName:     "email",
-									ErrorMessage: "",
+									Name:  "email",
+									Error: "",
 								},
 								&ast.ValidationRuleSimple{
-									RuleName:     "iso8601",
-									ErrorMessage: "",
+									Name:  "iso8601",
+									Error: "",
 								},
 								&ast.ValidationRuleSimple{
-									RuleName:     "uuid",
-									ErrorMessage: "",
+									Name:  "uuid",
+									Error: "",
 								},
 								&ast.ValidationRuleSimple{
-									RuleName:     "json",
-									ErrorMessage: "",
+									Name:  "json",
+									Error: "",
 								},
 								&ast.ValidationRuleSimple{
-									RuleName:     "lowercase",
-									ErrorMessage: "",
+									Name:  "lowercase",
+									Error: "",
 								},
 								&ast.ValidationRuleSimple{
-									RuleName:     "uppercase",
-									ErrorMessage: "",
+									Name:  "uppercase",
+									Error: "",
 								},
 							},
 						},
 						{
 							Name:     "intField",
 							Optional: false,
-							Type:     &ast.TypeInt{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithValue{
-									RuleName:     "equals",
-									Value:        "1",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "equals",
+									Value:     "1",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
-									RuleName:     "min",
-									Value:        "0",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "min",
+									Value:     "0",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
-									RuleName:     "max",
-									Value:        "100",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "max",
+									Value:     "100",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithArray{
-									RuleName:     "enum",
-									Values:       []string{"1", "2", "3"},
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "enum",
+									Values:    []string{"1", "2", "3"},
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 							},
 						},
 						{
 							Name:     "floatField",
 							Optional: false,
-							Type:     &ast.TypeFloat{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithValue{
-									RuleName:     "min",
-									Value:        "0.0",
-									ValueType:    ast.ValidationRuleValueTypeFloat,
-									ErrorMessage: "",
+									Name:      "min",
+									Value:     "0.0",
+									ValueType: ast.ValidationRuleValueTypeFloat,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
-									RuleName:     "max",
-									Value:        "100.0",
-									ValueType:    ast.ValidationRuleValueTypeFloat,
-									ErrorMessage: "",
+									Name:      "max",
+									Value:     "100.0",
+									ValueType: ast.ValidationRuleValueTypeFloat,
+									Error:     "",
 								},
 							},
 						},
 						{
 							Name:     "booleanField",
 							Optional: false,
-							Type:     &ast.TypeBoolean{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithValue{
-									RuleName:     "equals",
-									Value:        "true",
-									ValueType:    ast.ValidationRuleValueTypeBoolean,
-									ErrorMessage: "",
+									Name:      "equals",
+									Value:     "true",
+									ValueType: ast.ValidationRuleValueTypeBoolean,
+									Error:     "",
 								},
 							},
 						},
 						{
 							Name:     "arrayField",
 							Optional: false,
-							Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+							Type:     ast.TypeArray{ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithValue{
-									RuleName:     "minlen",
-									Value:        "1",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "minlen",
+									Value:     "1",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
-									RuleName:     "maxlen",
-									Value:        "100",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "",
+									Name:      "maxlen",
+									Value:     "100",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "",
 								},
 							},
 						},
@@ -613,7 +613,7 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Procedures: []ast.ProcDeclaration{
+			Procedures: []ast.ProcDecl{
 				{
 					Name:     "CreateUser",
 					Input:    ast.ProcInput{},
@@ -638,7 +638,7 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Procedures: []ast.ProcDeclaration{
+			Procedures: []ast.ProcDecl{
 				{
 					Doc:      "Create user procedure documentation",
 					Name:     "CreateUser",
@@ -667,7 +667,7 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Procedures: []ast.ProcDeclaration{
+			Procedures: []ast.ProcDecl{
 				{
 					Name:     "CreateUser",
 					Input:    ast.ProcInput{},
@@ -708,7 +708,7 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Procedures: []ast.ProcDeclaration{
+			Procedures: []ast.ProcDecl{
 				{
 					Doc:  "Creates a product with the given stock and returns the product id.",
 					Name: "CreateProduct",
@@ -717,12 +717,12 @@ func TestParserProcedureDeclaration(t *testing.T) {
 							{
 								Name:     "product",
 								Optional: false,
-								Type:     &ast.TypeCustom{Name: "Product"},
+								Type:     ast.TypeCustom{Name: "Product"},
 							},
 							{
 								Name:     "stock",
 								Optional: false,
-								Type:     &ast.TypeInt{},
+								Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 							},
 						},
 					},
@@ -731,29 +731,29 @@ func TestParserProcedureDeclaration(t *testing.T) {
 							{
 								Name:     "productId",
 								Optional: false,
-								Type:     &ast.TypeString{},
+								Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							},
 						},
 					},
 					Metadata: ast.ProcMeta{
 						Entries: []ast.ProcMetaKV{
 							{
-								Type:  ast.ProcMetaValueTypeString,
+								Type:  ast.PrimitiveTypeString,
 								Key:   "versionNumber",
 								Value: "1.0.0",
 							},
 							{
-								Type:  ast.ProcMetaValueTypeInt,
+								Type:  ast.PrimitiveTypeInt,
 								Key:   "maxRetries",
 								Value: "3",
 							},
 							{
-								Type:  ast.ProcMetaValueTypeFloat,
+								Type:  ast.PrimitiveTypeFloat,
 								Key:   "waitMinutes",
 								Value: "10.5",
 							},
 							{
-								Type:  ast.ProcMetaValueTypeBoolean,
+								Type:  ast.PrimitiveTypeBoolean,
 								Key:   "audit",
 								Value: "true",
 							},
@@ -785,68 +785,68 @@ func TestParserValidationRules(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "name",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
-									RuleName:     "required",
-									ErrorMessage: "Name is required",
+									Name:  "required",
+									Error: "Name is required",
 								},
 							},
 						},
 						{
 							Name:     "age",
 							Optional: false,
-							Type:     &ast.TypeInt{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithValue{
-									RuleName:     "min",
-									Value:        "18",
-									ValueType:    ast.ValidationRuleValueTypeInt,
-									ErrorMessage: "Must be an adult",
+									Name:      "min",
+									Value:     "18",
+									ValueType: ast.ValidationRuleValueTypeInt,
+									Error:     "Must be an adult",
 								},
 							},
 						},
 						{
 							Name:     "email",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
-									RuleName:     "email",
-									ErrorMessage: "Invalid email format",
+									Name:  "email",
+									Error: "Invalid email format",
 								},
 							},
 						},
 						{
 							Name:     "options",
 							Optional: false,
-							Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+							Type:     ast.TypeArray{ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithArray{
-									RuleName:     "enum",
-									Values:       []string{"a", "b", "c"},
-									ValueType:    ast.ValidationRuleValueTypeString,
-									ErrorMessage: "Invalid option selected",
+									Name:      "enum",
+									Values:    []string{"a", "b", "c"},
+									ValueType: ast.ValidationRuleValueTypeString,
+									Error:     "Invalid option selected",
 								},
 							},
 						},
 						{
 							Name:     "tag",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleWithValue{
-									RuleName:     "pattern",
-									Value:        "^[a-z]+$",
-									ValueType:    ast.ValidationRuleValueTypeString,
-									ErrorMessage: "Only lowercase letters allowed",
+									Name:      "pattern",
+									Value:     "^[a-z]+$",
+									ValueType: ast.ValidationRuleValueTypeString,
+									Error:     "Only lowercase letters allowed",
 								},
 							},
 						},
@@ -872,29 +872,29 @@ func TestParserValidationRules(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "User",
 					Fields: []ast.Field{
 						{
 							Name:     "name",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
-									RuleName:     "required",
-									ErrorMessage: "This field cannot be empty",
+									Name:  "required",
+									Error: "This field cannot be empty",
 								},
 							},
 						},
 						{
 							Name:     "email",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
-									RuleName:     "email",
-									ErrorMessage: "Please enter a valid email address",
+									Name:  "email",
+									Error: "Please enter a valid email address",
 								},
 							},
 						},
@@ -923,16 +923,16 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			CustomRules: []ast.CustomRuleDeclaration{
+			CustomRules: []ast.CustomRuleDecl{
 				{
 					Name: "minlen",
 					Doc:  "",
-					For:  &ast.TypeString{},
-					Param: ast.CustomRuleParamType{
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+					Param: ast.CustomRuleDeclParamType{
 						IsArray: false,
-						Type:    ast.CustomRulePrimitiveTypeInt,
+						Type:    ast.PrimitiveTypeInt,
 					},
-					ErrorMsg: "Value is too short",
+					Error: "Value is too short",
 				},
 			},
 		}
@@ -955,16 +955,16 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			CustomRules: []ast.CustomRuleDeclaration{
+			CustomRules: []ast.CustomRuleDecl{
 				{
 					Name: "enum",
 					Doc:  "",
-					For:  &ast.TypeString{},
-					Param: ast.CustomRuleParamType{
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+					Param: ast.CustomRuleDeclParamType{
 						IsArray: true,
-						Type:    ast.CustomRulePrimitiveTypeString,
+						Type:    ast.PrimitiveTypeString,
 					},
-					ErrorMsg: "Value must be one of the allowed options",
+					Error: "Value must be one of the allowed options",
 				},
 			},
 		}
@@ -991,16 +991,16 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			CustomRules: []ast.CustomRuleDeclaration{
+			CustomRules: []ast.CustomRuleDecl{
 				{
 					Name: "regex",
 					Doc:  "Validates if a string matches a regular expression pattern.\n\t\t\tThis rule is useful for format validation like emails, etc.",
-					For:  &ast.TypeString{},
-					Param: ast.CustomRuleParamType{
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+					Param: ast.CustomRuleDeclParamType{
 						IsArray: false,
-						Type:    ast.CustomRulePrimitiveTypeString,
+						Type:    ast.PrimitiveTypeString,
 					},
-					ErrorMsg: "Invalid format",
+					Error: "Invalid format",
 				},
 			},
 		}
@@ -1033,30 +1033,30 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			CustomRules: []ast.CustomRuleDeclaration{
+			CustomRules: []ast.CustomRuleDecl{
 				{
-					Name:     "lowercase",
-					Doc:      "",
-					For:      &ast.TypeString{},
-					Param:    ast.CustomRuleParamType{},
-					ErrorMsg: "Must be lowercase",
+					Name:  "lowercase",
+					Doc:   "",
+					For:   ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+					Param: ast.CustomRuleDeclParamType{},
+					Error: "Must be lowercase",
 				},
 				{
-					Name:     "uppercase",
-					Doc:      "",
-					For:      &ast.TypeString{},
-					Param:    ast.CustomRuleParamType{},
-					ErrorMsg: "Must be uppercase",
+					Name:  "uppercase",
+					Doc:   "",
+					For:   ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+					Param: ast.CustomRuleDeclParamType{},
+					Error: "Must be uppercase",
 				},
 				{
 					Name: "range",
 					Doc:  "",
-					For:  &ast.TypeInt{},
-					Param: ast.CustomRuleParamType{
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
+					Param: ast.CustomRuleDeclParamType{
 						IsArray: true,
-						Type:    ast.CustomRulePrimitiveTypeInt,
+						Type:    ast.PrimitiveTypeInt,
 					},
-					ErrorMsg: "Value out of range",
+					Error: "Value out of range",
 				},
 			},
 		}
@@ -1141,44 +1141,44 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		schema, _, err := parser.Parse()
 
 		expected := ast.Schema{
-			Types: []ast.TypeDeclaration{
+			Types: []ast.TypeDecl{
 				{
 					Name: "CustomType",
 					Fields: []ast.Field{
-						{Name: "field1", Optional: false, Type: &ast.TypeString{}},
-						{Name: "field2", Optional: false, Type: &ast.TypeInt{}},
-						{Name: "field3", Optional: false, Type: &ast.TypeFloat{}},
+						{Name: "field1", Optional: false, Type: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
+						{Name: "field2", Optional: false, Type: ast.TypePrimitive{Name: ast.PrimitiveTypeInt}},
+						{Name: "field3", Optional: false, Type: ast.TypePrimitive{Name: ast.PrimitiveTypeFloat}},
 					},
 				},
 			},
-			CustomRules: []ast.CustomRuleDeclaration{
+			CustomRules: []ast.CustomRuleDecl{
 				{
 					Name: "rule1",
-					For:  &ast.TypeString{},
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 				},
 				{
 					Name: "rule2",
-					For:  &ast.TypeInt{},
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 				},
 				{
 					Name: "rule3",
-					For:  &ast.TypeFloat{},
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 				},
 				{
 					Name: "rule4",
-					For:  &ast.TypeBoolean{},
+					For:  ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 				},
 				{
 					Name: "rule5",
-					For:  &ast.TypeArray{ArrayType: &ast.TypeString{}},
+					For:  ast.TypeArray{ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
 				},
 				{
 					Name: "rule6",
-					For:  &ast.TypeCustom{Name: "CustomType"},
+					For:  ast.TypeCustom{Name: "CustomType"},
 				},
 				{
 					Name: "rule7",
-					For:  &ast.TypeArray{ArrayType: &ast.TypeCustom{Name: "CustomType"}},
+					For:  ast.TypeArray{ElementsType: ast.TypeCustom{Name: "CustomType"}},
 				},
 			},
 		}
@@ -1387,35 +1387,35 @@ func TestParserFullExample(t *testing.T) {
 			IsSet: true,
 			Value: 1,
 		},
-		CustomRules: []ast.CustomRuleDeclaration{
+		CustomRules: []ast.CustomRuleDecl{
 			{
 				Name: "regex",
 				Doc:  "This rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.",
-				For:  &ast.TypeString{},
-				Param: ast.CustomRuleParamType{
+				For:  ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+				Param: ast.CustomRuleDeclParamType{
 					IsArray: false,
-					Type:    ast.CustomRulePrimitiveTypeString,
+					Type:    ast.PrimitiveTypeString,
 				},
-				ErrorMsg: "Invalid format",
+				Error: "Invalid format",
 			},
 			{
 				Name: "range",
 				Doc:  "Validates if a value is within a specified range.",
-				For:  &ast.TypeInt{},
-				Param: ast.CustomRuleParamType{
+				For:  ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
+				Param: ast.CustomRuleDeclParamType{
 					IsArray: true,
-					Type:    ast.CustomRulePrimitiveTypeInt,
+					Type:    ast.PrimitiveTypeInt,
 				},
-				ErrorMsg: "Value out of range",
+				Error: "Value out of range",
 			},
 			{
-				Name:     "validateCategory",
-				Doc:      "Validate category with custom logic",
-				For:      &ast.TypeCustom{Name: "Category"},
-				ErrorMsg: "Invalid category",
+				Name:  "validateCategory",
+				Doc:   "Validate category with custom logic",
+				For:   ast.TypeCustom{Name: "Category"},
+				Error: "Invalid category",
 			},
 		},
-		Types: []ast.TypeDeclaration{
+		Types: []ast.TypeDecl{
 			{
 				Name: "Category",
 				Doc:  "Category represents a product category in the system.\n\t\tThis type is used across the catalog module.",
@@ -1423,65 +1423,65 @@ func TestParserFullExample(t *testing.T) {
 					{
 						Name:     "id",
 						Optional: false,
-						Type:     &ast.TypeString{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleSimple{
-								RuleName:     "uuid",
-								ErrorMessage: "Must be a valid UUID",
+								Name:  "uuid",
+								Error: "Must be a valid UUID",
 							},
 							&ast.ValidationRuleWithValue{
-								RuleName:     "minlen",
-								Value:        "36",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								Name:      "minlen",
+								Value:     "36",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "",
 							},
 							&ast.ValidationRuleWithValue{
-								RuleName:     "maxlen",
-								Value:        "36",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "UUID must be exactly 36 characters",
+								Name:      "maxlen",
+								Value:     "36",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "UUID must be exactly 36 characters",
 							},
 						},
 					},
 					{
 						Name:     "name",
 						Optional: false,
-						Type:     &ast.TypeString{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleWithValue{
-								RuleName:     "minlen",
-								Value:        "3",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "Name must be at least 3 characters long",
+								Name:      "minlen",
+								Value:     "3",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "Name must be at least 3 characters long",
 							},
 						},
 					},
 					{
 						Name:     "description",
 						Optional: true,
-						Type:     &ast.TypeString{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 					},
 					{
 						Name:     "isActive",
 						Optional: false,
-						Type:     &ast.TypeBoolean{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleWithValue{
-								RuleName:     "equals",
-								Value:        "true",
-								ValueType:    ast.ValidationRuleValueTypeBoolean,
-								ErrorMessage: "",
+								Name:      "equals",
+								Value:     "true",
+								ValueType: ast.ValidationRuleValueTypeBoolean,
+								Error:     "",
 							},
 						},
 					},
 					{
 						Name:     "parentId",
 						Optional: true,
-						Type:     &ast.TypeString{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleSimple{
-								RuleName:     "uuid",
-								ErrorMessage: "",
+								Name:  "uuid",
+								Error: "",
 							},
 						},
 					},
@@ -1494,135 +1494,135 @@ func TestParserFullExample(t *testing.T) {
 					{
 						Name:     "id",
 						Optional: false,
-						Type:     &ast.TypeString{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleSimple{
-								RuleName:     "uuid",
-								ErrorMessage: "",
+								Name:  "uuid",
+								Error: "",
 							},
 						},
 					},
 					{
 						Name:     "name",
 						Optional: false,
-						Type:     &ast.TypeString{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleWithValue{
-								RuleName:     "minlen",
-								Value:        "2",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								Name:      "minlen",
+								Value:     "2",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "",
 							},
 							&ast.ValidationRuleWithValue{
-								RuleName:     "maxlen",
-								Value:        "100",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "Name cannot exceed 100 characters",
+								Name:      "maxlen",
+								Value:     "100",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "Name cannot exceed 100 characters",
 							},
 						},
 					},
 					{
 						Name:     "price",
 						Optional: false,
-						Type:     &ast.TypeFloat{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleWithValue{
-								RuleName:     "min",
-								Value:        "0.01",
-								ValueType:    ast.ValidationRuleValueTypeFloat,
-								ErrorMessage: "Price must be greater than zero",
+								Name:      "min",
+								Value:     "0.01",
+								ValueType: ast.ValidationRuleValueTypeFloat,
+								Error:     "Price must be greater than zero",
 							},
 						},
 					},
 					{
 						Name:     "stock",
 						Optional: false,
-						Type:     &ast.TypeInt{},
+						Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleWithValue{
-								RuleName:     "min",
-								Value:        "0",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								Name:      "min",
+								Value:     "0",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "",
 							},
 							&ast.ValidationRuleWithArray{
-								RuleName:     "range",
-								Values:       []string{"0", "1000"},
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "Stock must be between 0 and 1000",
+								Name:      "range",
+								Values:    []string{"0", "1000"},
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "Stock must be between 0 and 1000",
 							},
 						},
 					},
 					{
 						Name:     "category",
 						Optional: false,
-						Type:     &ast.TypeCustom{Name: "Category"},
+						Type:     ast.TypeCustom{Name: "Category"},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleSimple{
-								RuleName:     "validateCategory",
-								ErrorMessage: "Invalid category custom message",
+								Name:  "validateCategory",
+								Error: "Invalid category custom message",
 							},
 						},
 					},
 					{
 						Name:     "tags",
 						Optional: true,
-						Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+						Type:     ast.TypeArray{ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
 						ValidationRules: []ast.ValidationRule{
 							&ast.ValidationRuleWithValue{
-								RuleName:     "minlen",
-								Value:        "1",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "At least one tag is required",
+								Name:      "minlen",
+								Value:     "1",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "At least one tag is required",
 							},
 							&ast.ValidationRuleWithValue{
-								RuleName:     "maxlen",
-								Value:        "10",
-								ValueType:    ast.ValidationRuleValueTypeInt,
-								ErrorMessage: "",
+								Name:      "maxlen",
+								Value:     "10",
+								ValueType: ast.ValidationRuleValueTypeInt,
+								Error:     "",
 							},
 						},
 					},
 					{
 						Name:     "details",
 						Optional: false,
-						Type: &ast.TypeObject{
+						Type: ast.TypeObject{
 							Fields: []ast.Field{
 								{
 									Name:     "dimensions",
 									Optional: false,
-									Type: &ast.TypeObject{
+									Type: ast.TypeObject{
 										Fields: []ast.Field{
 											{
 												Name:     "width",
 												Optional: false,
-												Type:     &ast.TypeFloat{},
+												Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 												ValidationRules: []ast.ValidationRule{
 													&ast.ValidationRuleWithValue{
-														RuleName:     "min",
-														Value:        "0.0",
-														ValueType:    ast.ValidationRuleValueTypeFloat,
-														ErrorMessage: "Width cannot be negative",
+														Name:      "min",
+														Value:     "0.0",
+														ValueType: ast.ValidationRuleValueTypeFloat,
+														Error:     "Width cannot be negative",
 													},
 												},
 											},
 											{
 												Name:     "height",
 												Optional: false,
-												Type:     &ast.TypeFloat{},
+												Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 												ValidationRules: []ast.ValidationRule{
 													&ast.ValidationRuleWithValue{
-														RuleName:     "min",
-														Value:        "0.0",
-														ValueType:    ast.ValidationRuleValueTypeFloat,
-														ErrorMessage: "",
+														Name:      "min",
+														Value:     "0.0",
+														ValueType: ast.ValidationRuleValueTypeFloat,
+														Error:     "",
 													},
 												},
 											},
 											{
 												Name:     "depth",
 												Optional: true,
-												Type:     &ast.TypeFloat{},
+												Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 											},
 										},
 									},
@@ -1630,36 +1630,36 @@ func TestParserFullExample(t *testing.T) {
 								{
 									Name:     "weight",
 									Optional: true,
-									Type:     &ast.TypeFloat{},
+									Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 								},
 								{
 									Name:     "colors",
 									Optional: false,
-									Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+									Type:     ast.TypeArray{ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
 									ValidationRules: []ast.ValidationRule{
 										&ast.ValidationRuleWithArray{
-											RuleName:     "enum",
-											Values:       []string{"red", "green", "blue", "black", "white"},
-											ValueType:    ast.ValidationRuleValueTypeString,
-											ErrorMessage: "Color must be one of the allowed values",
+											Name:      "enum",
+											Values:    []string{"red", "green", "blue", "black", "white"},
+											ValueType: ast.ValidationRuleValueTypeString,
+											Error:     "Color must be one of the allowed values",
 										},
 									},
 								},
 								{
 									Name:     "attributes",
 									Optional: true,
-									Type: &ast.TypeArray{
-										ArrayType: &ast.TypeObject{
+									Type: ast.TypeArray{
+										ElementsType: ast.TypeObject{
 											Fields: []ast.Field{
 												{
 													Name:     "name",
 													Optional: false,
-													Type:     &ast.TypeString{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 												},
 												{
 													Name:     "value",
 													Optional: false,
-													Type:     &ast.TypeString{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 												},
 											},
 										},
@@ -1671,42 +1671,42 @@ func TestParserFullExample(t *testing.T) {
 					{
 						Name:     "variations",
 						Optional: false,
-						Type: &ast.TypeArray{
-							ArrayType: &ast.TypeObject{
+						Type: ast.TypeArray{
+							ElementsType: ast.TypeObject{
 								Fields: []ast.Field{
 									{
 										Name:     "sku",
 										Optional: false,
-										Type:     &ast.TypeString{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 									},
 									{
 										Name:     "price",
 										Optional: false,
-										Type:     &ast.TypeFloat{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 										ValidationRules: []ast.ValidationRule{
 											&ast.ValidationRuleWithValue{
-												RuleName:     "min",
-												Value:        "0.01",
-												ValueType:    ast.ValidationRuleValueTypeFloat,
-												ErrorMessage: "Variation price must be greater than zero",
+												Name:      "min",
+												Value:     "0.01",
+												ValueType: ast.ValidationRuleValueTypeFloat,
+												Error:     "Variation price must be greater than zero",
 											},
 										},
 									},
 									{
 										Name:     "attributes",
 										Optional: false,
-										Type: &ast.TypeArray{
-											ArrayType: &ast.TypeObject{
+										Type: ast.TypeArray{
+											ElementsType: ast.TypeObject{
 												Fields: []ast.Field{
 													{
 														Name:     "name",
 														Optional: false,
-														Type:     &ast.TypeString{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 													},
 													{
 														Name:     "value",
 														Optional: false,
-														Type:     &ast.TypeString{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 													},
 												},
 											},
@@ -1719,7 +1719,7 @@ func TestParserFullExample(t *testing.T) {
 				},
 			},
 		},
-		Procedures: []ast.ProcDeclaration{
+		Procedures: []ast.ProcDecl{
 			{
 				Name: "GetCategory",
 				Doc:  "GetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.",
@@ -1728,11 +1728,11 @@ func TestParserFullExample(t *testing.T) {
 						{
 							Name:     "id",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
-									RuleName:     "uuid",
-									ErrorMessage: "Category ID must be a valid UUID",
+									Name:  "uuid",
+									Error: "Category ID must be a valid UUID",
 								},
 							},
 						},
@@ -1743,34 +1743,34 @@ func TestParserFullExample(t *testing.T) {
 						{
 							Name:     "category",
 							Optional: false,
-							Type:     &ast.TypeCustom{Name: "Category"},
+							Type:     ast.TypeCustom{Name: "Category"},
 						},
 						{
 							Name:     "exists",
 							Optional: false,
-							Type:     &ast.TypeBoolean{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 						},
 					},
 				},
 				Metadata: ast.ProcMeta{
 					Entries: []ast.ProcMetaKV{
 						{
-							Type:  ast.ProcMetaValueTypeBoolean,
+							Type:  ast.PrimitiveTypeBoolean,
 							Key:   "cache",
 							Value: "true",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeInt,
+							Type:  ast.PrimitiveTypeInt,
 							Key:   "cacheTime",
 							Value: "300",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeBoolean,
+							Type:  ast.PrimitiveTypeBoolean,
 							Key:   "requiresAuth",
 							Value: "false",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeString,
+							Type:  ast.PrimitiveTypeString,
 							Key:   "apiVersion",
 							Value: "1.0.0",
 						},
@@ -1785,38 +1785,38 @@ func TestParserFullExample(t *testing.T) {
 						{
 							Name:     "product",
 							Optional: false,
-							Type:     &ast.TypeCustom{Name: "Product"},
+							Type:     ast.TypeCustom{Name: "Product"},
 						},
 						{
 							Name:     "options",
 							Optional: true,
-							Type: &ast.TypeObject{
+							Type: ast.TypeObject{
 								Fields: []ast.Field{
 									{
 										Name:     "draft",
 										Optional: false,
-										Type:     &ast.TypeBoolean{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 									},
 									{
 										Name:     "notify",
 										Optional: false,
-										Type:     &ast.TypeBoolean{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 									},
 									{
 										Name:     "scheduledFor",
 										Optional: true,
-										Type:     &ast.TypeString{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 										ValidationRules: []ast.ValidationRule{
 											&ast.ValidationRuleSimple{
-												RuleName:     "iso8601",
-												ErrorMessage: "Must be a valid ISO8601 date",
+												Name:  "iso8601",
+												Error: "Must be a valid ISO8601 date",
 											},
 										},
 									},
 									{
 										Name:     "tags",
 										Optional: true,
-										Type:     &ast.TypeArray{ArrayType: &ast.TypeString{}},
+										Type:     ast.TypeArray{ElementsType: ast.TypePrimitive{Name: ast.PrimitiveTypeString}},
 									},
 								},
 							},
@@ -1824,41 +1824,41 @@ func TestParserFullExample(t *testing.T) {
 						{
 							Name:     "validation",
 							Optional: false,
-							Type: &ast.TypeObject{
+							Type: ast.TypeObject{
 								Fields: []ast.Field{
 									{
 										Name:     "skipValidation",
 										Optional: true,
-										Type:     &ast.TypeBoolean{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 									},
 									{
 										Name:     "customRules",
 										Optional: true,
-										Type: &ast.TypeArray{
-											ArrayType: &ast.TypeObject{
+										Type: ast.TypeArray{
+											ElementsType: ast.TypeObject{
 												Fields: []ast.Field{
 													{
 														Name:     "name",
 														Optional: false,
-														Type:     &ast.TypeString{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 													},
 													{
 														Name:     "severity",
 														Optional: false,
-														Type:     &ast.TypeInt{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 														ValidationRules: []ast.ValidationRule{
 															&ast.ValidationRuleWithArray{
-																RuleName:     "enum",
-																Values:       []string{"1", "2", "3"},
-																ValueType:    ast.ValidationRuleValueTypeInt,
-																ErrorMessage: "Severity must be 1, 2, or 3",
+																Name:      "enum",
+																Values:    []string{"1", "2", "3"},
+																ValueType: ast.ValidationRuleValueTypeInt,
+																Error:     "Severity must be 1, 2, or 3",
 															},
 														},
 													},
 													{
 														Name:     "message",
 														Optional: false,
-														Type:     &ast.TypeString{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 													},
 												},
 											},
@@ -1874,39 +1874,39 @@ func TestParserFullExample(t *testing.T) {
 						{
 							Name:     "success",
 							Optional: false,
-							Type:     &ast.TypeBoolean{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 						},
 						{
 							Name:     "productId",
 							Optional: false,
-							Type:     &ast.TypeString{},
+							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 							ValidationRules: []ast.ValidationRule{
 								&ast.ValidationRuleSimple{
-									RuleName:     "uuid",
-									ErrorMessage: "Product ID must be a valid UUID",
+									Name:  "uuid",
+									Error: "Product ID must be a valid UUID",
 								},
 							},
 						},
 						{
 							Name:     "errors",
 							Optional: true,
-							Type: &ast.TypeArray{
-								ArrayType: &ast.TypeObject{
+							Type: ast.TypeArray{
+								ElementsType: ast.TypeObject{
 									Fields: []ast.Field{
 										{
 											Name:     "code",
 											Optional: false,
-											Type:     &ast.TypeInt{},
+											Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
 										},
 										{
 											Name:     "message",
 											Optional: false,
-											Type:     &ast.TypeString{},
+											Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 										},
 										{
 											Name:     "field",
 											Optional: true,
-											Type:     &ast.TypeString{},
+											Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 										},
 									},
 								},
@@ -1915,33 +1915,33 @@ func TestParserFullExample(t *testing.T) {
 						{
 							Name:     "analytics",
 							Optional: false,
-							Type: &ast.TypeObject{
+							Type: ast.TypeObject{
 								Fields: []ast.Field{
 									{
 										Name:     "duration",
 										Optional: false,
-										Type:     &ast.TypeFloat{},
+										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 									},
 									{
 										Name:     "processingSteps",
 										Optional: false,
-										Type: &ast.TypeArray{
-											ArrayType: &ast.TypeObject{
+										Type: ast.TypeArray{
+											ElementsType: ast.TypeObject{
 												Fields: []ast.Field{
 													{
 														Name:     "name",
 														Optional: false,
-														Type:     &ast.TypeString{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 													},
 													{
 														Name:     "duration",
 														Optional: false,
-														Type:     &ast.TypeFloat{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 													},
 													{
 														Name:     "success",
 														Optional: false,
-														Type:     &ast.TypeBoolean{},
+														Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
 													},
 												},
 											},
@@ -1950,34 +1950,34 @@ func TestParserFullExample(t *testing.T) {
 									{
 										Name:     "serverInfo",
 										Optional: false,
-										Type: &ast.TypeObject{
+										Type: ast.TypeObject{
 											Fields: []ast.Field{
 												{
 													Name:     "id",
 													Optional: false,
-													Type:     &ast.TypeString{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 												},
 												{
 													Name:     "region",
 													Optional: false,
-													Type:     &ast.TypeString{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
 												},
 												{
 													Name:     "load",
 													Optional: false,
-													Type:     &ast.TypeFloat{},
+													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
 													ValidationRules: []ast.ValidationRule{
 														&ast.ValidationRuleWithValue{
-															RuleName:     "min",
-															Value:        "0.0",
-															ValueType:    ast.ValidationRuleValueTypeFloat,
-															ErrorMessage: "",
+															Name:      "min",
+															Value:     "0.0",
+															ValueType: ast.ValidationRuleValueTypeFloat,
+															Error:     "",
 														},
 														&ast.ValidationRuleWithValue{
-															RuleName:     "max",
-															Value:        "1.0",
-															ValueType:    ast.ValidationRuleValueTypeFloat,
-															ErrorMessage: "Load factor cannot exceed 1.0",
+															Name:      "max",
+															Value:     "1.0",
+															ValueType: ast.ValidationRuleValueTypeFloat,
+															Error:     "Load factor cannot exceed 1.0",
 														},
 													},
 												},
@@ -1992,32 +1992,32 @@ func TestParserFullExample(t *testing.T) {
 				Metadata: ast.ProcMeta{
 					Entries: []ast.ProcMetaKV{
 						{
-							Type:  ast.ProcMetaValueTypeString,
+							Type:  ast.PrimitiveTypeString,
 							Key:   "auth",
 							Value: "required",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeString,
+							Type:  ast.PrimitiveTypeString,
 							Key:   "roles",
 							Value: "admin,product-manager",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeInt,
+							Type:  ast.PrimitiveTypeInt,
 							Key:   "rateLimit",
 							Value: "100",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeFloat,
+							Type:  ast.PrimitiveTypeFloat,
 							Key:   "timeout",
 							Value: "30.5",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeBoolean,
+							Type:  ast.PrimitiveTypeBoolean,
 							Key:   "audit",
 							Value: "true",
 						},
 						{
-							Type:  ast.ProcMetaValueTypeString,
+							Type:  ast.PrimitiveTypeString,
 							Key:   "apiVersion",
 							Value: "1.2.0",
 						},

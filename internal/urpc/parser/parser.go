@@ -178,7 +178,7 @@ func (p *Parser) parseVersion(currSchema ast.Schema) ast.Version {
 
 // parseDocstring handles a documentation string followed by a rule, type, or procedure declaration.
 // It routes to the appropriate parser function based on what follows the docstring.
-func (p *Parser) parseDocstring() (*ast.CustomRuleDeclaration, *ast.TypeDeclaration, *ast.ProcDeclaration) {
+func (p *Parser) parseDocstring() (*ast.CustomRuleDecl, *ast.TypeDecl, *ast.ProcDecl) {
 	if !p.expectToken(token.DOCSTRING) {
 		return nil, nil, nil
 	}
@@ -204,7 +204,7 @@ func (p *Parser) parseDocstring() (*ast.CustomRuleDeclaration, *ast.TypeDeclarat
 
 // parseCustomRuleDeclaration parses a custom validation rule declaration.
 // It validates that the rule follows the correct syntax and that any referenced types exist.
-func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDeclaration {
+func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDecl {
 	if !p.expectToken(token.RULE, "missing rule keyword") {
 		return nil
 	}
@@ -232,7 +232,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 
 	// Initialize defaults
 	var forType ast.Type
-	var paramType ast.CustomRuleParamType
+	var paramType ast.CustomRuleDeclParamType
 	var errorMsg string
 
 	// Parse rule fields
@@ -253,18 +253,18 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 			typeName := p.currentToken.Literal
 			switch typeName {
 			case "string":
-				forType = &ast.TypeString{}
+				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeString}
 			case "int":
-				forType = &ast.TypeInt{}
+				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeInt}
 			case "float":
-				forType = &ast.TypeFloat{}
+				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeFloat}
 			case "boolean":
-				forType = &ast.TypeBoolean{}
+				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean}
 			default:
 				if !strutil.IsPascalCase(typeName) {
 					p.appendError(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeName))
 				}
-				forType = &ast.TypeCustom{Name: typeName}
+				forType = ast.TypeCustom{Name: typeName}
 			}
 
 			p.readNextToken()
@@ -275,7 +275,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 				if !p.expectToken(token.RBRACKET, "missing closing bracket in type") {
 					return nil
 				}
-				forType = &ast.TypeArray{ArrayType: forType}
+				forType = ast.TypeArray{ElementsType: forType}
 				p.readNextToken()
 			}
 
@@ -288,18 +288,18 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 
 			// Check if it's an array type
 			isArray := false
-			var primitiveType ast.CustomRulePrimitiveType
+			var primitiveType ast.PrimitiveType
 
 			// Parse the type
 			switch p.currentToken.Literal {
 			case "string":
-				primitiveType = ast.CustomRulePrimitiveTypeString
+				primitiveType = ast.PrimitiveTypeString
 			case "int":
-				primitiveType = ast.CustomRulePrimitiveTypeInt
+				primitiveType = ast.PrimitiveTypeInt
 			case "float":
-				primitiveType = ast.CustomRulePrimitiveTypeFloat
+				primitiveType = ast.PrimitiveTypeFloat
 			case "boolean":
-				primitiveType = ast.CustomRulePrimitiveTypeBoolean
+				primitiveType = ast.PrimitiveTypeBoolean
 			default:
 				p.appendError(fmt.Sprintf(`invalid "%s" param type, must be one of "string", "int", "float", "boolean" or array of one of them`, p.currentToken.Literal))
 				return nil
@@ -317,7 +317,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 				p.readNextToken()
 			}
 
-			paramType = ast.CustomRuleParamType{
+			paramType = ast.CustomRuleDeclParamType{
 				IsArray: isArray,
 				Type:    primitiveType,
 			}
@@ -341,18 +341,18 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 		}
 	}
 
-	return &ast.CustomRuleDeclaration{
-		Doc:      docstring,
-		Name:     ruleName,
-		For:      forType,
-		Param:    paramType,
-		ErrorMsg: errorMsg,
+	return &ast.CustomRuleDecl{
+		Doc:   docstring,
+		Name:  ruleName,
+		For:   forType,
+		Param: paramType,
+		Error: errorMsg,
 	}
 }
 
 // parseTypeDeclaration processes a type declaration in the schema.
 // It validates the type name, fields, and their validation rules.
-func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
+func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDecl {
 	if !p.expectToken(token.TYPE, "missing type keyword") {
 		return nil
 	}
@@ -393,7 +393,7 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDeclaration {
 		}
 	}
 
-	return &ast.TypeDeclaration{
+	return &ast.TypeDecl{
 		Name:   typeName,
 		Doc:    docstring,
 		Fields: fields,
@@ -425,30 +425,29 @@ func (p *Parser) parseField() *ast.Field {
 
 	// Handle object type
 	if p.currentToken.Type == token.LBRACE {
-		fieldType = p.parseObjectType()
-		if fieldType == nil {
+		objType := p.parseObjectType()
+		if len(objType.Fields) == 0 {
 			return nil
 		}
+		fieldType = objType
 	} else {
 		typeLiteral := p.currentToken.Literal
 
 		switch typeLiteral {
 		case "string":
-			fieldType = &ast.TypeString{}
+			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeString}
 		case "int":
-			fieldType = &ast.TypeInt{}
+			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeInt}
 		case "float":
-			fieldType = &ast.TypeFloat{}
+			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeFloat}
 		case "boolean":
-			fieldType = &ast.TypeBoolean{}
+			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean}
 		default:
 			if !strutil.IsPascalCase(typeLiteral) {
 				p.appendError(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeLiteral))
 				return nil
 			}
-			fieldType = &ast.TypeCustom{
-				Name: typeLiteral,
-			}
+			fieldType = ast.TypeCustom{Name: typeLiteral}
 		}
 		p.readNextToken()
 	}
@@ -459,10 +458,7 @@ func (p *Parser) parseField() *ast.Field {
 			return nil
 		}
 		p.readNextToken()
-
-		fieldType = &ast.TypeArray{
-			ArrayType: fieldType,
-		}
+		fieldType = ast.TypeArray{ElementsType: fieldType}
 	}
 
 	// Parse field rules
@@ -485,9 +481,9 @@ func (p *Parser) parseField() *ast.Field {
 
 // parseObjectType processes an inline object type declaration.
 // It handles the object's fields and their validation rules.
-func (p *Parser) parseObjectType() ast.Type {
+func (p *Parser) parseObjectType() ast.TypeObject {
 	if !p.expectToken(token.LBRACE, "missing object type opening brace") {
-		return nil
+		return ast.TypeObject{}
 	}
 	p.readNextToken()
 
@@ -498,10 +494,10 @@ func (p *Parser) parseObjectType() ast.Type {
 		}
 		if p.currentToken.Type == token.EOF {
 			p.appendError("missing object type closing brace, unexpected EOF while parsing object fields")
-			return nil
+			return ast.TypeObject{}
 		}
 		if !p.expectToken(token.IDENT, "missing field name") {
-			return nil
+			return ast.TypeObject{}
 		}
 
 		field := p.parseField()
@@ -513,7 +509,7 @@ func (p *Parser) parseObjectType() ast.Type {
 	// Skip the closing brace
 	p.readNextToken()
 
-	return &ast.TypeObject{
+	return ast.TypeObject{
 		Fields: fields,
 	}
 }
@@ -536,8 +532,8 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 
 	// Default to simple rule with no parameters
 	var rule ast.ValidationRule = &ast.ValidationRuleSimple{
-		RuleName:     ruleName,
-		ErrorMessage: "",
+		Name:  ruleName,
+		Error: "",
 	}
 
 	// Check if there are parameters (starting with parenthesis)
@@ -563,8 +559,8 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		// Create simple rule with just an error message
 		errorMsg := p.currentToken.Literal
 		rule = &ast.ValidationRuleSimple{
-			RuleName:     ruleName,
-			ErrorMessage: errorMsg,
+			Name:  ruleName,
+			Error: errorMsg,
 		}
 		p.readNextToken()
 
@@ -587,10 +583,10 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		// String value
 		valueStr := p.currentToken.Literal
 		rule = &ast.ValidationRuleWithValue{
-			RuleName:     ruleName,
-			Value:        valueStr,
-			ValueType:    ast.ValidationRuleValueTypeString,
-			ErrorMessage: "",
+			Name:      ruleName,
+			Value:     valueStr,
+			ValueType: ast.ValidationRuleValueTypeString,
+			Error:     "",
 		}
 		p.readNextToken()
 
@@ -598,10 +594,10 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		// Integer value
 		valueStr := p.currentToken.Literal
 		rule = &ast.ValidationRuleWithValue{
-			RuleName:     ruleName,
-			Value:        valueStr,
-			ValueType:    ast.ValidationRuleValueTypeInt,
-			ErrorMessage: "",
+			Name:      ruleName,
+			Value:     valueStr,
+			ValueType: ast.ValidationRuleValueTypeInt,
+			Error:     "",
 		}
 		p.readNextToken()
 
@@ -609,10 +605,10 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		// Float value
 		valueStr := p.currentToken.Literal
 		rule = &ast.ValidationRuleWithValue{
-			RuleName:     ruleName,
-			Value:        valueStr,
-			ValueType:    ast.ValidationRuleValueTypeFloat,
-			ErrorMessage: "",
+			Name:      ruleName,
+			Value:     valueStr,
+			ValueType: ast.ValidationRuleValueTypeFloat,
+			Error:     "",
 		}
 		p.readNextToken()
 
@@ -620,10 +616,10 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		// Boolean value
 		valueStr := p.currentToken.Literal
 		rule = &ast.ValidationRuleWithValue{
-			RuleName:     ruleName,
-			Value:        valueStr,
-			ValueType:    ast.ValidationRuleValueTypeBoolean,
-			ErrorMessage: "",
+			Name:      ruleName,
+			Value:     valueStr,
+			ValueType: ast.ValidationRuleValueTypeBoolean,
+			Error:     "",
 		}
 		p.readNextToken()
 
@@ -684,10 +680,10 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		}
 
 		rule = &ast.ValidationRuleWithArray{
-			RuleName:     ruleName,
-			Values:       values,
-			ValueType:    valueType,
-			ErrorMessage: "",
+			Name:      ruleName,
+			Values:    values,
+			ValueType: valueType,
+			Error:     "",
 		}
 		p.readNextToken()
 
@@ -714,11 +710,11 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 			// Update the error message based on rule type
 			switch r := rule.(type) {
 			case *ast.ValidationRuleSimple:
-				r.ErrorMessage = errorMsg
+				r.Error = errorMsg
 			case *ast.ValidationRuleWithValue:
-				r.ErrorMessage = errorMsg
+				r.Error = errorMsg
 			case *ast.ValidationRuleWithArray:
-				r.ErrorMessage = errorMsg
+				r.Error = errorMsg
 			}
 
 			p.readNextToken()
@@ -739,7 +735,7 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 
 // parseProcDeclaration processes a procedure declaration in the schema.
 // It validates the procedure name, input, output, and metadata sections.
-func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
+func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 	if !p.expectToken(token.PROC, "missing proc keyword") {
 		return nil
 	}
@@ -814,7 +810,7 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDeclaration {
 		}
 	}
 
-	return &ast.ProcDeclaration{
+	return &ast.ProcDecl{
 		Name:     procName,
 		Doc:      docstring,
 		Input:    input,
@@ -947,16 +943,16 @@ func (p *Parser) parseProcMetaEntry() *ast.ProcMetaKV {
 	}
 	p.readNextToken()
 
-	var procMetaType ast.ProcMetaValueTypeName
+	var procMetaType ast.PrimitiveType
 	switch p.currentToken.Type {
 	case token.STRING:
-		procMetaType = ast.ProcMetaValueTypeString
+		procMetaType = ast.PrimitiveTypeString
 	case token.INT:
-		procMetaType = ast.ProcMetaValueTypeInt
+		procMetaType = ast.PrimitiveTypeInt
 	case token.FLOAT:
-		procMetaType = ast.ProcMetaValueTypeFloat
+		procMetaType = ast.PrimitiveTypeFloat
 	case token.TRUE, token.FALSE:
-		procMetaType = ast.ProcMetaValueTypeBoolean
+		procMetaType = ast.PrimitiveTypeBoolean
 	default:
 		p.appendError(fmt.Sprintf("invalid meta type %s for key %s", p.currentToken.Type, key))
 		return nil
