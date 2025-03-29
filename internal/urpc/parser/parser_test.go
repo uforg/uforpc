@@ -8,7 +8,7 @@ import (
 	"github.com/uforg/uforpc/internal/urpc/lexer"
 )
 
-func TestParser(t *testing.T) {
+func TestParserVersionDeclaration(t *testing.T) {
 	t.Run("Parse version", func(t *testing.T) {
 		lexer := lexer.NewLexer("test.urpc", "version 2")
 		parser := New(lexer)
@@ -40,7 +40,9 @@ func TestParser(t *testing.T) {
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "version already set")
 	})
+}
 
+func TestParserTypeDeclaration(t *testing.T) {
 	t.Run("Parse type declaration basic", func(t *testing.T) {
 		input := `
 			type User {}
@@ -562,7 +564,9 @@ func TestParser(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, expected, schema)
 	})
+}
 
+func TestParserProcedureDeclaration(t *testing.T) {
 	t.Run("Parse procedure declaration basic", func(t *testing.T) {
 		input := `
 			proc CreateUser {}
@@ -726,7 +730,9 @@ func TestParser(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, expected, schema)
 	})
+}
 
+func TestParserValidationRules(t *testing.T) {
 	t.Run("Parse validation rule with error message", func(t *testing.T) {
 		input := `
 			type User {
