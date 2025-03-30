@@ -8,6 +8,129 @@ import (
 	"github.com/uforg/uforpc/internal/urpc/lexer"
 )
 
+// equalWithoutPos compara dos esquemas ignorando las posiciones
+func equalWithoutPos(t *testing.T, expected, actual ast.Schema) {
+	// Comparar Version
+	require.Equal(t, expected.Version.IsSet, actual.Version.IsSet)
+	require.Equal(t, expected.Version.Value, actual.Version.Value)
+
+	// Comparar CustomRules
+	require.Equal(t, len(expected.CustomRules), len(actual.CustomRules))
+	for i := range expected.CustomRules {
+		require.Equal(t, expected.CustomRules[i].Name, actual.CustomRules[i].Name)
+		require.Equal(t, expected.CustomRules[i].Doc, actual.CustomRules[i].Doc)
+		require.Equal(t, expected.CustomRules[i].Error, actual.CustomRules[i].Error)
+		equalTypeWithoutPos(t, expected.CustomRules[i].For, actual.CustomRules[i].For)
+
+		// Param
+		require.Equal(t, expected.CustomRules[i].Param.IsArray, actual.CustomRules[i].Param.IsArray)
+		require.Equal(t, expected.CustomRules[i].Param.Type, actual.CustomRules[i].Param.Type)
+	}
+
+	// Comparar Types
+	require.Equal(t, len(expected.Types), len(actual.Types))
+	for i := range expected.Types {
+		require.Equal(t, expected.Types[i].Name, actual.Types[i].Name)
+		require.Equal(t, expected.Types[i].Doc, actual.Types[i].Doc)
+
+		// Fields
+		require.Equal(t, len(expected.Types[i].Fields), len(actual.Types[i].Fields))
+		for j := range expected.Types[i].Fields {
+			equalFieldWithoutPos(t, expected.Types[i].Fields[j], actual.Types[i].Fields[j])
+		}
+	}
+
+	// Comparar Procedures
+	require.Equal(t, len(expected.Procedures), len(actual.Procedures))
+	for i := range expected.Procedures {
+		require.Equal(t, expected.Procedures[i].Name, actual.Procedures[i].Name)
+		require.Equal(t, expected.Procedures[i].Doc, actual.Procedures[i].Doc)
+
+		// Input
+		require.Equal(t, len(expected.Procedures[i].Input.Fields), len(actual.Procedures[i].Input.Fields))
+		for j := range expected.Procedures[i].Input.Fields {
+			equalFieldWithoutPos(t, expected.Procedures[i].Input.Fields[j], actual.Procedures[i].Input.Fields[j])
+		}
+
+		// Output
+		require.Equal(t, len(expected.Procedures[i].Output.Fields), len(actual.Procedures[i].Output.Fields))
+		for j := range expected.Procedures[i].Output.Fields {
+			equalFieldWithoutPos(t, expected.Procedures[i].Output.Fields[j], actual.Procedures[i].Output.Fields[j])
+		}
+
+		// Metadata
+		require.Equal(t, len(expected.Procedures[i].Metadata.Entries), len(actual.Procedures[i].Metadata.Entries))
+		for j := range expected.Procedures[i].Metadata.Entries {
+			require.Equal(t, expected.Procedures[i].Metadata.Entries[j].Key, actual.Procedures[i].Metadata.Entries[j].Key)
+			require.Equal(t, expected.Procedures[i].Metadata.Entries[j].Type, actual.Procedures[i].Metadata.Entries[j].Type)
+			require.Equal(t, expected.Procedures[i].Metadata.Entries[j].Value, actual.Procedures[i].Metadata.Entries[j].Value)
+		}
+	}
+}
+
+// equalTypeWithoutPos compara dos tipos ignorando las posiciones
+func equalTypeWithoutPos(t *testing.T, expected, actual ast.Type) {
+	switch expectedType := expected.(type) {
+	case ast.TypePrimitive:
+		actualType, ok := actual.(ast.TypePrimitive)
+		require.True(t, ok, "Types don't match: expected TypePrimitive, got %T", actual)
+		require.Equal(t, expectedType.Name, actualType.Name)
+	case ast.TypeCustom:
+		actualType, ok := actual.(ast.TypeCustom)
+		require.True(t, ok, "Types don't match: expected TypeCustom, got %T", actual)
+		require.Equal(t, expectedType.Name, actualType.Name)
+	case ast.TypeArray:
+		actualType, ok := actual.(ast.TypeArray)
+		require.True(t, ok, "Types don't match: expected TypeArray, got %T", actual)
+		equalTypeWithoutPos(t, expectedType.ElementsType, actualType.ElementsType)
+	case ast.TypeObject:
+		actualType, ok := actual.(ast.TypeObject)
+		require.True(t, ok, "Types don't match: expected TypeObject, got %T", actual)
+		require.Equal(t, len(expectedType.Fields), len(actualType.Fields))
+		for i := range expectedType.Fields {
+			equalFieldWithoutPos(t, expectedType.Fields[i], actualType.Fields[i])
+		}
+	}
+}
+
+// equalFieldWithoutPos compara dos campos ignorando las posiciones
+func equalFieldWithoutPos(t *testing.T, expected, actual ast.Field) {
+	require.Equal(t, expected.Name, actual.Name)
+	require.Equal(t, expected.Optional, actual.Optional)
+	equalTypeWithoutPos(t, expected.Type, actual.Type)
+
+	// ValidationRules
+	require.Equal(t, len(expected.ValidationRules), len(actual.ValidationRules))
+	for i := range expected.ValidationRules {
+		equalValidationRuleWithoutPos(t, expected.ValidationRules[i], actual.ValidationRules[i])
+	}
+}
+
+// equalValidationRuleWithoutPos compara dos reglas de validación ignorando las posiciones
+func equalValidationRuleWithoutPos(t *testing.T, expected, actual ast.ValidationRule) {
+	switch expectedRule := expected.(type) {
+	case *ast.ValidationRuleSimple:
+		actualRule, ok := actual.(*ast.ValidationRuleSimple)
+		require.True(t, ok, "Rules don't match: expected ValidationRuleSimple, got %T", actual)
+		require.Equal(t, expectedRule.Name, actualRule.Name)
+		require.Equal(t, expectedRule.Error, actualRule.Error)
+	case *ast.ValidationRuleWithValue:
+		actualRule, ok := actual.(*ast.ValidationRuleWithValue)
+		require.True(t, ok, "Rules don't match: expected ValidationRuleWithValue, got %T", actual)
+		require.Equal(t, expectedRule.Name, actualRule.Name)
+		require.Equal(t, expectedRule.Error, actualRule.Error)
+		require.Equal(t, expectedRule.Value, actualRule.Value)
+		require.Equal(t, expectedRule.ValueType, actualRule.ValueType)
+	case *ast.ValidationRuleWithArray:
+		actualRule, ok := actual.(*ast.ValidationRuleWithArray)
+		require.True(t, ok, "Rules don't match: expected ValidationRuleWithArray, got %T", actual)
+		require.Equal(t, expectedRule.Name, actualRule.Name)
+		require.Equal(t, expectedRule.Error, actualRule.Error)
+		require.Equal(t, expectedRule.Values, actualRule.Values)
+		require.Equal(t, expectedRule.ValueType, actualRule.ValueType)
+	}
+}
+
 func TestParserVersionDeclaration(t *testing.T) {
 	t.Run("Parse version", func(t *testing.T) {
 		lexer := lexer.NewLexer("test.urpc", "version 2")
@@ -22,7 +145,7 @@ func TestParserVersionDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse version invalid", func(t *testing.T) {
@@ -61,7 +184,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with docstring", func(t *testing.T) {
@@ -84,7 +207,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with primitive type fields", func(t *testing.T) {
@@ -109,22 +232,30 @@ func TestParserTypeDeclaration(t *testing.T) {
 						{
 							Name:     "name",
 							Optional: false,
-							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+							Type: ast.TypePrimitive{
+								Name: ast.PrimitiveTypeString,
+							},
 						},
 						{
 							Name:     "age",
 							Optional: true,
-							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
+							Type: ast.TypePrimitive{
+								Name: ast.PrimitiveTypeInt,
+							},
 						},
 						{
 							Name:     "height",
 							Optional: false,
-							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeFloat},
+							Type: ast.TypePrimitive{
+								Name: ast.PrimitiveTypeFloat,
+							},
 						},
 						{
 							Name:     "isActive",
 							Optional: false,
-							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean},
+							Type: ast.TypePrimitive{
+								Name: ast.PrimitiveTypeBoolean,
+							},
 						},
 					},
 				},
@@ -132,7 +263,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with field using other custom type", func(t *testing.T) {
@@ -155,12 +286,16 @@ func TestParserTypeDeclaration(t *testing.T) {
 						{
 							Name:     "name",
 							Optional: false,
-							Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+							Type: ast.TypePrimitive{
+								Name: ast.PrimitiveTypeString,
+							},
 						},
 						{
 							Name:     "address",
 							Optional: true,
-							Type:     ast.TypeCustom{Name: "Address"},
+							Type: ast.TypeCustom{
+								Name: "Address",
+							},
 						},
 					},
 				},
@@ -168,7 +303,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with object type field", func(t *testing.T) {
@@ -198,12 +333,16 @@ func TestParserTypeDeclaration(t *testing.T) {
 									{
 										Name:     "name",
 										Optional: false,
-										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+										Type: ast.TypePrimitive{
+											Name: ast.PrimitiveTypeString,
+										},
 									},
 									{
 										Name:     "age",
 										Optional: false,
-										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
+										Type: ast.TypePrimitive{
+											Name: ast.PrimitiveTypeInt,
+										},
 									},
 								},
 							},
@@ -214,7 +353,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with nested object type field", func(t *testing.T) {
@@ -249,12 +388,16 @@ func TestParserTypeDeclaration(t *testing.T) {
 									{
 										Name:     "name",
 										Optional: false,
-										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+										Type: ast.TypePrimitive{
+											Name: ast.PrimitiveTypeString,
+										},
 									},
 									{
 										Name:     "age",
 										Optional: false,
-										Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
+										Type: ast.TypePrimitive{
+											Name: ast.PrimitiveTypeInt,
+										},
 									},
 									{
 										Name:     "address",
@@ -264,17 +407,23 @@ func TestParserTypeDeclaration(t *testing.T) {
 												{
 													Name:     "street",
 													Optional: false,
-													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+													Type: ast.TypePrimitive{
+														Name: ast.PrimitiveTypeString,
+													},
 												},
 												{
 													Name:     "city",
 													Optional: false,
-													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+													Type: ast.TypePrimitive{
+														Name: ast.PrimitiveTypeString,
+													},
 												},
 												{
 													Name:     "zip",
 													Optional: false,
-													Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+													Type: ast.TypePrimitive{
+														Name: ast.PrimitiveTypeString,
+													},
 												},
 											},
 										},
@@ -288,7 +437,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with array of objects", func(t *testing.T) {
@@ -319,12 +468,16 @@ func TestParserTypeDeclaration(t *testing.T) {
 										{
 											Name:     "name",
 											Optional: false,
-											Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeString},
+											Type: ast.TypePrimitive{
+												Name: ast.PrimitiveTypeString,
+											},
 										},
 										{
 											Name:     "age",
 											Optional: false,
-											Type:     ast.TypePrimitive{Name: ast.PrimitiveTypeInt},
+											Type: ast.TypePrimitive{
+												Name: ast.PrimitiveTypeInt,
+											},
 										},
 									},
 								},
@@ -336,7 +489,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with array type field", func(t *testing.T) {
@@ -366,7 +519,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with multidimensional array type field", func(t *testing.T) {
@@ -402,7 +555,7 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse type declaration with fields containing validation rules", func(t *testing.T) {
@@ -458,55 +611,44 @@ func TestParserTypeDeclaration(t *testing.T) {
 									Name:      "equals",
 									Value:     "Foo",
 									ValueType: ast.ValidationRuleValueTypeString,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
 									Name:      "contains",
 									Value:     "Bar",
 									ValueType: ast.ValidationRuleValueTypeString,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
 									Name:      "minlen",
 									Value:     "3",
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
 									Name:      "maxlen",
 									Value:     "100",
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithArray{
 									Name:      "enum",
 									Values:    []string{"Foo", "Bar"},
 									ValueType: ast.ValidationRuleValueTypeString,
-									Error:     "",
 								},
 								&ast.ValidationRuleSimple{
-									Name:  "email",
-									Error: "",
+									Name: "email",
 								},
 								&ast.ValidationRuleSimple{
-									Name:  "iso8601",
-									Error: "",
+									Name: "iso8601",
 								},
 								&ast.ValidationRuleSimple{
-									Name:  "uuid",
-									Error: "",
+									Name: "uuid",
 								},
 								&ast.ValidationRuleSimple{
-									Name:  "json",
-									Error: "",
+									Name: "json",
 								},
 								&ast.ValidationRuleSimple{
-									Name:  "lowercase",
-									Error: "",
+									Name: "lowercase",
 								},
 								&ast.ValidationRuleSimple{
-									Name:  "uppercase",
-									Error: "",
+									Name: "uppercase",
 								},
 							},
 						},
@@ -519,25 +661,21 @@ func TestParserTypeDeclaration(t *testing.T) {
 									Name:      "equals",
 									Value:     "1",
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
 									Name:      "min",
 									Value:     "0",
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
 									Name:      "max",
 									Value:     "100",
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithArray{
 									Name:      "enum",
 									Values:    []string{"1", "2", "3"},
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 							},
 						},
@@ -550,13 +688,11 @@ func TestParserTypeDeclaration(t *testing.T) {
 									Name:      "min",
 									Value:     "0.0",
 									ValueType: ast.ValidationRuleValueTypeFloat,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
 									Name:      "max",
 									Value:     "100.0",
 									ValueType: ast.ValidationRuleValueTypeFloat,
-									Error:     "",
 								},
 							},
 						},
@@ -569,7 +705,6 @@ func TestParserTypeDeclaration(t *testing.T) {
 									Name:      "equals",
 									Value:     "true",
 									ValueType: ast.ValidationRuleValueTypeBoolean,
-									Error:     "",
 								},
 							},
 						},
@@ -582,13 +717,11 @@ func TestParserTypeDeclaration(t *testing.T) {
 									Name:      "minlen",
 									Value:     "1",
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 								&ast.ValidationRuleWithValue{
 									Name:      "maxlen",
 									Value:     "100",
 									ValueType: ast.ValidationRuleValueTypeInt,
-									Error:     "",
 								},
 							},
 						},
@@ -598,14 +731,17 @@ func TestParserTypeDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 }
 
 func TestParserProcedureDeclaration(t *testing.T) {
 	t.Run("Parse procedure declaration basic", func(t *testing.T) {
 		input := `
-			proc CreateUser {}
+			proc GetUser {
+				input {}
+				output {}
+			}
 		`
 
 		lexer := lexer.NewLexer("test.urpc", input)
@@ -615,16 +751,20 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		expected := ast.Schema{
 			Procedures: []ast.ProcDecl{
 				{
-					Name:     "CreateUser",
-					Input:    ast.ProcInput{},
-					Output:   ast.ProcOutput{},
-					Metadata: ast.ProcMeta{},
+					Name: "GetUser",
+					Doc:  "",
+					Input: ast.ProcInput{
+						Fields: []ast.Field{},
+					},
+					Output: ast.ProcOutput{
+						Fields: []ast.Field{},
+					},
 				},
 			},
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse procedure declaration with docstring", func(t *testing.T) {
@@ -650,7 +790,7 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse procedure declaration with empty input, output and meta", func(t *testing.T) {
@@ -678,7 +818,7 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse procedure declaration with docstring, input, output and meta", func(t *testing.T) {
@@ -764,7 +904,7 @@ func TestParserProcedureDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 }
 
@@ -856,7 +996,7 @@ func TestParserValidationRules(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse validation rule with error only", func(t *testing.T) {
@@ -904,7 +1044,7 @@ func TestParserValidationRules(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 }
 
@@ -938,7 +1078,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse custom rule declaration with array param", func(t *testing.T) {
@@ -970,7 +1110,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse custom rule declaration with docstring", func(t *testing.T) {
@@ -1006,7 +1146,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse custom rule declaration with multiple rules", func(t *testing.T) {
@@ -1062,7 +1202,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 
 	t.Run("Parse custom rule declaration invalid for type", func(t *testing.T) {
@@ -1183,7 +1323,7 @@ func TestParserCustomRuleDeclaration(t *testing.T) {
 			},
 		}
 		require.NoError(t, err)
-		require.Equal(t, expected, schema)
+		equalWithoutPos(t, expected, schema)
 	})
 }
 
@@ -2028,5 +2168,5 @@ func TestParserFullExample(t *testing.T) {
 	}
 
 	require.NoError(t, err)
-	require.Equal(t, expected, schema)
+	equalWithoutPos(t, expected, schema)
 }

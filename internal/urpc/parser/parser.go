@@ -10,12 +10,26 @@ import (
 	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
+// ParserError is an error type that contains a message and a position from the parser.
+type ParserError struct {
+	Pos ast.Position
+	Msg string
+}
+
+func (e ParserError) String() string {
+	return fmt.Sprintf("%s Ln %d Col %d: %s", e.Pos.Filename, e.Pos.StartLine, e.Pos.StartCol, e.Msg)
+}
+
+func (e ParserError) Error() string {
+	return e.String()
+}
+
 // Parser analyzes tokens from a Lexer and constructs an AST representation of the URPC schema.
 // It tracks errors encountered during parsing and maintains the current parsing position.
 type Parser struct {
 	lex               *lexer.Lexer
 	tokens            []token.Token
-	errors            []error
+	errors            []ParserError
 	maxIndex          int
 	currentIndex      int
 	currentIndexIsEOF bool
@@ -29,7 +43,7 @@ func New(lex *lexer.Lexer) *Parser {
 
 	p.lex = lex
 	p.tokens = lex.ReadTokens()
-	p.errors = []error{}
+	p.errors = []ParserError{}
 	p.maxIndex = len(p.tokens) - 1
 
 	p.currentIndex = 0
@@ -40,11 +54,13 @@ func New(lex *lexer.Lexer) *Parser {
 	}
 	if p.currentIndexIsEOF {
 		p.currentToken = token.Token{
-			Type:     token.EOF,
-			Literal:  "",
-			FileName: p.lex.FileName,
-			Line:     p.lex.CurrentLine,
-			Column:   p.lex.CurrentColumn,
+			Type:        token.EOF,
+			Literal:     "",
+			FileName:    p.lex.FileName,
+			LineStart:   p.lex.CurrentLine,
+			ColumnStart: p.lex.CurrentColumn,
+			LineEnd:     p.lex.CurrentLine,
+			ColumnEnd:   p.lex.CurrentColumn,
 		}
 	} else {
 		p.currentToken = p.tokens[p.currentIndex]
@@ -64,11 +80,13 @@ func (p *Parser) readNextToken() {
 	if p.currentIndex > p.maxIndex {
 		p.currentIndexIsEOF = true
 		p.currentToken = token.Token{
-			Type:     token.EOF,
-			Literal:  "",
-			FileName: p.lex.FileName,
-			Line:     p.lex.CurrentLine,
-			Column:   p.lex.CurrentColumn,
+			Type:        token.EOF,
+			Literal:     "",
+			FileName:    p.lex.FileName,
+			LineStart:   p.lex.CurrentLine,
+			ColumnStart: p.lex.CurrentColumn,
+			LineEnd:     p.lex.CurrentLine,
+			ColumnEnd:   p.lex.CurrentColumn,
 		}
 	} else {
 		p.currentToken = p.tokens[p.currentIndex]
@@ -77,12 +95,23 @@ func (p *Parser) readNextToken() {
 
 // appendError adds a new error message to the parser's error list.
 // The error message is formatted with the current token's location information.
-func (p *Parser) appendError(message string) {
-	fileName := p.currentToken.FileName
-	line := p.currentToken.Line
-	column := p.currentToken.Column
-	err := fmt.Errorf("%s Ln %d Col %d: %s", fileName, line, column, message)
-	p.errors = append(p.errors, err)
+func (p *Parser) appendError(pos ast.Position, message string) {
+	p.errors = append(p.errors, ParserError{
+		Pos: pos,
+		Msg: message,
+	})
+}
+
+// appendErrorForToken adds a new error message to the parser's error list.
+// The error message is formatted with the given token's location information.
+func (p *Parser) appendErrorForToken(tok token.Token, message string) {
+	p.appendError(p.posFromToken(tok), message)
+}
+
+// appendErrorForCurrentToken adds a new error message to the parser's error list.
+// The error message is formatted with the current token's location information.
+func (p *Parser) appendErrorForCurrentToken(message string) {
+	p.appendErrorForToken(p.currentToken, message)
 }
 
 // expectToken checks if the current token matches the expected type.
@@ -93,16 +122,46 @@ func (p *Parser) expectToken(expectedType token.TokenType, message ...string) bo
 		if len(message) > 0 {
 			msg += fmt.Sprintf(": %s", message[0])
 		}
-		p.appendError(msg)
+		p.appendErrorForCurrentToken(msg)
 		return false
 	}
 	return true
 }
 
-// Parse processes all tokens from the lexer and constructs a complete AST.
-// It returns the parsed schema, all errors encountered, and the first error (if any).
-func (p *Parser) Parse() (ast.Schema, []error, error) {
-	schema := ast.Schema{}
+// posFromToken creates a Position from a single token with the same start and end.
+func (p *Parser) posFromToken(tok token.Token) ast.Position {
+	return ast.Position{
+		Filename:  tok.FileName,
+		StartLine: tok.LineStart,
+		StartCol:  tok.ColumnStart,
+		EndLine:   tok.LineEnd,
+		EndCol:    tok.ColumnEnd,
+	}
+}
+
+// posFromTokenRange creates a Position from a range of tokens.
+func (p *Parser) posFromTokenRange(startToken token.Token, endToken token.Token) ast.Position {
+	return ast.Position{
+		Filename:  startToken.FileName,
+		StartLine: startToken.LineStart,
+		StartCol:  startToken.ColumnStart,
+		EndLine:   endToken.LineEnd,
+		EndCol:    endToken.ColumnEnd,
+	}
+}
+
+// Parse parses the input schema and returns an AST representation.
+// It validates the syntax and reports any errors encountered.
+func (p *Parser) Parse() (ast.Schema, []ParserError, error) {
+	schema := ast.Schema{
+		Pos: ast.Position{
+			Filename:  p.lex.FileName,
+			StartLine: 1, // Schema always starts at line 1
+			StartCol:  1, // Schema always starts at column 1
+			EndLine:   p.lex.CurrentLine,
+			EndCol:    p.lex.CurrentColumn,
+		},
+	}
 
 	for p.currentToken.Type != token.EOF {
 		switch p.currentToken.Type {
@@ -112,6 +171,8 @@ func (p *Parser) Parse() (ast.Schema, []error, error) {
 			ruleDecl, typeDecl, procDecl := p.parseDocstring()
 			if ruleDecl != nil {
 				schema.CustomRules = append(schema.CustomRules, *ruleDecl)
+				// Since parseCustomRuleDeclaration doesn't advance past RBRACE, we need to do it here
+				p.readNextToken()
 			}
 			if typeDecl != nil {
 				schema.Types = append(schema.Types, *typeDecl)
@@ -123,6 +184,8 @@ func (p *Parser) Parse() (ast.Schema, []error, error) {
 			ruleDecl := p.parseCustomRuleDeclaration("")
 			if ruleDecl != nil {
 				schema.CustomRules = append(schema.CustomRules, *ruleDecl)
+				// Since parseCustomRuleDeclaration doesn't advance past RBRACE, we need to do it here
+				p.readNextToken()
 			}
 		case token.TYPE:
 			typeDecl := p.parseTypeDeclaration("")
@@ -134,10 +197,15 @@ func (p *Parser) Parse() (ast.Schema, []error, error) {
 			if procDecl != nil {
 				schema.Procedures = append(schema.Procedures, *procDecl)
 			}
+		default:
+			// Skip unknown tokens
+			p.readNextToken()
 		}
-
-		p.readNextToken()
 	}
+
+	// Update the end position of the schema to the EOF token
+	schema.Pos.EndLine = p.currentToken.LineStart
+	schema.Pos.EndCol = p.currentToken.ColumnStart
 
 	if len(p.errors) > 0 {
 		return schema, p.errors, p.errors[0]
@@ -152,27 +220,30 @@ func (p *Parser) parseVersion(currSchema ast.Schema) ast.Version {
 		return ast.Version{}
 	}
 
+	startToken := p.currentToken
 	if currSchema.Version.IsSet {
-		p.appendError("version already set")
+		p.appendErrorForCurrentToken("version already set")
 		return ast.Version{}
 	}
 
 	p.readNextToken()
 
 	if p.currentToken.Type != token.INT {
-		p.appendError("version expected to be an integer")
+		p.appendErrorForCurrentToken("version expected to be an integer")
 		return ast.Version{}
 	}
 
-	versionNumber, err := strconv.Atoi(p.currentToken.Literal)
+	versionToken := p.currentToken
+	versionNumber, err := strconv.Atoi(versionToken.Literal)
 	if err != nil {
-		p.appendError(fmt.Sprintf("version number is not a valid integer: %s", err.Error()))
+		p.appendErrorForCurrentToken(fmt.Sprintf("version number is not a valid integer: %s", err.Error()))
 		return ast.Version{}
 	}
 
 	return ast.Version{
-		IsSet: true,
+		Pos:   p.posFromTokenRange(startToken, versionToken),
 		Value: versionNumber,
+		IsSet: true,
 	}
 }
 
@@ -183,22 +254,26 @@ func (p *Parser) parseDocstring() (*ast.CustomRuleDecl, *ast.TypeDecl, *ast.Proc
 		return nil, nil, nil
 	}
 
-	docstring := p.currentToken.Literal
+	docstringToken := p.currentToken
+	docstring := docstringToken.Literal
 	p.readNextToken()
 
 	if p.currentToken.Type == token.RULE {
-		return p.parseCustomRuleDeclaration(docstring), nil, nil
+		customRule := p.parseCustomRuleDeclaration(docstring)
+		return customRule, nil, nil
 	}
 
 	if p.currentToken.Type == token.TYPE {
-		return nil, p.parseTypeDeclaration(docstring), nil
+		typeDecl := p.parseTypeDeclaration(docstring)
+		return nil, typeDecl, nil
 	}
 
 	if p.currentToken.Type == token.PROC {
-		return nil, nil, p.parseProcDeclaration(docstring)
+		procDecl := p.parseProcDeclaration(docstring)
+		return nil, nil, procDecl
 	}
 
-	p.appendError("docstring can be only added to custom rule, type or procedure declaration")
+	p.appendErrorForToken(docstringToken, "docstring can be only added to custom rule, type or procedure declaration")
 	return nil, nil, nil
 }
 
@@ -209,6 +284,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 		return nil
 	}
 
+	startToken := p.currentToken
 	p.readNextToken()
 	if !p.expectToken(token.AT, "missing @ in rule name") {
 		return nil
@@ -221,7 +297,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 
 	ruleName := p.currentToken.Literal
 	if !strutil.IsCamelCase(ruleName) {
-		p.appendError(fmt.Sprintf("rule name '%s' must be in camelCase", ruleName))
+		p.appendErrorForCurrentToken(fmt.Sprintf("rule name '%s' must be in camelCase", ruleName))
 	}
 
 	p.readNextToken()
@@ -238,7 +314,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 	// Parse rule fields
 	for p.currentToken.Type != token.RBRACE {
 		if p.currentToken.Type == token.EOF {
-			p.appendError("missing rule closing brace, unexpected EOF while parsing rule fields")
+			p.appendErrorForCurrentToken("missing rule closing brace, unexpected EOF while parsing rule fields")
 			return nil
 		}
 
@@ -251,35 +327,67 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 			p.readNextToken()
 
 			typeName := p.currentToken.Literal
+			typePos := p.posFromToken(p.currentToken)
+
 			switch typeName {
 			case "string":
-				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeString}
+				forType = ast.TypePrimitive{
+					Name: ast.PrimitiveTypeString,
+					Pos:  typePos,
+				}
 			case "int":
-				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeInt}
+				forType = ast.TypePrimitive{
+					Name: ast.PrimitiveTypeInt,
+					Pos:  typePos,
+				}
 			case "float":
-				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeFloat}
+				forType = ast.TypePrimitive{
+					Name: ast.PrimitiveTypeFloat,
+					Pos:  typePos,
+				}
 			case "boolean":
-				forType = ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean}
+				forType = ast.TypePrimitive{
+					Name: ast.PrimitiveTypeBoolean,
+					Pos:  typePos,
+				}
 			default:
 				if !strutil.IsPascalCase(typeName) {
-					p.appendError(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeName))
+					p.appendErrorForCurrentToken(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeName))
 				}
-				forType = ast.TypeCustom{Name: typeName}
+				forType = ast.TypeCustom{
+					Name: typeName,
+					Pos:  typePos,
+				}
 			}
 
 			p.readNextToken()
 
 			// Check if it's an array type
 			if p.currentToken.Type == token.LBRACKET {
+				arrayTokenPos := p.posFromToken(p.currentToken)
 				p.readNextToken()
 				if !p.expectToken(token.RBRACKET, "missing closing bracket in type") {
 					return nil
 				}
-				forType = ast.TypeArray{ElementsType: forType}
+
+				// Get next token position for exact end position
+				p.readNextToken()
+				arrayTokenPos.EndLine = p.currentToken.LineStart
+				arrayTokenPos.EndCol = p.currentToken.ColumnStart
+
+				// Move back so current token isn't changed
+				p.currentIndex--
+				p.currentToken = p.tokens[p.currentIndex]
+
+				forType = ast.TypeArray{
+					ElementsType: forType,
+					Pos:          arrayTokenPos,
+				}
 				p.readNextToken()
 			}
 
 		case token.PARAM:
+			paramTokenPos := p.posFromToken(p.currentToken)
 			p.readNextToken()
 			if !p.expectToken(token.COLON, "missing colon after 'param' keyword") {
 				return nil
@@ -301,7 +409,7 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 			case "boolean":
 				primitiveType = ast.PrimitiveTypeBoolean
 			default:
-				p.appendError(fmt.Sprintf(`invalid "%s" param type, must be one of "string", "int", "float", "boolean" or array of one of them`, p.currentToken.Literal))
+				p.appendErrorForCurrentToken(fmt.Sprintf(`invalid "%s" param type, must be one of "string", "int", "float", "boolean" or array of one of them`, p.currentToken.Literal))
 				return nil
 			}
 
@@ -314,12 +422,26 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 				if !p.expectToken(token.RBRACKET, "missing closing bracket in param type") {
 					return nil
 				}
+				// Get next token position for exact end
 				p.readNextToken()
+				paramTokenPos.EndLine = p.currentToken.LineStart
+				paramTokenPos.EndCol = p.currentToken.ColumnStart
+
+				// Move back to stay on current token
+				p.currentIndex--
+				p.currentToken = p.tokens[p.currentIndex]
+
+				p.readNextToken()
+			} else {
+				// Update end position for non-array types
+				paramTokenPos.EndLine = p.currentToken.LineStart
+				paramTokenPos.EndCol = p.currentToken.ColumnStart
 			}
 
 			paramType = ast.CustomRuleDeclParamType{
 				IsArray: isArray,
 				Type:    primitiveType,
+				Pos:     paramTokenPos,
 			}
 
 		case token.ERROR:
@@ -336,18 +458,28 @@ func (p *Parser) parseCustomRuleDeclaration(docstring string) *ast.CustomRuleDec
 			p.readNextToken()
 
 		default:
-			p.appendError(fmt.Sprintf("unexpected token %s in custom rule declaration, expected 'for', 'param' or 'error'", p.currentToken.Type))
+			p.appendErrorForCurrentToken(fmt.Sprintf("unexpected token %s in custom rule declaration, expected 'for', 'param' or 'error'", p.currentToken.Type))
 			return nil
 		}
 	}
 
-	return &ast.CustomRuleDecl{
+	// Include the closing brace in the token range
+	braceToken := p.currentToken
+
+	rulePos := p.posFromTokenRange(startToken, braceToken)
+
+	// Return the result but don't advance the token again, leave on the RBRACE
+	// The caller is responsible for reading the next token after RBRACE
+	customRule := &ast.CustomRuleDecl{
 		Doc:   docstring,
 		Name:  ruleName,
 		For:   forType,
 		Param: paramType,
 		Error: errorMsg,
+		Pos:   rulePos,
 	}
+
+	return customRule
 }
 
 // parseTypeDeclaration processes a type declaration in the schema.
@@ -357,6 +489,7 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDecl {
 		return nil
 	}
 
+	startToken := p.currentToken
 	p.readNextToken()
 	if !p.expectToken(token.IDENT, "missing type name") {
 		return nil
@@ -364,7 +497,7 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDecl {
 
 	typeName := p.currentToken.Literal
 	if !strutil.IsPascalCase(typeName) {
-		p.appendError(fmt.Sprintf("type name '%s' must be in PascalCase", typeName))
+		p.appendErrorForCurrentToken(fmt.Sprintf("type name '%s' must be in PascalCase", typeName))
 		return nil
 	}
 
@@ -380,7 +513,7 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDecl {
 			break
 		}
 		if p.currentToken.Type == token.EOF {
-			p.appendError("missing type closing brace, unexpected EOF while parsing type fields")
+			p.appendErrorForCurrentToken("missing type closing brace, unexpected EOF while parsing type fields")
 			return nil
 		}
 		if !p.expectToken(token.IDENT, "missing field name") {
@@ -393,10 +526,17 @@ func (p *Parser) parseTypeDeclaration(docstring string) *ast.TypeDecl {
 		}
 	}
 
+	// Include the closing brace in the position
+	braceToken := p.currentToken
+	p.readNextToken()
+
+	typePos := p.posFromTokenRange(startToken, braceToken)
+
 	return &ast.TypeDecl{
 		Name:   typeName,
 		Doc:    docstring,
 		Fields: fields,
+		Pos:    typePos,
 	}
 }
 
@@ -407,6 +547,7 @@ func (p *Parser) parseField() *ast.Field {
 		return nil
 	}
 
+	startToken := p.currentToken
 	fieldName := p.currentToken.Literal
 	p.readNextToken()
 
@@ -422,6 +563,7 @@ func (p *Parser) parseField() *ast.Field {
 	p.readNextToken()
 
 	var fieldType ast.Type
+	var lastToken token.Token
 
 	// Handle object type
 	if p.currentToken.Type == token.LBRACE {
@@ -430,35 +572,63 @@ func (p *Parser) parseField() *ast.Field {
 			return nil
 		}
 		fieldType = objType
+		lastToken = p.currentToken
 	} else {
+		typePos := p.posFromToken(p.currentToken)
 		typeLiteral := p.currentToken.Literal
+		lastToken = p.currentToken
 
 		switch typeLiteral {
 		case "string":
-			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeString}
+			fieldType = ast.TypePrimitive{
+				Name: ast.PrimitiveTypeString,
+				Pos:  typePos,
+			}
 		case "int":
-			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeInt}
+			fieldType = ast.TypePrimitive{
+				Name: ast.PrimitiveTypeInt,
+				Pos:  typePos,
+			}
 		case "float":
-			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeFloat}
+			fieldType = ast.TypePrimitive{
+				Name: ast.PrimitiveTypeFloat,
+				Pos:  typePos,
+			}
 		case "boolean":
-			fieldType = ast.TypePrimitive{Name: ast.PrimitiveTypeBoolean}
+			fieldType = ast.TypePrimitive{
+				Name: ast.PrimitiveTypeBoolean,
+				Pos:  typePos,
+			}
 		default:
 			if !strutil.IsPascalCase(typeLiteral) {
-				p.appendError(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeLiteral))
+				p.appendErrorForCurrentToken(fmt.Sprintf("custom type name '%s' must be in PascalCase", typeLiteral))
 				return nil
 			}
-			fieldType = ast.TypeCustom{Name: typeLiteral}
+			fieldType = ast.TypeCustom{
+				Name: typeLiteral,
+				Pos:  typePos,
+			}
 		}
 		p.readNextToken()
 	}
 
 	for p.currentToken.Type == token.LBRACKET {
+		arrayPos := p.posFromToken(p.currentToken)
 		p.readNextToken()
 		if !p.expectToken(token.RBRACKET, "missing array closing bracket") {
 			return nil
 		}
+
+		// Read next token for exact end position
 		p.readNextToken()
-		fieldType = ast.TypeArray{ElementsType: fieldType}
+		arrayPos.EndLine = p.currentToken.LineStart
+		arrayPos.EndCol = p.currentToken.ColumnStart
+		lastToken = p.currentToken
+
+		fieldType = ast.TypeArray{
+			ElementsType: fieldType,
+			Pos:          arrayPos,
+		}
 	}
 
 	// Parse field rules
@@ -468,14 +638,18 @@ func (p *Parser) parseField() *ast.Field {
 		rule := p.parseFieldRule()
 		if rule != nil {
 			fieldValidationRules = append(fieldValidationRules, *rule)
+			lastToken = p.currentToken
 		}
 	}
+
+	fieldPos := p.posFromTokenRange(startToken, lastToken)
 
 	return &ast.Field{
 		Name:            fieldName,
 		Optional:        isOptional,
 		Type:            fieldType,
 		ValidationRules: fieldValidationRules,
+		Pos:             fieldPos,
 	}
 }
 
@@ -485,6 +659,8 @@ func (p *Parser) parseObjectType() ast.TypeObject {
 	if !p.expectToken(token.LBRACE, "missing object type opening brace") {
 		return ast.TypeObject{}
 	}
+
+	startToken := p.currentToken
 	p.readNextToken()
 
 	var fields []ast.Field
@@ -493,7 +669,7 @@ func (p *Parser) parseObjectType() ast.TypeObject {
 			break
 		}
 		if p.currentToken.Type == token.EOF {
-			p.appendError("missing object type closing brace, unexpected EOF while parsing object fields")
+			p.appendErrorForCurrentToken("missing object type closing brace, unexpected EOF while parsing object fields")
 			return ast.TypeObject{}
 		}
 		if !p.expectToken(token.IDENT, "missing field name") {
@@ -506,11 +682,15 @@ func (p *Parser) parseObjectType() ast.TypeObject {
 		}
 	}
 
-	// Skip the closing brace
+	// Include the closing brace in the position
+	braceToken := p.currentToken
 	p.readNextToken()
+
+	objPos := p.posFromTokenRange(startToken, braceToken)
 
 	return ast.TypeObject{
 		Fields: fields,
+		Pos:    objPos,
 	}
 }
 
@@ -521,24 +701,28 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		return nil
 	}
 
+	startToken := p.currentToken
 	p.readNextToken()
 	if !p.expectToken(token.IDENT, "missing field rule name") {
 		return nil
 	}
 	ruleName := p.currentToken.Literal
 	if !strutil.IsCamelCase(ruleName) {
-		p.appendError(fmt.Sprintf("rule name '%s' must be in camelCase", ruleName))
+		p.appendErrorForCurrentToken(fmt.Sprintf("rule name '%s' must be in camelCase", ruleName))
 	}
 
 	// Default to simple rule with no parameters
-	var rule ast.ValidationRule = &ast.ValidationRuleSimple{
-		Name:  ruleName,
-		Error: "",
-	}
+	var rule ast.ValidationRule
 
 	// Check if there are parameters (starting with parenthesis)
 	p.readNextToken()
 	if p.currentToken.Type != token.LPAREN {
+		// No parameters, simple rule
+		rule = &ast.ValidationRuleSimple{
+			Name:  ruleName,
+			Error: "",
+			Pos:   p.posFromTokenRange(startToken, p.currentToken),
+		}
 		return &rule
 	}
 
@@ -558,17 +742,21 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 
 		// Create simple rule with just an error message
 		errorMsg := p.currentToken.Literal
-		rule = &ast.ValidationRuleSimple{
-			Name:  ruleName,
-			Error: errorMsg,
-		}
 		p.readNextToken()
 
 		// Expect closing parenthesis
 		if !p.expectToken(token.RPAREN, "missing closing parenthesis in validation rule") {
 			return nil
 		}
+		closeParenToken := p.currentToken
 		p.readNextToken()
+
+		rule = &ast.ValidationRuleSimple{
+			Name:  ruleName,
+			Error: errorMsg,
+			Pos:   p.posFromTokenRange(startToken, closeParenToken),
+		}
+
 		return &rule
 	}
 
@@ -576,7 +764,15 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 	switch p.currentToken.Type {
 	case token.RPAREN:
 		// Empty parentheses, still a simple rule
+		closeParenToken := p.currentToken
 		p.readNextToken()
+
+		rule = &ast.ValidationRuleSimple{
+			Name:  ruleName,
+			Error: "",
+			Pos:   p.posFromTokenRange(startToken, closeParenToken),
+		}
+
 		return &rule
 
 	case token.STRING:
@@ -645,32 +841,32 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 				if firstValue {
 					valueType = ast.ValidationRuleValueTypeString
 				} else if valueType != ast.ValidationRuleValueTypeString {
-					p.appendError("mixed types in validation rule array")
+					p.appendErrorForCurrentToken("mixed types in validation rule array")
 					return nil
 				}
 			case token.INT:
 				if firstValue {
 					valueType = ast.ValidationRuleValueTypeInt
 				} else if valueType != ast.ValidationRuleValueTypeInt {
-					p.appendError("mixed types in validation rule array")
+					p.appendErrorForCurrentToken("mixed types in validation rule array")
 					return nil
 				}
 			case token.FLOAT:
 				if firstValue {
 					valueType = ast.ValidationRuleValueTypeFloat
 				} else if valueType != ast.ValidationRuleValueTypeFloat {
-					p.appendError("mixed types in validation rule array")
+					p.appendErrorForCurrentToken("mixed types in validation rule array")
 					return nil
 				}
 			case token.TRUE, token.FALSE:
 				if firstValue {
 					valueType = ast.ValidationRuleValueTypeBoolean
 				} else if valueType != ast.ValidationRuleValueTypeBoolean {
-					p.appendError("mixed types in validation rule array")
+					p.appendErrorForCurrentToken("mixed types in validation rule array")
 					return nil
 				}
 			default:
-				p.appendError(fmt.Sprintf("unexpected token %s in validation rule array", p.currentToken.Type))
+				p.appendErrorForCurrentToken(fmt.Sprintf("unexpected token %s in validation rule array", p.currentToken.Type))
 				return nil
 			}
 
@@ -679,6 +875,7 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 			p.readNextToken()
 		}
 
+		// Include the closing bracket in the position
 		rule = &ast.ValidationRuleWithArray{
 			Name:      ruleName,
 			Values:    values,
@@ -688,7 +885,7 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 		p.readNextToken()
 
 	default:
-		p.appendError(fmt.Sprintf("unexpected token %s in validation rule parameter", p.currentToken.Type))
+		p.appendErrorForCurrentToken(fmt.Sprintf("unexpected token %s in validation rule parameter", p.currentToken.Type))
 		return nil
 	}
 
@@ -719,7 +916,7 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 
 			p.readNextToken()
 		} else {
-			p.appendError(fmt.Sprintf("unexpected token %s after comma in validation rule, expected 'error'", p.currentToken.Type))
+			p.appendErrorForCurrentToken(fmt.Sprintf("unexpected token %s after comma in validation rule, expected 'error'", p.currentToken.Type))
 			return nil
 		}
 	}
@@ -728,7 +925,21 @@ func (p *Parser) parseFieldRule() *ast.ValidationRule {
 	if !p.expectToken(token.RPAREN, "missing closing parenthesis in validation rule") {
 		return nil
 	}
+
+	closeParenToken := p.currentToken
 	p.readNextToken()
+
+	// Set the position for the rule
+	rulePos := p.posFromTokenRange(startToken, closeParenToken)
+
+	switch r := rule.(type) {
+	case *ast.ValidationRuleSimple:
+		r.Pos = rulePos
+	case *ast.ValidationRuleWithValue:
+		r.Pos = rulePos
+	case *ast.ValidationRuleWithArray:
+		r.Pos = rulePos
+	}
 
 	return &rule
 }
@@ -740,6 +951,7 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 		return nil
 	}
 
+	startToken := p.currentToken
 	p.readNextToken()
 	if !p.expectToken(token.IDENT, "missing procedure name") {
 		return nil
@@ -747,7 +959,7 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 
 	procName := p.currentToken.Literal
 	if !strutil.IsPascalCase(procName) {
-		p.appendError(fmt.Sprintf("procedure name '%s' must be in PascalCase", procName))
+		p.appendErrorForCurrentToken(fmt.Sprintf("procedure name '%s' must be in PascalCase", procName))
 	}
 
 	p.readNextToken()
@@ -762,19 +974,20 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 	meta := ast.ProcMeta{}
 	metaSet := false
 
-	for {
-		p.readNextToken()
+	// Read next token to enter the loop
+	p.readNextToken()
 
+	for {
 		if p.currentToken.Type == token.RBRACE {
 			break
 		}
 		if p.currentToken.Type == token.EOF {
-			p.appendError("missing procedure closing brace, unexpected EOF while parsing procedure children nodes")
+			p.appendErrorForCurrentToken("missing procedure closing brace, unexpected EOF while parsing procedure children nodes")
 			return nil
 		}
 		if p.currentToken.Type == token.INPUT {
 			if inputSet {
-				p.appendError("input already set for procedure " + procName)
+				p.appendErrorForCurrentToken("input already set for procedure " + procName)
 				continue
 			}
 
@@ -783,10 +996,9 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 				input = *inputRes
 				inputSet = true
 			}
-		}
-		if p.currentToken.Type == token.OUTPUT {
+		} else if p.currentToken.Type == token.OUTPUT {
 			if outputSet {
-				p.appendError("output already set for procedure " + procName)
+				p.appendErrorForCurrentToken("output already set for procedure " + procName)
 				continue
 			}
 
@@ -795,10 +1007,9 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 				output = *outputRes
 				outputSet = true
 			}
-		}
-		if p.currentToken.Type == token.META {
+		} else if p.currentToken.Type == token.META {
 			if metaSet {
-				p.appendError("meta already set for procedure " + procName)
+				p.appendErrorForCurrentToken("meta already set for procedure " + procName)
 				continue
 			}
 
@@ -807,8 +1018,16 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 				meta = *metaRes
 				metaSet = true
 			}
+		} else {
+			// Skip unknown tokens and continue
+			p.readNextToken()
 		}
 	}
+
+	// Include the closing brace in the position
+	braceToken := p.currentToken
+
+	procPos := p.posFromTokenRange(startToken, braceToken)
 
 	return &ast.ProcDecl{
 		Name:     procName,
@@ -816,6 +1035,7 @@ func (p *Parser) parseProcDeclaration(docstring string) *ast.ProcDecl {
 		Input:    input,
 		Output:   output,
 		Metadata: meta,
+		Pos:      procPos,
 	}
 }
 
@@ -826,6 +1046,7 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 		return nil
 	}
 
+	startToken := p.currentToken
 	p.readNextToken()
 	if !p.expectToken(token.LBRACE, "missing input opening brace") {
 		return nil
@@ -838,7 +1059,7 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 			break
 		}
 		if p.currentToken.Type == token.EOF {
-			p.appendError("missing input closing brace, unexpected EOF while parsing input fields")
+			p.appendErrorForCurrentToken("missing input closing brace, unexpected EOF while parsing input fields")
 			return nil
 		}
 		if !p.expectToken(token.IDENT, "missing field name") {
@@ -851,8 +1072,15 @@ func (p *Parser) parseProcInput() *ast.ProcInput {
 		}
 	}
 
+	// Include the closing brace in the position
+	braceToken := p.currentToken
+	p.readNextToken()
+
+	inputPos := p.posFromTokenRange(startToken, braceToken)
+
 	return &ast.ProcInput{
 		Fields: fields,
+		Pos:    inputPos,
 	}
 }
 
@@ -863,6 +1091,7 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 		return nil
 	}
 
+	startToken := p.currentToken
 	p.readNextToken()
 	if !p.expectToken(token.LBRACE, "missing output opening brace") {
 		return nil
@@ -875,7 +1104,7 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 			break
 		}
 		if p.currentToken.Type == token.EOF {
-			p.appendError("missing output closing brace, unexpected EOF while parsing output fields")
+			p.appendErrorForCurrentToken("missing output closing brace, unexpected EOF while parsing output fields")
 			return nil
 		}
 		if !p.expectToken(token.IDENT, "missing field name") {
@@ -888,8 +1117,15 @@ func (p *Parser) parseProcOutput() *ast.ProcOutput {
 		}
 	}
 
+	// Include the closing brace in the position
+	braceToken := p.currentToken
+	p.readNextToken()
+
+	outputPos := p.posFromTokenRange(startToken, braceToken)
+
 	return &ast.ProcOutput{
 		Fields: fields,
+		Pos:    outputPos,
 	}
 }
 
@@ -900,31 +1136,43 @@ func (p *Parser) parseProcMeta() *ast.ProcMeta {
 		return nil
 	}
 
+	startToken := p.currentToken
 	p.readNextToken()
 	if !p.expectToken(token.LBRACE, "missing meta opening brace") {
 		return nil
 	}
 
+	// Read next token to enter the loop
+	p.readNextToken()
+
 	var entries []ast.ProcMetaKV
 	for {
-		p.readNextToken()
-
 		if p.currentToken.Type == token.RBRACE {
 			break
 		}
 		if p.currentToken.Type == token.EOF {
-			p.appendError("missing meta closing brace, unexpected EOF while parsing meta entries")
+			p.appendErrorForCurrentToken("missing meta closing brace, unexpected EOF while parsing meta entries")
 			return nil
 		}
 
 		entry := p.parseProcMetaEntry()
 		if entry != nil {
 			entries = append(entries, *entry)
+		} else {
+			// Skip unknown tokens
+			p.readNextToken()
 		}
 	}
 
+	// Include the closing brace in the position
+	braceToken := p.currentToken
+	p.readNextToken()
+
+	metaPos := p.posFromTokenRange(startToken, braceToken)
+
 	return &ast.ProcMeta{
 		Entries: entries,
+		Pos:     metaPos,
 	}
 }
 
@@ -935,6 +1183,7 @@ func (p *Parser) parseProcMetaEntry() *ast.ProcMetaKV {
 		return nil
 	}
 
+	startToken := p.currentToken
 	key := p.currentToken.Literal
 	p.readNextToken()
 
@@ -944,6 +1193,8 @@ func (p *Parser) parseProcMetaEntry() *ast.ProcMetaKV {
 	p.readNextToken()
 
 	var procMetaType ast.PrimitiveType
+	valueToken := p.currentToken
+
 	switch p.currentToken.Type {
 	case token.STRING:
 		procMetaType = ast.PrimitiveTypeString
@@ -954,13 +1205,20 @@ func (p *Parser) parseProcMetaEntry() *ast.ProcMetaKV {
 	case token.TRUE, token.FALSE:
 		procMetaType = ast.PrimitiveTypeBoolean
 	default:
-		p.appendError(fmt.Sprintf("invalid meta type %s for key %s", p.currentToken.Type, key))
+		p.appendErrorForCurrentToken(fmt.Sprintf("invalid meta type %s for key %s", p.currentToken.Type, key))
 		return nil
 	}
+
+	// Advance to the next token after processing the value
+	valueText := valueToken.Literal
+	p.readNextToken()
+
+	entryPos := p.posFromTokenRange(startToken, valueToken)
 
 	return &ast.ProcMetaKV{
 		Type:  procMetaType,
 		Key:   key,
-		Value: p.currentToken.Literal,
+		Value: valueText,
+		Pos:   entryPos,
 	}
 }
