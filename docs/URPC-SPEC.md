@@ -351,5 +351,6 @@ proc GetProduct {
 
 ## 8. Known Limitations
 
-1. Importing other schema files is not supported
-2. Custom validators require external implementation
+1. Keywords can't be used as identifiers
+2. Importing other schema files is not supported
+3. Custom validators require external implementation
