@@ -227,11 +227,13 @@ func (l *Lexer) readComment() string {
 	}
 
 	nextChar, eofReached := l.peekChar(1)
-	if eofReached || nextChar != '/' {
+	isSingleLine := nextChar == '/'
+	isMultiline := nextChar == '*'
+	if eofReached || (!isSingleLine && !isMultiline) {
 		return ""
 	}
 
-	// Skip the opening slashes
+	// Skip the opening comment characters
 	l.readNextChar()
 	l.readNextChar()
 
@@ -239,9 +241,23 @@ func (l *Lexer) readComment() string {
 	for {
 		comment += string(l.currentChar)
 
-		nextChar, eofReached := l.peekChar(1)
-		if eofReached || nextChar == '\n' {
-			break
+		if isSingleLine {
+			nextChar, eofReached := l.peekChar(1)
+			if eofReached || nextChar == '\n' {
+				break
+			}
+		}
+
+		if isMultiline {
+			nextChar, eofReached := l.peekChar(1)
+			nextChar2, eofReached2 := l.peekChar(2)
+
+			if eofReached || eofReached2 || (nextChar == '*' && nextChar2 == '/') {
+				// Skip the closing comment characters
+				l.readNextChar()
+				l.readNextChar()
+				break
+			}
 		}
 
 		l.readNextChar()
@@ -262,11 +278,13 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 	if l.currentIndexIsEOF {
 		return token.Token{
-			Type:     token.EOF,
-			Literal:  "",
-			FileName: l.FileName,
-			Line:     l.CurrentLine,
-			Column:   l.CurrentColumn,
+			Type:        token.EOF,
+			Literal:     "",
+			FileName:    l.FileName,
+			LineStart:   l.CurrentLine,
+			ColumnStart: l.CurrentColumn,
+			LineEnd:     l.CurrentLine,
+			ColumnEnd:   l.CurrentColumn,
 		}
 	}
 
@@ -276,11 +294,13 @@ func (l *Lexer) NextToken() token.Token {
 	// Handle delimiters
 	if token.IsDelimiter(l.currentChar) {
 		return token.Token{
-			Type:     token.GetDelimiterTokenType(l.currentChar),
-			Literal:  string(l.currentChar),
-			FileName: l.FileName,
-			Line:     l.CurrentLine,
-			Column:   l.CurrentColumn,
+			Type:        token.GetDelimiterTokenType(l.currentChar),
+			Literal:     string(l.currentChar),
+			FileName:    l.FileName,
+			LineStart:   l.CurrentLine,
+			ColumnStart: l.CurrentColumn,
+			LineEnd:     l.CurrentLine,
+			ColumnEnd:   l.CurrentColumn,
 		}
 	}
 
@@ -307,41 +327,51 @@ func (l *Lexer) NextToken() token.Token {
 			docstring, unterminated := l.readDocstring()
 			if unterminated {
 				return token.Token{
-					Type:     token.ILLEGAL,
-					Literal:  `"""` + docstring,
-					FileName: l.FileName,
-					Line:     startLine,
-					Column:   startColumn,
+					Type:        token.ILLEGAL,
+					Literal:     `"""` + docstring,
+					FileName:    l.FileName,
+					LineStart:   startLine,
+					ColumnStart: startColumn,
+					LineEnd:     l.CurrentLine,
+					ColumnEnd:   l.CurrentColumn - 1,
 				}
 			}
 
 			return token.Token{
-				Type:     token.DOCSTRING,
-				Literal:  docstring,
-				FileName: l.FileName,
-				Line:     startLine,
-				Column:   startColumn,
+				Type:        token.DOCSTRING,
+				Literal:     docstring,
+				FileName:    l.FileName,
+				LineStart:   startLine,
+				ColumnStart: startColumn,
+				LineEnd:     l.CurrentLine,
+				ColumnEnd:   l.CurrentColumn,
 			}
 		}
 
 		str, unterminated := l.readString()
+		endLine := l.CurrentLine
+		endColumn := l.CurrentColumn
 
 		if unterminated {
 			return token.Token{
-				Type:     token.ILLEGAL,
-				Literal:  `"` + str,
-				FileName: l.FileName,
-				Line:     startLine,
-				Column:   startColumn,
+				Type:        token.ILLEGAL,
+				Literal:     `"` + str,
+				FileName:    l.FileName,
+				LineStart:   startLine,
+				ColumnStart: startColumn,
+				LineEnd:     endLine,
+				ColumnEnd:   endColumn - 1,
 			}
 		}
 
 		return token.Token{
-			Type:     token.STRING,
-			Literal:  str,
-			FileName: l.FileName,
-			Line:     startLine,
-			Column:   startColumn,
+			Type:        token.STRING,
+			Literal:     str,
+			FileName:    l.FileName,
+			LineStart:   startLine,
+			ColumnStart: startColumn,
+			LineEnd:     endLine,
+			ColumnEnd:   endColumn,
 		}
 	}
 
@@ -350,13 +380,17 @@ func (l *Lexer) NextToken() token.Token {
 		startLine := l.CurrentLine
 		startColumn := l.CurrentColumn
 		num := l.readNumber()
+		endLine := startLine
+		endColumn := startColumn + len(num) - 1
 
 		tok := token.Token{
-			Type:     token.INT,
-			Literal:  num,
-			FileName: l.FileName,
-			Line:     startLine,
-			Column:   startColumn,
+			Type:        token.INT,
+			Literal:     num,
+			FileName:    l.FileName,
+			LineStart:   startLine,
+			ColumnStart: startColumn,
+			LineEnd:     endLine,
+			ColumnEnd:   endColumn,
 		}
 
 		nextChar, eofReached := l.peekChar(1)
@@ -375,12 +409,17 @@ func (l *Lexer) NextToken() token.Token {
 		l.readNextChar()
 
 		num += "." + l.readNumber()
+		endLine = startLine
+		endColumn = startColumn + len(num) - 1
+
 		return token.Token{
-			Type:     token.FLOAT,
-			Literal:  num,
-			FileName: l.FileName,
-			Line:     startLine,
-			Column:   startColumn,
+			Type:        token.FLOAT,
+			Literal:     num,
+			FileName:    l.FileName,
+			LineStart:   startLine,
+			ColumnStart: startColumn,
+			LineEnd:     endLine,
+			ColumnEnd:   endColumn,
 		}
 	}
 
@@ -389,58 +428,77 @@ func (l *Lexer) NextToken() token.Token {
 		startLine := l.CurrentLine
 		startColumn := l.CurrentColumn
 		ident := l.readIdentifier()
+		endLine := startLine
+		endColumn := startColumn + len(ident) - 1
 
 		if token.IsKeyword(ident) {
 			return token.Token{
-				Type:     token.GetKeywordTokenType(ident),
-				Literal:  ident,
-				FileName: l.FileName,
-				Line:     startLine,
-				Column:   startColumn,
+				Type:        token.GetKeywordTokenType(ident),
+				Literal:     ident,
+				FileName:    l.FileName,
+				LineStart:   startLine,
+				ColumnStart: startColumn,
+				LineEnd:     endLine,
+				ColumnEnd:   endColumn,
 			}
 		}
 
 		return token.Token{
-			Type:     token.IDENT,
-			Literal:  ident,
-			FileName: l.FileName,
-			Line:     startLine,
-			Column:   startColumn,
+			Type:        token.IDENT,
+			Literal:     ident,
+			FileName:    l.FileName,
+			LineStart:   startLine,
+			ColumnStart: startColumn,
+			LineEnd:     endLine,
+			ColumnEnd:   endColumn,
 		}
 	}
 
 	// Handle comments
 	if l.currentChar == '/' {
 		nextChar, eofReached := l.peekChar(1)
-		if eofReached || nextChar != '/' {
+		if eofReached || (nextChar != '/' && nextChar != '*') {
 			return token.Token{
-				Type:     token.ILLEGAL,
-				Literal:  string(l.currentChar) + string(nextChar),
-				FileName: l.FileName,
-				Line:     l.CurrentLine,
-				Column:   l.CurrentColumn,
+				Type:        token.ILLEGAL,
+				Literal:     string(l.currentChar) + string(nextChar),
+				FileName:    l.FileName,
+				LineStart:   l.CurrentLine,
+				ColumnStart: l.CurrentColumn,
+				LineEnd:     l.CurrentLine,
+				ColumnEnd:   l.CurrentColumn,
 			}
 		}
 
 		startLine := l.CurrentLine
 		startColumn := l.CurrentColumn
 		comment := l.readComment()
+		endLine := l.CurrentLine
+		endColumn := l.CurrentColumn
+
 		return token.Token{
-			Type:     token.COMMENT,
-			Literal:  comment,
-			FileName: l.FileName,
-			Line:     startLine,
-			Column:   startColumn,
+			Type:        token.COMMENT,
+			Literal:     comment,
+			FileName:    l.FileName,
+			LineStart:   startLine,
+			ColumnStart: startColumn,
+			LineEnd:     endLine,
+			ColumnEnd:   endColumn,
 		}
 	}
 
 	// Everything else is illegal
+	startLine := l.CurrentLine
+	startColumn := l.CurrentColumn
+	endLine := startLine
+	endColumn := startColumn
 	return token.Token{
-		Type:     token.ILLEGAL,
-		Literal:  string(l.currentChar),
-		FileName: l.FileName,
-		Line:     l.CurrentLine,
-		Column:   l.CurrentColumn,
+		Type:        token.ILLEGAL,
+		Literal:     string(l.currentChar),
+		FileName:    l.FileName,
+		LineStart:   startLine,
+		ColumnStart: startColumn,
+		LineEnd:     endLine,
+		ColumnEnd:   endColumn,
 	}
 }
 
