@@ -25,10 +25,12 @@ type ValidationRule interface {
 	NodeType() NodeType
 	ValidationRuleShape() ValidationRuleShape
 	ValidationRuleValueType() ValidationRuleValueType
+	GetPosition() Position
 }
 
 // ValidationRuleSimple represents a simple validation rule that contains an error message.
 type ValidationRuleSimple struct {
+	Pos   Position
 	Name  string
 	Error string
 }
@@ -40,10 +42,14 @@ func (v *ValidationRuleSimple) ValidationRuleShape() ValidationRuleShape {
 func (v *ValidationRuleSimple) ValidationRuleValueType() ValidationRuleValueType {
 	return ValidationRuleValueTypeNone
 }
+func (v *ValidationRuleSimple) GetPosition() Position {
+	return v.Pos
+}
 
 // ValidationRuleWithValue represents a validation rule that contains a string value
 // and an error message.
 type ValidationRuleWithValue struct {
+	Pos       Position
 	Name      string
 	Value     string
 	ValueType ValidationRuleValueType
@@ -57,10 +63,14 @@ func (v *ValidationRuleWithValue) ValidationRuleShape() ValidationRuleShape {
 func (v *ValidationRuleWithValue) ValidationRuleValueType() ValidationRuleValueType {
 	return v.ValueType
 }
+func (v *ValidationRuleWithValue) GetPosition() Position {
+	return v.Pos
+}
 
 // ValidationRuleWithArray represents a validation rule that contains an array of values
 // and an error message.
 type ValidationRuleWithArray struct {
+	Pos       Position
 	Name      string
 	Values    []string
 	ValueType ValidationRuleValueType
@@ -73,4 +83,7 @@ func (v *ValidationRuleWithArray) ValidationRuleShape() ValidationRuleShape {
 }
 func (v *ValidationRuleWithArray) ValidationRuleValueType() ValidationRuleValueType {
 	return v.ValueType
+}
+func (v *ValidationRuleWithArray) GetPosition() Position {
+	return v.Pos
 }

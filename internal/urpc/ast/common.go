@@ -28,3 +28,13 @@ const (
 	PrimitiveTypeFloat   PrimitiveType = "float"
 	PrimitiveTypeBoolean PrimitiveType = "boolean"
 )
+
+// Position represents the position range of a node in the source file.
+// This information is used for error reporting and LSP integration.
+type Position struct {
+	Filename  string
+	StartLine int
+	StartCol  int
+	EndLine   int
+	EndCol    int
+}
