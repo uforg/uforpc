@@ -20,6 +20,10 @@ version: <number>
 
 // <comment>
 
+/*
+  <multiline comment>
+*/
+
 """
 <Custom rule documentation>
 """
@@ -32,7 +36,7 @@ rule @<CustomRuleName> {
 """
 <Type documentation>
 """
-type <TypeName> {
+type <CustomTypeName> [extends <OtherCustomTypeName>] {
   <field>[?]: <Type>
     [@<validationRule>(<param>, [error: <"message">])]
 }
@@ -292,6 +296,25 @@ type Product {
 }
 
 """
+Represents a review of a product
+"""
+type Review {
+  rating: int
+    @enum([1, 2, 3, 4, 5])
+
+  comment: string
+    @minlen(10)
+    @maxlen(500)
+}
+
+"""
+Represents a product with its reviews
+"""
+type ReviewedProduct extends Product {
+  reviews: Review[]
+}
+
+"""
 Creates a new product in the system and returns the product id.
 """
 proc CreateProduct {
@@ -310,10 +333,23 @@ proc CreateProduct {
     maxRetries: 3
   }
 }
+
+"""
+Get a product by id, it returns a product with its reviews.
+"""
+proc GetProduct {
+  input {
+    productId: string
+      @uuid
+  }
+  
+  output {
+    product: ReviewedProduct
+  }
+}
 ```
 
 ## 8. Known Limitations
 
-1. No type inheritance support
+1. Importing other schema files is not supported
 2. Custom validators require external implementation
-3. No multi-line comment support
