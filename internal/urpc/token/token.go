@@ -3,11 +3,20 @@ package token
 type TokenType string
 
 type Token struct {
-	Type     TokenType
-	Literal  string
+	// Type is the type of the token.
+	Type TokenType
+	// Literal is the literal value of the token.
+	Literal string
+	// FileName is the name of the file where the token was found.
 	FileName string
-	Line     int
-	Column   int
+	// LineStart is the line number of the first character of the token.
+	LineStart int
+	// LineEnd is the line number of the last character of the token.
+	LineEnd int
+	// ColumnStart is the column number of the first character of the token.
+	ColumnStart int
+	// ColumnEnd is the column number of the last character of the token.
+	ColumnEnd int
 }
 
 const (
@@ -38,6 +47,7 @@ const (
 	VERSION TokenType = "VERSION"
 	RULE    TokenType = "RULE"
 	TYPE    TokenType = "TYPE"
+	EXTENDS TokenType = "EXTENDS"
 	PROC    TokenType = "PROC"
 	INPUT   TokenType = "INPUT"
 	OUTPUT  TokenType = "OUTPUT"
@@ -79,6 +89,7 @@ var keywords = map[string]TokenType{
 	"version": VERSION,
 	"rule":    RULE,
 	"type":    TYPE,
+	"extends": EXTENDS,
 	"proc":    PROC,
 	"input":   INPUT,
 	"output":  OUTPUT,
