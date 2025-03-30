@@ -271,6 +271,11 @@ rule @regex {
   error: "Invalid format"
 }
 
+rule @uuid {
+  for: string
+  error: "Invalid UUID format"
+}
+
 rule @priceRange {
   for: float
   param: float[]
@@ -283,14 +288,14 @@ Represents a product in the catalog
 type Product {
   id: string
     @uuid
-  
+
   name: string
     @minlen(3)
     @regex("^[A-Za-z ]+$")
-  
+
   price: float
     @priceRange([0.01, 9999.99])
-  
+
   tags?: string[]
     @maxlen(5)
 }
@@ -321,13 +326,13 @@ proc CreateProduct {
   input {
     product: Product
   }
-  
+
   output {
     success: boolean
     productId: string
       @uuid
   }
-  
+
   meta {
     requiresAuth: true
     maxRetries: 3
@@ -342,7 +347,7 @@ proc GetProduct {
     productId: string
       @uuid
   }
-  
+
   output {
     product: ReviewedProduct
   }
