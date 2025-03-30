@@ -36,7 +36,7 @@ rule @<CustomRuleName> {
 """
 <Type documentation>
 """
-type <CustomTypeName> [extends <OtherCustomTypeName>] {
+type <CustomTypeName> [extends <OtherCustomTypeName>, <OtherCustomTypeName>, ...] {
   <field>[?]: <Type>
     [@<validationRule>(<param>, [error: <"message">])]
 }
