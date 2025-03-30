@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Position Inspector</title>
+    <style>
+      /* Reset default margins and paddings */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: #121212;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        line-height: 1.5;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      h2 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+      textarea {
+        width: 100%;
+        height: 200px;
+        background-color: #1e1e1e;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 10px;
+        font-size: 16px;
+        font-family: monospace; /* Ensure monospace font */
+        resize: vertical;
+      }
+      #caretInfo {
+        margin-top: 10px;
+        font-size: 16px;
+      }
+      /* Playground container now only handles overflow-x;
+         each line will be wrapped in a non-wrapping container */
+      #playground {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 4px;
+        font-family: monospace;
+        overflow-x: auto; /* Enable horizontal scrolling */
+      }
+      /* Style for each token (square box) */
+      #playground span {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        margin: 2px;
+        border: 1px solid #555;
+        border-radius: 4px;
+        font-size: 20px;
+        text-align: center;
+        line-height: 30px; /* Center text vertically */
+        cursor: default;
+        position: relative;
+        transition: background-color 0.2s; /* Smooth hover effect */
+      }
+      /* Change token background color on hover */
+      #playground span:hover {
+        background-color: #444;
+      }
+      /* Tooltip element style */
+      #tooltip {
+        position: absolute;
+        background-color: #333;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        pointer-events: none;
+        display: none;
+        font-size: 14px;
+        white-space: nowrap;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Position Inspector</h1>
+    <p>
+      This tool helps you inspect the position of a character in a text. Helpful
+      for debugging or writing tests for the UFO RPC parser.
+    </p>
+
+    <h2>Input</h2>
+    <textarea
+      id="editor"
+      placeholder="Type your text here..."
+    ></textarea>
+    <div id="caretInfo">Line: 1, Column: 1</div>
+
+    <h2>Inspector</h2>
+    <div id="playground"></div>
+    <div id="tooltip"></div>
+
+    <script>
+      // Function to calculate the caret position (line and column) in the textarea.
+      function getCaretPosition(text, pos) {
+        const substring = text.substring(0, pos);
+        const lines = substring.split("\n");
+        const lineNumber = lines.length;
+        const columnNumber = lines[lines.length - 1].length + 1; // 1-indexed
+        return { line: lineNumber, column: columnNumber };
+      }
+
+      // Return color based on character type.
+      function getColorForChar(ch) {
+        if (ch === " ") return "#00CED1"; // Space: DarkTurquoise
+        if (ch === "\t") return "#FF69B4"; // Tab: HotPink
+        if (/[a-zA-Z0-9]/.test(ch)) return "#FFFFFF"; // Alphanumeric: White
+        return "#FFA500"; // Punctuation/others: Orange
+      }
+
+      // Update the div that displays the current caret position.
+      function updateCaretInfo() {
+        const editor = document.getElementById("editor");
+        const info = document.getElementById("caretInfo");
+        const caretPos = editor.selectionStart;
+        const position = getCaretPosition(editor.value, caretPos);
+        info.textContent = "Line: " + position.line + ", Column: " +
+          position.column;
+      }
+
+      // Helper to attach tooltip event listeners to a token.
+      function attachTooltipEvents(token) {
+        token.addEventListener("mouseenter", function (e) {
+          const tooltip = document.getElementById("tooltip");
+          tooltip.textContent = token.getAttribute("data-tooltip");
+          tooltip.style.display = "block";
+        });
+        token.addEventListener("mousemove", function (e) {
+          const tooltip = document.getElementById("tooltip");
+          const tooltipWidth = tooltip.offsetWidth;
+          let posX;
+          // Position tooltip to the right if mouse is on the left half, else to the left.
+          if (e.clientX < window.innerWidth / 2) {
+            posX = e.pageX + 10;
+          } else {
+            posX = e.pageX - tooltipWidth - 10;
+          }
+          tooltip.style.left = posX + "px";
+          tooltip.style.top = (e.pageY + 10) + "px";
+        });
+        token.addEventListener("mouseleave", function (e) {
+          document.getElementById("tooltip").style.display = "none";
+        });
+      }
+
+      // Render every character in the playground. Each line is wrapped in a non-wrapping <div>
+      // and an EOF token is added only at the end of the last line.
+      function renderPlayground() {
+        const editor = document.getElementById("editor");
+        const playground = document.getElementById("playground");
+        playground.innerHTML = ""; // Clear previous content
+
+        const lines = editor.value.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+          // Create a container for the current line that will not wrap
+          const lineDiv = document.createElement("div");
+          lineDiv.style.whiteSpace = "nowrap";
+          const currentLine = i + 1;
+          let currentCol = 1;
+          const currentText = lines[i];
+
+          // Process each character in the current line.
+          for (let j = 0; j < currentText.length; j++) {
+            const ch = currentText[j];
+            const span = document.createElement("span");
+            let displayChar = ch;
+            // Represent spaces and tabs with visible symbols.
+            if (ch === " ") {
+              displayChar = "␣";
+            } else if (ch === "\t") {
+              displayChar = "⇥";
+            }
+            span.textContent = displayChar;
+            span.style.color = getColorForChar(ch);
+            span.setAttribute(
+              "data-tooltip",
+              "Line: " + currentLine + ", Column: " + currentCol,
+            );
+            attachTooltipEvents(span);
+            lineDiv.appendChild(span);
+            currentCol++;
+          }
+
+          // If this is the last line, add the EOF token at the end.
+          if (i === lines.length - 1) {
+            const eofToken = document.createElement("span");
+            eofToken.textContent = "🛑";
+            eofToken.style.color = "#FFFFFF"; // White color for EOF token
+            eofToken.setAttribute(
+              "data-tooltip",
+              `End Of File - Line: ${currentLine}, Column: ${currentCol}`,
+            );
+            attachTooltipEvents(eofToken);
+            lineDiv.appendChild(eofToken);
+          }
+          playground.appendChild(lineDiv);
+        }
+      }
+
+      // Reference to the editor textarea.
+      const editor = document.getElementById("editor");
+
+      // Update caret info and render the playground on input and various mouse events.
+      editor.addEventListener("input", function () {
+        updateCaretInfo();
+        renderPlayground();
+      });
+      editor.addEventListener("click", updateCaretInfo);
+      editor.addEventListener("keyup", updateCaretInfo);
+      editor.addEventListener("mouseup", updateCaretInfo);
+
+      // Initialize caret info and playground when the window loads.
+      window.onload = function () {
+        updateCaretInfo();
+        renderPlayground();
+      };
+    </script>
+  </body>
+</html>
