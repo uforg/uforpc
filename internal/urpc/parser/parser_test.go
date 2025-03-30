@@ -8,67 +8,62 @@ import (
 	"github.com/uforg/uforpc/internal/urpc/lexer"
 )
 
-// equalWithoutPos compara dos esquemas ignorando las posiciones
+// equalWithoutPos compares two schemas ignoring positions
 func equalWithoutPos(t *testing.T, expected, actual ast.Schema) {
-	// Comparar Version
+	// Compare Version
 	require.Equal(t, expected.Version.IsSet, actual.Version.IsSet)
 	require.Equal(t, expected.Version.Value, actual.Version.Value)
 
-	// Comparar CustomRules
+	// Compare CustomRules
 	require.Equal(t, len(expected.CustomRules), len(actual.CustomRules))
 	for i := range expected.CustomRules {
 		require.Equal(t, expected.CustomRules[i].Name, actual.CustomRules[i].Name)
 		require.Equal(t, expected.CustomRules[i].Doc, actual.CustomRules[i].Doc)
 		require.Equal(t, expected.CustomRules[i].Error, actual.CustomRules[i].Error)
-		equalTypeWithoutPos(t, expected.CustomRules[i].For, actual.CustomRules[i].For)
-
-		// Param
+		if expected.CustomRules[i].For != nil {
+			equalTypeWithoutPos(t, expected.CustomRules[i].For, actual.CustomRules[i].For)
+		}
 		require.Equal(t, expected.CustomRules[i].Param.IsArray, actual.CustomRules[i].Param.IsArray)
 		require.Equal(t, expected.CustomRules[i].Param.Type, actual.CustomRules[i].Param.Type)
 	}
 
-	// Comparar Types
+	// Compare Types
 	require.Equal(t, len(expected.Types), len(actual.Types))
 	for i := range expected.Types {
 		require.Equal(t, expected.Types[i].Name, actual.Types[i].Name)
 		require.Equal(t, expected.Types[i].Doc, actual.Types[i].Doc)
-
-		// Fields
 		require.Equal(t, len(expected.Types[i].Fields), len(actual.Types[i].Fields))
 		for j := range expected.Types[i].Fields {
 			equalFieldWithoutPos(t, expected.Types[i].Fields[j], actual.Types[i].Fields[j])
 		}
 	}
 
-	// Comparar Procedures
+	// Compare Procedures
 	require.Equal(t, len(expected.Procedures), len(actual.Procedures))
 	for i := range expected.Procedures {
 		require.Equal(t, expected.Procedures[i].Name, actual.Procedures[i].Name)
 		require.Equal(t, expected.Procedures[i].Doc, actual.Procedures[i].Doc)
 
-		// Input
 		require.Equal(t, len(expected.Procedures[i].Input.Fields), len(actual.Procedures[i].Input.Fields))
 		for j := range expected.Procedures[i].Input.Fields {
 			equalFieldWithoutPos(t, expected.Procedures[i].Input.Fields[j], actual.Procedures[i].Input.Fields[j])
 		}
 
-		// Output
 		require.Equal(t, len(expected.Procedures[i].Output.Fields), len(actual.Procedures[i].Output.Fields))
 		for j := range expected.Procedures[i].Output.Fields {
 			equalFieldWithoutPos(t, expected.Procedures[i].Output.Fields[j], actual.Procedures[i].Output.Fields[j])
 		}
 
-		// Metadata
 		require.Equal(t, len(expected.Procedures[i].Metadata.Entries), len(actual.Procedures[i].Metadata.Entries))
 		for j := range expected.Procedures[i].Metadata.Entries {
 			require.Equal(t, expected.Procedures[i].Metadata.Entries[j].Key, actual.Procedures[i].Metadata.Entries[j].Key)
-			require.Equal(t, expected.Procedures[i].Metadata.Entries[j].Type, actual.Procedures[i].Metadata.Entries[j].Type)
 			require.Equal(t, expected.Procedures[i].Metadata.Entries[j].Value, actual.Procedures[i].Metadata.Entries[j].Value)
+			require.Equal(t, expected.Procedures[i].Metadata.Entries[j].Type, actual.Procedures[i].Metadata.Entries[j].Type)
 		}
 	}
 }
 
-// equalTypeWithoutPos compara dos tipos ignorando las posiciones
+// equalTypeWithoutPos compares two types ignoring positions
 func equalTypeWithoutPos(t *testing.T, expected, actual ast.Type) {
 	switch expectedType := expected.(type) {
 	case ast.TypePrimitive:
@@ -93,7 +88,7 @@ func equalTypeWithoutPos(t *testing.T, expected, actual ast.Type) {
 	}
 }
 
-// equalFieldWithoutPos compara dos campos ignorando las posiciones
+// equalFieldWithoutPos compares two fields ignoring positions
 func equalFieldWithoutPos(t *testing.T, expected, actual ast.Field) {
 	require.Equal(t, expected.Name, actual.Name)
 	require.Equal(t, expected.Optional, actual.Optional)
@@ -106,7 +101,7 @@ func equalFieldWithoutPos(t *testing.T, expected, actual ast.Field) {
 	}
 }
 
-// equalValidationRuleWithoutPos compara dos reglas de validación ignorando las posiciones
+// equalValidationRuleWithoutPos compares two validation rules ignoring positions
 func equalValidationRuleWithoutPos(t *testing.T, expected, actual ast.ValidationRule) {
 	switch expectedRule := expected.(type) {
 	case *ast.ValidationRuleSimple:
@@ -118,16 +113,16 @@ func equalValidationRuleWithoutPos(t *testing.T, expected, actual ast.Validation
 		actualRule, ok := actual.(*ast.ValidationRuleWithValue)
 		require.True(t, ok, "Rules don't match: expected ValidationRuleWithValue, got %T", actual)
 		require.Equal(t, expectedRule.Name, actualRule.Name)
-		require.Equal(t, expectedRule.Error, actualRule.Error)
 		require.Equal(t, expectedRule.Value, actualRule.Value)
 		require.Equal(t, expectedRule.ValueType, actualRule.ValueType)
+		require.Equal(t, expectedRule.Error, actualRule.Error)
 	case *ast.ValidationRuleWithArray:
 		actualRule, ok := actual.(*ast.ValidationRuleWithArray)
 		require.True(t, ok, "Rules don't match: expected ValidationRuleWithArray, got %T", actual)
 		require.Equal(t, expectedRule.Name, actualRule.Name)
-		require.Equal(t, expectedRule.Error, actualRule.Error)
 		require.Equal(t, expectedRule.Values, actualRule.Values)
 		require.Equal(t, expectedRule.ValueType, actualRule.ValueType)
+		require.Equal(t, expectedRule.Error, actualRule.Error)
 	}
 }
 
