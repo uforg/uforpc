@@ -350,4 +350,121 @@ func TestParserTypeDecl(t *testing.T) {
 
 		equalNoPos(t, expected, parsed)
 	})
+
+	t.Run("Type declaration with extends", func(t *testing.T) {
+		input := `
+			type MyType extends OtherType {
+				field: string
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name:    "MyType",
+					Extends: []string{"OtherType"},
+					Fields: []*ast.Field{
+						{
+							Name: "field",
+							Type: "string",
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Type declaration with multiple extends", func(t *testing.T) {
+		input := `
+			type MyType extends OtherType, AnotherType, YetAnotherType {
+				field: string
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name:    "MyType",
+					Extends: []string{"OtherType", "AnotherType", "YetAnotherType"},
+					Fields: []*ast.Field{
+						{
+							Name: "field",
+							Type: "string",
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Type declaration with extends and docstring", func(t *testing.T) {
+		input := `
+			"""
+			My type description
+			"""
+			type MyType extends OtherType {
+				field: string
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Docstring: &ast.Docstring{Content: "My type description"},
+					Name:      "MyType",
+					Extends:   []string{"OtherType"},
+					Fields: []*ast.Field{
+						{
+							Name: "field",
+							Type: "string",
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Empty type not allowed", func(t *testing.T) {
+		input := `type MyType {}`
+		_, err := Parser.ParseString("schema.urpc", input)
+		require.Error(t, err)
+	})
+
+	t.Run("Type declaration with custom type field", func(t *testing.T) {
+		input := `
+			type MyType {
+				field: MyCustomType
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name: "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field",
+							Type: "MyCustomType",
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
 }

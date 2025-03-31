@@ -66,7 +66,8 @@ type TypeDecl struct {
 	EndPos    Position
 	Docstring *Docstring `parser:"@@?"`
 	Name      string     `parser:"Type @Ident"`
-	Fields    []*Field   `parser:"LBrace @@* RBrace"`
+	Extends   []string   `parser:"(Extends @Ident (Comma @Ident)*)?"`
+	Fields    []*Field   `parser:"LBrace @@ RBrace"`
 }
 
 // Field represents a field in a custom type or procedure input/output.
