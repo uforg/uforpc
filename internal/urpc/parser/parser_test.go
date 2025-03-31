@@ -186,6 +186,12 @@ func TestParserRuleDecl(t *testing.T) {
 		require.Error(t, err)
 	})
 
+	t.Run("Rule with no body not allowed", func(t *testing.T) {
+		input := `rule @myRule`
+		_, err := Parser.ParseString("schema.urpc", input)
+		require.Error(t, err)
+	})
+
 	t.Run("For in rule body is required", func(t *testing.T) {
 		input := `rule @myRule { param: string }`
 		_, err := Parser.ParseString("schema.urpc", input)
@@ -219,14 +225,40 @@ func TestParserRuleDecl(t *testing.T) {
 		equalNoPos(t, expected, parsed)
 	})
 
+	t.Run("Rule with array param", func(t *testing.T) {
+		input := `
+			rule @myRule {
+				for: string
+				param: string[]
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Rules: []*ast.RuleDecl{
+				{
+					Name: "myRule",
+					Body: ast.RuleDeclBody{
+						For:          "string",
+						Param:        "string",
+						ParamIsArray: true,
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
 	t.Run("Rule with all options", func(t *testing.T) {
 		input := `
 			"""
 			My rule description
 			"""
 			rule @myRule {
-				for: string
-				param: string
+				for: MyType
+				param: float[]
 				error: "My error message"
 			}
 		`
@@ -239,9 +271,10 @@ func TestParserRuleDecl(t *testing.T) {
 					Docstring: &ast.Docstring{Content: "My rule description"},
 					Name:      "myRule",
 					Body: ast.RuleDeclBody{
-						For:   "string",
-						Param: "string",
-						Error: "My error message",
+						For:          "MyType",
+						Param:        "float",
+						ParamIsArray: true,
+						Error:        "My error message",
 					},
 				},
 			},

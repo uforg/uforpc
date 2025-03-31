@@ -30,14 +30,14 @@ type URPCSchema struct {
 type Version struct {
 	Pos    Position
 	EndPos Position
-	Number int `parser:"VERSION COLON @INT"`
+	Number int `parser:"Version Colon @IntLiteral"`
 }
 
 // Docstring represents the documentation for a rule, type or procedure declaration.
 type Docstring struct {
 	Pos     Position
 	EndPos  Position
-	Content string `parser:"@DOCSTRING"`
+	Content string `parser:"@Docstring"`
 }
 
 // RuleDecl represents a custom validation rule declaration.
@@ -45,15 +45,16 @@ type RuleDecl struct {
 	Pos       Position
 	EndPos    Position
 	Docstring *Docstring   `parser:"@@?"`
-	Name      string       `parser:"RULE AT @IDENT"`
-	Body      RuleDeclBody `parser:"LBRACE @@ RBRACE"`
+	Name      string       `parser:"Rule At @Ident"`
+	Body      RuleDeclBody `parser:"LBrace @@ RBrace"`
 }
 
 // RuleDeclBody represents the body of a custom validation rule declaration.
 type RuleDeclBody struct {
-	Pos    Position
-	EndPos Position
-	For    string `parser:"FOR COLON @IDENT"`
-	Param  string `parser:"(PARAM COLON @IDENT)?"`
-	Error  string `parser:"(ERROR COLON @STRING)?"`
+	Pos          Position
+	EndPos       Position
+	For          string `parser:"For Colon @(Ident | String | Int | Float | Boolean)"`
+	Param        string `parser:"(Param Colon @(String | Int | Float | Boolean))?"`
+	ParamIsArray bool   `parser:"@(LBracket RBracket)?"`
+	Error        string `parser:"(Error Colon @StringLiteral)?"`
 }
