@@ -468,3 +468,46 @@ func TestParserTypeDecl(t *testing.T) {
 		equalNoPos(t, expected, parsed)
 	})
 }
+
+func TestParserField(t *testing.T) {
+	t.Run("Fields with primitive types", func(t *testing.T) {
+		input := `
+			type MyType {
+				field1: string
+				field2: int
+				field3: float
+				field4: boolean
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name: "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field1",
+							Type: "string",
+						},
+						{
+							Name: "field2",
+							Type: "int",
+						},
+						{
+							Name: "field3",
+							Type: "float",
+						},
+						{
+							Name: "field4",
+							Type: "boolean",
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+}
