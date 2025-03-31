@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "createUser": {
+      "input": {
+        "type": "string"
+      },
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

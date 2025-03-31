@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "types": {
+    "ArrayTypes": {
+      "fields": {
+        "stringArray": {
+          "type": "array",
+          "arrayType": {
+            "type": "string"
+          },
+          "rules": {
+            "minLen": {
+              "value": 1,
+              "errorMessage": "The array must have at least one element"
+            },
+            "maxLen": {
+              "value": 5,
+              "errorMessage": "The array must have a maximum of 5 elements"
+            }
+          }
+        },
+        "intArray": {
+          "type": "array",
+          "arrayType": {
+            "type": "int"
+          }
+        },
+        "objectArray": {
+          "type": "array",
+          "arrayType": {
+            "type": "object",
+            "fields": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "int"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ProcessArrays": {
+      "input": {
+        "arrays": {
+          "type": "ArrayTypes"
+        }
+      },
+      "output": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "TestBooleanEquals": {
+      "fields": {
+        "flag": {
+          "type": "boolean",
+          "rules": {
+            "equals": {
+              "value": "true",
+              "errorMessage": "Must be boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

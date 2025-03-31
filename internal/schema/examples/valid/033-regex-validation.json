@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "types": {
+    "RegexValidation": {
+      "fields": {
+        "zipCode": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateZipCode": {
+      "input": {
+        "data": {
+          "type": "RegexValidation"
+        }
+      },
+      "output": {
+        "isValid": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

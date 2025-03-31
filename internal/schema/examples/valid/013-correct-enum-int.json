@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "ValidEnum": {
+      "fields": {
+        "score": {
+          "type": "int",
+          "rules": {
+            "enum": {
+              "values": [1, 2, 3],
+              "errorMessage": "Score must be one of the allowed numbers"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

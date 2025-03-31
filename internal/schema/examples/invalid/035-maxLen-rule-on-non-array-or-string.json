@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidMaxLenRule": {
+      "fields": {
+        "boolField": {
+          "type": "boolean",
+          "rules": {
+            "maxLen": {
+              "value": 10,
+              "errorMessage": "Must be at most 10 characters"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

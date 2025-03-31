@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "types": {
+    "ValidRegex": {
+      "fields": {
+        "code": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

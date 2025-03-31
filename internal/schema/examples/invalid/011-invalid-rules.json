@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "types": {
+    "TestRules": {
+      "fields": {
+        "fieldWithInvalidRule": {
+          "type": "string",
+          "rules": {
+            "minLen": {
+              "errorMessage": "Missing value property"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

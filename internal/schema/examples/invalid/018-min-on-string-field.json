@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "TestMinRule": {
+      "fields": {
+        "username": {
+          "type": "string",
+          "rules": {
+            "min": {
+              "value": 5,
+              "errorMessage": "Min does not apply to strings"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "ValidMinLen": {
+      "fields": {
+        "description": {
+          "type": "string",
+          "rules": {
+            "minLen": {
+              "value": 5,
+              "errorMessage": "Minimum length is 5"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

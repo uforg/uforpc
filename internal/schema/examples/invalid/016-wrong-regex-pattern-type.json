@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "TestRegex": {
+      "fields": {
+        "code": {
+          "type": "string",
+          "rules": {
+            "regex": {
+              "value": 123,
+              "errorMessage": "Pattern must be a string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

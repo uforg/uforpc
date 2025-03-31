@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "InvalidInput": {
+      "input": "string",
+      "output": {
+        "type": "boolean"
+      }
+    }
+  }
+}

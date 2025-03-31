@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "types": {
+    "ExtraField": {
+      "fields": {
+        "field1": {
+          "type": "string",
+          "unknownProp": "not allowed"
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

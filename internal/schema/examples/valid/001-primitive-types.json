@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "types": {
+    "BasicType": {
+      "fields": {
+        "stringField": {
+          "type": "string",
+          "description": "A simple text field"
+        },
+        "intField": {
+          "type": "int",
+          "description": "A simple integer field"
+        },
+        "floatField": {
+          "type": "float",
+          "description": "A simple decimal field"
+        },
+        "boolField": {
+          "type": "boolean",
+          "description": "A simple boolean field"
+        }
+      }
+    }
+  },
+  "procedures": {
+    "GetBasicTypes": {
+      "input": {},
+      "output": {
+        "result": {
+          "type": "BasicType"
+        }
+      }
+    }
+  }
+}

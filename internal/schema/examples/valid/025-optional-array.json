@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "types": {
+    "OptionalArrayType": {
+      "fields": {
+        "optionalItems": {
+          "type": "array",
+          "arrayType": {
+            "type": "int"
+          },
+          "optional": true
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateOptionalArray": {
+      "input": {
+        "data": {
+          "type": "OptionalArrayType"
+        }
+      },
+      "output": {
+        "isValid": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

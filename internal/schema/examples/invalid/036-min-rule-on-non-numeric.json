@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidMinRule": {
+      "fields": {
+        "textField": {
+          "type": "string",
+          "rules": {
+            "min": {
+              "value": 5,
+              "errorMessage": "Must be at least 5"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

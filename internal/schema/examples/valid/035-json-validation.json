@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "types": {
+    "JsonValidation": {
+      "fields": {
+        "config": {
+          "type": "string",
+          "rules": {
+            "json": {
+              "errorMessage": "Must be valid JSON"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateConfig": {
+      "input": {
+        "data": {
+          "type": "JsonValidation"
+        }
+      },
+      "output": {
+        "isValid": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

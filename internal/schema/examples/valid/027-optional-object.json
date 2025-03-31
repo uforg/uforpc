@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "types": {
+    "OptionalObjectType": {
+      "fields": {
+        "metadata": {
+          "type": "object",
+          "optional": true,
+          "fields": {
+            "createdAt": {
+              "type": "string",
+              "rules": {
+                "iso8601": {
+                  "errorMessage": "Must be a valid ISO8601 date"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateOptionalObject": {
+      "input": {
+        "data": {
+          "type": "OptionalObjectType"
+        }
+      },
+      "output": {
+        "isValid": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

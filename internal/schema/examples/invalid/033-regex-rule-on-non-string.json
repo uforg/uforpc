@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidRegexRule": {
+      "fields": {
+        "numberField": {
+          "type": "int",
+          "rules": {
+            "regex": {
+              "value": "^\\d+$",
+              "errorMessage": "Must be a number"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

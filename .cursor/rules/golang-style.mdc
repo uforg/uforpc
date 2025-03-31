@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Go Style
+
+- All Golang code must be idiomatic, efficient, and extremely human-readable.
+- All functions must be documented with comments in an idiomatic manner and in English.
+- You should not include redundant comments inside functions because the code is expected to be self-explanatory.
+- Avoid using pointers whenever possible.
+- Always run **ALL** the tests and linter on every change you made using `task test` and `task lint`.
+
+## How to run the tests?
+
+To run the tests use the `task test` command, literally.
+
+## How to run the linter?
+
+To run the linter use the `task lint` command, literally.

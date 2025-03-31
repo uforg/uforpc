@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "types": {
+    "ContainsValidation": {
+      "fields": {
+        "text": {
+          "type": "string",
+          "rules": {
+            "contains": {
+              "value": "test",
+              "errorMessage": "Must contain the word 'test'"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateContains": {
+      "input": {
+        "data": {
+          "type": "ContainsValidation"
+        }
+      },
+      "output": {
+        "isValid": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

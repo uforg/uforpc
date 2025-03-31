@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidEnumRule": {
+      "fields": {
+        "status": {
+          "type": "string",
+          "rules": {
+            "enum": {
+              "values": [],
+              "errorMessage": "Status must be one of the allowed values"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}

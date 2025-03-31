@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "types": {
+    "UserProfile": {
+      "fields": {
+        "username": {
+          "type": "string",
+          "rules": {
+            "minLen": {
+              "value": 3,
+              "errorMessage": "Username must be at least 3 characters"
+            }
+          }
+        },
+        "email": {
+          "type": "string",
+          "rules": {
+            "email": {
+              "errorMessage": "Must be a valid email"
+            }
+          }
+        },
+        "displayName": {
+          "type": "string",
+          "optional": true
+        },
+        "age": {
+          "type": "int",
+          "optional": true,
+          "rules": {
+            "min": {
+              "value": 13,
+              "errorMessage": "Must be at least 13 years old"
+            }
+          }
+        },
+        "preferences": {
+          "type": "object",
+          "optional": true,
+          "fields": {
+            "theme": {
+              "type": "string",
+              "rules": {
+                "enum": {
+                  "values": ["light", "dark", "system"],
+                  "errorMessage": "Invalid theme"
+                }
+              }
+            },
+            "notifications": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "UpdateProfile": {
+      "input": {
+        "profile": {
+          "type": "UserProfile"
+        }
+      },
+      "output": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

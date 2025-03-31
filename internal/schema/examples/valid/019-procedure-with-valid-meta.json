@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "ValidProcedure": {
+      "input": {
+        "data": {
+          "type": "string"
+        }
+      },
+      "output": {
+        "success": {
+          "type": "boolean"
+        }
+      },
+      "meta": {
+        "audit": true,
+        "retryCount": 3,
+        "note": "Valid meta"
+      }
+    }
+  }
+}

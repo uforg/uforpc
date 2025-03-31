@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "types": {},
+  "procedures": {
+    "TestProcedure": {
+      "input": {
+        "type": "string"
+      },
+      "output": {
+        "type": "boolean"
+      },
+      "meta": {
+        "nested": { "inner": "value" }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "types": {
+    "LowercaseValidation": {
+      "fields": {
+        "username": {
+          "type": "string",
+          "rules": {
+            "lowercase": {
+              "errorMessage": "Username must be in lowercase"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "ValidateUsername": {
+      "input": {
+        "data": {
+          "type": "LowercaseValidation"
+        }
+      },
+      "output": {
+        "isValid": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

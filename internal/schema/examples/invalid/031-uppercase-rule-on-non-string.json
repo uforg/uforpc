@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "types": {
+    "InvalidUppercaseRule": {
+      "fields": {
+        "textField": {
+          "type": "int",
+          "rules": {
+            "uppercase": {
+              "errorMessage": "Must be in uppercase"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": {}
+}
