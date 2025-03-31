@@ -77,7 +77,7 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false for param extends"
+		input := "version rule type proc input output meta error true false for param extends string int float boolean"
 
 		tests := []token.Token{
 			{Type: token.VERSION, Literal: "version", FileName: "test.urpc", LineStart: 1, LineEnd: 1, ColumnStart: 1, ColumnEnd: 7},
@@ -93,7 +93,11 @@ func TestLexer(t *testing.T) {
 			{Type: token.FOR, Literal: "for", FileName: "test.urpc", LineStart: 1, ColumnStart: 59, LineEnd: 1, ColumnEnd: 61},
 			{Type: token.PARAM, Literal: "param", FileName: "test.urpc", LineStart: 1, ColumnStart: 63, LineEnd: 1, ColumnEnd: 67},
 			{Type: token.EXTENDS, Literal: "extends", FileName: "test.urpc", LineStart: 1, ColumnStart: 69, LineEnd: 1, ColumnEnd: 75},
-			{Type: token.EOF, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 76, LineEnd: 1, ColumnEnd: 76},
+			{Type: token.STRINGKEYWORD, Literal: "string", FileName: "test.urpc", LineStart: 1, ColumnStart: 77, LineEnd: 1, ColumnEnd: 82},
+			{Type: token.INTKEYWORD, Literal: "int", FileName: "test.urpc", LineStart: 1, ColumnStart: 84, LineEnd: 1, ColumnEnd: 86},
+			{Type: token.FLOATKEYWORD, Literal: "float", FileName: "test.urpc", LineStart: 1, ColumnStart: 88, LineEnd: 1, ColumnEnd: 92},
+			{Type: token.BOOLEANKEYWORD, Literal: "boolean", FileName: "test.urpc", LineStart: 1, ColumnStart: 94, LineEnd: 1, ColumnEnd: 100},
+			{Type: token.EOF, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 101, LineEnd: 1, ColumnEnd: 101},
 		}
 
 		lex1 := NewLexer("test.urpc", input)

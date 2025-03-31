@@ -28,6 +28,8 @@ const (
 	STRING    TokenType = "STRING"
 	INT       TokenType = "INT"
 	FLOAT     TokenType = "FLOAT"
+	TRUE      TokenType = "TRUE"
+	FALSE     TokenType = "FALSE"
 	COMMENT   TokenType = "COMMENT"
 	DOCSTRING TokenType = "DOCSTRING"
 
@@ -44,19 +46,21 @@ const (
 	QUESTION TokenType = "QUESTION"
 
 	// Keywords
-	VERSION TokenType = "VERSION"
-	RULE    TokenType = "RULE"
-	TYPE    TokenType = "TYPE"
-	EXTENDS TokenType = "EXTENDS"
-	PROC    TokenType = "PROC"
-	INPUT   TokenType = "INPUT"
-	OUTPUT  TokenType = "OUTPUT"
-	META    TokenType = "META"
-	ERROR   TokenType = "ERROR"
-	TRUE    TokenType = "TRUE"
-	FALSE   TokenType = "FALSE"
-	FOR     TokenType = "FOR"
-	PARAM   TokenType = "PARAM"
+	VERSION        TokenType = "VERSION"
+	RULE           TokenType = "RULE"
+	TYPE           TokenType = "TYPE"
+	EXTENDS        TokenType = "EXTENDS"
+	PROC           TokenType = "PROC"
+	INPUT          TokenType = "INPUT"
+	OUTPUT         TokenType = "OUTPUT"
+	META           TokenType = "META"
+	ERROR          TokenType = "ERROR"
+	FOR            TokenType = "FOR"
+	PARAM          TokenType = "PARAM"
+	STRINGKEYWORD  TokenType = "STRINGKEYWORD"
+	INTKEYWORD     TokenType = "INTKEYWORD"
+	FLOATKEYWORD   TokenType = "FLOATKEYWORD"
+	BOOLEANKEYWORD TokenType = "BOOLEANKEYWORD"
 )
 
 var TokenTypes = []TokenType{
@@ -68,6 +72,8 @@ var TokenTypes = []TokenType{
 	STRING,
 	INT,
 	FLOAT,
+	TRUE,
+	FALSE,
 	COMMENT,
 	DOCSTRING,
 
@@ -93,10 +99,12 @@ var TokenTypes = []TokenType{
 	OUTPUT,
 	META,
 	ERROR,
-	TRUE,
-	FALSE,
 	FOR,
 	PARAM,
+	STRINGKEYWORD,
+	INTKEYWORD,
+	FLOATKEYWORD,
+	BOOLEANKEYWORD,
 }
 
 // delimiters is a map of delimiters to their corresponding token types.
@@ -139,6 +147,10 @@ var keywords = map[string]TokenType{
 	"false":   FALSE,
 	"for":     FOR,
 	"param":   PARAM,
+	"string":  STRINGKEYWORD,
+	"int":     INTKEYWORD,
+	"float":   FLOATKEYWORD,
+	"boolean": BOOLEANKEYWORD,
 }
 
 // IsKeyword returns true if the identifier is a keyword.
