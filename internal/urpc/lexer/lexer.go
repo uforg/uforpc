@@ -278,7 +278,7 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 	if l.currentIndexIsEOF {
 		return token.Token{
-			Type:        token.EOF,
+			Type:        token.Eof,
 			Literal:     "",
 			FileName:    l.FileName,
 			LineStart:   l.CurrentLine,
@@ -327,7 +327,7 @@ func (l *Lexer) NextToken() token.Token {
 			docstring, unterminated := l.readDocstring()
 			if unterminated {
 				return token.Token{
-					Type:        token.ILLEGAL,
+					Type:        token.Illegal,
 					Literal:     `"""` + docstring,
 					FileName:    l.FileName,
 					LineStart:   startLine,
@@ -338,7 +338,7 @@ func (l *Lexer) NextToken() token.Token {
 			}
 
 			return token.Token{
-				Type:        token.DOCSTRING,
+				Type:        token.Docstring,
 				Literal:     docstring,
 				FileName:    l.FileName,
 				LineStart:   startLine,
@@ -354,7 +354,7 @@ func (l *Lexer) NextToken() token.Token {
 
 		if unterminated {
 			return token.Token{
-				Type:        token.ILLEGAL,
+				Type:        token.Illegal,
 				Literal:     `"` + str,
 				FileName:    l.FileName,
 				LineStart:   startLine,
@@ -365,7 +365,7 @@ func (l *Lexer) NextToken() token.Token {
 		}
 
 		return token.Token{
-			Type:        token.STRING,
+			Type:        token.StringLiteral,
 			Literal:     str,
 			FileName:    l.FileName,
 			LineStart:   startLine,
@@ -384,7 +384,7 @@ func (l *Lexer) NextToken() token.Token {
 		endColumn := startColumn + len(num) - 1
 
 		tok := token.Token{
-			Type:        token.INT,
+			Type:        token.IntLiteral,
 			Literal:     num,
 			FileName:    l.FileName,
 			LineStart:   startLine,
@@ -413,7 +413,7 @@ func (l *Lexer) NextToken() token.Token {
 		endColumn = startColumn + len(num) - 1
 
 		return token.Token{
-			Type:        token.FLOAT,
+			Type:        token.FloatLiteral,
 			Literal:     num,
 			FileName:    l.FileName,
 			LineStart:   startLine,
@@ -423,13 +423,37 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	}
 
-	// Handle identifiers
+	// Handle identifiers, boolean literals and keywords
 	if isLetter(l.currentChar) {
 		startLine := l.CurrentLine
 		startColumn := l.CurrentColumn
 		ident := l.readIdentifier()
 		endLine := startLine
 		endColumn := startColumn + len(ident) - 1
+
+		if ident == "true" {
+			return token.Token{
+				Type:        token.TrueLiteral,
+				Literal:     "true",
+				FileName:    l.FileName,
+				LineStart:   startLine,
+				ColumnStart: startColumn,
+				LineEnd:     endLine,
+				ColumnEnd:   endColumn,
+			}
+		}
+
+		if ident == "false" {
+			return token.Token{
+				Type:        token.FalseLiteral,
+				Literal:     "false",
+				FileName:    l.FileName,
+				LineStart:   startLine,
+				ColumnStart: startColumn,
+				LineEnd:     endLine,
+				ColumnEnd:   endColumn,
+			}
+		}
 
 		if token.IsKeyword(ident) {
 			return token.Token{
@@ -444,7 +468,7 @@ func (l *Lexer) NextToken() token.Token {
 		}
 
 		return token.Token{
-			Type:        token.IDENT,
+			Type:        token.Ident,
 			Literal:     ident,
 			FileName:    l.FileName,
 			LineStart:   startLine,
@@ -459,7 +483,7 @@ func (l *Lexer) NextToken() token.Token {
 		nextChar, eofReached := l.peekChar(1)
 		if eofReached || (nextChar != '/' && nextChar != '*') {
 			return token.Token{
-				Type:        token.ILLEGAL,
+				Type:        token.Illegal,
 				Literal:     string(l.currentChar) + string(nextChar),
 				FileName:    l.FileName,
 				LineStart:   l.CurrentLine,
@@ -476,7 +500,7 @@ func (l *Lexer) NextToken() token.Token {
 		endColumn := l.CurrentColumn
 
 		return token.Token{
-			Type:        token.COMMENT,
+			Type:        token.Comment,
 			Literal:     comment,
 			FileName:    l.FileName,
 			LineStart:   startLine,
@@ -492,7 +516,7 @@ func (l *Lexer) NextToken() token.Token {
 	endLine := startLine
 	endColumn := startColumn
 	return token.Token{
-		Type:        token.ILLEGAL,
+		Type:        token.Illegal,
 		Literal:     string(l.currentChar),
 		FileName:    l.FileName,
 		LineStart:   startLine,
@@ -509,7 +533,7 @@ func (l *Lexer) ReadTokens() []token.Token {
 		nextToken := l.NextToken()
 		tokens = append(tokens, nextToken)
 
-		if nextToken.Type == token.EOF {
+		if nextToken.Type == token.Eof {
 			break
 		}
 	}

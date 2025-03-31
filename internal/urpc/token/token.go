@@ -20,105 +20,111 @@ type Token struct {
 }
 
 const (
-	EOF     TokenType = "EOF"
-	ILLEGAL TokenType = "ILLEGAL"
+	// Special tokens
+	Eof     TokenType = "Eof"
+	Illegal TokenType = "Illegal"
+
+	// Identifiers, comments and docstrings
+	Ident     TokenType = "Ident"
+	Comment   TokenType = "Comment"
+	Docstring TokenType = "Docstring"
 
 	// Identifiers and literals
-	IDENT     TokenType = "IDENT"
-	STRING    TokenType = "STRING"
-	INT       TokenType = "INT"
-	FLOAT     TokenType = "FLOAT"
-	TRUE      TokenType = "TRUE"
-	FALSE     TokenType = "FALSE"
-	COMMENT   TokenType = "COMMENT"
-	DOCSTRING TokenType = "DOCSTRING"
+	StringLiteral TokenType = "StringLiteral"
+	IntLiteral    TokenType = "IntLiteral"
+	FloatLiteral  TokenType = "FloatLiteral"
+	TrueLiteral   TokenType = "TrueLiteral"
+	FalseLiteral  TokenType = "FalseLiteral"
 
 	// Operators and delimiters
-	COLON    TokenType = "COLON"
-	COMMA    TokenType = "COMMA"
-	LPAREN   TokenType = "LPAREN"
-	RPAREN   TokenType = "RPAREN"
-	LBRACE   TokenType = "LBRACE"
-	RBRACE   TokenType = "RBRACE"
-	LBRACKET TokenType = "LBRACKET"
-	RBRACKET TokenType = "RBRACKET"
-	AT       TokenType = "AT"
-	QUESTION TokenType = "QUESTION"
+	Colon    TokenType = "Colon"
+	Comma    TokenType = "Comma"
+	LParen   TokenType = "LParen"
+	RParen   TokenType = "RParen"
+	LBrace   TokenType = "LBrace"
+	RBrace   TokenType = "RBrace"
+	LBracket TokenType = "LBracket"
+	RBracket TokenType = "RBracket"
+	At       TokenType = "At"
+	Question TokenType = "Question"
 
 	// Keywords
-	VERSION        TokenType = "VERSION"
-	RULE           TokenType = "RULE"
-	TYPE           TokenType = "TYPE"
-	EXTENDS        TokenType = "EXTENDS"
-	PROC           TokenType = "PROC"
-	INPUT          TokenType = "INPUT"
-	OUTPUT         TokenType = "OUTPUT"
-	META           TokenType = "META"
-	ERROR          TokenType = "ERROR"
-	FOR            TokenType = "FOR"
-	PARAM          TokenType = "PARAM"
-	STRINGKEYWORD  TokenType = "STRINGKEYWORD"
-	INTKEYWORD     TokenType = "INTKEYWORD"
-	FLOATKEYWORD   TokenType = "FLOATKEYWORD"
-	BOOLEANKEYWORD TokenType = "BOOLEANKEYWORD"
+	Version TokenType = "Version"
+	Rule    TokenType = "Rule"
+	Type    TokenType = "Type"
+	Extends TokenType = "Extends"
+	Proc    TokenType = "Proc"
+	Input   TokenType = "Input"
+	Output  TokenType = "Output"
+	Meta    TokenType = "Meta"
+	Error   TokenType = "Error"
+	For     TokenType = "For"
+	Param   TokenType = "Param"
+	String  TokenType = "String"
+	Int     TokenType = "Int"
+	Float   TokenType = "Float"
+	Boolean TokenType = "Boolean"
 )
 
 var TokenTypes = []TokenType{
-	EOF,
-	ILLEGAL,
+	// Special tokens
+	Eof,
+	Illegal,
 
-	// Identifiers and literals
-	IDENT,
-	STRING,
-	INT,
-	FLOAT,
-	TRUE,
-	FALSE,
-	COMMENT,
-	DOCSTRING,
+	// Identifiers, comments and docstrings
+	Ident,
+	Comment,
+	Docstring,
+
+	// Literals
+	StringLiteral,
+	IntLiteral,
+	FloatLiteral,
+	TrueLiteral,
+	FalseLiteral,
 
 	// Operators and delimiters
-	COLON,
-	COMMA,
-	LPAREN,
-	RPAREN,
-	LBRACE,
-	RBRACE,
-	LBRACKET,
-	RBRACKET,
-	AT,
-	QUESTION,
+	Colon,
+	Comma,
+	LParen,
+	RParen,
+	LBrace,
+	RBrace,
+	LBracket,
+	RBracket,
+	At,
+	Question,
 
 	// Keywords
-	VERSION,
-	RULE,
-	TYPE,
-	EXTENDS,
-	PROC,
-	INPUT,
-	OUTPUT,
-	META,
-	ERROR,
-	FOR,
-	PARAM,
-	STRINGKEYWORD,
-	INTKEYWORD,
-	FLOATKEYWORD,
-	BOOLEANKEYWORD,
+	Version,
+	Rule,
+	Type,
+	Extends,
+	Proc,
+	Input,
+	Output,
+	Meta,
+	Error,
+	For,
+	Param,
+	String,
+	Int,
+	Float,
+	Boolean,
 }
 
 // delimiters is a map of delimiters to their corresponding token types.
 var delimiters = map[string]TokenType{
-	":": COLON,
-	",": COMMA,
-	"(": LPAREN,
-	")": RPAREN,
-	"{": LBRACE,
-	"}": RBRACE,
-	"[": LBRACKET,
-	"]": RBRACKET,
-	"@": AT,
-	"?": QUESTION,
+	":": Colon,
+	",": Comma,
+	"(": LParen,
+	")": RParen,
+	"{": LBrace,
+	"}": RBrace,
+	"[": LBracket,
+	"]": RBracket,
+	"@": At,
+	"?": Question,
 }
 
 // IsDelimiter returns true if the character is a delimiter.
@@ -134,23 +140,21 @@ func GetDelimiterTokenType(ch byte) TokenType {
 
 // keywords is a map of keywords to their corresponding token types.
 var keywords = map[string]TokenType{
-	"version": VERSION,
-	"rule":    RULE,
-	"type":    TYPE,
-	"extends": EXTENDS,
-	"proc":    PROC,
-	"input":   INPUT,
-	"output":  OUTPUT,
-	"meta":    META,
-	"error":   ERROR,
-	"true":    TRUE,
-	"false":   FALSE,
-	"for":     FOR,
-	"param":   PARAM,
-	"string":  STRINGKEYWORD,
-	"int":     INTKEYWORD,
-	"float":   FLOATKEYWORD,
-	"boolean": BOOLEANKEYWORD,
+	"version": Version,
+	"rule":    Rule,
+	"type":    Type,
+	"extends": Extends,
+	"proc":    Proc,
+	"input":   Input,
+	"output":  Output,
+	"meta":    Meta,
+	"error":   Error,
+	"for":     For,
+	"param":   Param,
+	"string":  String,
+	"int":     Int,
+	"float":   Float,
+	"boolean": Boolean,
 }
 
 // IsKeyword returns true if the identifier is a keyword.
