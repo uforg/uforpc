@@ -24,6 +24,8 @@ version: <number>
   <multiline comment>
 */
 
+import "<schema_path>"
+
 """
 <Custom rule documentation>
 """
@@ -61,16 +63,62 @@ proc <ProcedureName> {
 }
 ```
 
+### 2.2 Importing Schemas
+
+To achieve modularity, you can import external schema files with a simple
+syntax.
+
+The transpiler will merge the imported schemas into the main schema in order and
+in the same scope, make sure you don't have conflicting identifiers.
+
+All paths should be relative to the file that is importing the other schema.
+
+```urpc
+import "<schema_path>"
+```
+
+### 2.3 Defining Types and Procedures
+
+```urpc
+"""
+<Type documentation>
+"""
+type <CustomTypeName> [extends <OtherCustomTypeName>, <OtherCustomTypeName>, ...] {
+  <field>[?]: <Type>
+    [@<validationRule>(<param>, [error: <"message">])]
+}
+
+"""
+<Procedure documentation>
+"""
+proc <ProcedureName> {
+  input {
+    <field>[?]: <PrimitiveType> | <CustomType>
+      [@<validationRule>(<param>, [error: <"message">])]
+  }
+  
+  output {
+    <field>[?]: <PrimitiveType> | <CustomType>
+      [@<validationRule>(<param>, [error: <"message">])]
+  }
+  
+  meta {
+    <key>: <value>
+  }
+}
+```
+
 ## 3. Data Types
 
 ### 3.1 Primitive Types
 
-| DSL       | JSON Type | Description           |
-| --------- | --------- | --------------------- |
-| `string`  | string    | UTF-8 text string     |
-| `int`     | integer   | 64-bit integer        |
-| `float`   | number    | Floating point number |
-| `boolean` | boolean   | True/False value      |
+| DSL        | JSON Type | Description                           |
+| ---------- | --------- | ------------------------------------- |
+| `string`   | string    | UTF-8 text string                     |
+| `int`      | integer   | 64-bit integer                        |
+| `float`    | number    | Floating point number                 |
+| `boolean`  | boolean   | Either true or false                  |
+| `datetime` | string    | Date and time value (ISO 8601 format) |
 
 ### 3.2 Composite Types
 
@@ -152,9 +200,9 @@ your own logic.
 #### Float built-in rules
 
 Rules like `equals`, `enum` are not supported for float because of the nature of
-how computers represent floating point numbers UFO RPC can't guarantee the
-precision of the float number. You can implement custom rules for float with
-your own logic to address this limitation.
+how computers represent floating point numbers. UFO RPC can't guarantee the
+precision of float numbers. You can implement custom rules for float with your
+own logic to address this limitation.
 
 | Rule  | Parameters | Example       |
 | ----- | ---------- | ------------- |
@@ -174,11 +222,21 @@ your own logic to address this limitation.
 | `minlen` | integer    | `@minlen(1)`   |
 | `maxlen` | integer    | `@maxlen(100)` |
 
+#### Datetime built-in rules
+
+The parameter for these rules should be a string that follows the ISO 8601
+format.
+
+| Rule  | Parameters | Example                        |
+| ----- | ---------- | ------------------------------ |
+| `min` | datetime   | `@min("2000-01-01T00:00:00Z")` |
+| `max` | datetime   | `@max("2050-12-31T23:59:59Z")` |
+
 ### 4.3 Custom Rules
 
 Define reusable validation rules. Rules must be declared **before** usage.
 
-Your custom defined rules, should be defined in the DSL and implemented in your
+Your custom defined rules should be defined in the DSL and implemented in your
 codebase using the helpers included in the generated code, so you can validate
 in any way you want with your own logic.
 
@@ -264,6 +322,8 @@ meta {
 ```urpc
 version: 1
 
+import "path/to/other_schema.urpc"
+
 // Custom Rules
 rule @regex {
   for: string
@@ -295,6 +355,10 @@ type Product {
 
   price: float
     @priceRange([0.01, 9999.99])
+
+  availabilityDate: datetime
+    @min("2020-01-01T00:00:00Z")
+    @max("2030-12-31T23:59:59Z")
 
   tags?: string[]
     @maxlen(5)
@@ -357,5 +421,4 @@ proc GetProduct {
 ## 8. Known Limitations
 
 1. Keywords can't be used as identifiers
-2. Importing other schema files is not supported
-3. Custom validators require external implementation
+2. Custom validators require external implementation
