@@ -24,6 +24,7 @@ type URPCSchema struct {
 	EndPos  Position
 	Version *Version    `parser:"@@?"`
 	Rules   []*RuleDecl `parser:"@@*"`
+	Types   []*TypeDecl `parser:"@@*"`
 }
 
 // Version represents the version of the URPC schema.
@@ -57,4 +58,22 @@ type RuleDeclBody struct {
 	Param        string `parser:"(Param Colon @(String | Int | Float | Boolean))?"`
 	ParamIsArray bool   `parser:"@(LBracket RBracket)?"`
 	Error        string `parser:"(Error Colon @StringLiteral)?"`
+}
+
+// TypeDecl represents a custom type declaration.
+type TypeDecl struct {
+	Pos       Position
+	EndPos    Position
+	Docstring *Docstring `parser:"@@?"`
+	Name      string     `parser:"Type @Ident"`
+	Fields    []*Field   `parser:"LBrace @@* RBrace"`
+}
+
+// Field represents a field in a custom type or procedure input/output.
+type Field struct {
+	Pos      Position
+	EndPos   Position
+	Name     string `parser:"@Ident"`
+	Optional bool   `parser:"@(Question)?"`
+	Type     string `parser:"Colon @(Ident | String | Int | Float | Boolean)"`
 }

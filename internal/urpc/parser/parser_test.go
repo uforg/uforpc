@@ -65,6 +65,16 @@ func equalNoPos(t *testing.T, expected, actual *ast.URPCSchema) {
 			rule.Body = setEmptyPos(rule.Body)
 		}
 
+		for _, typeDecl := range ast.Types {
+			if typeDecl.Docstring != nil {
+				typeDecl.Docstring = setEmptyPos(typeDecl.Docstring)
+			}
+			typeDecl = setEmptyPos(typeDecl)
+			for i, field := range typeDecl.Fields {
+				typeDecl.Fields[i] = setEmptyPos(field)
+			}
+		}
+
 		return ast
 	}
 
@@ -159,10 +169,10 @@ func TestParserVersion(t *testing.T) {
 func TestParserRuleDecl(t *testing.T) {
 	t.Run("Minimum rule declaration parsing", func(t *testing.T) {
 		input := `
-			rule @myRule {
-				for: string
-			}
-		`
+				rule @myRule {
+					for: string
+				}
+			`
 		parsed, err := Parser.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
@@ -200,13 +210,13 @@ func TestParserRuleDecl(t *testing.T) {
 
 	t.Run("Rule with docstring", func(t *testing.T) {
 		input := `
-			"""
-			My rule description
-			"""
-			rule @myRule {
-				for: string
-			}
-		`
+				"""
+				My rule description
+				"""
+				rule @myRule {
+					for: string
+				}
+			`
 		parsed, err := Parser.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
@@ -227,11 +237,11 @@ func TestParserRuleDecl(t *testing.T) {
 
 	t.Run("Rule with array param", func(t *testing.T) {
 		input := `
-			rule @myRule {
-				for: string
-				param: string[]
-			}
-		`
+				rule @myRule {
+					for: string
+					param: string[]
+				}
+			`
 		parsed, err := Parser.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
@@ -253,15 +263,15 @@ func TestParserRuleDecl(t *testing.T) {
 
 	t.Run("Rule with all options", func(t *testing.T) {
 		input := `
-			"""
-			My rule description
-			"""
-			rule @myRule {
-				for: MyType
-				param: float[]
-				error: "My error message"
-			}
-		`
+				"""
+				My rule description
+				"""
+				rule @myRule {
+					for: MyType
+					param: float[]
+					error: "My error message"
+				}
+			`
 		parsed, err := Parser.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
@@ -275,6 +285,64 @@ func TestParserRuleDecl(t *testing.T) {
 						Param:        "float",
 						ParamIsArray: true,
 						Error:        "My error message",
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+}
+
+func TestParserTypeDecl(t *testing.T) {
+	t.Run("Minimum type declaration parsing", func(t *testing.T) {
+		input := `
+			type MyType {
+				field: string
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name: "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field",
+							Type: "string",
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Type declaration With Docstring", func(t *testing.T) {
+		input := `
+			"""
+			My type description
+			"""
+			type MyType {
+				field: string
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Docstring: &ast.Docstring{Content: "My type description"},
+					Name:      "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field",
+							Type: "string",
+						},
 					},
 				},
 			},
