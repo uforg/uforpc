@@ -32,16 +32,16 @@ const (
 	DOCSTRING TokenType = "DOCSTRING"
 
 	// Operators and delimiters
-	COLON    TokenType = ":"
-	COMMA    TokenType = ","
-	LPAREN   TokenType = "("
-	RPAREN   TokenType = ")"
-	LBRACE   TokenType = "{"
-	RBRACE   TokenType = "}"
-	LBRACKET TokenType = "["
-	RBRACKET TokenType = "]"
-	AT       TokenType = "@"
-	QUESTION TokenType = "?"
+	COLON    TokenType = "COLON"
+	COMMA    TokenType = "COMMA"
+	LPAREN   TokenType = "LPAREN"
+	RPAREN   TokenType = "RPAREN"
+	LBRACE   TokenType = "LBRACE"
+	RBRACE   TokenType = "RBRACE"
+	LBRACKET TokenType = "LBRACKET"
+	RBRACKET TokenType = "RBRACKET"
+	AT       TokenType = "AT"
+	QUESTION TokenType = "QUESTION"
 
 	// Keywords
 	VERSION TokenType = "VERSION"
@@ -58,6 +58,46 @@ const (
 	FOR     TokenType = "FOR"
 	PARAM   TokenType = "PARAM"
 )
+
+var TokenTypes = []TokenType{
+	EOF,
+	ILLEGAL,
+
+	// Identifiers and literals
+	IDENT,
+	STRING,
+	INT,
+	FLOAT,
+	COMMENT,
+	DOCSTRING,
+
+	// Operators and delimiters
+	COLON,
+	COMMA,
+	LPAREN,
+	RPAREN,
+	LBRACE,
+	RBRACE,
+	LBRACKET,
+	RBRACKET,
+	AT,
+	QUESTION,
+
+	// Keywords
+	VERSION,
+	RULE,
+	TYPE,
+	EXTENDS,
+	PROC,
+	INPUT,
+	OUTPUT,
+	META,
+	ERROR,
+	TRUE,
+	FALSE,
+	FOR,
+	PARAM,
+}
 
 // delimiters is a map of delimiters to their corresponding token types.
 var delimiters = map[string]TokenType{
