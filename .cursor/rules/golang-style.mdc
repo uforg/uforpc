@@ -19,3 +19,8 @@ To run the tests use the `task test` command, literally.
 ## How to run the linter?
 
 To run the linter use the `task lint` command, literally.
+
+## Other important rules to follow
+
+- Use `any` instead of `interface{}` whenever possible.
+- Use the new syntax `for i := range 10` instead of `for i := 1; i < 10; i++` whenever possible.
