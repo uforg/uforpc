@@ -8,7 +8,9 @@ import (
 // participle library for parsing.
 //
 // It includes Pos and EndPos fields for each node to track the
-// position of the node in the original source code.
+// position of the node in the original source code, it is used
+// later in the analyzer and LSP to give useful error messages
+// and auto-completion.
 //
 // Any node in the AST containing a field Pos lexer.Position
 // will be automatically populated from the nearest matching token.
@@ -18,17 +20,13 @@ import (
 //
 // https://github.com/alecthomas/participle/blob/master/README.md#error-reporting
 
-// The Pos and EndPos fields can be added only to nodes that will be referenced from
-// other nodes to use them later in the analyzer and LSP and give useful error
-// messages and auto-completion.
-//
-// Other inner nodes can skip the Pos and EndPos fields to make the AST more
-// compact and easier to work with.
-
+// Position is an alias for the participle.Position type.
 type Position plexer.Position
 
 // URPCSchema is the root of the URPC schema AST.
 type URPCSchema struct {
+	Pos     Position
+	EndPos  Position
 	Version *Version    `parser:"@@?"`
 	Imports []*Import   `parser:"@@*"`
 	Rules   []*RuleDecl `parser:"@@*"`
@@ -61,6 +59,8 @@ type RuleDecl struct {
 
 // RuleDeclBody represents the body of a custom validation rule declaration.
 type RuleDeclBody struct {
+	Pos          Position
+	EndPos       Position
 	For          string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
 	Param        string `parser:"(Param Colon @(String | Int | Float | Boolean))?"`
 	ParamIsArray bool   `parser:"@(LBracket RBracket)?"`
@@ -88,6 +88,8 @@ type ProcDecl struct {
 
 // ProcDeclBody represents the body of a procedure declaration.
 type ProcDeclBody struct {
+	Pos    Position
+	EndPos Position
 	Input  []*Field              `parser:"(Input LBrace @@+ RBrace)?"`
 	Output []*Field              `parser:"(Output LBrace @@+ RBrace)?"`
 	Meta   []*ProcDeclBodyMetaKV `parser:"(Meta LBrace @@+ RBrace)?"`
@@ -95,8 +97,10 @@ type ProcDeclBody struct {
 
 // ProcDeclBodyMetaKV represents a key-value pair in the meta information of a procedure declaration.
 type ProcDeclBodyMetaKV struct {
-	Key   string `parser:"@Ident"`
-	Value string `parser:"Colon @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)"`
+	Pos    Position
+	EndPos Position
+	Key    string `parser:"@Ident"`
+	Value  string `parser:"Colon @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)"`
 }
 
 //////////////////
@@ -105,6 +109,8 @@ type ProcDeclBodyMetaKV struct {
 
 // Field represents a field in a custom type or procedure input/output.
 type Field struct {
+	Pos      Position
+	EndPos   Position
 	Name     string       `parser:"@Ident"`
 	Optional bool         `parser:"@(Question)?"`
 	Type     FieldType    `parser:"Colon @@"`
@@ -114,8 +120,10 @@ type Field struct {
 // FieldType represents the type of a field. If the field is an array, the Depth
 // represents the depth of the array otherwise it is 0.
 type FieldType struct {
-	Base  *FieldTypeBase `parser:"@@"`
-	Depth FieldTypeDepth `parser:"@((LBracket RBracket)*)"`
+	Pos    Position
+	EndPos Position
+	Base   *FieldTypeBase `parser:"@@"`
+	Depth  FieldTypeDepth `parser:"@((LBracket RBracket)*)"`
 }
 
 // FieldTypeDepth represents the depth of an array.
@@ -137,23 +145,31 @@ func (a *FieldTypeDepth) Capture(values []string) error {
 // or custom type, the Named field is set. If the field is an inline object, the Object
 // field is set.
 type FieldTypeBase struct {
+	Pos    Position
+	EndPos Position
 	Named  *string          `parser:"@(Ident | String | Int | Float | Boolean | Datetime)"`
 	Object *FieldTypeObject `parser:"| @@"`
 }
 
 // FieldTypeObject represents an inline object type.
 type FieldTypeObject struct {
+	Pos    Position
+	EndPos Position
 	Fields []*Field `parser:"LBrace @@+ RBrace"`
 }
 
 // FieldRule represents a rule applied to a field.
 type FieldRule struct {
-	Name string        `parser:"At @Ident"`
-	Body FieldRuleBody `parser:"(LParen @@ RParen)?"`
+	Pos    Position
+	EndPos Position
+	Name   string        `parser:"At @Ident"`
+	Body   FieldRuleBody `parser:"(LParen @@ RParen)?"`
 }
 
 // FieldRuleBody represents the body of a rule applied to a field.
 type FieldRuleBody struct {
+	Pos         Position
+	EndPos      Position
 	ParamSingle *string  `parser:"@(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)?"`
 	ParamList   []string `parser:"(LBracket @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral) (Comma @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral))* RBracket)?"`
 	Error       string   `parser:"(Comma? Error Colon @StringLiteral)?"`
