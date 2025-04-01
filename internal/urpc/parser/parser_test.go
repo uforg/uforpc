@@ -8,33 +8,47 @@ import (
 	"github.com/uforg/uforpc/internal/urpc/ast"
 )
 
-// setEmptyPos uses reflection to check if the node has Pos or EndPos fields
-// and sets them to the empty position (emptyPos).
-//
-// It handles pointers and non-pointers correctly.
-func setEmptyPos[T any](node T) T {
-	valueOfNode, valueOfEmptyPos := reflect.ValueOf(node), reflect.ValueOf(ast.Position{})
-	fix := func(s reflect.Value) {
-		if f := s.FieldByName("Pos"); f.IsValid() && f.CanSet() && f.Type() == valueOfEmptyPos.Type() {
-			f.Set(valueOfEmptyPos)
-		}
-		if f := s.FieldByName("EndPos"); f.IsValid() && f.CanSet() && f.Type() == valueOfEmptyPos.Type() {
-			f.Set(valueOfEmptyPos)
-		}
+//////////////////
+// TEST HELPERS //
+//////////////////
+
+// cleanPositionsRecursively cleans all position fields recursively in any struct or array of structs.
+// If includeRoot is true, it will also clean the position fields of the root object.
+func cleanPositionsRecursively(val reflect.Value, emptyPos reflect.Value, includeRoot bool) {
+	if !val.IsValid() {
+		return
 	}
-	switch valueOfNode.Kind() {
+
+	switch val.Kind() {
 	case reflect.Ptr:
-		if !valueOfNode.IsNil() && valueOfNode.Elem().Kind() == reflect.Struct {
-			fix(valueOfNode.Elem())
+		if !val.IsNil() {
+			// Skip cleaning root if includeRoot is false
+			cleanPositionsRecursively(val.Elem(), emptyPos, includeRoot)
 		}
-		return node
 	case reflect.Struct:
-		s := reflect.New(valueOfNode.Type()).Elem()
-		s.Set(valueOfNode)
-		fix(s)
-		return s.Interface().(T)
-	default:
-		return node
+		// Set Pos and EndPos fields to empty value if they exist and we should process this level
+		if includeRoot {
+			if f := val.FieldByName("Pos"); f.IsValid() && f.CanSet() && f.Type() == emptyPos.Type() {
+				f.Set(emptyPos)
+			}
+			if f := val.FieldByName("EndPos"); f.IsValid() && f.CanSet() && f.Type() == emptyPos.Type() {
+				f.Set(emptyPos)
+			}
+		}
+
+		// Always process fields recursively - after processing the current level
+		for i := range val.NumField() {
+			field := val.Field(i)
+			if field.CanInterface() {
+				// Always clean position fields in children
+				cleanPositionsRecursively(field, emptyPos, true)
+			}
+		}
+	case reflect.Slice:
+		// Handle arrays/slices recursively
+		for i := range val.Len() {
+			cleanPositionsRecursively(val.Index(i), emptyPos, true)
+		}
 	}
 }
 
@@ -50,30 +64,16 @@ func equal(t *testing.T, expected, actual *ast.URPCSchema) {
 func equalNoPos(t *testing.T, expected, actual *ast.URPCSchema) {
 	t.Helper()
 
-	cleanPositions := func(ast *ast.URPCSchema) *ast.URPCSchema {
-		ast = setEmptyPos(ast)
+	cleanPositions := func(schema *ast.URPCSchema) *ast.URPCSchema {
+		// Make a deep copy to avoid modifying the original
+		schemaCopy := &ast.URPCSchema{}
+		*schemaCopy = *schema
 
-		if ast.Version != nil {
-			ast.Version = setEmptyPos(ast.Version)
-		}
+		// Recursively clean all positions in the copy
+		schemaVal := reflect.ValueOf(schemaCopy)
+		cleanPositionsRecursively(schemaVal, reflect.ValueOf(ast.Position{}), true)
 
-		for i, importStmt := range ast.Imports {
-			ast.Imports[i] = setEmptyPos(importStmt)
-		}
-
-		for i, rule := range ast.Rules {
-			ast.Rules[i] = setEmptyPos(rule)
-		}
-
-		for i, typeDecl := range ast.Types {
-			ast.Types[i] = setEmptyPos(typeDecl)
-		}
-
-		for i, procDecl := range ast.Procs {
-			ast.Procs[i] = setEmptyPos(procDecl)
-		}
-
-		return ast
+		return schemaCopy
 	}
 
 	expected = cleanPositions(expected)
@@ -86,6 +86,10 @@ func ptr[T any](v T) *T {
 	return &v
 }
 
+////////////////
+// TEST CASES //
+////////////////
+
 func TestParserPositions(t *testing.T) {
 	t.Run("Version position", func(t *testing.T) {
 		input := `version 1`
@@ -94,6 +98,18 @@ func TestParserPositions(t *testing.T) {
 		require.NotNil(t, parsed)
 
 		expected := &ast.URPCSchema{
+			Pos: ast.Position{
+				Filename: "schema.urpc",
+				Line:     1,
+				Offset:   0,
+				Column:   1,
+			},
+			EndPos: ast.Position{
+				Filename: "schema.urpc",
+				Line:     1,
+				Offset:   9,
+				Column:   10,
+			},
 			Version: &ast.Version{
 				Pos: ast.Position{
 					Filename: "schema.urpc",
