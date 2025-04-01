@@ -49,21 +49,23 @@ const (
 	Question TokenType = "Question"
 
 	// Keywords
-	Version TokenType = "Version"
-	Rule    TokenType = "Rule"
-	Type    TokenType = "Type"
-	Extends TokenType = "Extends"
-	Proc    TokenType = "Proc"
-	Input   TokenType = "Input"
-	Output  TokenType = "Output"
-	Meta    TokenType = "Meta"
-	Error   TokenType = "Error"
-	For     TokenType = "For"
-	Param   TokenType = "Param"
-	String  TokenType = "String"
-	Int     TokenType = "Int"
-	Float   TokenType = "Float"
-	Boolean TokenType = "Boolean"
+	Version  TokenType = "Version"
+	Import   TokenType = "Import"
+	Rule     TokenType = "Rule"
+	Type     TokenType = "Type"
+	Extends  TokenType = "Extends"
+	Proc     TokenType = "Proc"
+	Input    TokenType = "Input"
+	Output   TokenType = "Output"
+	Meta     TokenType = "Meta"
+	Error    TokenType = "Error"
+	For      TokenType = "For"
+	Param    TokenType = "Param"
+	String   TokenType = "String"
+	Int      TokenType = "Int"
+	Float    TokenType = "Float"
+	Boolean  TokenType = "Boolean"
+	Datetime TokenType = "Datetime"
 )
 
 var TokenTypes = []TokenType{
@@ -97,6 +99,7 @@ var TokenTypes = []TokenType{
 
 	// Keywords
 	Version,
+	Import,
 	Rule,
 	Type,
 	Extends,
@@ -111,6 +114,7 @@ var TokenTypes = []TokenType{
 	Int,
 	Float,
 	Boolean,
+	Datetime,
 }
 
 // delimiters is a map of delimiters to their corresponding token types.
@@ -140,21 +144,23 @@ func GetDelimiterTokenType(ch byte) TokenType {
 
 // keywords is a map of keywords to their corresponding token types.
 var keywords = map[string]TokenType{
-	"version": Version,
-	"rule":    Rule,
-	"type":    Type,
-	"extends": Extends,
-	"proc":    Proc,
-	"input":   Input,
-	"output":  Output,
-	"meta":    Meta,
-	"error":   Error,
-	"for":     For,
-	"param":   Param,
-	"string":  String,
-	"int":     Int,
-	"float":   Float,
-	"boolean": Boolean,
+	"version":  Version,
+	"import":   Import,
+	"rule":     Rule,
+	"type":     Type,
+	"extends":  Extends,
+	"proc":     Proc,
+	"input":    Input,
+	"output":   Output,
+	"meta":     Meta,
+	"error":    Error,
+	"for":      For,
+	"param":    Param,
+	"string":   String,
+	"int":      Int,
+	"float":    Float,
+	"boolean":  Boolean,
+	"datetime": Datetime,
 }
 
 // IsKeyword returns true if the identifier is a keyword.

@@ -77,7 +77,7 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false for param extends string int float boolean"
+		input := "version rule type proc input output meta error true false for param extends string int float boolean import datetime"
 
 		tests := []token.Token{
 			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 1, LineEnd: 1, ColumnStart: 1, ColumnEnd: 7},
@@ -97,7 +97,9 @@ func TestLexer(t *testing.T) {
 			{Type: token.Int, Literal: "int", FileName: "test.urpc", LineStart: 1, ColumnStart: 84, LineEnd: 1, ColumnEnd: 86},
 			{Type: token.Float, Literal: "float", FileName: "test.urpc", LineStart: 1, ColumnStart: 88, LineEnd: 1, ColumnEnd: 92},
 			{Type: token.Boolean, Literal: "boolean", FileName: "test.urpc", LineStart: 1, ColumnStart: 94, LineEnd: 1, ColumnEnd: 100},
-			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 101, LineEnd: 1, ColumnEnd: 101},
+			{Type: token.Import, Literal: "import", FileName: "test.urpc", LineStart: 1, ColumnStart: 102, LineEnd: 1, ColumnEnd: 107},
+			{Type: token.Datetime, Literal: "datetime", FileName: "test.urpc", LineStart: 1, ColumnStart: 109, LineEnd: 1, ColumnEnd: 116},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 117, LineEnd: 1, ColumnEnd: 117},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
