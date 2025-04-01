@@ -78,9 +78,10 @@ type TypeDecl struct {
 
 // Field represents a field in a custom type or procedure input/output.
 type Field struct {
-	Name     string    `parser:"@Ident"`
-	Optional bool      `parser:"@(Question)?"`
-	Type     FieldType `parser:"Colon @@"`
+	Name     string       `parser:"@Ident"`
+	Optional bool         `parser:"@(Question)?"`
+	Type     FieldType    `parser:"Colon @@"`
+	Rules    []*FieldRule `parser:"@@*"`
 }
 
 // FieldType represents the type of a field. If the field is an array, the Depth
@@ -116,4 +117,17 @@ type FieldTypeBase struct {
 // FieldTypeObject represents an inline object type.
 type FieldTypeObject struct {
 	Fields []*Field `parser:"LBrace @@+ RBrace"`
+}
+
+// FieldRule represents a rule applied to a field.
+type FieldRule struct {
+	Name string        `parser:"At @Ident"`
+	Body FieldRuleBody `parser:"(LParen @@ RParen)?"`
+}
+
+// FieldRuleBody represents the body of a rule applied to a field.
+type FieldRuleBody struct {
+	ParamSingle *string  `parser:"@(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)?"`
+	ParamList   []string `parser:"(LBracket @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral) (Comma @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral))* RBracket)?"`
+	Error       string   `parser:"(Comma? Error Colon @StringLiteral)?"`
 }

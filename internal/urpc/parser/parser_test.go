@@ -712,4 +712,86 @@ func TestParserField(t *testing.T) {
 
 		equalNoPos(t, expected, parsed)
 	})
+
+	t.Run("Field with rules", func(t *testing.T) {
+		input := `
+			type MyType {
+				field1: string
+					@uppercase
+					@uppercase()
+					@uppercase(error: "Field must be uppercase")
+					@contains("hello", error: "Field must contain 'hello'")
+					@enum(["hello", "world"], error: "Field must be 'hello' or 'world'")
+					@enum([1, 2, 3])
+					@enum([1.1, 2.2, 3.3])
+					@enum([true, false])
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name: "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field1",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "uppercase",
+								},
+								{
+									Name: "uppercase",
+								},
+								{
+									Name: "uppercase",
+									Body: ast.FieldRuleBody{
+										Error: "Field must be uppercase",
+									},
+								},
+								{
+									Name: "contains",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("hello"),
+										Error:       "Field must contain 'hello'",
+									},
+								},
+								{
+									Name: "enum",
+									Body: ast.FieldRuleBody{
+										ParamList: []string{"hello", "world"},
+										Error:     "Field must be 'hello' or 'world'",
+									},
+								},
+								{
+									Name: "enum",
+									Body: ast.FieldRuleBody{
+										ParamList: []string{"1", "2", "3"},
+									},
+								},
+								{
+									Name: "enum",
+									Body: ast.FieldRuleBody{
+										ParamList: []string{"1.1", "2.2", "3.3"},
+									},
+								},
+								{
+									Name: "enum",
+									Body: ast.FieldRuleBody{
+										ParamList: []string{"true", "false"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
 }
