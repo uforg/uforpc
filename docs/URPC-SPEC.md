@@ -11,9 +11,9 @@ The primary goal of URPC is to offer an intuitive, human-readable format that
 ensures the best possible developer experience (DX) while maintaining strict
 data integrity.
 
-## 2. Basic Syntax
+## 2. URPC Syntax
 
-### 2.1 General Structure
+This is the syntax for the URPC DSL.
 
 ```urpc
 version: <number>
@@ -63,13 +63,10 @@ proc <ProcedureName> {
 }
 ```
 
-### 2.2 Importing Schemas
+## 3. Importing Schemas
 
 To achieve modularity, you can import external schema files with a simple
 syntax.
-
-The transpiler will merge the imported schemas into the main schema in order and
-in the same scope, make sure you don't have conflicting identifiers.
 
 All paths should be relative to the file that is importing the other schema.
 
@@ -77,7 +74,49 @@ All paths should be relative to the file that is importing the other schema.
 import "<schema_path>"
 ```
 
-### 2.3 Defining Types and Procedures
+### 3.1 Conflict resolution
+
+If there are conflicting custom validaion rules, custom types or procedures, the
+transpiler will throw an error. Make sure to use unique names across schemas to
+avoid issues.
+
+## 4. Types
+
+Types are the building blocks of your API. They define the structure of the data
+that can be exchanged between the client and the server.
+
+### 4.1 Primitive Types
+
+Primitive types are the types that are built-in into the URPC DSL.
+
+| DSL        | JSON Type | Description                           |
+| ---------- | --------- | ------------------------------------- |
+| `string`   | string    | UTF-8 text string                     |
+| `int`      | integer   | 64-bit integer                        |
+| `float`    | number    | Floating point number                 |
+| `boolean`  | boolean   | Either true or false                  |
+| `datetime` | string    | Date and time value (ISO 8601 format) |
+
+### 4.2 Composite Types
+
+Composite types are types that are composed of other types. They can be used to
+create more complex data structures.
+
+```urpc
+// Array
+ElementType[]  // E.g.: string[] 
+
+// Inline object
+{
+  field1: Type
+  field2: Type
+}
+```
+
+### 4.3 Custom Types
+
+You can define custom types additional of the primitive types provided by the
+transpiler that you can use in the input and output of your procedures.
 
 ```urpc
 """
@@ -87,7 +126,44 @@ type <CustomTypeName> [extends <OtherCustomTypeName>, <OtherCustomTypeName>, ...
   <field>[?]: <Type>
     [@<validationRule>(<param>, [error: <"message">])]
 }
+```
 
+#### 4.3.1 Custom type documentation
+
+You can add documentation to your custom types to help the developer understand
+how to use them, they can include Markdown syntax that will be rendered in the
+generated documentation.
+
+#### 4.3.2 Type inheritance
+
+Types can extend other types, inheriting their fields and validation rules.
+
+Fields or validation rules defined in the parent type can't be overridden by the
+child type.
+
+```urpc
+type ExtendedType extends BaseType {
+  // Additional fields and rules
+}
+```
+
+#### 4.3.3 Optional fields
+
+All fields of a type are required by default. To make a field optional, use the
+`?` suffix.
+
+```urpc
+// Optional field
+field?: Type
+```
+
+## 5. Defining Procedures
+
+Procedures are the main building block of your API. They define the procedures
+(AKA functions) that can be implemented on the server and called from the
+client.
+
+```urpc
 """
 <Procedure documentation>
 """
@@ -108,58 +184,55 @@ proc <ProcedureName> {
 }
 ```
 
-## 3. Data Types
+### 5.1 Procedure documentation
 
-### 3.1 Primitive Types
+You can add documentation to your procedures to help the developer understand
+how to use them, they can include Markdown syntax that will be rendered in the
+generated documentation.
 
-| DSL        | JSON Type | Description                           |
-| ---------- | --------- | ------------------------------------- |
-| `string`   | string    | UTF-8 text string                     |
-| `int`      | integer   | 64-bit integer                        |
-| `float`    | number    | Floating point number                 |
-| `boolean`  | boolean   | Either true or false                  |
-| `datetime` | string    | Date and time value (ISO 8601 format) |
+### 5.2 Procedure input/output
 
-### 3.2 Composite Types
+The input and output of a procedure is defined in the same way as the types.
+
+### 5.3 Procedure metadata
+
+The metadata of a procedure is a map of key-value pairs that can be used to
+provide additional information about the procedure.
+
+This information will be available in the generated code and can be used for any
+purpose you want.
+
+There is no built-in metadata, it's completely up to you to define it.
+
+You can only define values of the following types:
+
+- string
+- int
+- float
+- boolean
 
 ```urpc
-// Array
-ElementType[]  // E.g.: string[] 
-
-// Inline object
-{
-  field1: Type
-  field2: Type
+meta {
+  // Allowed values
+  <key>: string|int|float|boolean
+  
+  // Examples
+  cache: true
+  ttl: 300
+  auth: "required"
 }
 ```
 
-### 3.3 Optionals
+## 6. Validation Rules
 
-All fields are required by default. To make a field optional, use the `?`
-suffix.
-
-```urpc
-// Optional field
-field?: Type
-
-// Example
-input {
-  foo?: int
-  bar?: {
-    baz?: MyCustomType[]
-  }
-}
-```
-
-## 4. Validation Rules
-
-### 4.1 General Syntax
+Validation rules can be applied to fields of a type to validate the value of the
+field.
 
 ```urpc
 @<ruleName>([param][, error: "message"])
 ```
 
-### 4.2 Built-in Type-Specific Rules
+### 6.1 Built-in Type-Specific Rules
 
 Built-in rules are implemented in the generated code for you, so you can use
 them as is without any additional implementation.
@@ -171,7 +244,7 @@ the same regardless of the target language of the generated code.
 If you need to implement a custom or more complex rule, you can do so by
 declaring a custom rule and implementing it in your codebase.
 
-#### String built-in rules
+#### 6.1.1 String built-in rules
 
 Rules like `regex`, `email`, `uuid`, `iso8601`, `json` are not supported because
 they are not deterministic and UFO RPC can't guarantee the same result in any
@@ -188,7 +261,7 @@ your own logic.
 | `lowercase` | -            | `@lowercase`                          |
 | `uppercase` | -            | `@uppercase`                          |
 
-#### Int built-in rules
+#### 6.1.2 Int built-in rules
 
 | Rule     | Parameters    | Example            |
 | -------- | ------------- | ------------------ |
@@ -197,7 +270,7 @@ your own logic.
 | `max`    | integer       | `@max(100)`        |
 | `enum`   | [integer,...] | `@enum([1, 2, 3])` |
 
-#### Float built-in rules
+#### 6.1.3 Float built-in rules
 
 Rules like `equals`, `enum` are not supported for float because of the nature of
 how computers represent floating point numbers. UFO RPC can't guarantee the
@@ -209,20 +282,20 @@ own logic to address this limitation.
 | `min` | number     | `@min(0.0)`   |
 | `max` | number     | `@max(100.0)` |
 
-#### Boolean built-in rules
+#### 6.1.4 Boolean built-in rules
 
 | Rule     | Parameters | Example         |
 | -------- | ---------- | --------------- |
 | `equals` | boolean    | `@equals(true)` |
 
-#### Array built-in rules
+#### 6.1.5 Array built-in rules
 
 | Rule     | Parameters | Example        |
 | -------- | ---------- | -------------- |
 | `minlen` | integer    | `@minlen(1)`   |
 | `maxlen` | integer    | `@maxlen(100)` |
 
-#### Datetime built-in rules
+#### 6.1.6 Datetime built-in rules
 
 The parameter for these rules should be a string that follows the ISO 8601
 format.
@@ -232,9 +305,10 @@ format.
 | `min` | datetime   | `@min("2000-01-01T00:00:00Z")` |
 | `max` | datetime   | `@max("2050-12-31T23:59:59Z")` |
 
-### 4.3 Custom Rules
+### 6.2 Custom Rules
 
-Define reusable validation rules. Rules must be declared **before** usage.
+If the built-in rules don't cover your needs, you can define your own custom
+rules.
 
 Your custom defined rules should be defined in the DSL and implemented in your
 codebase using the helpers included in the generated code, so you can validate
@@ -251,7 +325,13 @@ rule @<RuleName> {
 }
 ```
 
-#### Example
+#### 6.2.1 Custom rule documentation
+
+You can add documentation to your custom rules to help the developer understand
+how to use them, they can include Markdown syntax that will be rendered in the
+generated documentation.
+
+#### 6.2.2 Example
 
 ```urpc
 """ This is a custom rule that validates if the field matches a regular expression """
@@ -268,7 +348,7 @@ rule @range {
 }
 ```
 
-#### Usage
+#### 6.2.3 Usage
 
 ```urpc
 input {
@@ -280,42 +360,12 @@ input {
 }
 ```
 
-## 5. Procedures
+### 6.3 Validation rules and type inheritance
 
-### 5.1 Structure
-
-```urpc
-"""
-<Procedure documentation>
-"""
-proc <Name> {
-  input {
-    <field>: <Type>
-  }
-
-  output {
-    <field>: <Type>
-  }
-
-  meta {
-    <key>: <value>
-  }
-}
-```
-
-## 6. Metadata
-
-```urpc
-meta {
-  // Allowed values
-  <key>: string|int|float|boolean
-  
-  // Examples
-  cache: true
-  ttl: 300
-  auth: "required"
-}
-```
+- Any type that extends another type will inherit the validation rules of the
+  parent type.
+- If a custom type is used as a field type in another type, the validation rules
+  of the referenced type will be applied to the field.
 
 ## 7. Complete Example
 
