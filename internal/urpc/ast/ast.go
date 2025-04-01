@@ -1,6 +1,8 @@
 package ast
 
-import plexer "github.com/alecthomas/participle/v2/lexer"
+import (
+	plexer "github.com/alecthomas/participle/v2/lexer"
+)
 
 // This AST is used for parsing the URPC schema and it uses the
 // participle library for parsing.
@@ -16,12 +18,17 @@ import plexer "github.com/alecthomas/participle/v2/lexer"
 //
 // https://github.com/alecthomas/participle/blob/master/README.md#error-reporting
 
+// The Pos and EndPos fields can be added only to nodes that will be referenced from
+// other nodes to use them later in the analyzer and LSP and give useful error
+// messages and auto-completion.
+//
+// Other inner nodes can skip the Pos and EndPos fields to make the AST more
+// compact and easier to work with.
+
 type Position plexer.Position
 
 // URPCSchema is the root of the URPC schema AST.
 type URPCSchema struct {
-	Pos     Position
-	EndPos  Position
 	Version *Version    `parser:"@@?"`
 	Imports []*Import   `parser:"@@*"`
 	Rules   []*RuleDecl `parser:"@@*"`
@@ -42,27 +49,18 @@ type Import struct {
 	Path   string `parser:"Import @StringLiteral"`
 }
 
-// Docstring represents the documentation for a rule, type or procedure declaration.
-type Docstring struct {
-	Pos     Position
-	EndPos  Position
-	Content string `parser:"@Docstring"`
-}
-
 // RuleDecl represents a custom validation rule declaration.
 type RuleDecl struct {
 	Pos       Position
 	EndPos    Position
-	Docstring *Docstring   `parser:"@@?"`
+	Docstring string       `parser:"@Docstring?"`
 	Name      string       `parser:"Rule At @Ident"`
 	Body      RuleDeclBody `parser:"LBrace @@ RBrace"`
 }
 
 // RuleDeclBody represents the body of a custom validation rule declaration.
 type RuleDeclBody struct {
-	Pos          Position
-	EndPos       Position
-	For          string `parser:"For Colon @(Ident | String | Int | Float | Boolean)"`
+	For          string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
 	Param        string `parser:"(Param Colon @(String | Int | Float | Boolean))?"`
 	ParamIsArray bool   `parser:"@(LBracket RBracket)?"`
 	Error        string `parser:"(Error Colon @StringLiteral)?"`
@@ -72,17 +70,50 @@ type RuleDeclBody struct {
 type TypeDecl struct {
 	Pos       Position
 	EndPos    Position
-	Docstring *Docstring `parser:"@@?"`
-	Name      string     `parser:"Type @Ident"`
-	Extends   []string   `parser:"(Extends @Ident (Comma @Ident)*)?"`
-	Fields    []*Field   `parser:"LBrace @@+ RBrace"`
+	Docstring string   `parser:"@Docstring?"`
+	Name      string   `parser:"Type @Ident"`
+	Extends   []string `parser:"(Extends @Ident (Comma @Ident)*)?"`
+	Fields    []*Field `parser:"LBrace @@+ RBrace"`
 }
 
 // Field represents a field in a custom type or procedure input/output.
 type Field struct {
-	Pos      Position
-	EndPos   Position
-	Name     string `parser:"@Ident"`
-	Optional bool   `parser:"@(Question)?"`
-	Type     string `parser:"Colon @(Ident | String | Int | Float | Boolean)"`
+	Name     string    `parser:"@Ident"`
+	Optional bool      `parser:"@(Question)?"`
+	Type     FieldType `parser:"Colon @@"`
+}
+
+// FieldType represents the type of a field. If the field is an array, the Depth
+// represents the depth of the array otherwise it is 0.
+type FieldType struct {
+	Base  *FieldTypeBase `parser:"@@"`
+	Depth FieldTypeDepth `parser:"@((LBracket RBracket)*)"`
+}
+
+// FieldTypeDepth represents the depth of an array.
+type FieldTypeDepth int
+
+func (a *FieldTypeDepth) Capture(values []string) error {
+	count := 0
+	for i := range len(values) {
+		if values[i] == "[" && values[i+1] == "]" {
+			count++
+		}
+	}
+
+	*a = FieldTypeDepth(count)
+	return nil
+}
+
+// FieldTypeBase represents the base type of a field. If the field is a primitive
+// or custom type, the Named field is set. If the field is an inline object, the Object
+// field is set.
+type FieldTypeBase struct {
+	Named  *string          `parser:"@(Ident | String | Int | Float | Boolean | Datetime)"`
+	Object *FieldTypeObject `parser:"| @@"`
+}
+
+// FieldTypeObject represents an inline object type.
+type FieldTypeObject struct {
+	Fields []*Field `parser:"LBrace @@+ RBrace"`
 }

@@ -61,22 +61,12 @@ func equalNoPos(t *testing.T, expected, actual *ast.URPCSchema) {
 			ast.Imports[i] = setEmptyPos(importStmt)
 		}
 
-		for _, rule := range ast.Rules {
-			if rule.Docstring != nil {
-				rule.Docstring = setEmptyPos(rule.Docstring)
-			}
-			rule = setEmptyPos(rule)
-			rule.Body = setEmptyPos(rule.Body)
+		for i, rule := range ast.Rules {
+			ast.Rules[i] = setEmptyPos(rule)
 		}
 
-		for _, typeDecl := range ast.Types {
-			if typeDecl.Docstring != nil {
-				typeDecl.Docstring = setEmptyPos(typeDecl.Docstring)
-			}
-			typeDecl = setEmptyPos(typeDecl)
-			for i, field := range typeDecl.Fields {
-				typeDecl.Fields[i] = setEmptyPos(field)
-			}
+		for i, typeDecl := range ast.Types {
+			ast.Types[i] = setEmptyPos(typeDecl)
 		}
 
 		return ast
@@ -87,6 +77,11 @@ func equalNoPos(t *testing.T, expected, actual *ast.URPCSchema) {
 	equal(t, expected, actual)
 }
 
+// ptr creates a pointer to the given value.
+func ptr[T any](v T) *T {
+	return &v
+}
+
 func TestParserPositions(t *testing.T) {
 	t.Run("Version position", func(t *testing.T) {
 		input := `version 1`
@@ -95,18 +90,6 @@ func TestParserPositions(t *testing.T) {
 		require.NotNil(t, parsed)
 
 		expected := &ast.URPCSchema{
-			Pos: ast.Position{
-				Filename: "schema.urpc",
-				Line:     1,
-				Offset:   0,
-				Column:   1,
-			},
-			EndPos: ast.Position{
-				Filename: "schema.urpc",
-				Line:     1,
-				Offset:   9,
-				Column:   10,
-			},
 			Version: &ast.Version{
 				Pos: ast.Position{
 					Filename: "schema.urpc",
@@ -243,7 +226,7 @@ func TestParserRuleDecl(t *testing.T) {
 		expected := &ast.URPCSchema{
 			Rules: []*ast.RuleDecl{
 				{
-					Docstring: &ast.Docstring{Content: "My rule description"},
+					Docstring: "My rule description",
 					Name:      "myRule",
 					Body: ast.RuleDeclBody{
 						For: "string",
@@ -298,7 +281,7 @@ func TestParserRuleDecl(t *testing.T) {
 		expected := &ast.URPCSchema{
 			Rules: []*ast.RuleDecl{
 				{
-					Docstring: &ast.Docstring{Content: "My rule description"},
+					Docstring: "My rule description",
 					Name:      "myRule",
 					Body: ast.RuleDeclBody{
 						For:          "MyType",
@@ -331,7 +314,9 @@ func TestParserTypeDecl(t *testing.T) {
 					Fields: []*ast.Field{
 						{
 							Name: "field",
-							Type: "string",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
 						},
 					},
 				},
@@ -356,12 +341,14 @@ func TestParserTypeDecl(t *testing.T) {
 		expected := &ast.URPCSchema{
 			Types: []*ast.TypeDecl{
 				{
-					Docstring: &ast.Docstring{Content: "My type description"},
+					Docstring: "My type description",
 					Name:      "MyType",
 					Fields: []*ast.Field{
 						{
 							Name: "field",
-							Type: "string",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
 						},
 					},
 				},
@@ -388,7 +375,9 @@ func TestParserTypeDecl(t *testing.T) {
 					Fields: []*ast.Field{
 						{
 							Name: "field",
-							Type: "string",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
 						},
 					},
 				},
@@ -415,7 +404,9 @@ func TestParserTypeDecl(t *testing.T) {
 					Fields: []*ast.Field{
 						{
 							Name: "field",
-							Type: "string",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
 						},
 					},
 				},
@@ -440,13 +431,15 @@ func TestParserTypeDecl(t *testing.T) {
 		expected := &ast.URPCSchema{
 			Types: []*ast.TypeDecl{
 				{
-					Docstring: &ast.Docstring{Content: "My type description"},
+					Docstring: "My type description",
 					Name:      "MyType",
 					Extends:   []string{"OtherType"},
 					Fields: []*ast.Field{
 						{
 							Name: "field",
-							Type: "string",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
 						},
 					},
 				},
@@ -478,7 +471,9 @@ func TestParserTypeDecl(t *testing.T) {
 					Fields: []*ast.Field{
 						{
 							Name: "field",
-							Type: "MyCustomType",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+							},
 						},
 					},
 				},
@@ -497,6 +492,7 @@ func TestParserField(t *testing.T) {
 				field2: int
 				field3: float
 				field4: boolean
+				field5: datetime
 			}
 		`
 		parsed, err := Parser.ParseString("schema.urpc", input)
@@ -509,19 +505,205 @@ func TestParserField(t *testing.T) {
 					Fields: []*ast.Field{
 						{
 							Name: "field1",
-							Type: "string",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
 						},
 						{
 							Name: "field2",
-							Type: "int",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("int")},
+							},
 						},
 						{
 							Name: "field3",
-							Type: "float",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("float")},
+							},
 						},
 						{
 							Name: "field4",
-							Type: "boolean",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("boolean")},
+							},
+						},
+						{
+							Name: "field5",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("datetime")},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Fields with custom types", func(t *testing.T) {
+		input := `
+			type MyType {
+				field1: MyCustomType
+				field2: MyOtherCustomType
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name: "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field1",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+							},
+						},
+						{
+							Name: "field2",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("MyOtherCustomType")},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Optional fields", func(t *testing.T) {
+		input := `
+			type MyType {
+				field1?: string
+				field2?: MyCustomType
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name: "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field1",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("string")},
+							},
+							Optional: true,
+						},
+						{
+							Name: "field2",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+							},
+							Optional: true,
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Complex array and nested object fields", func(t *testing.T) {
+		input := `
+			type MyType {
+				field1: string[]
+				field2: {
+					subfield: string
+				}
+				field3: int[][]
+				field4?: {
+					subfield: {
+						subsubfield: datetime[][][]
+					}[][]
+				}[][][][][][][]
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Types: []*ast.TypeDecl{
+				{
+					Name: "MyType",
+					Fields: []*ast.Field{
+						{
+							Name: "field1",
+							Type: ast.FieldType{
+								Depth: 1,
+								Base: &ast.FieldTypeBase{
+									Named: ptr("string"),
+								},
+							},
+						},
+						{
+							Name: "field2",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Object: &ast.FieldTypeObject{
+										Fields: []*ast.Field{
+											{
+												Name: "subfield",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("string")},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						{
+							Name: "field3",
+							Type: ast.FieldType{
+								Depth: 2,
+								Base: &ast.FieldTypeBase{
+									Named: ptr("int"),
+								},
+							},
+						},
+						{
+							Name:     "field4",
+							Optional: true,
+							Type: ast.FieldType{
+								Depth: 7,
+								Base: &ast.FieldTypeBase{
+									Object: &ast.FieldTypeObject{
+										Fields: []*ast.Field{
+											{
+												Name: "subfield",
+												Type: ast.FieldType{
+													Depth: 2,
+													Base: &ast.FieldTypeBase{
+														Object: &ast.FieldTypeObject{
+															Fields: []*ast.Field{
+																{
+																	Name: "subsubfield",
+																	Type: ast.FieldType{
+																		Depth: 3,
+																		Base: &ast.FieldTypeBase{
+																			Named: ptr("datetime"),
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
