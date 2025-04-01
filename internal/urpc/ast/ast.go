@@ -32,7 +32,7 @@ type URPCSchema struct {
 type Version struct {
 	Pos    Position
 	EndPos Position
-	Number int `parser:"Version Colon @IntLiteral"`
+	Number int `parser:"Version @IntLiteral"`
 }
 
 // Import represents an import statement.

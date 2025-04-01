@@ -89,7 +89,7 @@ func equalNoPos(t *testing.T, expected, actual *ast.URPCSchema) {
 
 func TestParserPositions(t *testing.T) {
 	t.Run("Version position", func(t *testing.T) {
-		input := `version: 1`
+		input := `version 1`
 		parsed, err := Parser.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 		require.NotNil(t, parsed)
@@ -104,8 +104,8 @@ func TestParserPositions(t *testing.T) {
 			EndPos: ast.Position{
 				Filename: "schema.urpc",
 				Line:     1,
-				Offset:   10,
-				Column:   11,
+				Offset:   9,
+				Column:   10,
 			},
 			Version: &ast.Version{
 				Pos: ast.Position{
@@ -117,8 +117,8 @@ func TestParserPositions(t *testing.T) {
 				EndPos: ast.Position{
 					Filename: "schema.urpc",
 					Line:     1,
-					Offset:   10,
-					Column:   11,
+					Offset:   9,
+					Column:   10,
 				},
 				Number: 1,
 			},
@@ -130,7 +130,7 @@ func TestParserPositions(t *testing.T) {
 
 func TestParserVersion(t *testing.T) {
 	t.Run("Correct version parsing", func(t *testing.T) {
-		input := `version: 1`
+		input := `version 1`
 		parsed, err := Parser.ParseString("schema.urpc", input)
 
 		require.NoError(t, err)
@@ -146,13 +146,13 @@ func TestParserVersion(t *testing.T) {
 	})
 
 	t.Run("More than one version should fail", func(t *testing.T) {
-		input := `version: 1 version: 2`
+		input := `version 1 version: 2`
 		_, err := Parser.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
 
 	t.Run("Version as float should fail", func(t *testing.T) {
-		input := `version: 1.0`
+		input := `version 1.0`
 		_, err := Parser.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
