@@ -16,7 +16,7 @@ data integrity.
 This is the syntax for the URPC DSL.
 
 ```urpc
-version: <number>
+version <number>
 
 // <comment>
 
@@ -370,7 +370,7 @@ input {
 ## 7. Complete Example
 
 ```urpc
-version: 1
+version 1
 
 import "path/to/other_schema.urpc"
 
