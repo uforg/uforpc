@@ -69,6 +69,10 @@ func equalNoPos(t *testing.T, expected, actual *ast.URPCSchema) {
 			ast.Types[i] = setEmptyPos(typeDecl)
 		}
 
+		for i, procDecl := range ast.Procs {
+			ast.Procs[i] = setEmptyPos(procDecl)
+		}
+
 		return ast
 	}
 
@@ -785,6 +789,221 @@ func TestParserField(t *testing.T) {
 										ParamList: []string{"true", "false"},
 									},
 								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+}
+
+func TestParserProcDecl(t *testing.T) {
+	t.Run("Minimum procedure declaration parsing", func(t *testing.T) {
+		input := `
+			proc MyProc {}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Procs: []*ast.ProcDecl{
+				{
+					Name: "MyProc",
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Procedure with docstring", func(t *testing.T) {
+		input := `
+			"""
+			MyProc is a procedure that does something.
+			"""
+			proc MyProc {}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Procs: []*ast.ProcDecl{
+				{
+					Docstring: "MyProc is a procedure that does something.",
+					Name:      "MyProc",
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Procedure with input", func(t *testing.T) {
+		input := `
+			proc MyProc {
+				input {
+					field1: string
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Procs: []*ast.ProcDecl{
+				{
+					Name: "MyProc",
+					Body: ast.ProcDeclBody{
+						Input: []*ast.Field{
+							{
+								Name: "field1",
+								Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("string")}},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Procedure with output", func(t *testing.T) {
+		input := `
+			proc MyProc {
+				output {
+					field1: int
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Procs: []*ast.ProcDecl{
+				{
+					Name: "MyProc",
+					Body: ast.ProcDeclBody{
+						Output: []*ast.Field{
+							{
+								Name: "field1",
+								Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("int")}},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Procedure with meta", func(t *testing.T) {
+		input := `
+			proc MyProc {
+				meta {
+					key1: "hello"
+					key2: 123
+					key3: 1.23
+					key4: true
+					key5: false
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Procs: []*ast.ProcDecl{
+				{
+					Name: "MyProc",
+					Body: ast.ProcDeclBody{
+						Meta: []*ast.ProcDeclBodyMetaKV{
+							{Key: "key1", Value: "hello"},
+							{Key: "key2", Value: "123"},
+							{Key: "key3", Value: "1.23"},
+							{Key: "key4", Value: "true"},
+							{Key: "key5", Value: "false"},
+						},
+					},
+				},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Full procedure", func(t *testing.T) {
+		input := `
+			"""
+			MyProc is a procedure that does something.
+			"""
+			proc MyProc {
+				input {
+					input1: string[][]
+				}
+				output {
+					output1?: int
+				}
+				meta {
+					key1: "hello"
+					key2: 123
+					key3: 1.23
+					key4: true
+					key5: false
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Procs: []*ast.ProcDecl{
+				{
+					Docstring: "MyProc is a procedure that does something.",
+					Name:      "MyProc",
+					Body: ast.ProcDeclBody{
+						Input: []*ast.Field{
+							{
+								Name: "input1",
+								Type: ast.FieldType{
+									Depth: 2,
+									Base:  &ast.FieldTypeBase{Named: ptr("string")},
+								},
+							},
+						},
+						Output: []*ast.Field{
+							{
+								Name:     "output1",
+								Optional: true,
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("int")},
+								},
+							},
+						},
+						Meta: []*ast.ProcDeclBodyMetaKV{
+							{
+								Key:   "key1",
+								Value: "hello",
+							},
+							{
+								Key:   "key2",
+								Value: "123",
+							},
+							{
+								Key:   "key3",
+								Value: "1.23",
+							},
+							{
+								Key:   "key4",
+								Value: "true",
+							},
+							{
+								Key:   "key5",
+								Value: "false",
 							},
 						},
 					},
