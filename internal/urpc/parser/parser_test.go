@@ -57,6 +57,10 @@ func equalNoPos(t *testing.T, expected, actual *ast.URPCSchema) {
 			ast.Version = setEmptyPos(ast.Version)
 		}
 
+		for i, importStmt := range ast.Imports {
+			ast.Imports[i] = setEmptyPos(importStmt)
+		}
+
 		for _, rule := range ast.Rules {
 			if rule.Docstring != nil {
 				rule.Docstring = setEmptyPos(rule.Docstring)
@@ -163,6 +167,22 @@ func TestParserVersion(t *testing.T) {
 		input := `version: "1"`
 		_, err := Parser.ParseString("schema.urpc", input)
 		require.Error(t, err)
+	})
+}
+
+func TestParserImport(t *testing.T) {
+	t.Run("Import parsing", func(t *testing.T) {
+		input := `import "../../my_sub_schema.urpc"`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.URPCSchema{
+			Imports: []*ast.Import{
+				{Path: "../../my_sub_schema.urpc"},
+			},
+		}
+
+		equalNoPos(t, expected, parsed)
 	})
 }
 

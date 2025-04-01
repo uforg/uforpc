@@ -23,6 +23,7 @@ type URPCSchema struct {
 	Pos     Position
 	EndPos  Position
 	Version *Version    `parser:"@@?"`
+	Imports []*Import   `parser:"@@*"`
 	Rules   []*RuleDecl `parser:"@@*"`
 	Types   []*TypeDecl `parser:"@@*"`
 }
@@ -32,6 +33,13 @@ type Version struct {
 	Pos    Position
 	EndPos Position
 	Number int `parser:"Version Colon @IntLiteral"`
+}
+
+// Import represents an import statement.
+type Import struct {
+	Pos    Position
+	EndPos Position
+	Path   string `parser:"Import @StringLiteral"`
 }
 
 // Docstring represents the documentation for a rule, type or procedure declaration.
