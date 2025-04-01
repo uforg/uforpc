@@ -229,14 +229,15 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerStrings", func(t *testing.T) {
-		input := `"hello" "world" "hello world!"test`
+		input := `"hello" "world" "hello world!"test "hello \"quotes\" \\"`
 
 		tests := []token.Token{
 			{Type: token.StringLiteral, Literal: "hello", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 7},
 			{Type: token.StringLiteral, Literal: "world", FileName: "test.urpc", LineStart: 1, ColumnStart: 9, LineEnd: 1, ColumnEnd: 15},
 			{Type: token.StringLiteral, Literal: "hello world!", FileName: "test.urpc", LineStart: 1, ColumnStart: 17, LineEnd: 1, ColumnEnd: 30},
 			{Type: token.Ident, Literal: "test", FileName: "test.urpc", LineStart: 1, ColumnStart: 31, LineEnd: 1, ColumnEnd: 34},
-			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 35, LineEnd: 1, ColumnEnd: 35},
+			{Type: token.StringLiteral, Literal: "hello \"quotes\" \\", FileName: "test.urpc", LineStart: 1, ColumnStart: 36, LineEnd: 1, ColumnEnd: 56},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 57, LineEnd: 1, ColumnEnd: 57},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
@@ -369,6 +370,31 @@ func TestLexer(t *testing.T) {
 		tests := []token.Token{
 			{Type: token.Docstring, Literal: "This is a docstring", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 27},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 28, LineEnd: 1, ColumnEnd: 28},
+		}
+
+		lex1 := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex1.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.LineStart, tok.LineStart, "test %d", i)
+			require.Equal(t, test.ColumnStart, tok.ColumnStart, "test %d", i)
+			require.Equal(t, test.LineEnd, tok.LineEnd, "test %d", i)
+			require.Equal(t, test.ColumnEnd, tok.ColumnEnd, "test %d", i)
+		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
+	})
+
+	t.Run("TestLexerDocstringsWithQuotes", func(t *testing.T) {
+		input := `""" This is a docstring with "quotes" inside """`
+
+		tests := []token.Token{
+			{Type: token.Docstring, Literal: "This is a docstring with \"quotes\" inside", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 48},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 49, LineEnd: 1, ColumnEnd: 49},
 		}
 
 		lex1 := NewLexer("test.urpc", input)

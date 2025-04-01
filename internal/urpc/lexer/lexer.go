@@ -112,6 +112,11 @@ func (l *Lexer) readNumber() string {
 
 // readString reads a string from the current index to the next double quote.
 //
+// It can escape double quotes inside the string using a backslash. And to add a
+// backslash to the string, it can be escaped using another backslash.
+//
+// E.g. "foo \"bar\" \\ baz" -> foo "bar" \ baz
+//
 // Returns the string and a boolean indicating if the string is unterminated.
 func (l *Lexer) readString() (string, bool) {
 	if l.currentChar != '"' {
@@ -123,6 +128,23 @@ func (l *Lexer) readString() (string, bool) {
 
 	var str string
 	for !l.currentIndexIsEOF && l.currentChar != '"' {
+		if l.currentChar == '\\' {
+			nextChar, eofReached := l.peekChar(1)
+			if eofReached || (nextChar != '"' && nextChar != '\\') {
+				break
+			}
+			if nextChar == '"' {
+				str += `"`
+			}
+			if nextChar == '\\' {
+				str += `\`
+			}
+
+			l.readNextChar() // Skip the backslash
+			l.readNextChar() // Skip the escaped character
+			continue
+		}
+
 		str += string(l.currentChar)
 		l.readNextChar()
 	}
