@@ -29,7 +29,7 @@ const (
 	Comment   TokenType = "Comment"
 	Docstring TokenType = "Docstring"
 
-	// Identifiers and literals
+	// Literals
 	StringLiteral TokenType = "StringLiteral"
 	IntLiteral    TokenType = "IntLiteral"
 	FloatLiteral  TokenType = "FloatLiteral"
