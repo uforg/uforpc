@@ -82,6 +82,7 @@ func (l *LSP) handleMessage(messageBytes []byte, message Message) error {
 
 	switch message.Method {
 	case "initialize":
+		return l.handleInitialize(messageBytes)
 	case "initialized":
 	}
 
