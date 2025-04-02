@@ -9,6 +9,7 @@ import (
 type LSP struct {
 	reader io.Reader
 	writer io.Writer
+	logger *LSPLogger
 }
 
 // New creates a new LSP instance. It uses the given reader and writer to read and write
@@ -17,6 +18,7 @@ func New(reader io.Reader, writer io.Writer) *LSP {
 	return &LSP{
 		reader: reader,
 		writer: writer,
+		logger: NewLSPLogger(),
 	}
 }
 
@@ -45,6 +47,11 @@ func (l *LSP) Run() error {
 }
 
 func (l *LSP) handleMessage(messageBytes []byte, message Message) error {
+	if message.ID != "" {
+		l.logger.Info("message received", "id", message.ID, "method", message.Method)
+	} else {
+		l.logger.Info("notification received", "method", message.Method)
+	}
 
 	switch message.Method {
 	case "initialize":
