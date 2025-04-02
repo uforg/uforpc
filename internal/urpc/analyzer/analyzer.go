@@ -234,7 +234,6 @@ func (a *Analyzer) collectAndValidateProcNames() *AnalyzerError {
 
 // validateCustomRuleReferences validates that all custom rule references are valid.
 func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
-	// Map of built-in rules and the types they can be applied to
 	builtInRulesMap := map[string][]string{
 		"equals":    {"string", "boolean"},
 		"contains":  {"string"},
@@ -247,7 +246,6 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 		"max":       {"int", "float", "datetime"},
 	}
 
-	// Get the base type of a field (resolving arrays to their element type)
 	getFieldBaseType := func(field *ast.Field) (string, bool) {
 		var baseType string
 		isArray := field.Type.Depth > 0
@@ -263,36 +261,25 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 		return baseType, isArray
 	}
 
-	// Check if a rule can be applied to a specific type
 	canRuleApplyToType := func(ruleName, fieldType string, isArray bool) bool {
-		// For custom rules, check the "for" field in the rule declaration
 		if rule, isCustomRule := a.customRuleNames[ruleName]; isCustomRule {
-			// If the rule is for arrays and the field is an array, it's valid
 			if rule.Body.For == "array" && isArray {
 				return true
 			}
 
-			// If the field is a custom type, we need special handling
 			if _, isCustomType := a.customTypeNames[fieldType]; isCustomType {
-				// Custom rules might be applicable to custom types depending on implementation
-				// This is a simplification - in a real implementation, you might want to check
-				// if the custom type has fields of the type specified in the rule's "for" field
 				return true
 			}
 
-			// For primitive types, check if the rule's "for" field matches the field type
 			return rule.Body.For == fieldType
 		}
 
-		// For built-in rules
 		if supportedTypes, exists := builtInRulesMap[ruleName]; exists {
-			// Check if the rule supports arrays and the field is an array
 			for _, supportedType := range supportedTypes {
 				if supportedType == "array" && isArray {
 					return true
 				}
 
-				// For non-array types, check if the rule supports the field's type
 				if supportedType == fieldType && (!isArray || supportedType == "array") {
 					return true
 				}
@@ -300,20 +287,16 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 			return false
 		}
 
-		// If we don't recognize the rule, assume it's valid
-		// This might happen if the schema is being extended with new rule types
 		return true
 	}
 
 	var checkFieldRules func([]*ast.Field, string) *AnalyzerError
 
-	// Function to check rule references in fields
 	checkFieldRules = func(fields []*ast.Field, context string) *AnalyzerError {
 		for _, field := range fields {
 			baseType, isArray := getFieldBaseType(field)
 
 			for _, rule := range field.Rules {
-				// First check if the rule exists
 				if _, isBuiltIn := builtInRulesMap[rule.Name]; !isBuiltIn {
 					if _, isCustomRule := a.customRuleNames[rule.Name]; !isCustomRule {
 						return &AnalyzerError{
@@ -324,7 +307,6 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 					}
 				}
 
-				// Then check if the rule can be applied to the field's type
 				if !canRuleApplyToType(rule.Name, baseType, isArray) {
 					var ruleAppliesTo string
 
@@ -336,7 +318,6 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 						ruleAppliesTo = "unknown"
 					}
 
-					// Special message for array types
 					if isArray {
 						return &AnalyzerError{
 							Message: fmt.Sprintf("rule \"%s\" in %s cannot be applied to array type \"%s[]\", it can only be applied to %s",
@@ -355,7 +336,6 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 				}
 			}
 
-			// If the field type is an object with fields, recursively check those fields
 			if field.Type.Base.Object != nil {
 				if err := checkFieldRules(field.Type.Base.Object.Fields, fmt.Sprintf("inline object in field \"%s\"", field.Name)); err != nil {
 					return err
@@ -365,14 +345,12 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 		return nil
 	}
 
-	// Check custom types
 	for _, typeDecl := range a.sch.Types {
 		if err := checkFieldRules(typeDecl.Fields, fmt.Sprintf("type \"%s\"", typeDecl.Name)); err != nil {
 			return err
 		}
 	}
 
-	// Check procedures
 	for _, proc := range a.sch.Procs {
 		if proc.Body.Input != nil {
 			if err := checkFieldRules(proc.Body.Input, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {
@@ -400,23 +378,18 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 		"datetime": true,
 	}
 
-	// Function to check if a type name is valid (either primitive or defined custom type)
 	isValidType := func(typeName string) bool {
 		return primitiveTypes[typeName] || a.customTypeNames[typeName].Name != ""
 	}
 
 	var checkFieldTypeReferences func([]*ast.Field, string) *AnalyzerError
 
-	// Function to check field type references
 	checkFieldTypeReferences = func(fields []*ast.Field, context string) *AnalyzerError {
 		for _, field := range fields {
-			// Check if the field is a named type (not an inline object)
 			if field.Type.Base.Named != nil {
 				typeName := *field.Type.Base.Named
 
-				// Skip primitive types
 				if !primitiveTypes[typeName] {
-					// Check if the type exists
 					if !isValidType(typeName) {
 						return &AnalyzerError{
 							Message: fmt.Sprintf("referenced type \"%s\" in %s is not defined", typeName, context),
@@ -426,7 +399,6 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 					}
 				}
 			} else if field.Type.Base.Object != nil {
-				// If it's an inline object, check its fields recursively
 				if err := checkFieldTypeReferences(field.Type.Base.Object.Fields, fmt.Sprintf("inline object in field \"%s\"", field.Name)); err != nil {
 					return err
 				}
@@ -435,7 +407,6 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 		return nil
 	}
 
-	// Check type extends clauses
 	for _, typeDecl := range a.sch.Types {
 		for _, extendTypeName := range typeDecl.Extends {
 			if !isValidType(extendTypeName) {
@@ -447,13 +418,11 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 			}
 		}
 
-		// Check field types
 		if err := checkFieldTypeReferences(typeDecl.Fields, fmt.Sprintf("type \"%s\"", typeDecl.Name)); err != nil {
 			return err
 		}
 	}
 
-	// Check procedure input/output types
 	for _, proc := range a.sch.Procs {
 		if proc.Body.Input != nil {
 			if err := checkFieldTypeReferences(proc.Body.Input, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {

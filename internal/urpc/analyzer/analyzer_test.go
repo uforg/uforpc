@@ -471,3 +471,441 @@ func TestAnalyzer_BuiltInRuleValidation(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, errors)
 }
+
+func TestAnalyzer_ValidTypeExtends(t *testing.T) {
+	input := `
+		version 1
+
+		type BaseUser {
+		  id: string
+		  username: string
+		}
+
+		type ExtendedUser extends BaseUser {
+		  email: string
+		  age: int
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_MultipleTypeExtends(t *testing.T) {
+	input := `
+		version 1
+
+		type Base1 {
+		  field1: string
+		}
+
+		type Base2 {
+		  field2: int
+		}
+
+		type Combined extends Base1, Base2 {
+		  field3: boolean
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_ValidProcedureMeta(t *testing.T) {
+	input := `
+		version 1
+
+		proc DoSomething {
+		  input {
+		    data: string
+		  }
+
+		  meta {
+		    requiresAuth: true
+		    maxRetries: 3
+		    timeout: 60
+		    description: "This is a test procedure"
+		  }
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_ValidInlineObject(t *testing.T) {
+	input := `
+		version 1
+
+		type User {
+		  id: string
+		  address: {
+		    street: string
+		    city: string
+		    zipCode: string
+		  }
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_ValidNestedInlineObject(t *testing.T) {
+	input := `
+		version 1
+
+		type User {
+		  id: string
+		  contact: {
+		    email: string
+		    address: {
+		      street: string
+		      city: string
+		      country: string
+		    }
+		  }
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_ValidInlineObjectWithRules(t *testing.T) {
+	input := `
+		version 1
+
+		type User {
+		  id: string
+		  contact: {
+		    email: string
+		      @contains("@")
+		      @minlen(5)
+		    phone: string
+		      @minlen(10)
+		  }
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_InvalidRuleInInlineObject(t *testing.T) {
+	input := `
+		version 1
+
+		type User {
+		  id: string
+		  contact: {
+		    email: string
+		      @invalidRule // This rule doesn't exist
+		  }
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "referenced rule \"invalidRule\" in inline object in field \"contact\" is not defined")
+}
+
+func TestAnalyzer_ValidArrayOfArrays(t *testing.T) {
+	input := `
+		version 1
+
+		type Matrix {
+		  data: int[][]  // 2D array of integers
+		    @minlen(1)   // Valid rule for the outer array
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_ValidArrayOfObjects(t *testing.T) {
+	input := `
+		version 1
+
+		type User {
+		  id: string
+		  addresses: {
+		    street: string
+		    city: string
+		  }[]
+		    @minlen(1)  // Valid rule for array
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_CustomRuleWithParameters(t *testing.T) {
+	input := `
+		version 1
+
+		rule @regex {
+		  for: string
+		  param: string
+		  error: "Invalid format"
+		}
+
+		type User {
+		  email: string
+		    @regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", error: "Invalid email format")
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_CustomRuleWithArrayParameter(t *testing.T) {
+	input := `
+		version 1
+
+		rule @range {
+		  for: int
+		  param: int[]
+		  error: "Value out of range"
+		}
+
+		type Product {
+		  price: int
+		    @range([10, 1000], error: "Price must be between 10 and 1000")
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_EnumValidation(t *testing.T) {
+	input := `
+		version 1
+
+		type Product {
+		  status: string
+		    @enum(["pending", "approved", "rejected"])
+		    
+		  priority: int
+		    @enum([1, 2, 3])
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_DatetimeValidation(t *testing.T) {
+	input := `
+		version 1
+
+		type Event {
+		  startDate: datetime
+		    @min("2023-01-01T00:00:00Z")
+		    
+		  endDate: datetime
+		    @max("2030-12-31T23:59:59Z")
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_OptionalFields(t *testing.T) {
+	input := `
+		version 1
+
+		type User {
+		  id: string
+		  email: string
+		  phone?: string  // Optional field
+		  address?: {     // Optional inline object
+		    street: string
+		    city: string
+		  }
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestAnalyzer_CompleteSchema(t *testing.T) {
+	input := `
+		version 1
+
+		rule @regex {
+		  for: string
+		  param: string
+		  error: "Invalid format"
+		}
+
+		rule @range {
+		  for: int
+		  param: int[]
+		  error: "Value out of range"
+		}
+
+		type Address {
+		  street: string
+		    @minlen(3)
+		  city: string
+		    @minlen(2)
+		  zipCode: string
+		    @regex("^\\d{5}$", error: "Zip code must be 5 digits")
+		}
+
+		type BaseUser {
+		  id: string
+		    @minlen(10)
+		  username: string
+		    @minlen(3)
+		    @maxlen(30)
+		    @regex("^[a-zA-Z0-9_]+$", error: "Username can only contain letters, numbers, and underscores")
+		}
+
+		type User extends BaseUser {
+		  email: string
+		    @contains("@")
+		    @minlen(5)
+		  password: string
+		    @minlen(8)
+		  age: int
+		    @range([18, 120], error: "Age must be between 18 and 120")
+		  isActive: boolean
+		    @equals(true)
+		  address: Address
+		  tags: string[]
+		    @minlen(1)
+		    @maxlen(10)
+		  metadata: {
+		    lastLogin: datetime
+		      @min("2020-01-01T00:00:00Z")
+		    preferences: {
+		      theme: string
+		        @enum(["light", "dark", "system"])
+		      notifications: boolean
+		    }
+		  }
+		}
+
+		proc CreateUser {
+		  input {
+		    user: User
+		  }
+
+		  output {
+		    success: boolean
+		    userId: string
+		    errors: string[]
+		  }
+
+		  meta {
+		    requiresAuth: false
+		    rateLimit: 10
+		    description: "Creates a new user in the system"
+		  }
+		}
+
+		proc GetUser {
+		  input {
+		    userId: string
+		      @minlen(10)
+		  }
+
+		  output {
+		    user: User
+		  }
+
+		  meta {
+		    requiresAuth: true
+		    cacheTTL: 300
+		    description: "Retrieves a user by ID"
+		  }
+		}
+	`
+	schema, err := parser.Parser.ParseString("test.urpc", input)
+	require.NoError(t, err)
+
+	analyzer := NewAnalyzer(schema)
+	errors, err := analyzer.Analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
