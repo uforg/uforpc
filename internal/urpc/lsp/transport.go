@@ -10,11 +10,13 @@ import (
 // scannerSplitFunc is a custom split function for the scanner that splits the input
 // into valid LSP JSON-RPC messages.
 //
+// If the input has no header it will ignore that chunk and continue reading the input.
+//
 // If the input has no sufficient data to form a valid LSP JSON-RPC message, it returns
 // 0, nil, nil to indicate that the scanner should continue reading the input.
 func scannerSplitFunc(data []byte, _ bool) (advance int, token []byte, err error) {
 	if !bytes.HasPrefix(data, []byte("Content-Length: ")) {
-		return 0, nil, nil
+		return len(data), nil, nil
 	}
 
 	delimiter := []byte("\r\n\r\n")
