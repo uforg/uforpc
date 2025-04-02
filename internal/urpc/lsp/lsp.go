@@ -4,21 +4,24 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"sync"
 )
 
 type LSP struct {
-	reader io.Reader
-	writer io.Writer
-	logger *LSPLogger
+	reader    io.Reader
+	writer    io.Writer
+	handlerMu sync.Mutex
+	logger    *LSPLogger
 }
 
 // New creates a new LSP instance. It uses the given reader and writer to read and write
 // messages to the LSP server.
 func New(reader io.Reader, writer io.Writer) *LSP {
 	return &LSP{
-		reader: reader,
-		writer: writer,
-		logger: NewLSPLogger(),
+		reader:    reader,
+		writer:    writer,
+		handlerMu: sync.Mutex{},
+		logger:    NewLSPLogger(),
 	}
 }
 
@@ -68,6 +71,9 @@ func (l *LSP) sendMessage(message any) error {
 }
 
 func (l *LSP) handleMessage(messageBytes []byte, message Message) error {
+	l.handlerMu.Lock()
+	defer l.handlerMu.Unlock()
+
 	if message.ID != "" {
 		l.logger.Info("message received", "id", message.ID, "method", message.Method)
 	} else {
