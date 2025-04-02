@@ -46,6 +46,27 @@ func (l *LSP) Run() error {
 	return nil
 }
 
+func (l *LSP) sendMessage(message any) error {
+	messageBytes, err := encode(message)
+	if err != nil {
+		return fmt.Errorf("failed to encode message: %w", err)
+	}
+
+	_, err = l.writer.Write(messageBytes)
+	if err != nil {
+		return fmt.Errorf("failed to write message: %w", err)
+	}
+
+	if m, ok := message.(ResponseMessage); ok {
+		l.logger.Info("message response sent", "id", m.ID, "method", m.Method)
+	}
+	if m, ok := message.(NotificationMessage); ok {
+		l.logger.Info("notification sent", "method", m.Method)
+	}
+
+	return nil
+}
+
 func (l *LSP) handleMessage(messageBytes []byte, message Message) error {
 	if message.ID != "" {
 		l.logger.Info("message received", "id", message.ID, "method", message.Method)
