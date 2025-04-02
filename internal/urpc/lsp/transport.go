@@ -4,7 +4,40 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
+
+// scannerSplitFunc is a custom split function for the scanner that splits the input
+// into valid LSP JSON-RPC messages.
+//
+// If the input has no sufficient data to form a valid LSP JSON-RPC message, it returns
+// 0, nil, nil to indicate that the scanner should continue reading the input.
+func scannerSplitFunc(data []byte, _ bool) (advance int, token []byte, err error) {
+	if !bytes.HasPrefix(data, []byte("Content-Length: ")) {
+		return 0, nil, nil
+	}
+
+	delimiter := []byte("\r\n\r\n")
+	header, content, found := bytes.Cut(data, delimiter)
+	if !found {
+		return 0, nil, nil
+	}
+
+	rawContentLength := bytes.TrimPrefix(header, []byte("Content-Length: "))
+	rawContentLength = bytes.TrimSpace(rawContentLength)
+	contentLength, err := strconv.Atoi(string(rawContentLength))
+	if err != nil {
+		return 0, nil, fmt.Errorf("invalid Content-Length, should be an integer: %s", err)
+	}
+
+	if len(content) < contentLength {
+		return 0, nil, nil
+	}
+	content = content[:contentLength]
+
+	totalLength := len(header) + len(delimiter) + len(content)
+	return totalLength, content, nil
+}
 
 // encode encodes the given data into a valid LSP JSON-RPC message and returns
 // the encoded message as a byte slice.
