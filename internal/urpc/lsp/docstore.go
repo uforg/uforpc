@@ -54,3 +54,10 @@ func (d *docstore) close(params NotificationMessageTextDocumentDidCloseParams) e
 	delete(d.docs, params.TextDocument.URI)
 	return nil
 }
+
+func (d *docstore) get(uri string) (docstoreItem, error) {
+	if _, ok := d.docs[uri]; !ok {
+		return docstoreItem{}, fmt.Errorf("document not found")
+	}
+	return d.docs[uri], nil
+}

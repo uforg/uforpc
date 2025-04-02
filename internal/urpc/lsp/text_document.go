@@ -24,3 +24,28 @@ type TextDocumentContentChangeEvent struct {
 	// The new text of the whole document.
 	Text string `json:"text"`
 }
+
+// TextDocumentPosition: Position in a text document expressed as zero-based line and
+// zero-based character offset.
+type TextDocumentPosition struct {
+	// The zero-based line number from the start of the document.
+	Line int `json:"line"`
+	// The zero-based character offset from the start of the line.
+	Character int `json:"character"`
+}
+
+// TextDocumentRange: A range in a text document expressed as (zero-based) start and end positions.
+type TextDocumentRange struct {
+	// The start position of the range.
+	Start TextDocumentPosition `json:"start"`
+	// The end position of the range.
+	End TextDocumentPosition `json:"end"`
+}
+
+// TextDocumentTextEdit: A text edit represents a change to a document.
+type TextDocumentTextEdit struct {
+	// The range of the text document to change.
+	Range TextDocumentRange `json:"range"`
+	// The string to replace the given range.
+	NewText string `json:"newText"`
+}

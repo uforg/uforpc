@@ -106,6 +106,8 @@ func (l *LSP) handleMessage(messageBytes []byte, message Message) (bool, error) 
 		return false, l.handleTextDocumentDidChange(messageBytes)
 	case "textDocument/didClose":
 		return false, l.handleTextDocumentDidClose(messageBytes)
+	case "textDocument/formatting":
+		return false, l.handleTextDocumentFormatting(messageBytes)
 	}
 
 	return false, nil
