@@ -168,9 +168,12 @@ type FieldRule struct {
 
 // FieldRuleBody represents the body of a rule applied to a field.
 type FieldRuleBody struct {
-	Pos         Position
-	EndPos      Position
-	ParamSingle *string  `parser:"@(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)?"`
-	ParamList   []string `parser:"(LBracket @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral) (Comma @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral))* RBracket)?"`
-	Error       string   `parser:"(Comma? Error Colon @StringLiteral)?"`
+	Pos              Position
+	EndPos           Position
+	ParamSingle      *string  `parser:"@(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)?"`
+	ParamListString  []string `parser:"(LBracket @StringLiteral (Comma @StringLiteral)* RBracket)?"`
+	ParamListInt     []string `parser:"(LBracket @IntLiteral (Comma @IntLiteral)* RBracket)?"`
+	ParamListFloat   []string `parser:"(LBracket @FloatLiteral (Comma @FloatLiteral)* RBracket)?"`
+	ParamListBoolean []string `parser:"(LBracket @(TrueLiteral | FalseLiteral) (Comma @(TrueLiteral | FalseLiteral))* RBracket)?"`
+	Error            string   `parser:"(Comma? Error Colon @StringLiteral)?"`
 }

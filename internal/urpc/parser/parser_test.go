@@ -783,26 +783,26 @@ func TestParserField(t *testing.T) {
 								{
 									Name: "enum",
 									Body: ast.FieldRuleBody{
-										ParamList: []string{"hello", "world"},
-										Error:     "Field must be 'hello' or 'world'",
+										ParamListString: []string{"hello", "world"},
+										Error:           "Field must be 'hello' or 'world'",
 									},
 								},
 								{
 									Name: "enum",
 									Body: ast.FieldRuleBody{
-										ParamList: []string{"1", "2", "3"},
+										ParamListInt: []string{"1", "2", "3"},
 									},
 								},
 								{
 									Name: "enum",
 									Body: ast.FieldRuleBody{
-										ParamList: []string{"1.1", "2.2", "3.3"},
+										ParamListFloat: []string{"1.1", "2.2", "3.3"},
 									},
 								},
 								{
 									Name: "enum",
 									Body: ast.FieldRuleBody{
-										ParamList: []string{"true", "false"},
+										ParamListBoolean: []string{"true", "false"},
 									},
 								},
 							},
@@ -813,6 +813,20 @@ func TestParserField(t *testing.T) {
 		}
 
 		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Rules with array parameters of multiple types not allowed", func(t *testing.T) {
+		input := `
+			type MyType {
+				field1: string
+					@enum(["hello", 1])
+					@enum([1, 1.1])
+					@enum([1.1, true])
+			}
+		`
+
+		_, err := Parser.ParseString("schema.urpc", input)
+		require.Error(t, err)
 	})
 }
 
@@ -1513,7 +1527,7 @@ func TestParserFullSchema(t *testing.T) {
 							{
 								Name: "range",
 								Body: ast.FieldRuleBody{
-									ParamList: []string{
+									ParamListInt: []string{
 										"0",
 										"1000",
 									},
@@ -1643,7 +1657,7 @@ func TestParserFullSchema(t *testing.T) {
 												{
 													Name: "enum",
 													Body: ast.FieldRuleBody{
-														ParamList: []string{
+														ParamListString: []string{
 															"red",
 															"green",
 															"blue",
@@ -1928,7 +1942,7 @@ func TestParserFullSchema(t *testing.T) {
 																		{
 																			Name: "enum",
 																			Body: ast.FieldRuleBody{
-																				ParamList: []string{
+																				ParamListInt: []string{
 																					"1",
 																					"2",
 																					"3",
