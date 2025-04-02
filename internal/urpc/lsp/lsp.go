@@ -84,6 +84,7 @@ func (l *LSP) handleMessage(messageBytes []byte, message Message) error {
 	case "initialize":
 		return l.handleInitialize(messageBytes)
 	case "initialized":
+		return l.handleInitialized(messageBytes)
 	}
 
 	return nil
