@@ -22,17 +22,19 @@ func encode(data any) ([]byte, error) {
 
 // decode decodes the given data into the given value. It expects the data to be
 // a valid LSP JSON-RPC message.
+//
+// If the data contains a header part (Content-Length: ...\r\n\r\n), it will be removed.
 func decode(data []byte, v any) error {
-	if !bytes.HasPrefix(data, []byte("Content-Length: ")) {
-		return fmt.Errorf("invalid LSP JSON-RPC message")
+	if bytes.HasPrefix(data, []byte("Content-Length: ")) {
+		delimiter := []byte("\r\n\r\n")
+		_, content, found := bytes.Cut(data, delimiter)
+		if !found {
+			return fmt.Errorf("invalid LSP JSON-RPC message")
+		}
+		data = content
 	}
 
-	segments := bytes.Split(data, []byte("\r\n\r\n"))
-	if len(segments) != 2 {
-		return fmt.Errorf("invalid LSP JSON-RPC message")
-	}
-
-	if err := json.Unmarshal(segments[1], &v); err != nil {
+	if err := json.Unmarshal(data, &v); err != nil {
 		return fmt.Errorf("failed to unmarshal data: %w", err)
 	}
 	return nil
