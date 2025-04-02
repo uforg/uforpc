@@ -14,7 +14,12 @@ var (
 // Message is a general message as defined by JSON-RPC. The language server protocol
 // always uses “2.0” as the jsonrpc version.
 type Message struct {
+	// The JSON-RPC version. Always "2.0".
 	JSONRPC string `json:"jsonrpc"`
+	// The request id. Only for messages.
+	ID IntOrString `json:"id,omitempty,omitzero"`
+	// The method to be invoked. For messages and notifications.
+	Method string `json:"method,omitempty,omitzero"`
 }
 
 // IntOrString is a type that can be either an int or a string when unmarshalled from JSON.
@@ -42,10 +47,6 @@ func (i *IntOrString) UnmarshalJSON(b []byte) error {
 // request must send a response back to the sender of the request.
 type RequestMessage struct {
 	Message
-	// The request id.
-	ID IntOrString `json:"id"`
-	// The method to be invoked.
-	Method string `json:"method"`
 }
 
 // ResponseMessage sent as a result of a request.
@@ -70,6 +71,4 @@ type ResponseError struct {
 // NotificationMessage describes a notification between the client and the server.
 type NotificationMessage struct {
 	Message
-	// The method to be invoked.
-	Method string `json:"method"`
 }
