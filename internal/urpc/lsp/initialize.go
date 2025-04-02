@@ -34,6 +34,8 @@ type ResponseMessageInitializeResultServerInfo struct {
 }
 
 type ResponseMessageInitializeResultCapabilities struct {
+	DocumentFormattingProvider bool `json:"documentFormattingProvider"`
+	TextDocumentSync           int  `json:"textDocumentSync"`
 }
 
 func (l *LSP) handleInitialize(rawMessage []byte) error {
@@ -60,7 +62,12 @@ func (l *LSP) handleInitialize(rawMessage []byte) error {
 				Name:    "UFO RPC Language Server",
 				Version: version.VersionWithPrefix,
 			},
-			Capabilities: ResponseMessageInitializeResultCapabilities{},
+			Capabilities: ResponseMessageInitializeResultCapabilities{
+				// Documents are synced by always sending the full content of the document.
+				TextDocumentSync: 1,
+				// Document formatting is supported.
+				DocumentFormattingProvider: true,
+			},
 		},
 	}
 

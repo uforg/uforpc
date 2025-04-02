@@ -12,6 +12,7 @@ type LSP struct {
 	writer    io.Writer
 	handlerMu sync.Mutex
 	logger    *LSPLogger
+	docstore  *docstore
 }
 
 // New creates a new LSP instance. It uses the given reader and writer to read and write
@@ -22,6 +23,7 @@ func New(reader io.Reader, writer io.Writer) *LSP {
 		writer:    writer,
 		handlerMu: sync.Mutex{},
 		logger:    NewLSPLogger(),
+		docstore:  newDocstore(),
 	}
 }
 
@@ -87,6 +89,7 @@ func (l *LSP) handleMessage(messageBytes []byte, message Message) (bool, error) 
 	}
 
 	switch message.Method {
+	// Lifecycle operations
 	case "initialize":
 		return false, l.handleInitialize(messageBytes)
 	case "initialized":
@@ -95,6 +98,14 @@ func (l *LSP) handleMessage(messageBytes []byte, message Message) (bool, error) 
 		return false, l.handleShutdown(messageBytes)
 	case "exit":
 		return true, nil
+
+	// Text document operations
+	case "textDocument/didOpen":
+		return false, l.handleTextDocumentDidOpen(messageBytes)
+	case "textDocument/didChange":
+		return false, l.handleTextDocumentDidChange(messageBytes)
+	case "textDocument/didClose":
+		return false, l.handleTextDocumentDidClose(messageBytes)
 	}
 
 	return false, nil
