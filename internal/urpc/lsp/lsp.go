@@ -41,8 +41,14 @@ func (l *LSP) Run() error {
 		if err := decode(messageBytes, &message); err != nil {
 			return fmt.Errorf("failed to decode message or notification: %w", err)
 		}
-		if err := l.handleMessage(messageBytes, message); err != nil {
+
+		shouldExit, err := l.handleMessage(messageBytes, message)
+		if err != nil {
 			return fmt.Errorf("failed to handle message with method %s and id %s: %w", message.Method, message.ID, err)
+		}
+
+		if shouldExit {
+			return nil
 		}
 	}
 
@@ -70,7 +76,7 @@ func (l *LSP) sendMessage(message any) error {
 	return nil
 }
 
-func (l *LSP) handleMessage(messageBytes []byte, message Message) error {
+func (l *LSP) handleMessage(messageBytes []byte, message Message) (bool, error) {
 	l.handlerMu.Lock()
 	defer l.handlerMu.Unlock()
 
@@ -82,10 +88,14 @@ func (l *LSP) handleMessage(messageBytes []byte, message Message) error {
 
 	switch message.Method {
 	case "initialize":
-		return l.handleInitialize(messageBytes)
+		return false, l.handleInitialize(messageBytes)
 	case "initialized":
-		return l.handleInitialized(messageBytes)
+		return false, l.handleInitialized(messageBytes)
+	case "shutdown":
+		return false, l.handleShutdown(messageBytes)
+	case "exit":
+		return true, nil
 	}
 
-	return nil
+	return false, nil
 }
