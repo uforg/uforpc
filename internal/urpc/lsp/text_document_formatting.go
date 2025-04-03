@@ -49,7 +49,7 @@ func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) (any, error) {
 
 	lines := strings.Split(doc.rawText, "\n")
 	lastLine := max(len(lines)-1, 0)
-	lastLineChar := max(len(lines[lastLine])-1, 0)
+	lastLineChar := len(lines[lastLine])
 
 	response.Result = &[]TextDocumentTextEdit{
 		{
