@@ -180,8 +180,12 @@ func TestParserImport(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Imports: []*ast.Import{
-				{Path: "../../my_sub_schema.urpc"},
+			Nodes: []*ast.Node{
+				{
+					Import: &ast.Import{
+						Path: "../../my_sub_schema.urpc",
+					},
+				},
 			},
 		}
 
@@ -200,11 +204,13 @@ func TestParserRuleDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Rules: []*ast.RuleDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "myRule",
-					Body: ast.RuleDeclBody{
-						For: "string",
+					Rule: &ast.RuleDecl{
+						Name: "myRule",
+						Body: ast.RuleDeclBody{
+							For: "string",
+						},
 					},
 				},
 			},
@@ -244,12 +250,14 @@ func TestParserRuleDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Rules: []*ast.RuleDecl{
+			Nodes: []*ast.Node{
 				{
-					Docstring: "My rule description",
-					Name:      "myRule",
-					Body: ast.RuleDeclBody{
-						For: "string",
+					Rule: &ast.RuleDecl{
+						Docstring: "My rule description",
+						Name:      "myRule",
+						Body: ast.RuleDeclBody{
+							For: "string",
+						},
 					},
 				},
 			},
@@ -269,13 +277,15 @@ func TestParserRuleDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Rules: []*ast.RuleDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "myRule",
-					Body: ast.RuleDeclBody{
-						For:          "string",
-						Param:        "string",
-						ParamIsArray: true,
+					Rule: &ast.RuleDecl{
+						Name: "myRule",
+						Body: ast.RuleDeclBody{
+							For:          "string",
+							Param:        "string",
+							ParamIsArray: true,
+						},
 					},
 				},
 			},
@@ -299,15 +309,17 @@ func TestParserRuleDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Rules: []*ast.RuleDecl{
+			Nodes: []*ast.Node{
 				{
-					Docstring: "My rule description",
-					Name:      "myRule",
-					Body: ast.RuleDeclBody{
-						For:          "MyType",
-						Param:        "float",
-						ParamIsArray: true,
-						Error:        "My error message",
+					Rule: &ast.RuleDecl{
+						Docstring: "My rule description",
+						Name:      "myRule",
+						Body: ast.RuleDeclBody{
+							For:          "MyType",
+							Param:        "float",
+							ParamIsArray: true,
+							Error:        "My error message",
+						},
 					},
 				},
 			},
@@ -328,14 +340,16 @@ func TestParserTypeDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
+								},
 							},
 						},
 					},
@@ -359,15 +373,17 @@ func TestParserTypeDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Docstring: "My type description",
-					Name:      "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
+					Type: &ast.TypeDecl{
+						Docstring: "My type description",
+						Name:      "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
+								},
 							},
 						},
 					},
@@ -388,15 +404,17 @@ func TestParserTypeDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name:    "MyType",
-					Extends: []string{"OtherType"},
-					Fields: []*ast.Field{
-						{
-							Name: "field",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
+					Type: &ast.TypeDecl{
+						Name:    "MyType",
+						Extends: []string{"OtherType"},
+						Fields: []*ast.Field{
+							{
+								Name: "field",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
+								},
 							},
 						},
 					},
@@ -417,15 +435,17 @@ func TestParserTypeDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name:    "MyType",
-					Extends: []string{"OtherType", "AnotherType", "YetAnotherType"},
-					Fields: []*ast.Field{
-						{
-							Name: "field",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
+					Type: &ast.TypeDecl{
+						Name:    "MyType",
+						Extends: []string{"OtherType", "AnotherType", "YetAnotherType"},
+						Fields: []*ast.Field{
+							{
+								Name: "field",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
+								},
 							},
 						},
 					},
@@ -449,16 +469,18 @@ func TestParserTypeDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Docstring: "My type description",
-					Name:      "MyType",
-					Extends:   []string{"OtherType"},
-					Fields: []*ast.Field{
-						{
-							Name: "field",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
+					Type: &ast.TypeDecl{
+						Docstring: "My type description",
+						Name:      "MyType",
+						Extends:   []string{"OtherType"},
+						Fields: []*ast.Field{
+							{
+								Name: "field",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
+								},
 							},
 						},
 					},
@@ -485,14 +507,16 @@ func TestParserTypeDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+								},
 							},
 						},
 					},
@@ -519,38 +543,40 @@ func TestParserField(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field1",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field1",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
+								},
 							},
-						},
-						{
-							Name: "field2",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("int")},
+							{
+								Name: "field2",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("int")},
+								},
 							},
-						},
-						{
-							Name: "field3",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("float")},
+							{
+								Name: "field3",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("float")},
+								},
 							},
-						},
-						{
-							Name: "field4",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("boolean")},
+							{
+								Name: "field4",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("boolean")},
+								},
 							},
-						},
-						{
-							Name: "field5",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("datetime")},
+							{
+								Name: "field5",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("datetime")},
+								},
 							},
 						},
 					},
@@ -572,20 +598,22 @@ func TestParserField(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field1",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field1",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+								},
 							},
-						},
-						{
-							Name: "field2",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("MyOtherCustomType")},
+							{
+								Name: "field2",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("MyOtherCustomType")},
+								},
 							},
 						},
 					},
@@ -607,23 +635,25 @@ func TestParserField(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field1",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field1",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
+								},
+								Optional: true,
 							},
-							Optional: true,
-						},
-						{
-							Name: "field2",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+							{
+								Name: "field2",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+								},
+								Optional: true,
 							},
-							Optional: true,
 						},
 					},
 				},
@@ -652,66 +682,68 @@ func TestParserField(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field1",
-							Type: ast.FieldType{
-								Depth: 1,
-								Base: &ast.FieldTypeBase{
-									Named: ptr("string"),
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field1",
+								Type: ast.FieldType{
+									Depth: 1,
+									Base: &ast.FieldTypeBase{
+										Named: ptr("string"),
+									},
 								},
 							},
-						},
-						{
-							Name: "field2",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{
-									Object: &ast.FieldTypeObject{
-										Fields: []*ast.Field{
-											{
-												Name: "subfield",
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("string")},
+							{
+								Name: "field2",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Object: &ast.FieldTypeObject{
+											Fields: []*ast.Field{
+												{
+													Name: "subfield",
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{Named: ptr("string")},
+													},
 												},
 											},
 										},
 									},
 								},
 							},
-						},
-						{
-							Name: "field3",
-							Type: ast.FieldType{
-								Depth: 2,
-								Base: &ast.FieldTypeBase{
-									Named: ptr("int"),
+							{
+								Name: "field3",
+								Type: ast.FieldType{
+									Depth: 2,
+									Base: &ast.FieldTypeBase{
+										Named: ptr("int"),
+									},
 								},
 							},
-						},
-						{
-							Name:     "field4",
-							Optional: true,
-							Type: ast.FieldType{
-								Depth: 7,
-								Base: &ast.FieldTypeBase{
-									Object: &ast.FieldTypeObject{
-										Fields: []*ast.Field{
-											{
-												Name: "subfield",
-												Type: ast.FieldType{
-													Depth: 2,
-													Base: &ast.FieldTypeBase{
-														Object: &ast.FieldTypeObject{
-															Fields: []*ast.Field{
-																{
-																	Name: "subsubfield",
-																	Type: ast.FieldType{
-																		Depth: 3,
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("datetime"),
+							{
+								Name:     "field4",
+								Optional: true,
+								Type: ast.FieldType{
+									Depth: 7,
+									Base: &ast.FieldTypeBase{
+										Object: &ast.FieldTypeObject{
+											Fields: []*ast.Field{
+												{
+													Name: "subfield",
+													Type: ast.FieldType{
+														Depth: 2,
+														Base: &ast.FieldTypeBase{
+															Object: &ast.FieldTypeObject{
+																Fields: []*ast.Field{
+																	{
+																		Name: "subsubfield",
+																		Type: ast.FieldType{
+																			Depth: 3,
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("datetime"),
+																			},
 																		},
 																	},
 																},
@@ -751,58 +783,60 @@ func TestParserField(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Types: []*ast.TypeDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyType",
-					Fields: []*ast.Field{
-						{
-							Name: "field1",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{Named: ptr("string")},
-							},
-							Rules: []*ast.FieldRule{
-								{
-									Name: "uppercase",
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Fields: []*ast.Field{
+							{
+								Name: "field1",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{Named: ptr("string")},
 								},
-								{
-									Name: "uppercase",
-								},
-								{
-									Name: "uppercase",
-									Body: ast.FieldRuleBody{
-										Error: "Field must be uppercase",
+								Rules: []*ast.FieldRule{
+									{
+										Name: "uppercase",
 									},
-								},
-								{
-									Name: "contains",
-									Body: ast.FieldRuleBody{
-										ParamSingle: ptr("hello"),
-										Error:       "Field must contain 'hello'",
+									{
+										Name: "uppercase",
 									},
-								},
-								{
-									Name: "enum",
-									Body: ast.FieldRuleBody{
-										ParamListString: []string{"hello", "world"},
-										Error:           "Field must be 'hello' or 'world'",
+									{
+										Name: "uppercase",
+										Body: ast.FieldRuleBody{
+											Error: "Field must be uppercase",
+										},
 									},
-								},
-								{
-									Name: "enum",
-									Body: ast.FieldRuleBody{
-										ParamListInt: []string{"1", "2", "3"},
+									{
+										Name: "contains",
+										Body: ast.FieldRuleBody{
+											ParamSingle: ptr("hello"),
+											Error:       "Field must contain 'hello'",
+										},
 									},
-								},
-								{
-									Name: "enum",
-									Body: ast.FieldRuleBody{
-										ParamListFloat: []string{"1.1", "2.2", "3.3"},
+									{
+										Name: "enum",
+										Body: ast.FieldRuleBody{
+											ParamListString: []string{"hello", "world"},
+											Error:           "Field must be 'hello' or 'world'",
+										},
 									},
-								},
-								{
-									Name: "enum",
-									Body: ast.FieldRuleBody{
-										ParamListBoolean: []string{"true", "false"},
+									{
+										Name: "enum",
+										Body: ast.FieldRuleBody{
+											ParamListInt: []string{"1", "2", "3"},
+										},
+									},
+									{
+										Name: "enum",
+										Body: ast.FieldRuleBody{
+											ParamListFloat: []string{"1.1", "2.2", "3.3"},
+										},
+									},
+									{
+										Name: "enum",
+										Body: ast.FieldRuleBody{
+											ParamListBoolean: []string{"true", "false"},
+										},
 									},
 								},
 							},
@@ -839,9 +873,11 @@ func TestParserProcDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Procs: []*ast.ProcDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyProc",
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+					},
 				},
 			},
 		}
@@ -860,10 +896,12 @@ func TestParserProcDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Procs: []*ast.ProcDecl{
+			Nodes: []*ast.Node{
 				{
-					Docstring: "MyProc is a procedure that does something.",
-					Name:      "MyProc",
+					Proc: &ast.ProcDecl{
+						Docstring: "MyProc is a procedure that does something.",
+						Name:      "MyProc",
+					},
 				},
 			},
 		}
@@ -883,14 +921,16 @@ func TestParserProcDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Procs: []*ast.ProcDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyProc",
-					Body: ast.ProcDeclBody{
-						Input: []*ast.Field{
-							{
-								Name: "field1",
-								Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("string")}},
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Body: ast.ProcDeclBody{
+							Input: []*ast.Field{
+								{
+									Name: "field1",
+									Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("string")}},
+								},
 							},
 						},
 					},
@@ -913,14 +953,16 @@ func TestParserProcDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Procs: []*ast.ProcDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyProc",
-					Body: ast.ProcDeclBody{
-						Output: []*ast.Field{
-							{
-								Name: "field1",
-								Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("int")}},
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Body: ast.ProcDeclBody{
+							Output: []*ast.Field{
+								{
+									Name: "field1",
+									Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("int")}},
+								},
 							},
 						},
 					},
@@ -947,16 +989,18 @@ func TestParserProcDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Procs: []*ast.ProcDecl{
+			Nodes: []*ast.Node{
 				{
-					Name: "MyProc",
-					Body: ast.ProcDeclBody{
-						Meta: []*ast.ProcDeclBodyMetaKV{
-							{Key: "key1", Value: "hello"},
-							{Key: "key2", Value: "123"},
-							{Key: "key3", Value: "1.23"},
-							{Key: "key4", Value: "true"},
-							{Key: "key5", Value: "false"},
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Body: ast.ProcDeclBody{
+							Meta: []*ast.ProcDeclBodyMetaKV{
+								{Key: "key1", Value: "hello"},
+								{Key: "key2", Value: "123"},
+								{Key: "key3", Value: "1.23"},
+								{Key: "key4", Value: "true"},
+								{Key: "key5", Value: "false"},
+							},
 						},
 					},
 				},
@@ -991,49 +1035,51 @@ func TestParserProcDecl(t *testing.T) {
 		require.NoError(t, err)
 
 		expected := &ast.URPCSchema{
-			Procs: []*ast.ProcDecl{
+			Nodes: []*ast.Node{
 				{
-					Docstring: "MyProc is a procedure that does something.",
-					Name:      "MyProc",
-					Body: ast.ProcDeclBody{
-						Input: []*ast.Field{
-							{
-								Name: "input1",
-								Type: ast.FieldType{
-									Depth: 2,
-									Base:  &ast.FieldTypeBase{Named: ptr("string")},
+					Proc: &ast.ProcDecl{
+						Docstring: "MyProc is a procedure that does something.",
+						Name:      "MyProc",
+						Body: ast.ProcDeclBody{
+							Input: []*ast.Field{
+								{
+									Name: "input1",
+									Type: ast.FieldType{
+										Depth: 2,
+										Base:  &ast.FieldTypeBase{Named: ptr("string")},
+									},
 								},
 							},
-						},
-						Output: []*ast.Field{
-							{
-								Name:     "output1",
-								Optional: true,
-								Type: ast.FieldType{
-									Base: &ast.FieldTypeBase{Named: ptr("int")},
+							Output: []*ast.Field{
+								{
+									Name:     "output1",
+									Optional: true,
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: ptr("int")},
+									},
 								},
 							},
-						},
-						Meta: []*ast.ProcDeclBodyMetaKV{
-							{
-								Key:   "key1",
-								Value: "hello",
-							},
-							{
-								Key:   "key2",
-								Value: "123",
-							},
-							{
-								Key:   "key3",
-								Value: "1.23",
-							},
-							{
-								Key:   "key4",
-								Value: "true",
-							},
-							{
-								Key:   "key5",
-								Value: "false",
+							Meta: []*ast.ProcDeclBodyMetaKV{
+								{
+									Key:   "key1",
+									Value: "hello",
+								},
+								{
+									Key:   "key2",
+									Value: "123",
+								},
+								{
+									Key:   "key3",
+									Value: "1.23",
+								},
+								{
+									Key:   "key4",
+									Value: "true",
+								},
+								{
+									Key:   "key5",
+									Value: "false",
+								},
 							},
 						},
 					},
@@ -1047,15 +1093,12 @@ func TestParserProcDecl(t *testing.T) {
 
 func TestParserFullSchema(t *testing.T) {
 	input := `
-		// Version declaration
 		version 1
 
 		/* Import other schema */
 		import "my_sub_schema.urpc"
 
-		//////////////////////////////
-		// Custom rule declarations //
-		//////////////////////////////
+		// Custom rule declarations
 
 		"""
 		This rule validates if a string matches a regular expression pattern.
@@ -1067,24 +1110,13 @@ func TestParserFullSchema(t *testing.T) {
 			error: "Invalid format"
 		}
 
-		"""
-		Validates if a value is within a specified range.
-		"""
-		rule @range {
-			for: int
-			param: int[]
-			error: "Value out of range"
-		}
-
 		""" Validate "category" with custom logic """
 		rule @validateCategory {
 			for: Category
 			error: "Field \"category\" is not valid"
 		}
 
-		///////////////////////
-		// Type declarations //
-		///////////////////////
+		// Type declarations
 
 		type FirstDummyType {
 			dummyField: datetime
@@ -1168,9 +1200,7 @@ func TestParserFullSchema(t *testing.T) {
 			}[]
 		}
 
-		////////////////////////////
-		// Procedure declarations //
-		////////////////////////////
+		// Procedure declarations
 
 		"""
 		GetCategory retrieves a category by its ID.
@@ -1258,6 +1288,15 @@ func TestParserFullSchema(t *testing.T) {
 				apiVersion: "1.2.0"
 			}
 		}
+
+		"""
+		Validates if a value is within a specified range.
+		"""
+		rule @range {
+			for: int
+			param: int[]
+			error: "Value out of range"
+		}
 	`
 
 	parsed, err := Parser.ParseString("schema.urpc", input)
@@ -1267,502 +1306,70 @@ func TestParserFullSchema(t *testing.T) {
 		Version: &ast.Version{
 			Number: 1,
 		},
-		Imports: []*ast.Import{
+		Nodes: []*ast.Node{
 			{
-				Path: "my_sub_schema.urpc",
-			},
-		},
-		Rules: []*ast.RuleDecl{
-			{
-				Docstring: "This rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.",
-				Name:      "regex",
-				Body: ast.RuleDeclBody{
-					For:   "string",
-					Param: "string",
-					Error: "Invalid format",
+				CommentBlock: &ast.CommentBlock{
+					Text: "Import other schema",
 				},
 			},
 			{
-				Docstring: "Validates if a value is within a specified range.",
-				Name:      "range",
-				Body: ast.RuleDeclBody{
-					For:          "int",
-					Param:        "int",
-					ParamIsArray: true,
-					Error:        "Value out of range",
+				Import: &ast.Import{
+					Path: "my_sub_schema.urpc",
 				},
 			},
 			{
-				Docstring: "Validate \"category\" with custom logic",
-				Name:      "validateCategory",
-				Body: ast.RuleDeclBody{
-					For:   "Category",
-					Error: "Field \"category\" is not valid",
+				Comment: &ast.Comment{
+					Text: "Custom rule declarations",
 				},
 			},
-		},
-		Types: []*ast.TypeDecl{
 			{
-				Name: "FirstDummyType",
-				Fields: []*ast.Field{
-					{
-						Name: "dummyField",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("datetime"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "min",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("1900-01-01T00:00:00Z"),
-								},
-							},
-							{
-								Name: "max",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("2100-01-01T00:00:00Z"),
-								},
-							},
-						},
+				Rule: &ast.RuleDecl{
+					Docstring: "This rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.",
+					Name:      "regex",
+					Body: ast.RuleDeclBody{
+						For:   "string",
+						Param: "string",
+						Error: "Invalid format",
 					},
 				},
 			},
 			{
-				Name: "SecondDummyType",
-				Fields: []*ast.Field{
-					{
-						Name: "dummyField",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("int"),
-							},
-						},
+				Rule: &ast.RuleDecl{
+					Docstring: "Validate \"category\" with custom logic",
+					Name:      "validateCategory",
+					Body: ast.RuleDeclBody{
+						For:   "Category",
+						Error: "Field \"category\" is not valid",
 					},
 				},
 			},
 			{
-				Name: "ThirdDummyType",
-				Extends: []string{
-					"FirstDummyType",
-					"SecondDummyType",
-				},
-				Fields: []*ast.Field{
-					{
-						Name: "dummyField",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-					},
+				Comment: &ast.Comment{
+					Text: "Type declarations",
 				},
 			},
 			{
-				Docstring: "Category represents a product category in the system.\n\t\tThis type is used across the catalog module.",
-				Name:      "Category",
-				Extends: []string{
-					"ThirdDummyType",
-				},
-				Fields: []*ast.Field{
-					{
-						Name: "id",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "uuid",
-								Body: ast.FieldRuleBody{
-									Error: "Must be a valid UUID",
+				Type: &ast.TypeDecl{
+					Name: "FirstDummyType",
+					Fields: []*ast.Field{
+						{
+							Name: "dummyField",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("datetime"),
 								},
 							},
-							{
-								Name: "minlen",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("36"),
-								},
-							},
-							{
-								Name: "maxlen",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("36"),
-									Error:       "UUID must be exactly 36 characters",
-								},
-							},
-						},
-					},
-					{
-						Name: "name",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "minlen",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("3"),
-									Error:       "Name must be at least 3 characters long",
-								},
-							},
-						},
-					},
-					{
-						Name:     "description",
-						Optional: true,
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-					},
-					{
-						Name: "isActive",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("boolean"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "equals",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("true"),
-								},
-							},
-						},
-					},
-					{
-						Name:     "parentId",
-						Optional: true,
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "uuid",
-							},
-						},
-					},
-				},
-			},
-			{
-				Docstring: "Product represents a sellable item in the store.\n\t\tProducts have complex validation rules and can be\n\t\tnested inside catalogs.",
-				Name:      "Product",
-				Fields: []*ast.Field{
-					{
-						Name: "id",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "uuid",
-							},
-						},
-					},
-					{
-						Name: "name",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "minlen",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("2"),
-								},
-							},
-							{
-								Name: "maxlen",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("100"),
-									Error:       "Name cannot exceed 100 characters",
-								},
-							},
-						},
-					},
-					{
-						Name: "price",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("float"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "min",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("0.01"),
-									Error:       "Price must be greater than zero",
-								},
-							},
-						},
-					},
-					{
-						Name: "stock",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("int"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "min",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("0"),
-								},
-							},
-							{
-								Name: "range",
-								Body: ast.FieldRuleBody{
-									ParamListInt: []string{
-										"0",
-										"1000",
-									},
-									Error: "Stock must be between 0 and 1000",
-								},
-							},
-						},
-					},
-					{
-						Name: "category",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Named: ptr("Category"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "validateCategory",
-								Body: ast.FieldRuleBody{
-									Error: "Invalid category custom message",
-								},
-							},
-						},
-					},
-					{
-						Name:     "tags",
-						Optional: true,
-						Type: ast.FieldType{
-							Depth: 1,
-							Base: &ast.FieldTypeBase{
-								Named: ptr("string"),
-							},
-						},
-						Rules: []*ast.FieldRule{
-							{
-								Name: "minlen",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("1"),
-									Error:       "At least one tag is required",
-								},
-							},
-							{
-								Name: "maxlen",
-								Body: ast.FieldRuleBody{
-									ParamSingle: ptr("10"),
-								},
-							},
-						},
-					},
-					{
-						Name: "details",
-						Type: ast.FieldType{
-							Base: &ast.FieldTypeBase{
-								Object: &ast.FieldTypeObject{
-									Fields: []*ast.Field{
-										{
-											Name: "dimensions",
-											Type: ast.FieldType{
-												Base: &ast.FieldTypeBase{
-													Object: &ast.FieldTypeObject{
-														Fields: []*ast.Field{
-															{
-																Name: "width",
-																Type: ast.FieldType{
-																	Base: &ast.FieldTypeBase{
-																		Named: ptr("float"),
-																	},
-																},
-																Rules: []*ast.FieldRule{
-																	{
-																		Name: "min",
-																		Body: ast.FieldRuleBody{
-																			ParamSingle: ptr("0.0"),
-																			Error:       "Width cannot be negative",
-																		},
-																	},
-																},
-															},
-															{
-																Name: "height",
-																Type: ast.FieldType{
-																	Base: &ast.FieldTypeBase{
-																		Named: ptr("float"),
-																	},
-																},
-																Rules: []*ast.FieldRule{
-																	{
-																		Name: "min",
-																		Body: ast.FieldRuleBody{
-																			ParamSingle: ptr("0.0"),
-																		},
-																	},
-																},
-															},
-															{
-																Name:     "depth",
-																Optional: true,
-																Type: ast.FieldType{
-																	Base: &ast.FieldTypeBase{
-																		Named: ptr("float"),
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-										{
-											Name:     "weight",
-											Optional: true,
-											Type: ast.FieldType{
-												Base: &ast.FieldTypeBase{
-													Named: ptr("float"),
-												},
-											},
-										},
-										{
-											Name: "colors",
-											Type: ast.FieldType{
-												Depth: 1,
-												Base: &ast.FieldTypeBase{
-													Named: ptr("string"),
-												},
-											},
-											Rules: []*ast.FieldRule{
-												{
-													Name: "enum",
-													Body: ast.FieldRuleBody{
-														ParamListString: []string{
-															"red",
-															"green",
-															"blue",
-															"black",
-															"white",
-														},
-														Error: "Color must be one of the allowed values",
-													},
-												},
-											},
-										},
-										{
-											Name:     "attributes",
-											Optional: true,
-											Type: ast.FieldType{
-												Depth: 1,
-												Base: &ast.FieldTypeBase{
-													Object: &ast.FieldTypeObject{
-														Fields: []*ast.Field{
-															{
-																Name: "name",
-																Type: ast.FieldType{
-																	Base: &ast.FieldTypeBase{
-																		Named: ptr("string"),
-																	},
-																},
-															},
-															{
-																Name: "value",
-																Type: ast.FieldType{
-																	Base: &ast.FieldTypeBase{
-																		Named: ptr("string"),
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "min",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("1900-01-01T00:00:00Z"),
 									},
 								},
-							},
-						},
-					},
-					{
-						Name: "variations",
-						Type: ast.FieldType{
-							Depth: 1,
-							Base: &ast.FieldTypeBase{
-								Object: &ast.FieldTypeObject{
-									Fields: []*ast.Field{
-										{
-											Name: "sku",
-											Type: ast.FieldType{
-												Base: &ast.FieldTypeBase{
-													Named: ptr("string"),
-												},
-											},
-										},
-										{
-											Name: "price",
-											Type: ast.FieldType{
-												Base: &ast.FieldTypeBase{
-													Named: ptr("float"),
-												},
-											},
-											Rules: []*ast.FieldRule{
-												{
-													Name: "min",
-													Body: ast.FieldRuleBody{
-														ParamSingle: ptr("0.01"),
-														Error:       "Variation price must be greater than zero",
-													},
-												},
-											},
-										},
-										{
-											Name: "attributes",
-											Type: ast.FieldType{
-												Depth: 1,
-												Base: &ast.FieldTypeBase{
-													Object: &ast.FieldTypeObject{
-														Fields: []*ast.Field{
-															{
-																Name: "name",
-																Type: ast.FieldType{
-																	Base: &ast.FieldTypeBase{
-																		Named: ptr("string"),
-																	},
-																},
-															},
-															{
-																Name: "value",
-																Type: ast.FieldType{
-																	Base: &ast.FieldTypeBase{
-																		Named: ptr("string"),
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
+								{
+									Name: "max",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("2100-01-01T00:00:00Z"),
 									},
 								},
 							},
@@ -1770,13 +1377,48 @@ func TestParserFullSchema(t *testing.T) {
 					},
 				},
 			},
-		},
-		Procs: []*ast.ProcDecl{
 			{
-				Docstring: "GetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.",
-				Name:      "GetCategory",
-				Body: ast.ProcDeclBody{
-					Input: []*ast.Field{
+				Type: &ast.TypeDecl{
+					Name: "SecondDummyType",
+					Fields: []*ast.Field{
+						{
+							Name: "dummyField",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("int"),
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Type: &ast.TypeDecl{
+					Name: "ThirdDummyType",
+					Extends: []string{
+						"FirstDummyType",
+						"SecondDummyType",
+					},
+					Fields: []*ast.Field{
+						{
+							Name: "dummyField",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("string"),
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Type: &ast.TypeDecl{
+					Docstring: "Category represents a product category in the system.\n\t\tThis type is used across the catalog module.",
+					Name:      "Category",
+					Extends: []string{
+						"ThirdDummyType",
+					},
+					Fields: []*ast.Field{
 						{
 							Name: "id",
 							Type: ast.FieldType{
@@ -1788,200 +1430,69 @@ func TestParserFullSchema(t *testing.T) {
 								{
 									Name: "uuid",
 									Body: ast.FieldRuleBody{
-										Error: "Category ID must be a valid UUID",
+										Error: "Must be a valid UUID",
+									},
+								},
+								{
+									Name: "minlen",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("36"),
+									},
+								},
+								{
+									Name: "maxlen",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("36"),
+										Error:       "UUID must be exactly 36 characters",
 									},
 								},
 							},
 						},
-					},
-					Output: []*ast.Field{
 						{
-							Name: "category",
+							Name: "name",
 							Type: ast.FieldType{
 								Base: &ast.FieldTypeBase{
-									Named: ptr("Category"),
+									Named: ptr("string"),
+								},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "minlen",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("3"),
+										Error:       "Name must be at least 3 characters long",
+									},
 								},
 							},
 						},
 						{
-							Name: "exists",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{
-									Named: ptr("boolean"),
-								},
-							},
-						},
-					},
-					Meta: []*ast.ProcDeclBodyMetaKV{
-						{
-							Key:   "cache",
-							Value: "true",
-						},
-						{
-							Key:   "cacheTime",
-							Value: "300",
-						},
-						{
-							Key:   "requiresAuth",
-							Value: "false",
-						},
-						{
-							Key:   "apiVersion",
-							Value: "1.0.0",
-						},
-					},
-				},
-			},
-			{
-				Docstring: "CreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.",
-				Name:      "CreateProduct",
-				Body: ast.ProcDeclBody{
-					Input: []*ast.Field{
-						{
-							Name: "product",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{
-									Named: ptr("Product"),
-								},
-							},
-						},
-						{
-							Name:     "options",
+							Name:     "description",
 							Optional: true,
 							Type: ast.FieldType{
 								Base: &ast.FieldTypeBase{
-									Object: &ast.FieldTypeObject{
-										Fields: []*ast.Field{
-											{
-												Name: "draft",
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("boolean"),
-													},
-												},
-											},
-											{
-												Name: "notify",
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("boolean"),
-													},
-												},
-											},
-											{
-												Name:     "scheduledFor",
-												Optional: true,
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("string"),
-													},
-												},
-												Rules: []*ast.FieldRule{
-													{
-														Name: "iso8601",
-														Body: ast.FieldRuleBody{
-															Error: "Must be a valid ISO8601 date",
-														},
-													},
-												},
-											},
-											{
-												Name:     "tags",
-												Optional: true,
-												Type: ast.FieldType{
-													Depth: 1,
-													Base: &ast.FieldTypeBase{
-														Named: ptr("string"),
-													},
-												},
-											},
-										},
-									},
+									Named: ptr("string"),
 								},
 							},
 						},
 						{
-							Name: "validation",
-							Type: ast.FieldType{
-								Base: &ast.FieldTypeBase{
-									Object: &ast.FieldTypeObject{
-										Fields: []*ast.Field{
-											{
-												Name:     "skipValidation",
-												Optional: true,
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("boolean"),
-													},
-												},
-											},
-											{
-												Name:     "customRules",
-												Optional: true,
-												Type: ast.FieldType{
-													Depth: 1,
-													Base: &ast.FieldTypeBase{
-														Object: &ast.FieldTypeObject{
-															Fields: []*ast.Field{
-																{
-																	Name: "name",
-																	Type: ast.FieldType{
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
-																		},
-																	},
-																},
-																{
-																	Name: "severity",
-																	Type: ast.FieldType{
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("int"),
-																		},
-																	},
-																	Rules: []*ast.FieldRule{
-																		{
-																			Name: "enum",
-																			Body: ast.FieldRuleBody{
-																				ParamListInt: []string{
-																					"1",
-																					"2",
-																					"3",
-																				},
-																				Error: "Severity must be 1, 2, or 3",
-																			},
-																		},
-																	},
-																},
-																{
-																	Name: "message",
-																	Type: ast.FieldType{
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					Output: []*ast.Field{
-						{
-							Name: "success",
+							Name: "isActive",
 							Type: ast.FieldType{
 								Base: &ast.FieldTypeBase{
 									Named: ptr("boolean"),
 								},
 							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "equals",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("true"),
+									},
+								},
+							},
 						},
 						{
-							Name: "productId",
+							Name:     "parentId",
+							Optional: true,
 							Type: ast.FieldType{
 								Base: &ast.FieldTypeBase{
 									Named: ptr("string"),
@@ -1990,124 +1501,168 @@ func TestParserFullSchema(t *testing.T) {
 							Rules: []*ast.FieldRule{
 								{
 									Name: "uuid",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Type: &ast.TypeDecl{
+					Docstring: "Product represents a sellable item in the store.\n\t\tProducts have complex validation rules and can be\n\t\tnested inside catalogs.",
+					Name:      "Product",
+					Fields: []*ast.Field{
+						{
+							Name: "id",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("string"),
+								},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "uuid",
+								},
+							},
+						},
+						{
+							Name: "name",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("string"),
+								},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "minlen",
 									Body: ast.FieldRuleBody{
-										Error: "Product ID must be a valid UUID",
+										ParamSingle: ptr("2"),
+									},
+								},
+								{
+									Name: "maxlen",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("100"),
+										Error:       "Name cannot exceed 100 characters",
 									},
 								},
 							},
 						},
 						{
-							Name:     "errors",
+							Name: "price",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("float"),
+								},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "min",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("0.01"),
+										Error:       "Price must be greater than zero",
+									},
+								},
+							},
+						},
+						{
+							Name: "stock",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("int"),
+								},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "min",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("0"),
+									},
+								},
+								{
+									Name: "range",
+									Body: ast.FieldRuleBody{
+										ParamListInt: []string{
+											"0",
+											"1000",
+										},
+										Error: "Stock must be between 0 and 1000",
+									},
+								},
+							},
+						},
+						{
+							Name: "category",
+							Type: ast.FieldType{
+								Base: &ast.FieldTypeBase{
+									Named: ptr("Category"),
+								},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "validateCategory",
+									Body: ast.FieldRuleBody{
+										Error: "Invalid category custom message",
+									},
+								},
+							},
+						},
+						{
+							Name:     "tags",
 							Optional: true,
 							Type: ast.FieldType{
 								Depth: 1,
 								Base: &ast.FieldTypeBase{
-									Object: &ast.FieldTypeObject{
-										Fields: []*ast.Field{
-											{
-												Name: "code",
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("int"),
-													},
-												},
-											},
-											{
-												Name: "message",
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("string"),
-													},
-												},
-											},
-											{
-												Name:     "field",
-												Optional: true,
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("string"),
-													},
-												},
-											},
-										},
+									Named: ptr("string"),
+								},
+							},
+							Rules: []*ast.FieldRule{
+								{
+									Name: "minlen",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("1"),
+										Error:       "At least one tag is required",
+									},
+								},
+								{
+									Name: "maxlen",
+									Body: ast.FieldRuleBody{
+										ParamSingle: ptr("10"),
 									},
 								},
 							},
 						},
 						{
-							Name: "analytics",
+							Name: "details",
 							Type: ast.FieldType{
 								Base: &ast.FieldTypeBase{
 									Object: &ast.FieldTypeObject{
 										Fields: []*ast.Field{
 											{
-												Name: "duration",
+												Name: "dimensions",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Named: ptr("float"),
-													},
-												},
-											},
-											{
-												Name: "processingSteps",
-												Type: ast.FieldType{
-													Depth: 1,
 													Base: &ast.FieldTypeBase{
 														Object: &ast.FieldTypeObject{
 															Fields: []*ast.Field{
 																{
-																	Name: "name",
-																	Type: ast.FieldType{
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
-																		},
-																	},
-																},
-																{
-																	Name: "duration",
+																	Name: "width",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
 																			Named: ptr("float"),
 																		},
 																	},
-																},
-																{
-																	Name: "success",
-																	Type: ast.FieldType{
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("boolean"),
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											{
-												Name: "serverInfo",
-												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{
-														Object: &ast.FieldTypeObject{
-															Fields: []*ast.Field{
-																{
-																	Name: "id",
-																	Type: ast.FieldType{
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
+																	Rules: []*ast.FieldRule{
+																		{
+																			Name: "min",
+																			Body: ast.FieldRuleBody{
+																				ParamSingle: ptr("0.0"),
+																				Error:       "Width cannot be negative",
+																			},
 																		},
 																	},
 																},
 																{
-																	Name: "region",
-																	Type: ast.FieldType{
-																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
-																		},
-																	},
-																},
-																{
-																	Name: "load",
+																	Name: "height",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
 																			Named: ptr("float"),
@@ -2120,12 +1675,141 @@ func TestParserFullSchema(t *testing.T) {
 																				ParamSingle: ptr("0.0"),
 																			},
 																		},
-																		{
-																			Name: "max",
-																			Body: ast.FieldRuleBody{
-																				ParamSingle: ptr("1.0"),
-																				Error:       "Load factor cannot exceed 1.0",
-																			},
+																	},
+																},
+																{
+																	Name:     "depth",
+																	Optional: true,
+																	Type: ast.FieldType{
+																		Base: &ast.FieldTypeBase{
+																			Named: ptr("float"),
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											{
+												Name:     "weight",
+												Optional: true,
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{
+														Named: ptr("float"),
+													},
+												},
+											},
+											{
+												Name: "colors",
+												Type: ast.FieldType{
+													Depth: 1,
+													Base: &ast.FieldTypeBase{
+														Named: ptr("string"),
+													},
+												},
+												Rules: []*ast.FieldRule{
+													{
+														Name: "enum",
+														Body: ast.FieldRuleBody{
+															ParamListString: []string{
+																"red",
+																"green",
+																"blue",
+																"black",
+																"white",
+															},
+															Error: "Color must be one of the allowed values",
+														},
+													},
+												},
+											},
+											{
+												Name:     "attributes",
+												Optional: true,
+												Type: ast.FieldType{
+													Depth: 1,
+													Base: &ast.FieldTypeBase{
+														Object: &ast.FieldTypeObject{
+															Fields: []*ast.Field{
+																{
+																	Name: "name",
+																	Type: ast.FieldType{
+																		Base: &ast.FieldTypeBase{
+																			Named: ptr("string"),
+																		},
+																	},
+																},
+																{
+																	Name: "value",
+																	Type: ast.FieldType{
+																		Base: &ast.FieldTypeBase{
+																			Named: ptr("string"),
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						{
+							Name: "variations",
+							Type: ast.FieldType{
+								Depth: 1,
+								Base: &ast.FieldTypeBase{
+									Object: &ast.FieldTypeObject{
+										Fields: []*ast.Field{
+											{
+												Name: "sku",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{
+														Named: ptr("string"),
+													},
+												},
+											},
+											{
+												Name: "price",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{
+														Named: ptr("float"),
+													},
+												},
+												Rules: []*ast.FieldRule{
+													{
+														Name: "min",
+														Body: ast.FieldRuleBody{
+															ParamSingle: ptr("0.01"),
+															Error:       "Variation price must be greater than zero",
+														},
+													},
+												},
+											},
+											{
+												Name: "attributes",
+												Type: ast.FieldType{
+													Depth: 1,
+													Base: &ast.FieldTypeBase{
+														Object: &ast.FieldTypeObject{
+															Fields: []*ast.Field{
+																{
+																	Name: "name",
+																	Type: ast.FieldType{
+																		Base: &ast.FieldTypeBase{
+																			Named: ptr("string"),
+																		},
+																	},
+																},
+																{
+																	Name: "value",
+																	Type: ast.FieldType{
+																		Base: &ast.FieldTypeBase{
+																			Named: ptr("string"),
 																		},
 																	},
 																},
@@ -2140,31 +1824,422 @@ func TestParserFullSchema(t *testing.T) {
 							},
 						},
 					},
-					Meta: []*ast.ProcDeclBodyMetaKV{
-						{
-							Key:   "auth",
-							Value: "required",
+				},
+			},
+			{
+				Comment: &ast.Comment{
+					Text: "Procedure declarations",
+				},
+			},
+			{
+				Proc: &ast.ProcDecl{
+					Docstring: "GetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.",
+					Name:      "GetCategory",
+					Body: ast.ProcDeclBody{
+						Input: []*ast.Field{
+							{
+								Name: "id",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Named: ptr("string"),
+									},
+								},
+								Rules: []*ast.FieldRule{
+									{
+										Name: "uuid",
+										Body: ast.FieldRuleBody{
+											Error: "Category ID must be a valid UUID",
+										},
+									},
+								},
+							},
 						},
-						{
-							Key:   "roles",
-							Value: "admin,product-manager",
+						Output: []*ast.Field{
+							{
+								Name: "category",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Named: ptr("Category"),
+									},
+								},
+							},
+							{
+								Name: "exists",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Named: ptr("boolean"),
+									},
+								},
+							},
 						},
-						{
-							Key:   "rateLimit",
-							Value: "100",
+						Meta: []*ast.ProcDeclBodyMetaKV{
+							{
+								Key:   "cache",
+								Value: "true",
+							},
+							{
+								Key:   "cacheTime",
+								Value: "300",
+							},
+							{
+								Key:   "requiresAuth",
+								Value: "false",
+							},
+							{
+								Key:   "apiVersion",
+								Value: "1.0.0",
+							},
 						},
-						{
-							Key:   "timeout",
-							Value: "30.5",
+					},
+				},
+			},
+			{
+				Proc: &ast.ProcDecl{
+					Docstring: "CreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.",
+					Name:      "CreateProduct",
+					Body: ast.ProcDeclBody{
+						Input: []*ast.Field{
+							{
+								Name: "product",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Named: ptr("Product"),
+									},
+								},
+							},
+							{
+								Name:     "options",
+								Optional: true,
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Object: &ast.FieldTypeObject{
+											Fields: []*ast.Field{
+												{
+													Name: "draft",
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("boolean"),
+														},
+													},
+												},
+												{
+													Name: "notify",
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("boolean"),
+														},
+													},
+												},
+												{
+													Name:     "scheduledFor",
+													Optional: true,
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("string"),
+														},
+													},
+													Rules: []*ast.FieldRule{
+														{
+															Name: "iso8601",
+															Body: ast.FieldRuleBody{
+																Error: "Must be a valid ISO8601 date",
+															},
+														},
+													},
+												},
+												{
+													Name:     "tags",
+													Optional: true,
+													Type: ast.FieldType{
+														Depth: 1,
+														Base: &ast.FieldTypeBase{
+															Named: ptr("string"),
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							{
+								Name: "validation",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Object: &ast.FieldTypeObject{
+											Fields: []*ast.Field{
+												{
+													Name:     "skipValidation",
+													Optional: true,
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("boolean"),
+														},
+													},
+												},
+												{
+													Name:     "customRules",
+													Optional: true,
+													Type: ast.FieldType{
+														Depth: 1,
+														Base: &ast.FieldTypeBase{
+															Object: &ast.FieldTypeObject{
+																Fields: []*ast.Field{
+																	{
+																		Name: "name",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("string"),
+																			},
+																		},
+																	},
+																	{
+																		Name: "severity",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("int"),
+																			},
+																		},
+																		Rules: []*ast.FieldRule{
+																			{
+																				Name: "enum",
+																				Body: ast.FieldRuleBody{
+																					ParamListInt: []string{
+																						"1",
+																						"2",
+																						"3",
+																					},
+																					Error: "Severity must be 1, 2, or 3",
+																				},
+																			},
+																		},
+																	},
+																	{
+																		Name: "message",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("string"),
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
-						{
-							Key:   "audit",
-							Value: "true",
+						Output: []*ast.Field{
+							{
+								Name: "success",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Named: ptr("boolean"),
+									},
+								},
+							},
+							{
+								Name: "productId",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Named: ptr("string"),
+									},
+								},
+								Rules: []*ast.FieldRule{
+									{
+										Name: "uuid",
+										Body: ast.FieldRuleBody{
+											Error: "Product ID must be a valid UUID",
+										},
+									},
+								},
+							},
+							{
+								Name:     "errors",
+								Optional: true,
+								Type: ast.FieldType{
+									Depth: 1,
+									Base: &ast.FieldTypeBase{
+										Object: &ast.FieldTypeObject{
+											Fields: []*ast.Field{
+												{
+													Name: "code",
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("int"),
+														},
+													},
+												},
+												{
+													Name: "message",
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("string"),
+														},
+													},
+												},
+												{
+													Name:     "field",
+													Optional: true,
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("string"),
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							{
+								Name: "analytics",
+								Type: ast.FieldType{
+									Base: &ast.FieldTypeBase{
+										Object: &ast.FieldTypeObject{
+											Fields: []*ast.Field{
+												{
+													Name: "duration",
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Named: ptr("float"),
+														},
+													},
+												},
+												{
+													Name: "processingSteps",
+													Type: ast.FieldType{
+														Depth: 1,
+														Base: &ast.FieldTypeBase{
+															Object: &ast.FieldTypeObject{
+																Fields: []*ast.Field{
+																	{
+																		Name: "name",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("string"),
+																			},
+																		},
+																	},
+																	{
+																		Name: "duration",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("float"),
+																			},
+																		},
+																	},
+																	{
+																		Name: "success",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("boolean"),
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+												{
+													Name: "serverInfo",
+													Type: ast.FieldType{
+														Base: &ast.FieldTypeBase{
+															Object: &ast.FieldTypeObject{
+																Fields: []*ast.Field{
+																	{
+																		Name: "id",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("string"),
+																			},
+																		},
+																	},
+																	{
+																		Name: "region",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("string"),
+																			},
+																		},
+																	},
+																	{
+																		Name: "load",
+																		Type: ast.FieldType{
+																			Base: &ast.FieldTypeBase{
+																				Named: ptr("float"),
+																			},
+																		},
+																		Rules: []*ast.FieldRule{
+																			{
+																				Name: "min",
+																				Body: ast.FieldRuleBody{
+																					ParamSingle: ptr("0.0"),
+																				},
+																			},
+																			{
+																				Name: "max",
+																				Body: ast.FieldRuleBody{
+																					ParamSingle: ptr("1.0"),
+																					Error:       "Load factor cannot exceed 1.0",
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
-						{
-							Key:   "apiVersion",
-							Value: "1.2.0",
+						Meta: []*ast.ProcDeclBodyMetaKV{
+							{
+								Key:   "auth",
+								Value: "required",
+							},
+							{
+								Key:   "roles",
+								Value: "admin,product-manager",
+							},
+							{
+								Key:   "rateLimit",
+								Value: "100",
+							},
+							{
+								Key:   "timeout",
+								Value: "30.5",
+							},
+							{
+								Key:   "audit",
+								Value: "true",
+							},
+							{
+								Key:   "apiVersion",
+								Value: "1.2.0",
+							},
 						},
+					},
+				},
+			},
+			{
+				Rule: &ast.RuleDecl{
+					Docstring: "Validates if a value is within a specified range.",
+					Name:      "range",
+					Body: ast.RuleDeclBody{
+						For:          "int",
+						Param:        "int",
+						ParamIsArray: true,
+						Error:        "Value out of range",
 					},
 				},
 			},

@@ -7,5 +7,4 @@ import (
 
 var Parser = participle.MustBuild[ast.URPCSchema](
 	participle.Lexer(&AdaptedLexer{}),
-	participle.Elide("Comment"),
 )
