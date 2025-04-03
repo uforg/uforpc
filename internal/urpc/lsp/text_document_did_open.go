@@ -10,17 +10,17 @@ type NotificationMessageTextDocumentDidOpenParams struct {
 	TextDocument TextDocumentItem `json:"textDocument"`
 }
 
-func (l *LSP) handleTextDocumentDidOpen(rawMessage []byte) error {
+func (l *LSP) handleTextDocumentDidOpen(rawMessage []byte) (any, error) {
 	var notification NotificationMessageTextDocumentDidOpen
 	if err := decode(rawMessage, &notification); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := l.docstore.open(notification.Params); err != nil {
-		return err
+		return nil, err
 	}
 
 	l.logger.Info("text document did open", "uri", notification.Params.TextDocument.URI)
 
-	return nil
+	return nil, nil
 }

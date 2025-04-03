@@ -22,15 +22,15 @@ type ResponseMessageTextDocumentFormatting struct {
 	Result *[]TextDocumentTextEdit `json:"result,omitempty"`
 }
 
-func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) error {
+func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) (any, error) {
 	var request RequestMessageTextDocumentFormatting
 	if err := decode(rawMessage, &request); err != nil {
-		return fmt.Errorf("failed to decode text document formatting request: %w", err)
+		return nil, fmt.Errorf("failed to decode text document formatting request: %w", err)
 	}
 
 	doc, err := l.docstore.get(request.Params.TextDocument.URI)
 	if err != nil {
-		return fmt.Errorf("failed to get text document: %w", err)
+		return nil, fmt.Errorf("failed to get text document: %w", err)
 	}
 
 	response := ResponseMessageTextDocumentFormatting{
@@ -38,12 +38,13 @@ func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) error {
 			Message: DefaultMessage,
 			ID:      request.ID,
 		},
-		Result: &[]TextDocumentTextEdit{},
+		Result: nil,
 	}
 
 	formattedText, err := formatter.Format(doc.rawText)
 	if err != nil {
-		return l.sendMessage(response)
+		// If formatting fails, return no edits.
+		return response, nil
 	}
 
 	lines := strings.Split(doc.rawText, "\n")
@@ -60,5 +61,5 @@ func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) error {
 		},
 	}
 
-	return l.sendMessage(response)
+	return response, nil
 }

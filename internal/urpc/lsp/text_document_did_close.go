@@ -10,17 +10,17 @@ type NotificationMessageTextDocumentDidCloseParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
 }
 
-func (l *LSP) handleTextDocumentDidClose(rawMessage []byte) error {
+func (l *LSP) handleTextDocumentDidClose(rawMessage []byte) (any, error) {
 	var notification NotificationMessageTextDocumentDidClose
 	if err := decode(rawMessage, &notification); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := l.docstore.close(notification.Params); err != nil {
-		return err
+		return nil, err
 	}
 
 	l.logger.Info("text document did close", "uri", notification.Params.TextDocument.URI)
 
-	return nil
+	return nil, nil
 }

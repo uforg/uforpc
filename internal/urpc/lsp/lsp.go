@@ -38,15 +38,8 @@ func (l *LSP) Run() error {
 	scanner.Split(scannerSplitFunc)
 
 	for scanner.Scan() {
-		messageBytes := scanner.Bytes()
-		var message Message
-		if err := decode(messageBytes, &message); err != nil {
-			return fmt.Errorf("failed to decode message or notification: %w", err)
-		}
-
-		shouldExit, err := l.handleMessage(messageBytes, message)
+		shouldExit, err := l.handleMessage(scanner.Bytes())
 		if err != nil {
-			err = fmt.Errorf("failed to handle message with method %s and id %s: %w", message.Method, message.ID, err)
 			l.logger.Error(err.Error())
 			return err
 		}
@@ -57,6 +50,65 @@ func (l *LSP) Run() error {
 	}
 
 	return nil
+}
+
+func (l *LSP) handleMessage(rawBytes []byte) (bool, error) {
+	l.handlerMu.Lock()
+	defer l.handlerMu.Unlock()
+
+	rawMessage, err := decodeToMap(rawBytes)
+	if err != nil {
+		return false, fmt.Errorf("failed to decode message: %w", err)
+	}
+
+	messageID, messageHasID := rawMessage["id"]
+	messageMethod, messageHasMethod := rawMessage["method"]
+	if !messageHasMethod {
+		return false, nil
+	}
+
+	if messageHasID {
+		l.logger.Info("message received", "id", messageID, "method", messageMethod, "raw", rawMessage)
+	} else {
+		l.logger.Info("notification received", "method", messageMethod, "raw", rawMessage)
+	}
+
+	var response any = nil
+	var shouldExit bool = false
+
+	switch messageMethod {
+	// Lifecycle operations
+	case "initialize":
+		response, err = l.handleInitialize(rawBytes)
+	case "initialized":
+		response, err = l.handleInitialized(rawBytes)
+	case "shutdown":
+		response, err = l.handleShutdown(rawBytes)
+	case "exit":
+		shouldExit = true
+
+	// Text document operations
+	case "textDocument/didOpen":
+		response, err = l.handleTextDocumentDidOpen(rawBytes)
+	case "textDocument/didChange":
+		response, err = l.handleTextDocumentDidChange(rawBytes)
+	case "textDocument/didClose":
+		response, err = l.handleTextDocumentDidClose(rawBytes)
+	case "textDocument/formatting":
+		response, err = l.handleTextDocumentFormatting(rawBytes)
+	}
+
+	if err != nil {
+		return false, fmt.Errorf("failed to handle message: %w", err)
+	}
+
+	if response != nil {
+		if err := l.sendMessage(response); err != nil {
+			return false, fmt.Errorf("failed to send message: %w", err)
+		}
+	}
+
+	return shouldExit, nil
 }
 
 func (l *LSP) sendMessage(message any) error {
@@ -70,47 +122,19 @@ func (l *LSP) sendMessage(message any) error {
 		return fmt.Errorf("failed to write message: %w", err)
 	}
 
-	if m, ok := message.(ResponseMessage); ok {
-		l.logger.Info("message response sent", "id", m.ID, "method", m.Method)
+	rawResp, err := decodeToMap(messageBytes)
+	if err != nil {
+		return fmt.Errorf("failed to decode sent message: %w", err)
 	}
-	if m, ok := message.(NotificationMessage); ok {
-		l.logger.Info("notification sent", "method", m.Method)
+
+	respID, respHasID := rawResp["id"]
+	respMethod := rawResp["method"]
+
+	if respHasID {
+		l.logger.Info("message response sent", "id", respID, "method", respMethod, "raw", rawResp)
+	} else {
+		l.logger.Info("notification response sent", "method", respMethod, "raw", rawResp)
 	}
 
 	return nil
-}
-
-func (l *LSP) handleMessage(messageBytes []byte, message Message) (bool, error) {
-	l.handlerMu.Lock()
-	defer l.handlerMu.Unlock()
-
-	if message.ID != "" {
-		l.logger.Info("message received", "id", message.ID, "method", message.Method)
-	} else {
-		l.logger.Info("notification received", "method", message.Method)
-	}
-
-	switch message.Method {
-	// Lifecycle operations
-	case "initialize":
-		return false, l.handleInitialize(messageBytes)
-	case "initialized":
-		return false, l.handleInitialized(messageBytes)
-	case "shutdown":
-		return false, l.handleShutdown(messageBytes)
-	case "exit":
-		return true, nil
-
-	// Text document operations
-	case "textDocument/didOpen":
-		return false, l.handleTextDocumentDidOpen(messageBytes)
-	case "textDocument/didChange":
-		return false, l.handleTextDocumentDidChange(messageBytes)
-	case "textDocument/didClose":
-		return false, l.handleTextDocumentDidClose(messageBytes)
-	case "textDocument/formatting":
-		return false, l.handleTextDocumentFormatting(messageBytes)
-	}
-
-	return false, nil
 }

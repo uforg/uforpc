@@ -12,17 +12,17 @@ type NotificationMessageTextDocumentDidChangeParams struct {
 	ContentChanges []TextDocumentContentChangeEvent `json:"contentChanges"`
 }
 
-func (l *LSP) handleTextDocumentDidChange(rawMessage []byte) error {
+func (l *LSP) handleTextDocumentDidChange(rawMessage []byte) (any, error) {
 	var notification NotificationMessageTextDocumentDidChange
 	if err := decode(rawMessage, &notification); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := l.docstore.change(notification.Params); err != nil {
-		return err
+		return nil, err
 	}
 
 	l.logger.Info("text document did change", "uri", notification.Params.TextDocument.URI)
 
-	return nil
+	return nil, nil
 }

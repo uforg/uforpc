@@ -38,10 +38,10 @@ type ResponseMessageInitializeResultCapabilities struct {
 	TextDocumentSync           int  `json:"textDocumentSync"`
 }
 
-func (l *LSP) handleInitialize(rawMessage []byte) error {
+func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
 	var message RequestMessageInitialize
 	if err := decode(rawMessage, &message); err != nil {
-		return fmt.Errorf("failed to decode initialize message: %w", err)
+		return nil, fmt.Errorf("failed to decode initialize message: %w", err)
 	}
 
 	l.logger.Info(
@@ -71,9 +71,5 @@ func (l *LSP) handleInitialize(rawMessage []byte) error {
 		},
 	}
 
-	if err := l.sendMessage(response); err != nil {
-		return fmt.Errorf("failed to send initialize response: %w", err)
-	}
-
-	return nil
+	return response, nil
 }
