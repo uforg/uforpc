@@ -31,6 +31,72 @@ type URPCSchema struct {
 	Nodes   []*Node  `parser:"@@*"`
 }
 
+// GetComments returns all comments in the URPC schema.
+func (s *URPCSchema) GetComments() []*Comment {
+	comments := []*Comment{}
+	for _, node := range s.Nodes {
+		if node.Kind() == NodeKindComment {
+			comments = append(comments, node.Comment)
+		}
+	}
+	return comments
+}
+
+// GetCommentBlocks returns all comment blocks in the URPC schema.
+func (s *URPCSchema) GetCommentBlocks() []*CommentBlock {
+	commentBlocks := []*CommentBlock{}
+	for _, node := range s.Nodes {
+		if node.Kind() == NodeKindCommentBlock {
+			commentBlocks = append(commentBlocks, node.CommentBlock)
+		}
+	}
+	return commentBlocks
+}
+
+// GetImports returns all import statements in the URPC schema.
+func (s *URPCSchema) GetImports() []*Import {
+	imports := []*Import{}
+	for _, node := range s.Nodes {
+		if node.Kind() == NodeKindImport {
+			imports = append(imports, node.Import)
+		}
+	}
+	return imports
+}
+
+// GetRules returns all custom validation rules in the URPC schema.
+func (s *URPCSchema) GetRules() []*RuleDecl {
+	rules := []*RuleDecl{}
+	for _, node := range s.Nodes {
+		if node.Kind() == NodeKindRule {
+			rules = append(rules, node.Rule)
+		}
+	}
+	return rules
+}
+
+// GetTypes returns all custom types in the URPC schema.
+func (s *URPCSchema) GetTypes() []*TypeDecl {
+	types := []*TypeDecl{}
+	for _, node := range s.Nodes {
+		if node.Kind() == NodeKindType {
+			types = append(types, node.Type)
+		}
+	}
+	return types
+}
+
+// GetProcs returns all procedures in the URPC schema.
+func (s *URPCSchema) GetProcs() []*ProcDecl {
+	procs := []*ProcDecl{}
+	for _, node := range s.Nodes {
+		if node.Kind() == NodeKindProc {
+			procs = append(procs, node.Proc)
+		}
+	}
+	return procs
+}
+
 // NodeKind represents the kind of a top level node.
 type NodeKind string
 
