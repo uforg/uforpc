@@ -74,3 +74,15 @@ func decode(data []byte, v any) error {
 	}
 	return nil
 }
+
+// decodeToMap decodes the given data into a map[string]any. It expects the data to be
+// a valid LSP JSON-RPC message.
+//
+// If the data contains a header part (Content-Length: ...\r\n\r\n), it will be removed.
+func decodeToMap(data []byte) (map[string]any, error) {
+	var v map[string]any
+	if err := decode(data, &v); err != nil {
+		return nil, fmt.Errorf("failed to decode data: %w", err)
+	}
+	return v, nil
+}
