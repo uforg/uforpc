@@ -37,7 +37,11 @@ func (l *LSPLogger) ensureLogFile() error {
 	_, err := os.Stat(l.filePath)
 
 	if os.IsNotExist(err) {
-		return os.MkdirAll(l.filePath, 0644)
+		file, err := os.Create(l.filePath)
+		if err != nil {
+			return err
+		}
+		return file.Close()
 	}
 
 	if err != nil {
