@@ -1,4 +1,4 @@
-package parser
+package lexer
 
 import (
 	"bytes"
@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	plexer "github.com/alecthomas/participle/v2/lexer"
-	"github.com/uforg/uforpc/internal/urpc/lexer"
 	"github.com/uforg/uforpc/internal/urpc/token"
 )
 
-// This file contains the lexer adapter to make the handwritted lexer
-// compatible with the participle parser.
+////////////////////////////////////////////////////////////////////////
+// This file contains the lexer adapter to make the handwritted lexer //
+// compatible with the participle parser.                             //
+////////////////////////////////////////////////////////////////////////
 
 // getLexerSymbols returns a map of token types to their corresponding
 // participle compatible token types.
@@ -32,7 +33,7 @@ func getLexerSymbols() map[string]plexer.TokenType {
 // participle compatible token types.
 var lexerSymbols = getLexerSymbols()
 
-// AdaptedLexer is an adapter that makes the handwritted lexer
+// ParticipleLexer is an adapter that makes the handwritted lexer
 // compatible with the participle parser.
 //
 // Documentation:
@@ -43,36 +44,36 @@ var lexerSymbols = getLexerSymbols()
 //   - https://pkg.go.dev/github.com/alecthomas/participle/v2/lexer#StringDefinition
 //   - https://pkg.go.dev/github.com/alecthomas/participle/v2/lexer#BytesDefinition
 //   - https://pkg.go.dev/github.com/alecthomas/participle/v2/lexer#Lexer
-type AdaptedLexer struct {
-	customLexer *lexer.Lexer
+type ParticipleLexer struct {
+	customLexer *Lexer
 }
 
-func (l *AdaptedLexer) Symbols() map[string]plexer.TokenType {
+func (l *ParticipleLexer) Symbols() map[string]plexer.TokenType {
 	return lexerSymbols
 }
 
 // Lex creates a new lexer from a reader. Should create a new lexer each
 // time it is called to avoid sharing the same state across multiple
 // parsings.
-func (l *AdaptedLexer) Lex(filename string, r io.Reader) (plexer.Lexer, error) {
+func (l *ParticipleLexer) Lex(filename string, r io.Reader) (plexer.Lexer, error) {
 	content, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
-	lexer := lexer.NewLexer(filename, string(content))
-	return &AdaptedLexer{customLexer: lexer}, nil
+	lexer := NewLexer(filename, string(content))
+	return &ParticipleLexer{customLexer: lexer}, nil
 }
 
-func (l *AdaptedLexer) LexString(filename, input string) (plexer.Lexer, error) {
+func (l *ParticipleLexer) LexString(filename, input string) (plexer.Lexer, error) {
 	return l.Lex(filename, strings.NewReader(input))
 }
 
-func (l *AdaptedLexer) LexBytes(filename string, content []byte) (plexer.Lexer, error) {
+func (l *ParticipleLexer) LexBytes(filename string, content []byte) (plexer.Lexer, error) {
 	return l.Lex(filename, bytes.NewReader(content))
 }
 
-func (l *AdaptedLexer) Next() (plexer.Token, error) {
+func (l *ParticipleLexer) Next() (plexer.Token, error) {
 	tok := l.customLexer.NextToken()
 
 	tokType := lexerSymbols[string(tok.Type)]
