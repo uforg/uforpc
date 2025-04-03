@@ -67,30 +67,30 @@ func (f *formatter) formatSchema(schema *ast.URPCSchema) {
 	}
 
 	// Format imports
-	if len(schema.Imports) > 0 {
-		f.formatImports(schema.Imports)
+	if len(schema.GetImports()) > 0 {
+		f.formatImports(schema.GetImports())
 		f.write("\n")
 	}
 
 	// Format rules
-	if len(schema.Rules) > 0 {
-		f.formatRules(schema.Rules)
-		if len(schema.Types) > 0 || len(schema.Procs) > 0 {
+	if len(schema.GetRules()) > 0 {
+		f.formatRules(schema.GetRules())
+		if len(schema.GetTypes()) > 0 || len(schema.GetProcs()) > 0 {
 			f.write("\n")
 		}
 	}
 
 	// Format types
-	if len(schema.Types) > 0 {
-		f.formatTypes(schema.Types)
-		if len(schema.Procs) > 0 {
+	if len(schema.GetTypes()) > 0 {
+		f.formatTypes(schema.GetTypes())
+		if len(schema.GetProcs()) > 0 {
 			f.write("\n")
 		}
 	}
 
 	// Format procedures
-	if len(schema.Procs) > 0 {
-		f.formatProcs(schema.Procs)
+	if len(schema.GetProcs()) > 0 {
+		f.formatProcs(schema.GetProcs())
 	}
 }
 
