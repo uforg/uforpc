@@ -25,9 +25,10 @@ const (
 	Illegal TokenType = "Illegal"
 
 	// Identifiers, comments and docstrings
-	Ident     TokenType = "Ident"
-	Comment   TokenType = "Comment"
-	Docstring TokenType = "Docstring"
+	Ident        TokenType = "Ident"
+	Comment      TokenType = "Comment"
+	CommentBlock TokenType = "CommentBlock" // Multiline comment with /* */
+	Docstring    TokenType = "Docstring"
 
 	// Literals
 	StringLiteral TokenType = "StringLiteral"
@@ -76,6 +77,7 @@ var TokenTypes = []TokenType{
 	// Identifiers, comments and docstrings
 	Ident,
 	Comment,
+	CommentBlock,
 	Docstring,
 
 	// Literals

@@ -314,11 +314,11 @@ func TestLexer(t *testing.T) {
 		require.Equal(t, tests, tokens)
 	})
 
-	t.Run("TestMultilineComments", func(t *testing.T) {
+	t.Run("TestLexerCommentBlocks", func(t *testing.T) {
 		input := "/* This is a multiline comment\nwith multiple lines */"
 
 		tests := []token.Token{
-			{Type: token.Comment, Literal: "This is a multiline comment\nwith multiple lines", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 2, ColumnEnd: 22},
+			{Type: token.CommentBlock, Literal: "This is a multiline comment\nwith multiple lines", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 2, ColumnEnd: 22},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 2, ColumnStart: 23, LineEnd: 2, ColumnEnd: 23},
 		}
 

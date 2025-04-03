@@ -243,16 +243,18 @@ func (l *Lexer) readDocstring() (string, bool) {
 
 // readComment reads a comment from the current index to the next newline or EOF.
 // it does not skip the end newline character.
-func (l *Lexer) readComment() string {
+//
+// Returns the comment and a boolean indicating if the comment is a block/multiline comment.
+func (l *Lexer) readComment() (string, bool) {
 	if l.currentChar != '/' {
-		return ""
+		return "", false
 	}
 
 	nextChar, eofReached := l.peekChar(1)
 	isSingleLine := nextChar == '/'
 	isMultiline := nextChar == '*'
 	if eofReached || (!isSingleLine && !isMultiline) {
-		return ""
+		return "", false
 	}
 
 	// Skip the opening comment characters
@@ -260,6 +262,7 @@ func (l *Lexer) readComment() string {
 	l.readNextChar()
 
 	var comment string
+	isMultilineComment := false
 	for {
 		comment += string(l.currentChar)
 
@@ -278,6 +281,7 @@ func (l *Lexer) readComment() string {
 				// Skip the closing comment characters
 				l.readNextChar()
 				l.readNextChar()
+				isMultilineComment = true
 				break
 			}
 		}
@@ -285,7 +289,7 @@ func (l *Lexer) readComment() string {
 		l.readNextChar()
 	}
 
-	return strings.TrimSpace(comment)
+	return strings.TrimSpace(comment), isMultilineComment
 }
 
 // skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.
@@ -517,11 +521,11 @@ func (l *Lexer) NextToken() token.Token {
 
 		startLine := l.CurrentLine
 		startColumn := l.CurrentColumn
-		comment := l.readComment()
+		comment, isMultiline := l.readComment()
 		endLine := l.CurrentLine
 		endColumn := l.CurrentColumn
 
-		return token.Token{
+		tok := token.Token{
 			Type:        token.Comment,
 			Literal:     comment,
 			FileName:    l.FileName,
@@ -530,6 +534,10 @@ func (l *Lexer) NextToken() token.Token {
 			LineEnd:     endLine,
 			ColumnEnd:   endColumn,
 		}
+		if isMultiline {
+			tok.Type = token.CommentBlock
+		}
+		return tok
 	}
 
 	// Everything else is illegal
