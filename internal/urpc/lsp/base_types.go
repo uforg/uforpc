@@ -3,6 +3,7 @@ package lsp
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 var (
@@ -41,6 +42,20 @@ func (i *IntOrString) UnmarshalJSON(b []byte) error {
 	}
 
 	return fmt.Errorf("IntOrString: %s is not an int or a string", string(b))
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+// If the value is an int, it is marshaled as an int. Otherwise, it is marshaled as a string.
+func (i *IntOrString) MarshalJSON() ([]byte, error) {
+	if i == nil {
+		return nil, nil
+	}
+
+	if n, err := strconv.Atoi(string(*i)); err == nil {
+		return json.Marshal(n)
+	}
+
+	return json.Marshal(string(*i))
 }
 
 // RequestMessage describes a request between the client and the server. Every processed
