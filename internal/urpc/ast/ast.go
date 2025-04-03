@@ -27,11 +27,70 @@ type Position plexer.Position
 type URPCSchema struct {
 	Pos     Position
 	EndPos  Position
-	Version *Version    `parser:"@@?"`
-	Imports []*Import   `parser:"@@*"`
-	Rules   []*RuleDecl `parser:"@@*"`
-	Types   []*TypeDecl `parser:"@@*"`
-	Procs   []*ProcDecl `parser:"@@*"`
+	Version *Version `parser:"@@?"`
+	Nodes   []*Node  `parser:"@@*"`
+}
+
+// NodeKind represents the kind of a top level node.
+type NodeKind string
+
+const (
+	NodeKindComment      NodeKind = "Comment"
+	NodeKindCommentBlock NodeKind = "CommentBlock"
+	NodeKindImport       NodeKind = "Import"
+	NodeKindRule         NodeKind = "Rule"
+	NodeKindType         NodeKind = "Type"
+	NodeKindProc         NodeKind = "Proc"
+)
+
+// Node represents a node in the URPC schema that can be
+// at the top level of the schema. Primarily used to allow the
+// source code to be parsed in any order.
+type Node struct {
+	Pos          Position
+	EndPos       Position
+	Comment      *Comment      `parser:"@@"`
+	CommentBlock *CommentBlock `parser:"| @@"`
+	Import       *Import       `parser:"| @@"`
+	Rule         *RuleDecl     `parser:"| @@"`
+	Type         *TypeDecl     `parser:"| @@"`
+	Proc         *ProcDecl     `parser:"| @@"`
+}
+
+func (n *Node) Kind() NodeKind {
+	if n.Comment != nil {
+		return NodeKindComment
+	}
+	if n.CommentBlock != nil {
+		return NodeKindCommentBlock
+	}
+	if n.Import != nil {
+		return NodeKindImport
+	}
+	if n.Rule != nil {
+		return NodeKindRule
+	}
+	if n.Type != nil {
+		return NodeKindType
+	}
+	if n.Proc != nil {
+		return NodeKindProc
+	}
+	return ""
+}
+
+// Comment represents a comment in the URPC schema.
+type Comment struct {
+	Pos    Position
+	EndPos Position
+	Text   string `parser:"@Comment"`
+}
+
+// CommentBlock represents a multiline comment in the URPC schema.
+type CommentBlock struct {
+	Pos    Position
+	EndPos Position
+	Text   string `parser:"@CommentBlock"`
 }
 
 // Version represents the version of the URPC schema.
