@@ -46,7 +46,9 @@ func (l *LSP) Run() error {
 
 		shouldExit, err := l.handleMessage(messageBytes, message)
 		if err != nil {
-			return fmt.Errorf("failed to handle message with method %s and id %s: %w", message.Method, message.ID, err)
+			err = fmt.Errorf("failed to handle message with method %s and id %s: %w", message.Method, message.ID, err)
+			l.logger.Error(err.Error())
+			return err
 		}
 
 		if shouldExit {
