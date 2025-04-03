@@ -50,7 +50,7 @@ func TestEncode(t *testing.T) {
 	encoded, err := encode(request)
 
 	require.NoError(t, err)
-	require.Equal(t, "Content-Length: 26\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":\"1\"}", string(encoded))
+	require.Equal(t, "Content-Length: 24\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1}", string(encoded))
 }
 
 func TestDecode(t *testing.T) {
