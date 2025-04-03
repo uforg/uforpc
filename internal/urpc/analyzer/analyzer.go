@@ -117,7 +117,7 @@ func (a *Analyzer) validateVersion() *AnalyzerError {
 func (a *Analyzer) validateImports() *AnalyzerError {
 	importedNames := make(map[string]bool)
 
-	for _, importStmt := range a.sch.Imports {
+	for _, importStmt := range a.sch.GetImports() {
 		if importStmt.Path == "" {
 			return &AnalyzerError{
 				Message: "import path is required",
@@ -150,7 +150,7 @@ func (a *Analyzer) validateImports() *AnalyzerError {
 
 // collectAndValidateCustomRuleNames collects and validates the custom rule names.
 func (a *Analyzer) collectAndValidateCustomRuleNames() *AnalyzerError {
-	for _, rule := range a.sch.Rules {
+	for _, rule := range a.sch.GetRules() {
 		if existing, ok := a.customRuleNames[rule.Name]; ok {
 			return &AnalyzerError{
 				Message: fmt.Sprintf(
@@ -178,7 +178,7 @@ func (a *Analyzer) collectAndValidateCustomRuleNames() *AnalyzerError {
 
 // collectAndValidateCustomTypeNames collects and validates the custom type names.
 func (a *Analyzer) collectAndValidateCustomTypeNames() *AnalyzerError {
-	for _, typeDecl := range a.sch.Types {
+	for _, typeDecl := range a.sch.GetTypes() {
 		if existing, ok := a.customTypeNames[typeDecl.Name]; ok {
 			return &AnalyzerError{
 				Message: fmt.Sprintf(
@@ -206,7 +206,7 @@ func (a *Analyzer) collectAndValidateCustomTypeNames() *AnalyzerError {
 
 // collectAndValidateProcNames collects and validates the procedure names.
 func (a *Analyzer) collectAndValidateProcNames() *AnalyzerError {
-	for _, proc := range a.sch.Procs {
+	for _, proc := range a.sch.GetProcs() {
 		if existing, ok := a.procNames[proc.Name]; ok {
 			return &AnalyzerError{
 				Message: fmt.Sprintf(
@@ -345,13 +345,13 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 		return nil
 	}
 
-	for _, typeDecl := range a.sch.Types {
+	for _, typeDecl := range a.sch.GetTypes() {
 		if err := checkFieldRules(typeDecl.Fields, fmt.Sprintf("type \"%s\"", typeDecl.Name)); err != nil {
 			return err
 		}
 	}
 
-	for _, proc := range a.sch.Procs {
+	for _, proc := range a.sch.GetProcs() {
 		if proc.Body.Input != nil {
 			if err := checkFieldRules(proc.Body.Input, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {
 				return err
@@ -407,7 +407,7 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 		return nil
 	}
 
-	for _, typeDecl := range a.sch.Types {
+	for _, typeDecl := range a.sch.GetTypes() {
 		for _, extendTypeName := range typeDecl.Extends {
 			if !isValidType(extendTypeName) {
 				return &AnalyzerError{
@@ -423,7 +423,7 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 		}
 	}
 
-	for _, proc := range a.sch.Procs {
+	for _, proc := range a.sch.GetProcs() {
 		if proc.Body.Input != nil {
 			if err := checkFieldTypeReferences(proc.Body.Input, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {
 				return err

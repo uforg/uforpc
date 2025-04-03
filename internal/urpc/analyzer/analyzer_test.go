@@ -138,7 +138,8 @@ func TestAnalyzer_DuplicateCustomRule(t *testing.T) {
 		  error: "Invalid string format"
 		}
 
-		rule @customStringRule { // Duplicate rule name
+		// Duplicate rule name
+		rule @customStringRule {
 		  for: string
 		  error: "Another invalid string format"
 		}
@@ -158,7 +159,8 @@ func TestAnalyzer_InvalidCustomRuleName(t *testing.T) {
 	input := `
 		version 1
 
-		rule @InvalidRuleName { // PascalCase, should be camelCase
+		// PascalCase, should be camelCase
+		rule @InvalidRuleName {
 		  for: string
 		  error: "Invalid string format"
 		}
@@ -202,7 +204,8 @@ func TestAnalyzer_DuplicateCustomType(t *testing.T) {
 		  age: int
 		}
 
-		type User { // Duplicate type name
+		// Duplicate type name
+		type User {
 		  name: string
 		}
 	`
@@ -221,7 +224,8 @@ func TestAnalyzer_InvalidCustomTypeName(t *testing.T) {
 	input := `
 		version 1
 
-		type invalidTypeName { // camelCase, should be PascalCase
+		// camelCase, should be PascalCase
+		type invalidTypeName {
 		  id: string
 		}
 	`
@@ -275,7 +279,8 @@ func TestAnalyzer_DuplicateProcedure(t *testing.T) {
 		  }
 		}
 
-		proc GetUser { // Duplicate procedure name
+		// Duplicate procedure name
+		proc GetUser {
 		  input {
 		    id: string
 		  }
@@ -296,7 +301,8 @@ func TestAnalyzer_InvalidProcedureName(t *testing.T) {
 	input := `
 		version 1
 
-		proc getUser { // camelCase, should be PascalCase
+		// camelCase, should be PascalCase
+		proc getUser {
 		  input {
 		    userId: string
 		  }
@@ -317,9 +323,10 @@ func TestAnalyzer_NonExistentRuleReference(t *testing.T) {
 	input := `
 		version 1
 
+		// This rule doesn't exist
 		type User {
 		  id: string
-		    @nonExistentRule // This rule doesn't exist
+		    @nonExistentRule
 		}
 	`
 	schema, err := parser.Parser.ParseString("test.urpc", input)
@@ -341,9 +348,10 @@ func TestAnalyzer_RuleTypeMismatch(t *testing.T) {
 		  for: string
 		}
 
+		// Rule is for string, but field is int
 		type User {
 		  id: int
-		    @customStringRule // Rule is for string, but field is int
+		    @customStringRule
 		}
 	`
 	schema, err := parser.Parser.ParseString("test.urpc", input)
@@ -361,9 +369,10 @@ func TestAnalyzer_NonExistentTypeReference(t *testing.T) {
 	input := `
 		version 1
 
+		// This type doesn't exist
 		proc GetPost {
 		  output {
-		    post: Post // This type doesn't exist
+		    post: Post
 		  }
 		}
 	`
@@ -401,9 +410,10 @@ func TestAnalyzer_ValidArrayWithRules(t *testing.T) {
 	input := `
 		version 1
 
+		// Valid rule for arrays
 		type User {
 		  tags: string[]
-		    @minlen(1) // Valid rule for arrays
+		    @minlen(1)
 		}
 	`
 	schema, err := parser.Parser.ParseString("test.urpc", input)
@@ -420,9 +430,10 @@ func TestAnalyzer_InvalidArrayRule(t *testing.T) {
 	input := `
 		version 1
 
+		// This rule is not valid for arrays (only for strings)
 		type User {
 		  tags: string[]
-		    @contains("tag") // This rule is not valid for arrays (only for strings)
+		    @contains("tag")
 		}
 	`
 	schema, err := parser.Parser.ParseString("test.urpc", input)
@@ -627,11 +638,12 @@ func TestAnalyzer_InvalidRuleInInlineObject(t *testing.T) {
 	input := `
 		version 1
 
+		// This rule doesn't exist
 		type User {
 		  id: string
 		  contact: {
 		    email: string
-		      @invalidRule // This rule doesn't exist
+		      @invalidRule
 		  }
 		}
 	`
@@ -651,8 +663,8 @@ func TestAnalyzer_ValidArrayOfArrays(t *testing.T) {
 		version 1
 
 		type Matrix {
-		  data: int[][]  // 2D array of integers
-		    @minlen(1)   // Valid rule for the outer array
+		  data: int[][]
+		    @minlen(1)
 		}
 	`
 	schema, err := parser.Parser.ParseString("test.urpc", input)
@@ -675,7 +687,7 @@ func TestAnalyzer_ValidArrayOfObjects(t *testing.T) {
 		    street: string
 		    city: string
 		  }[]
-		    @minlen(1)  // Valid rule for array
+		    @minlen(1)
 		}
 	`
 	schema, err := parser.Parser.ParseString("test.urpc", input)
@@ -789,8 +801,8 @@ func TestAnalyzer_OptionalFields(t *testing.T) {
 		type User {
 		  id: string
 		  email: string
-		  phone?: string  // Optional field
-		  address?: {     // Optional inline object
+		  phone?: string
+		  address?: {
 		    street: string
 		    city: string
 		  }
