@@ -6,12 +6,14 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 // LSPLogger is a LSPLogger for the LSP.
 type LSPLogger struct {
 	slogger  *slog.Logger
 	filePath string
+	writeMu  sync.Mutex
 }
 
 // NewLSPLogger creates a new logger. It will log to a file named .uforpc-lsp.log in the
@@ -27,7 +29,10 @@ func NewLSPLogger() *LSPLogger {
 
 	filePath := filepath.Join(dir, ".uforpc-lsp.log")
 
-	lgr := &LSPLogger{filePath: filePath}
+	lgr := &LSPLogger{
+		filePath: filePath,
+		writeMu:  sync.Mutex{},
+	}
 	lgr.slogger = slog.New(slog.NewJSONHandler(lgr, nil))
 
 	return lgr
@@ -74,6 +79,9 @@ func (l *LSPLogger) cleanOldLogs() error {
 }
 
 func (l *LSPLogger) Write(content []byte) (int, error) {
+	l.writeMu.Lock()
+	defer l.writeMu.Unlock()
+
 	if err := l.ensureLogFile(); err != nil {
 		return 0, fmt.Errorf("failed to ensure log file: %w", err)
 	}
@@ -82,7 +90,6 @@ func (l *LSPLogger) Write(content []byte) (int, error) {
 		return 0, fmt.Errorf("failed to clean old logs: %w", err)
 	}
 
-	content = append(content, []byte("\n")...)
 	existingContent, err := os.ReadFile(l.filePath)
 	if err != nil {
 		return 0, fmt.Errorf("failed to read log file: %w", err)
