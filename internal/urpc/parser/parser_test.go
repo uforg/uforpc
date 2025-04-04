@@ -1248,6 +1248,823 @@ func TestParserProcDecl(t *testing.T) {
 	})
 }
 
+func TestParserComments(t *testing.T) {
+	t.Run("Top level comments between declarations", func(t *testing.T) {
+		input := `
+			// Version comment
+			version 1
+			/* Import comment */
+			import "path/to/file.urpc"
+			// Rule comment
+			rule @myRule { for: string }
+			/* Type comment */
+			type MyType { field: int }
+			// Proc comment
+			proc MyProc {}
+			/* Trailing comment */
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Comment: &ast.Comment{Simple: ptr(" Version comment")},
+				},
+				{
+					Version: &ast.Version{Number: 1},
+				},
+				{
+					Comment: &ast.Comment{Block: ptr(" Import comment ")},
+				},
+				{
+					Import: &ast.Import{Path: "path/to/file.urpc"},
+				},
+				{
+					Comment: &ast.Comment{Simple: ptr(" Rule comment")},
+				},
+				{
+					Rule: &ast.RuleDecl{
+						Name: "myRule",
+						Children: []*ast.RuleDeclChild{
+							{
+								For: &ast.RuleDeclChildFor{For: "string"},
+							},
+						},
+					},
+				},
+				{
+					Comment: &ast.Comment{Block: ptr(" Type comment ")},
+				},
+				{
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Field: &ast.Field{
+									Name: "field",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: ptr("int")},
+									},
+								},
+							},
+						},
+					},
+				},
+				{
+					Comment: &ast.Comment{Simple: ptr(" Proc comment")},
+				},
+				{
+					Proc: &ast.ProcDecl{Name: "MyProc"},
+				},
+				{
+					Comment: &ast.Comment{Block: ptr(" Trailing comment ")},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments within RuleDecl", func(t *testing.T) {
+		input := `
+			rule @myRule {
+				// Before for
+				for: string
+				/* Between for and param */
+				param: int
+				// Before error
+				error: "msg"
+				// Trailing comment in rule
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Rule: &ast.RuleDecl{
+						Name: "myRule",
+						Children: []*ast.RuleDeclChild{
+							{
+								Comment: &ast.Comment{Simple: ptr(" Before for")},
+							},
+							{
+								For: &ast.RuleDeclChildFor{For: "string"},
+							},
+							{
+								Comment: &ast.Comment{Block: ptr(" Between for and param ")},
+							},
+							{
+								Param: &ast.RuleDeclChildParam{Param: "int"},
+							},
+							{
+								Comment: &ast.Comment{Simple: ptr(" Before error")},
+							},
+							{
+								Error: &ast.RuleDeclChildError{Error: "msg"},
+							},
+							{
+								Comment: &ast.Comment{Simple: ptr(" Trailing comment in rule")},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments within TypeDecl", func(t *testing.T) {
+		input := `
+			type MyType {
+				// Before field1
+				field1: string
+				/* Between field1 and field2 */
+				field2?: int
+				// Trailing comment in type
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Comment: &ast.Comment{Simple: ptr(" Before field1")},
+							},
+							{
+								Field: &ast.Field{
+									Name: "field1",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: ptr("string")},
+									},
+									Children: []*ast.FieldChild{
+										{
+											Comment: &ast.Comment{Block: ptr(" Between field1 and field2 ")},
+										},
+									},
+								},
+							},
+							{
+								Field: &ast.Field{
+									Name:     "field2",
+									Optional: true,
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: ptr("int")},
+									},
+									Children: []*ast.FieldChild{
+										{
+											Comment: &ast.Comment{Simple: ptr(" Trailing comment in type")},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments within ProcDecl (between blocks)", func(t *testing.T) {
+		input := `
+			proc MyProc {
+				// Before input
+				input { fieldIn: string }
+				/* Between input and output */
+				output { fieldOut: int }
+				// Between output and meta
+				meta { key: "value" }
+				// Trailing comment in proc
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Children: []*ast.ProcDeclChild{
+							{
+								Comment: &ast.Comment{Simple: ptr(" Before input")},
+							},
+							{
+								Input: &ast.ProcDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "fieldIn",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("string")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{
+								Comment: &ast.Comment{Block: ptr(" Between input and output ")},
+							},
+							{
+								Output: &ast.ProcDeclChildOutput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "fieldOut",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("int")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{
+								Comment: &ast.Comment{Simple: ptr(" Between output and meta")},
+							},
+							{
+								Meta: &ast.ProcDeclChildMeta{
+									Children: []*ast.ProcDeclChildMetaChild{
+										{
+											KV: &ast.ProcDeclChildMetaKV{
+												Key:   "key",
+												Value: "value",
+											},
+										},
+									},
+								},
+							},
+							{
+								Comment: &ast.Comment{Simple: ptr(" Trailing comment in proc")},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments within ProcDecl Input block", func(t *testing.T) {
+		input := `
+			proc MyProc {
+				input {
+					// Before fieldIn1
+					fieldIn1: string
+					/* Between fieldIn1 and fieldIn2 */
+					fieldIn2: int
+					// Trailing comment in input
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Children: []*ast.ProcDeclChild{
+							{
+								Input: &ast.ProcDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Comment: &ast.Comment{Simple: ptr(" Before fieldIn1")},
+										},
+										{
+											Field: &ast.Field{
+												Name: "fieldIn1",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("string")},
+												},
+												Children: []*ast.FieldChild{
+													{
+														Comment: &ast.Comment{Block: ptr(" Between fieldIn1 and fieldIn2 ")},
+													},
+												},
+											},
+										},
+										{
+											Field: &ast.Field{
+												Name: "fieldIn2",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("int")},
+												},
+												Children: []*ast.FieldChild{
+													{
+														Comment: &ast.Comment{Simple: ptr(" Trailing comment in input")},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments within ProcDecl Output block", func(t *testing.T) {
+		input := `
+			proc MyProc {
+				output {
+					// Before fieldOut1
+					fieldOut1: string
+					/* Between fieldOut1 and fieldOut2 */
+					fieldOut2: int
+					// Trailing comment in output
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Children: []*ast.ProcDeclChild{
+							{
+								Output: &ast.ProcDeclChildOutput{
+									Children: []*ast.FieldOrComment{
+										{
+											Comment: &ast.Comment{Simple: ptr(" Before fieldOut1")},
+										},
+										{
+											Field: &ast.Field{
+												Name: "fieldOut1",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("string")},
+												},
+												Children: []*ast.FieldChild{
+													{
+														Comment: &ast.Comment{Block: ptr(" Between fieldOut1 and fieldOut2 ")},
+													},
+												},
+											},
+										},
+										{
+											Field: &ast.Field{
+												Name: "fieldOut2",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("int")},
+												},
+												Children: []*ast.FieldChild{
+													{
+														Comment: &ast.Comment{Simple: ptr(" Trailing comment in output")},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments within ProcDecl Meta block", func(t *testing.T) {
+		input := `
+			proc MyProc {
+				meta {
+					// Before key1
+					key1: "value1"
+					/* Between key1 and key2 */
+					key2: 123
+					// Trailing comment in meta
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Children: []*ast.ProcDeclChild{
+							{
+								Meta: &ast.ProcDeclChildMeta{
+
+									Children: []*ast.ProcDeclChildMetaChild{
+										{
+											Comment: &ast.Comment{Simple: ptr(" Before key1")},
+										},
+										{
+											KV: &ast.ProcDeclChildMetaKV{
+												Key:   "key1",
+												Value: "value1",
+											},
+										},
+										{
+											Comment: &ast.Comment{Block: ptr(" Between key1 and key2 ")},
+										},
+										{
+											KV: &ast.ProcDeclChildMetaKV{
+												Key:   "key2",
+												Value: "123",
+											},
+										},
+										{
+											Comment: &ast.Comment{Simple: ptr(" Trailing comment in meta")},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments within FieldTypeObject (nested type)", func(t *testing.T) {
+		input := `
+			type MyType {
+				nested: {
+					// Before sub1
+					sub1: string
+					/* Between sub1 and sub2 */
+					sub2: int
+					// Trailing comment in nested
+				}
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Field: &ast.Field{
+									Name: "nested",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{
+											Object: &ast.FieldTypeObject{
+												Children: []*ast.FieldOrComment{
+													{
+														Comment: &ast.Comment{Simple: ptr(" Before sub1")},
+													},
+													{
+														Field: &ast.Field{
+															Name: "sub1",
+															Type: ast.FieldType{
+																Base: &ast.FieldTypeBase{Named: ptr("string")},
+															},
+															Children: []*ast.FieldChild{
+																{
+																	Comment: &ast.Comment{Block: ptr(" Between sub1 and sub2 ")},
+																},
+															},
+														},
+													},
+													{
+														Field: &ast.Field{
+															Name: "sub2",
+															Type: ast.FieldType{
+																Base: &ast.FieldTypeBase{Named: ptr("int")},
+															},
+															Children: []*ast.FieldChild{
+																{
+																	Comment: &ast.Comment{Simple: ptr(" Trailing comment in nested")},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments between Field rules", func(t *testing.T) {
+		input := `
+			type MyType {
+				field: string
+					// Before rule1
+					@rule1
+					/* Between rule1 and rule2 */
+					@rule2("param")
+					// Trailing comment after rules
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Field: &ast.Field{
+									Name: "field",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: ptr("string")},
+									},
+									Children: []*ast.FieldChild{
+										{
+											Comment: &ast.Comment{Simple: ptr(" Before rule1")},
+										},
+										{
+											Rule: &ast.FieldRule{Name: "rule1"},
+										},
+										{
+											Comment: &ast.Comment{Block: ptr(" Between rule1 and rule2 ")},
+										},
+										{
+											Rule: &ast.FieldRule{
+												Name: "rule2",
+												Body: &ast.FieldRuleBody{ParamSingle: ptr("param")},
+											},
+										}, // Assuming param is captured as ParamSingle
+										{
+											Comment: &ast.Comment{Simple: ptr(" Trailing comment after rules")},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("End-of-line comments", func(t *testing.T) {
+		input := `
+			version 1 // EOL on version
+			import "path" // EOL on import
+			rule @myRule { // EOL on rule start
+				for: string // EOL on for
+				param: int // EOL on param
+			} // EOL on rule end
+			type MyType { // EOL on type start
+				field: string // EOL on field
+					@rule1 // EOL on rule
+			} // EOL on type end
+			proc MyProc { // EOL on proc start
+				input { f: int } // EOL on input
+				output { o: int } // EOL on output
+				meta { k: "v" } // EOL on meta
+			} // EOL on proc end
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Version: &ast.Version{Number: 1},
+				},
+				{
+					Comment: &ast.Comment{Simple: ptr(" EOL on version")},
+				},
+				{
+					Import: &ast.Import{Path: "path"},
+				},
+				{
+					Comment: &ast.Comment{Simple: ptr(" EOL on import")},
+				},
+				{
+					Rule: &ast.RuleDecl{
+						Name: "myRule",
+						Children: []*ast.RuleDeclChild{
+							{Comment: &ast.Comment{Simple: ptr(" EOL on rule start")}}, // Comment inside the block
+							{For: &ast.RuleDeclChildFor{For: "string"}},
+							{Comment: &ast.Comment{Simple: ptr(" EOL on for")}},
+							{Param: &ast.RuleDeclChildParam{Param: "int"}},
+							{Comment: &ast.Comment{Simple: ptr(" EOL on param")}},
+						},
+					},
+				},
+				{
+					Comment: &ast.Comment{Simple: ptr(" EOL on rule end")},
+				}, // Comment after the block
+				{
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Children: []*ast.FieldOrComment{
+							{Comment: &ast.Comment{Simple: ptr(" EOL on type start")}}, // Comment inside the block
+							{
+								Field: &ast.Field{
+									Name: "field",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: ptr("string")},
+									},
+									Children: []*ast.FieldChild{
+										{Comment: &ast.Comment{Simple: ptr(" EOL on field")}}, // Comment after type, before rule
+										{Rule: &ast.FieldRule{Name: "rule1"}},
+										{Comment: &ast.Comment{Simple: ptr(" EOL on rule")}}, // Comment after rule
+									},
+								},
+							},
+						},
+					},
+				},
+				{
+					Comment: &ast.Comment{Simple: ptr(" EOL on type end")},
+				}, // Comment after the block
+				{
+					Proc: &ast.ProcDecl{
+						Name: "MyProc",
+						Children: []*ast.ProcDeclChild{
+							{Comment: &ast.Comment{Simple: ptr(" EOL on proc start")}}, // Comment inside the block
+							{
+								Input: &ast.ProcDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "f",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("int")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{Comment: &ast.Comment{Simple: ptr(" EOL on input")}},
+							{
+								Output: &ast.ProcDeclChildOutput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "o",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: ptr("int")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{Comment: &ast.Comment{Simple: ptr(" EOL on output")}},
+							{
+								Meta: &ast.ProcDeclChildMeta{
+									Children: []*ast.ProcDeclChildMetaChild{
+										{
+											KV: &ast.ProcDeclChildMetaKV{
+												Key:   "k",
+												Value: "v",
+											},
+										},
+									},
+								},
+							},
+							{Comment: &ast.Comment{Simple: ptr(" EOL on meta")}},
+						},
+					},
+				},
+				{
+					Comment: &ast.Comment{Simple: ptr(" EOL on proc end")},
+				}, // Comment after the block
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Comments inside empty blocks", func(t *testing.T) {
+		input := `
+			rule @emptyRule { /* Rule Comment */ }
+			type EmptyType { // Type Comment
+			}
+			proc EmptyProc {
+				/* Proc Comment */
+				input { /* Input Comment */ }
+				output { // Output Comment
+				}
+				meta { /* Meta Comment */ }
+			}
+			type NestedEmpty {
+				field: { /* Nested Comment */ }
+			}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Rule: &ast.RuleDecl{
+						Name: "emptyRule",
+						Children: []*ast.RuleDeclChild{
+							{
+								Comment: &ast.Comment{Block: ptr(" Rule Comment ")},
+							},
+						},
+					},
+				},
+				{
+					Type: &ast.TypeDecl{
+						Name: "EmptyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Comment: &ast.Comment{Simple: ptr(" Type Comment")},
+							},
+						},
+					},
+				},
+				{
+					Proc: &ast.ProcDecl{
+						Name: "EmptyProc",
+						Children: []*ast.ProcDeclChild{
+							{
+								Comment: &ast.Comment{Block: ptr(" Proc Comment ")},
+							},
+							{
+								Input: &ast.ProcDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Comment: &ast.Comment{Block: ptr(" Input Comment ")},
+										},
+									},
+								},
+							},
+							{
+								Output: &ast.ProcDeclChildOutput{
+									Children: []*ast.FieldOrComment{
+										{
+											Comment: &ast.Comment{Simple: ptr(" Output Comment")},
+										},
+									},
+								},
+							},
+							{
+								Meta: &ast.ProcDeclChildMeta{
+									Children: []*ast.ProcDeclChildMetaChild{
+										{
+											Comment: &ast.Comment{Block: ptr(" Meta Comment ")},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				{
+					Type: &ast.TypeDecl{
+						Name: "NestedEmpty",
+						Children: []*ast.FieldOrComment{
+							{
+								Field: &ast.Field{
+									Name: "field",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{
+											Object: &ast.FieldTypeObject{
+												Children: []*ast.FieldOrComment{
+													{
+														Comment: &ast.Comment{Block: ptr(" Nested Comment ")},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+}
+
 func TestParserFullSchema(t *testing.T) {
 	input := `
 		version 1
