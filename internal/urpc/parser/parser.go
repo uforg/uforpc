@@ -6,6 +6,6 @@ import (
 	"github.com/uforg/uforpc/internal/urpc/lexer"
 )
 
-var Parser = participle.MustBuild[ast.URPCSchema](
+var Parser = participle.MustBuild[ast.Schema](
 	participle.Lexer(&lexer.ParticipleLexer{}),
 )
