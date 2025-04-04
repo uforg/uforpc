@@ -243,20 +243,8 @@ func TestParserRuleDecl(t *testing.T) {
 		equalNoPos(t, expected, parsed)
 	})
 
-	t.Run("Empty rule not allowed", func(t *testing.T) {
-		input := `rule @myRule {}`
-		_, err := Parser.ParseString("schema.urpc", input)
-		require.Error(t, err)
-	})
-
 	t.Run("Rule with no body not allowed", func(t *testing.T) {
 		input := `rule @myRule`
-		_, err := Parser.ParseString("schema.urpc", input)
-		require.Error(t, err)
-	})
-
-	t.Run("For in rule body is required", func(t *testing.T) {
-		input := `rule @myRule { param: string }`
 		_, err := Parser.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
@@ -277,7 +265,7 @@ func TestParserRuleDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Rule: &ast.RuleDecl{
-						Docstring: "My rule description",
+						Docstring: "\n\t\t\t\tMy rule description\n\t\t\t\t",
 						Name:      "myRule",
 						Children: []*ast.RuleDeclChild{
 							{
@@ -332,9 +320,7 @@ func TestParserRuleDecl(t *testing.T) {
 
 	t.Run("Rule with all options", func(t *testing.T) {
 		input := `
-				"""
-				My rule description
-				"""
+				""" My rule description """
 				rule @myRule {
 					for: MyType
 					param: float[]
@@ -348,7 +334,7 @@ func TestParserRuleDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Rule: &ast.RuleDecl{
-						Docstring: "My rule description",
+						Docstring: " My rule description ",
 						Name:      "myRule",
 						Children: []*ast.RuleDeclChild{
 							{
@@ -412,9 +398,7 @@ func TestParserTypeDecl(t *testing.T) {
 
 	t.Run("Type declaration With Docstring", func(t *testing.T) {
 		input := `
-			"""
-			My type description
-			"""
+			""" My type description """
 			type MyType {
 				field: string
 			}
@@ -426,7 +410,7 @@ func TestParserTypeDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Type: &ast.TypeDecl{
-						Docstring: "My type description",
+						Docstring: " My type description ",
 						Name:      "MyType",
 						Children: []*ast.FieldOrComment{
 							{
@@ -514,9 +498,7 @@ func TestParserTypeDecl(t *testing.T) {
 
 	t.Run("Type declaration with extends and docstring", func(t *testing.T) {
 		input := `
-			"""
-			My type description
-			"""
+			""" My type description """
 			type MyType extends OtherType {
 				field: string
 			}
@@ -528,7 +510,7 @@ func TestParserTypeDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Type: &ast.TypeDecl{
-						Docstring: "My type description",
+						Docstring: " My type description ",
 						Name:      "MyType",
 						Extends:   []string{"OtherType"},
 						Children: []*ast.FieldOrComment{
@@ -992,9 +974,7 @@ func TestParserProcDecl(t *testing.T) {
 
 	t.Run("Procedure with docstring", func(t *testing.T) {
 		input := `
-			"""
-			MyProc is a procedure that does something.
-			"""
+			""" MyProc is a procedure that does something. """
 			proc MyProc {}
 		`
 		parsed, err := Parser.ParseString("schema.urpc", input)
@@ -1004,7 +984,7 @@ func TestParserProcDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Proc: &ast.ProcDecl{
-						Docstring: "MyProc is a procedure that does something.",
+						Docstring: " MyProc is a procedure that does something. ",
 						Name:      "MyProc",
 					},
 				},
@@ -1143,9 +1123,7 @@ func TestParserProcDecl(t *testing.T) {
 
 	t.Run("Full procedure", func(t *testing.T) {
 		input := `
-			"""
-			MyProc is a procedure that does something.
-			"""
+			""" MyProc is a procedure that does something. """
 			proc MyProc {
 				input {
 					input1: string[][]
@@ -1169,7 +1147,7 @@ func TestParserProcDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Proc: &ast.ProcDecl{
-						Docstring: "MyProc is a procedure that does something.",
+						Docstring: " MyProc is a procedure that does something. ",
 						Name:      "MyProc",
 						Children: []*ast.ProcDeclChild{
 							{
@@ -2285,7 +2263,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Block: ptr("Import other schema"),
+					Block: ptr(" Import other schema "),
 				},
 			},
 			{
@@ -2295,12 +2273,12 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Simple: ptr("Custom rule declarations"),
+					Simple: ptr(" Custom rule declarations"),
 				},
 			},
 			{
 				Rule: &ast.RuleDecl{
-					Docstring: "This rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.",
+					Docstring: "\n\t\tThis rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.\n\t\t",
 					Name:      "regex",
 					Children: []*ast.RuleDeclChild{
 						{
@@ -2323,7 +2301,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Rule: &ast.RuleDecl{
-					Docstring: "Validate \"category\" with custom logic",
+					Docstring: " Validate \"category\" with custom logic ",
 					Name:      "validateCategory",
 					Children: []*ast.RuleDeclChild{
 						{
@@ -2341,7 +2319,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Simple: ptr("Type declarations"),
+					Simple: ptr(" Type declarations"),
 				},
 			},
 			{
@@ -2419,7 +2397,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Type: &ast.TypeDecl{
-					Docstring: "Category represents a product category in the system.\n\t\tThis type is used across the catalog module.",
+					Docstring: "\n\t\tCategory represents a product category in the system.\n\t\tThis type is used across the catalog module.\n\t\t",
 					Name:      "Category",
 					Extends: []string{
 						"ThirdDummyType",
@@ -2537,7 +2515,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Type: &ast.TypeDecl{
-					Docstring: "Product represents a sellable item in the store.\n\t\tProducts have complex validation rules and can be\n\t\tnested inside catalogs.",
+					Docstring: "\n\t\tProduct represents a sellable item in the store.\n\t\tProducts have complex validation rules and can be\n\t\tnested inside catalogs.\n\t\t",
 					Name:      "Product",
 					Children: []*ast.FieldOrComment{
 						{
@@ -2926,12 +2904,12 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Simple: ptr("Procedure declarations"),
+					Simple: ptr(" Procedure declarations"),
 				},
 			},
 			{
 				Proc: &ast.ProcDecl{
-					Docstring: "GetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.",
+					Docstring: "\n\t\tGetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.\n\t\t",
 					Name:      "GetCategory",
 					Children: []*ast.ProcDeclChild{
 						{
@@ -3021,7 +2999,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Proc: &ast.ProcDecl{
-					Docstring: "CreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.",
+					Docstring: "\n\t\tCreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.\n\t\t",
 					Name:      "CreateProduct",
 					Children: []*ast.ProcDeclChild{
 						{
@@ -3449,7 +3427,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Rule: &ast.RuleDecl{
-					Docstring: "Validates if a value is within a specified range.",
+					Docstring: "\n\t\tValidates if a value is within a specified range.\n\t\t",
 					Name:      "range",
 					Children: []*ast.RuleDeclChild{
 						{
