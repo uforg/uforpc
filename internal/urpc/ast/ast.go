@@ -23,18 +23,28 @@ import (
 // Position is an alias for the participle.Position type.
 type Position plexer.Position
 
-// URPCSchema is the root of the URPC schema AST.
-type URPCSchema struct {
-	Pos     Position
-	EndPos  Position
-	Version *Version `parser:"@@?"`
-	Nodes   []*Node  `parser:"@@*"`
+// Schema is the root of the URPC schema AST.
+type Schema struct {
+	Pos      Position
+	EndPos   Position
+	Children []*SchemaChild `parser:"@@*"`
+}
+
+// GetVersions returns all version declarations in the URPC schema.
+func (s *Schema) GetVersions() []*Version {
+	versions := []*Version{}
+	for _, node := range s.Children {
+		if node.Kind() == NodeKindVersion {
+			versions = append(versions, node.Version)
+		}
+	}
+	return versions
 }
 
 // GetComments returns all comments in the URPC schema.
-func (s *URPCSchema) GetComments() []*Comment {
+func (s *Schema) GetComments() []*Comment {
 	comments := []*Comment{}
-	for _, node := range s.Nodes {
+	for _, node := range s.Children {
 		if node.Kind() == NodeKindComment {
 			comments = append(comments, node.Comment)
 		}
@@ -42,21 +52,10 @@ func (s *URPCSchema) GetComments() []*Comment {
 	return comments
 }
 
-// GetCommentBlocks returns all comment blocks in the URPC schema.
-func (s *URPCSchema) GetCommentBlocks() []*CommentBlock {
-	commentBlocks := []*CommentBlock{}
-	for _, node := range s.Nodes {
-		if node.Kind() == NodeKindCommentBlock {
-			commentBlocks = append(commentBlocks, node.CommentBlock)
-		}
-	}
-	return commentBlocks
-}
-
 // GetImports returns all import statements in the URPC schema.
-func (s *URPCSchema) GetImports() []*Import {
+func (s *Schema) GetImports() []*Import {
 	imports := []*Import{}
-	for _, node := range s.Nodes {
+	for _, node := range s.Children {
 		if node.Kind() == NodeKindImport {
 			imports = append(imports, node.Import)
 		}
@@ -65,9 +64,9 @@ func (s *URPCSchema) GetImports() []*Import {
 }
 
 // GetRules returns all custom validation rules in the URPC schema.
-func (s *URPCSchema) GetRules() []*RuleDecl {
+func (s *Schema) GetRules() []*RuleDecl {
 	rules := []*RuleDecl{}
-	for _, node := range s.Nodes {
+	for _, node := range s.Children {
 		if node.Kind() == NodeKindRule {
 			rules = append(rules, node.Rule)
 		}
@@ -76,9 +75,9 @@ func (s *URPCSchema) GetRules() []*RuleDecl {
 }
 
 // GetTypes returns all custom types in the URPC schema.
-func (s *URPCSchema) GetTypes() []*TypeDecl {
+func (s *Schema) GetTypes() []*TypeDecl {
 	types := []*TypeDecl{}
-	for _, node := range s.Nodes {
+	for _, node := range s.Children {
 		if node.Kind() == NodeKindType {
 			types = append(types, node.Type)
 		}
@@ -87,9 +86,9 @@ func (s *URPCSchema) GetTypes() []*TypeDecl {
 }
 
 // GetProcs returns all procedures in the URPC schema.
-func (s *URPCSchema) GetProcs() []*ProcDecl {
+func (s *Schema) GetProcs() []*ProcDecl {
 	procs := []*ProcDecl{}
-	for _, node := range s.Nodes {
+	for _, node := range s.Children {
 		if node.Kind() == NodeKindProc {
 			procs = append(procs, node.Proc)
 		}
@@ -97,38 +96,36 @@ func (s *URPCSchema) GetProcs() []*ProcDecl {
 	return procs
 }
 
-// NodeKind represents the kind of a top level node.
-type NodeKind string
+// SchemaChildKind represents the kind of a schema child node.
+type SchemaChildKind string
 
 const (
-	NodeKindComment      NodeKind = "Comment"
-	NodeKindCommentBlock NodeKind = "CommentBlock"
-	NodeKindImport       NodeKind = "Import"
-	NodeKindRule         NodeKind = "Rule"
-	NodeKindType         NodeKind = "Type"
-	NodeKindProc         NodeKind = "Proc"
+	NodeKindVersion SchemaChildKind = "Version"
+	NodeKindComment SchemaChildKind = "Comment"
+	NodeKindImport  SchemaChildKind = "Import"
+	NodeKindRule    SchemaChildKind = "Rule"
+	NodeKindType    SchemaChildKind = "Type"
+	NodeKindProc    SchemaChildKind = "Proc"
 )
 
-// Node represents a node in the URPC schema that can be
-// at the top level of the schema. Primarily used to allow the
-// source code to be parsed in any order.
-type Node struct {
-	Pos          Position
-	EndPos       Position
-	Comment      *Comment      `parser:"@@"`
-	CommentBlock *CommentBlock `parser:"| @@"`
-	Import       *Import       `parser:"| @@"`
-	Rule         *RuleDecl     `parser:"| @@"`
-	Type         *TypeDecl     `parser:"| @@"`
-	Proc         *ProcDecl     `parser:"| @@"`
+// SchemaChild represents a child node of the Schema root node.
+type SchemaChild struct {
+	Pos     Position
+	EndPos  Position
+	Version *Version  `parser:"  @@"`
+	Comment *Comment  `parser:"| @@"`
+	Import  *Import   `parser:"| @@"`
+	Rule    *RuleDecl `parser:"| @@"`
+	Type    *TypeDecl `parser:"| @@"`
+	Proc    *ProcDecl `parser:"| @@"`
 }
 
-func (n *Node) Kind() NodeKind {
+func (n *SchemaChild) Kind() SchemaChildKind {
 	if n.Comment != nil {
 		return NodeKindComment
 	}
-	if n.CommentBlock != nil {
-		return NodeKindCommentBlock
+	if n.Version != nil {
+		return NodeKindVersion
 	}
 	if n.Import != nil {
 		return NodeKindImport
@@ -145,18 +142,12 @@ func (n *Node) Kind() NodeKind {
 	return ""
 }
 
-// Comment represents a comment in the URPC schema.
+// Comment represents both simple and block comments in the URPC schema.
 type Comment struct {
 	Pos    Position
 	EndPos Position
-	Text   string `parser:"@Comment"`
-}
-
-// CommentBlock represents a multiline comment in the URPC schema.
-type CommentBlock struct {
-	Pos    Position
-	EndPos Position
-	Text   string `parser:"@CommentBlock"`
+	Simple *string `parser:"  @Comment"`
+	Block  *string `parser:"| @CommentBlock"`
 }
 
 // Version represents the version of the URPC schema.
@@ -177,51 +168,103 @@ type Import struct {
 type RuleDecl struct {
 	Pos       Position
 	EndPos    Position
-	Docstring string       `parser:"@Docstring?"`
-	Name      string       `parser:"Rule At @Ident"`
-	Body      RuleDeclBody `parser:"LBrace @@ RBrace"`
+	Docstring string           `parser:"@Docstring?"`
+	Name      string           `parser:"Rule At @Ident"`
+	Children  []*RuleDeclChild `parser:"LBrace @@* RBrace"`
 }
 
-// RuleDeclBody represents the body of a custom validation rule declaration.
-type RuleDeclBody struct {
-	Pos          Position
-	EndPos       Position
-	For          string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
-	Param        string `parser:"(Param Colon @(String | Int | Float | Boolean))?"`
-	ParamIsArray bool   `parser:"@(LBracket RBracket)?"`
-	Error        string `parser:"(Error Colon @StringLiteral)?"`
+// RuleDeclChild represents a child node within a RuleDecl block.
+type RuleDeclChild struct {
+	Pos     Position
+	EndPos  Position
+	Comment *Comment            `parser:"  @@"`
+	For     *RuleDeclChildFor   `parser:"| @@"`
+	Param   *RuleDeclChildParam `parser:"| @@"`
+	Error   *RuleDeclChildError `parser:"| @@"`
+}
+
+// RuleDeclChildFor represents the "for" clause within a RuleDecl block.
+type RuleDeclChildFor struct {
+	Pos    Position
+	EndPos Position
+	For    string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
+}
+
+// RuleDeclChildParam represents the "param" clause within a RuleDecl block.
+type RuleDeclChildParam struct {
+	Pos     Position
+	EndPos  Position
+	Param   string `parser:"Param Colon @(String | Int | Float | Boolean)"`
+	IsArray bool   `parser:"@(LBracket RBracket)?"`
+}
+
+// RuleDeclChildError represents the "error" clause within a RuleDecl block.
+type RuleDeclChildError struct {
+	Pos    Position
+	EndPos Position
+	Error  string `parser:"Error Colon @StringLiteral"`
 }
 
 // TypeDecl represents a custom type declaration.
 type TypeDecl struct {
 	Pos       Position
 	EndPos    Position
-	Docstring string   `parser:"@Docstring?"`
-	Name      string   `parser:"Type @Ident"`
-	Extends   []string `parser:"(Extends @Ident (Comma @Ident)*)?"`
-	Fields    []*Field `parser:"LBrace @@+ RBrace"`
+	Docstring string            `parser:"@Docstring?"`
+	Name      string            `parser:"Type @Ident"`
+	Extends   []string          `parser:"(Extends @Ident (Comma @Ident)*)?"`
+	Children  []*FieldOrComment `parser:"LBrace @@* RBrace"`
 }
 
 // ProcDecl represents a procedure declaration.
 type ProcDecl struct {
 	Pos       Position
 	EndPos    Position
-	Docstring string       `parser:"@Docstring?"`
-	Name      string       `parser:"Proc @Ident"`
-	Body      ProcDeclBody `parser:"LBrace @@? RBrace"`
+	Docstring string           `parser:"@Docstring?"`
+	Name      string           `parser:"Proc @Ident"`
+	Children  []*ProcDeclChild `parser:"LBrace @@* RBrace"`
 }
 
-// ProcDeclBody represents the body of a procedure declaration.
-type ProcDeclBody struct {
-	Pos    Position
-	EndPos Position
-	Input  []*Field              `parser:"(Input LBrace @@+ RBrace)?"`
-	Output []*Field              `parser:"(Output LBrace @@+ RBrace)?"`
-	Meta   []*ProcDeclBodyMetaKV `parser:"(Meta LBrace @@+ RBrace)?"`
+// ProcDeclChild represents a child node within a ProcDecl block (Comment, Input, Output, or Meta).
+type ProcDeclChild struct {
+	Pos     Position
+	EndPos  Position
+	Comment *Comment             `parser:"  @@"`
+	Input   *ProcDeclChildInput  `parser:"| @@"`
+	Output  *ProcDeclChildOutput `parser:"| @@"`
+	Meta    *ProcDeclChildMeta   `parser:"| @@"`
 }
 
-// ProcDeclBodyMetaKV represents a key-value pair in the meta information of a procedure declaration.
-type ProcDeclBodyMetaKV struct {
+// ProcDeclChildInput represents the Input{...} block within a ProcDecl.
+type ProcDeclChildInput struct {
+	Pos      Position
+	EndPos   Position
+	Children []*FieldOrComment `parser:"Input LBrace @@* RBrace"`
+}
+
+// ProcDeclChildOutput represents the Output{...} block within a ProcDecl.
+type ProcDeclChildOutput struct {
+	Pos      Position
+	EndPos   Position
+	Children []*FieldOrComment `parser:"Output LBrace @@* RBrace"`
+}
+
+// ProcDeclChildMeta represents the Meta{...} block within a ProcDecl.
+type ProcDeclChildMeta struct {
+	Pos      Position
+	EndPos   Position
+	Children []*ProcDeclChildMetaChild `parser:"Meta LBrace @@* RBrace"`
+}
+
+// ProcDeclChildMetaChild represents a child node within a MetaBlock (either a Comment or a Key-Value pair).
+type ProcDeclChildMetaChild struct {
+	Pos     Position
+	EndPos  Position
+	Comment *Comment             `parser:"  @@"`
+	KV      *ProcDeclChildMetaKV `parser:"| @@"`
+}
+
+// ProcDeclChildMetaKV represents a key-value pair within a MetaBlock.
+type ProcDeclChildMetaKV struct {
 	Pos    Position
 	EndPos Position
 	Key    string `parser:"@Ident"`
@@ -232,18 +275,34 @@ type ProcDeclBodyMetaKV struct {
 // SHARED TYPES //
 //////////////////
 
-// Field represents a field in a custom type or procedure input/output.
+// FieldOrComment represents a child node within blocks that contain fields,
+// such as TypeDecl, ProcDeclChildInput, ProcDeclChildOutput, and FieldTypeObject.
+type FieldOrComment struct {
+	Pos     Position
+	EndPos  Position
+	Comment *Comment `parser:"  @@"`
+	Field   *Field   `parser:"| @@"`
+}
+
+// Field represents a field definition. It can contain comments and rules after the type definition.
 type Field struct {
 	Pos      Position
 	EndPos   Position
-	Name     string       `parser:"@Ident"`
-	Optional bool         `parser:"@(Question)?"`
-	Type     FieldType    `parser:"Colon @@"`
-	Rules    []*FieldRule `parser:"@@*"`
+	Name     string        `parser:"@Ident"`
+	Optional bool          `parser:"@(Question)?"`
+	Type     FieldType     `parser:"Colon @@"`
+	Children []*FieldChild `parser:"@@*"` // Captures rules and comments following the type
 }
 
-// FieldType represents the type of a field. If the field is an array, the Depth
-// represents the depth of the array otherwise it is 0.
+// FieldChild represents a child node following a Field's type definition (either a Comment or a FieldRule).
+type FieldChild struct {
+	Pos     Position
+	EndPos  Position
+	Comment *Comment   `parser:"  @@"`
+	Rule    *FieldRule `parser:"| @@"`
+}
+
+// FieldType represents the type of a field.
 type FieldType struct {
 	Pos    Position
 	EndPos Position
@@ -251,9 +310,10 @@ type FieldType struct {
 	Depth  FieldTypeDepth `parser:"@((LBracket RBracket)*)"`
 }
 
-// FieldTypeDepth represents the depth of an array.
+// FieldTypeDepth represents the depth of an array type.
 type FieldTypeDepth int
 
+// Capture implements the participle Capture interface.
 func (a *FieldTypeDepth) Capture(values []string) error {
 	count := 0
 	for i := range len(values) {
@@ -261,14 +321,11 @@ func (a *FieldTypeDepth) Capture(values []string) error {
 			count++
 		}
 	}
-
 	*a = FieldTypeDepth(count)
 	return nil
 }
 
-// FieldTypeBase represents the base type of a field. If the field is a primitive
-// or custom type, the Named field is set. If the field is an inline object, the Object
-// field is set.
+// FieldTypeBase represents the base type of a field (primitive, named, or inline object).
 type FieldTypeBase struct {
 	Pos    Position
 	EndPos Position
@@ -276,29 +333,33 @@ type FieldTypeBase struct {
 	Object *FieldTypeObject `parser:"| @@"`
 }
 
-// FieldTypeObject represents an inline object type.
+// FieldTypeObject represents an inline object type definition.
 type FieldTypeObject struct {
-	Pos    Position
-	EndPos Position
-	Fields []*Field `parser:"LBrace @@+ RBrace"`
+	Pos      Position
+	EndPos   Position
+	Children []*FieldOrComment `parser:"LBrace @@* RBrace"`
 }
 
-// FieldRule represents a rule applied to a field.
+// FieldRule represents a validation rule applied to a field. It does not support comments within its body.
 type FieldRule struct {
 	Pos    Position
 	EndPos Position
-	Name   string        `parser:"At @Ident"`
-	Body   FieldRuleBody `parser:"(LParen @@ RParen)?"`
+	Name   string         `parser:"At @Ident"`
+	Body   *FieldRuleBody `parser:"(LParen @@ RParen)?"` // Body is optional and captured as a single unit if present
 }
 
-// FieldRuleBody represents the body of a rule applied to a field.
+// FieldRuleBody represents the body of a validation rule applied to a field.
+// It captures parameters and an optional error message. Comments are not supported within this structure.
 type FieldRuleBody struct {
-	Pos              Position
-	EndPos           Position
+	Pos    Position
+	EndPos Position
+	// Parameters are captured positionally; validation must ensure correct number/type.
+	// Capturing specific list types requires more complex parsing or post-processing.
 	ParamSingle      *string  `parser:"@(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)?"`
 	ParamListString  []string `parser:"(LBracket @StringLiteral (Comma @StringLiteral)* RBracket)?"`
 	ParamListInt     []string `parser:"(LBracket @IntLiteral (Comma @IntLiteral)* RBracket)?"`
 	ParamListFloat   []string `parser:"(LBracket @FloatLiteral (Comma @FloatLiteral)* RBracket)?"`
 	ParamListBoolean []string `parser:"(LBracket @(TrueLiteral | FalseLiteral) (Comma @(TrueLiteral | FalseLiteral))* RBracket)?"`
-	Error            string   `parser:"(Comma? Error Colon @StringLiteral)?"`
+	// Error clause, if present, must appear after parameters.
+	Error *string `parser:"(Comma? Error Colon @StringLiteral)?"`
 }
