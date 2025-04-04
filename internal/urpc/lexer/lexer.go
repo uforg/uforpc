@@ -1,8 +1,6 @@
 package lexer
 
 import (
-	"strings"
-
 	"github.com/uforg/uforpc/internal/urpc/token"
 )
 
@@ -227,9 +225,6 @@ func (l *Lexer) readDocstring() (string, bool) {
 		l.readNextChar()
 	}
 
-	// Trim beginning and ending space characters
-	docstring = strings.TrimSpace(docstring)
-
 	if l.currentIndexIsEOF {
 		return docstring, true
 	}
@@ -289,7 +284,7 @@ func (l *Lexer) readComment() (string, bool) {
 		l.readNextChar()
 	}
 
-	return strings.TrimSpace(comment), isMultilineComment
+	return comment, isMultilineComment
 }
 
 // skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.

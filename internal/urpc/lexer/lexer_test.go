@@ -290,7 +290,7 @@ func TestLexer(t *testing.T) {
 		input := "// This is a comment\nversion: 1"
 
 		tests := []token.Token{
-			{Type: token.Comment, Literal: "This is a comment", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 20},
+			{Type: token.Comment, Literal: " This is a comment", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 20},
 			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 2, ColumnStart: 1, LineEnd: 2, ColumnEnd: 7},
 			{Type: token.Colon, Literal: ":", FileName: "test.urpc", LineStart: 2, ColumnStart: 8, LineEnd: 2, ColumnEnd: 8},
 			{Type: token.IntLiteral, Literal: "1", FileName: "test.urpc", LineStart: 2, ColumnStart: 10, LineEnd: 2, ColumnEnd: 10},
@@ -318,7 +318,7 @@ func TestLexer(t *testing.T) {
 		input := "/* This is a multiline comment\nwith multiple lines */"
 
 		tests := []token.Token{
-			{Type: token.CommentBlock, Literal: "This is a multiline comment\nwith multiple lines", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 2, ColumnEnd: 22},
+			{Type: token.CommentBlock, Literal: " This is a multiline comment\nwith multiple lines ", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 2, ColumnEnd: 22},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 2, ColumnStart: 23, LineEnd: 2, ColumnEnd: 23},
 		}
 
@@ -368,7 +368,7 @@ func TestLexer(t *testing.T) {
 		input := `""" This is a docstring """`
 
 		tests := []token.Token{
-			{Type: token.Docstring, Literal: "This is a docstring", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 27},
+			{Type: token.Docstring, Literal: " This is a docstring ", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 27},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 28, LineEnd: 1, ColumnEnd: 28},
 		}
 
@@ -393,7 +393,7 @@ func TestLexer(t *testing.T) {
 		input := `""" This is a docstring with "quotes" inside """`
 
 		tests := []token.Token{
-			{Type: token.Docstring, Literal: "This is a docstring with \"quotes\" inside", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 48},
+			{Type: token.Docstring, Literal: " This is a docstring with \"quotes\" inside ", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 48},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 49, LineEnd: 1, ColumnEnd: 49},
 		}
 
@@ -418,7 +418,7 @@ func TestLexer(t *testing.T) {
 		input := "\"\"\" This is a multiline docstring\nwith multiple lines \"\"\"\n"
 
 		tests := []token.Token{
-			{Type: token.Docstring, Literal: "This is a multiline docstring\nwith multiple lines", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 2, ColumnEnd: 23},
+			{Type: token.Docstring, Literal: " This is a multiline docstring\nwith multiple lines ", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 2, ColumnEnd: 23},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 3, ColumnStart: 1, LineEnd: 3, ColumnEnd: 1},
 		}
 
@@ -484,12 +484,12 @@ func TestLexer(t *testing.T) {
 			}`
 
 		tests := []token.Token{
-			{Type: token.Comment, Literal: "This test evaluates the lexer with a full URPC file."},
-			{Type: token.Comment, Literal: "It is used to ensure that the lexer is working correctly."},
+			{Type: token.Comment, Literal: " This test evaluates the lexer with a full URPC file."},
+			{Type: token.Comment, Literal: " It is used to ensure that the lexer is working correctly."},
 			{Type: token.Version, Literal: "version"},
 			{Type: token.Colon, Literal: ":"},
 			{Type: token.IntLiteral, Literal: "1"},
-			{Type: token.Docstring, Literal: "Product is a type that represents a product."},
+			{Type: token.Docstring, Literal: " Product is a type that represents a product. "},
 			{Type: token.Type, Literal: "type"},
 			{Type: token.Ident, Literal: "Product"},
 			{Type: token.Extends, Literal: "extends"},
@@ -540,7 +540,7 @@ func TestLexer(t *testing.T) {
 			{Type: token.IntLiteral, Literal: "5"},
 			{Type: token.RParen, Literal: ")"},
 			{Type: token.RBrace, Literal: "}"},
-			{Type: token.Docstring, Literal: "Creates a product and returns the product id."},
+			{Type: token.Docstring, Literal: " Creates a product and returns the product id. "},
 			{Type: token.Proc, Literal: "proc"},
 			{Type: token.Ident, Literal: "CreateProduct"},
 			{Type: token.LBrace, Literal: "{"},
