@@ -43,10 +43,10 @@ type schemaFormatter struct {
 func newSchemaFormatter(sch *ast.Schema) *schemaFormatter {
 	maxIndex := max(len(sch.Children)-1, 0)
 	currentIndex := 0
-	currentIndexEOF := maxIndex < 0
+	currentIndexEOF := len(sch.Children) < 1
 	currentIndexChild := ast.SchemaChild{}
 
-	if maxIndex >= 0 {
+	if !currentIndexEOF {
 		currentIndexChild = *sch.Children[0]
 	}
 
@@ -203,6 +203,25 @@ func (f *schemaFormatter) formatImport() {
 }
 
 func (f *schemaFormatter) formatRule() {
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
+
+	shouldBreakBefore := false
+	if !prevEOF {
+		if prev.Kind() != ast.SchemaChildKindComment {
+			shouldBreakBefore = true
+		}
+
+		if prevLineDiff < -1 {
+			shouldBreakBefore = true
+		}
+	}
+
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
+	ruleFormatter := newRuleFormatter(f.currentIndexChild.Rule)
+	f.LineAndComment(strings.TrimSpace(ruleFormatter.format().String()))
 }
 
 func (f *schemaFormatter) formatType() {
