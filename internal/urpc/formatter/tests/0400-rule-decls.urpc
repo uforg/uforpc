@@ -14,6 +14,9 @@ param: string
 error: "This is an error message"
 }
 
+      """
+  This is a range rule.
+"""
 rule @rangeRule {
 for: int param: int[]
 error: "Value out of range" }
@@ -40,6 +43,9 @@ rule @foo {
   error: "This is an error message"
 }
 
+"""
+  This is a range rule.
+"""
 rule @rangeRule {
   for: int
   param: int[]
