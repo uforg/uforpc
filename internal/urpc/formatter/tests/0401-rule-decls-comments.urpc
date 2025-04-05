@@ -1,0 +1,33 @@
+      // Comment
+rule 
+@foo                          { // This is a comment
+    
+            } // Comment
+
+
+rule @foo {/* Comment */
+// Comment
+for: string// Comment
+// Comment
+
+// Comment
+param: string// Comment
+/* Comment */error: "This is an error message"/* Comment */
+} /* Comment */
+
+// >>>>
+
+// Comment
+rule @foo { // This is a comment
+} // Comment
+
+rule @foo { /* Comment */
+  // Comment
+  for: string // Comment
+  // Comment
+
+  // Comment
+  param: string // Comment
+  /* Comment */
+  error: "This is an error message" /* Comment */
+} /* Comment */
