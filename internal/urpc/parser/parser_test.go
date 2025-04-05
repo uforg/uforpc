@@ -98,33 +98,23 @@ func TestParserPositions(t *testing.T) {
 		require.NotNil(t, parsed)
 
 		expected := &ast.Schema{
-			Pos: ast.Position{
-				Filename: "schema.urpc",
-				Line:     1,
-				Offset:   0,
-				Column:   1,
-			},
-			EndPos: ast.Position{
-				Filename: "schema.urpc",
-				Line:     1,
-				Offset:   9,
-				Column:   10,
+			Positions: ast.Positions{
+				Pos: ast.Position{
+					Filename: "schema.urpc",
+					Line:     1,
+					Offset:   0,
+					Column:   1,
+				},
+				EndPos: ast.Position{
+					Filename: "schema.urpc",
+					Line:     1,
+					Offset:   9,
+					Column:   10,
+				},
 			},
 			Children: []*ast.SchemaChild{
 				{
-					Pos: ast.Position{
-						Filename: "schema.urpc",
-						Line:     1,
-						Offset:   0,
-						Column:   1,
-					},
-					EndPos: ast.Position{
-						Filename: "schema.urpc",
-						Line:     1,
-						Offset:   9,
-						Column:   10,
-					},
-					Version: &ast.Version{
+					Positions: ast.Positions{
 						Pos: ast.Position{
 							Filename: "schema.urpc",
 							Line:     1,
@@ -136,6 +126,22 @@ func TestParserPositions(t *testing.T) {
 							Line:     1,
 							Offset:   9,
 							Column:   10,
+						},
+					},
+					Version: &ast.Version{
+						Positions: ast.Positions{
+							Pos: ast.Position{
+								Filename: "schema.urpc",
+								Line:     1,
+								Offset:   0,
+								Column:   1,
+							},
+							EndPos: ast.Position{
+								Filename: "schema.urpc",
+								Line:     1,
+								Offset:   9,
+								Column:   10,
+							},
 						},
 						Number: 1,
 					},
