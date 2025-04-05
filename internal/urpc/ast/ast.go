@@ -34,7 +34,7 @@ type Schema struct {
 func (s *Schema) GetVersions() []*Version {
 	versions := []*Version{}
 	for _, node := range s.Children {
-		if node.Kind() == NodeKindVersion {
+		if node.Kind() == SchemaChildKindVersion {
 			versions = append(versions, node.Version)
 		}
 	}
@@ -45,7 +45,7 @@ func (s *Schema) GetVersions() []*Version {
 func (s *Schema) GetComments() []*Comment {
 	comments := []*Comment{}
 	for _, node := range s.Children {
-		if node.Kind() == NodeKindComment {
+		if node.Kind() == SchemaChildKindComment {
 			comments = append(comments, node.Comment)
 		}
 	}
@@ -56,7 +56,7 @@ func (s *Schema) GetComments() []*Comment {
 func (s *Schema) GetImports() []*Import {
 	imports := []*Import{}
 	for _, node := range s.Children {
-		if node.Kind() == NodeKindImport {
+		if node.Kind() == SchemaChildKindImport {
 			imports = append(imports, node.Import)
 		}
 	}
@@ -67,7 +67,7 @@ func (s *Schema) GetImports() []*Import {
 func (s *Schema) GetRules() []*RuleDecl {
 	rules := []*RuleDecl{}
 	for _, node := range s.Children {
-		if node.Kind() == NodeKindRule {
+		if node.Kind() == SchemaChildKindRule {
 			rules = append(rules, node.Rule)
 		}
 	}
@@ -78,7 +78,7 @@ func (s *Schema) GetRules() []*RuleDecl {
 func (s *Schema) GetTypes() []*TypeDecl {
 	types := []*TypeDecl{}
 	for _, node := range s.Children {
-		if node.Kind() == NodeKindType {
+		if node.Kind() == SchemaChildKindType {
 			types = append(types, node.Type)
 		}
 	}
@@ -89,7 +89,7 @@ func (s *Schema) GetTypes() []*TypeDecl {
 func (s *Schema) GetProcs() []*ProcDecl {
 	procs := []*ProcDecl{}
 	for _, node := range s.Children {
-		if node.Kind() == NodeKindProc {
+		if node.Kind() == SchemaChildKindProc {
 			procs = append(procs, node.Proc)
 		}
 	}
@@ -100,12 +100,12 @@ func (s *Schema) GetProcs() []*ProcDecl {
 type SchemaChildKind string
 
 const (
-	NodeKindVersion SchemaChildKind = "Version"
-	NodeKindComment SchemaChildKind = "Comment"
-	NodeKindImport  SchemaChildKind = "Import"
-	NodeKindRule    SchemaChildKind = "Rule"
-	NodeKindType    SchemaChildKind = "Type"
-	NodeKindProc    SchemaChildKind = "Proc"
+	SchemaChildKindVersion SchemaChildKind = "Version"
+	SchemaChildKindComment SchemaChildKind = "Comment"
+	SchemaChildKindImport  SchemaChildKind = "Import"
+	SchemaChildKindRule    SchemaChildKind = "Rule"
+	SchemaChildKindType    SchemaChildKind = "Type"
+	SchemaChildKindProc    SchemaChildKind = "Proc"
 )
 
 // SchemaChild represents a child node of the Schema root node.
@@ -122,22 +122,22 @@ type SchemaChild struct {
 
 func (n *SchemaChild) Kind() SchemaChildKind {
 	if n.Comment != nil {
-		return NodeKindComment
+		return SchemaChildKindComment
 	}
 	if n.Version != nil {
-		return NodeKindVersion
+		return SchemaChildKindVersion
 	}
 	if n.Import != nil {
-		return NodeKindImport
+		return SchemaChildKindImport
 	}
 	if n.Rule != nil {
-		return NodeKindRule
+		return SchemaChildKindRule
 	}
 	if n.Type != nil {
-		return NodeKindType
+		return SchemaChildKindType
 	}
 	if n.Proc != nil {
-		return NodeKindProc
+		return SchemaChildKindProc
 	}
 	return ""
 }
