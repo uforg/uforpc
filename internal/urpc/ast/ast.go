@@ -1,42 +1,13 @@
 package ast
 
-import (
-	plexer "github.com/alecthomas/participle/v2/lexer"
-)
-
 // This AST is used for parsing the URPC schema and it uses the
 // participle library for parsing.
 //
-// It includes Pos and EndPos fields for each node to track the
+// It includes embedded Positions fields for each node to track the
 // position of the node in the original source code, it is used
 // later in the analyzer and LSP to give useful error messages
-// and auto-completion.
-//
-// Any node in the AST containing a field Pos lexer.Position
-// will be automatically populated from the nearest matching token.
-//
-// Any node in the AST containing a field EndPos lexer.Position
-// will be automatically populated from the token at the end of the node.
-//
-// https://github.com/alecthomas/participle/blob/master/README.md#error-reporting
-
-// Position is an alias for the participle.Position type.
-type Position plexer.Position
-
-// Positions is a struct that contains the start and end positions of a node.
-//
-// Used to embed in structs that contain a start and end position and
-// automatically populate the Pos field, EndPos field, and the
-// GetPositions method.
-type Positions struct {
-	Pos    Position
-	EndPos Position
-}
-
-// GetPositions returns the start and end positions of the node.
-func (p Positions) GetPositions() Positions {
-	return p
-}
+// and auto-completion. Those positions are automatically populated
+// by the participle library.
 
 // Schema is the root of the URPC schema AST.
 type Schema struct {
