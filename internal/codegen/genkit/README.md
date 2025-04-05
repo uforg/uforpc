@@ -21,12 +21,11 @@ properly formatted code.
 
 ```go
 g := genkit.NewGenKit()
-g.Inline("function greet(name) {"). // First line without the line break of the previous line
+g.Line("function greet(name) {").
     Indent().
     Line("console.log('Hello, ' + name)").
     Dedent().
-    Line("}").
-    Break() // If you want to add EOF line break
+    Line("}")
 
 fmt.Println(g.String())
 ```
@@ -35,7 +34,7 @@ Output:
 
 ```javascript
 function greet(name) {
-  console.log("Hello, " + name);
+    console.log("Hello, " + name);
 }
 ```
 
@@ -70,9 +69,9 @@ Output:
 
 ```javascript
 class User {
-  constructor(name) {
-    this.name = name;
-  }
+    constructor(name) {
+        this.name = name;
+    }
 }
 ```
 
@@ -138,6 +137,7 @@ Output:
 
 ```javascript
 console.log("Hello");
+
 console.log("World");
 ```
 
@@ -169,7 +169,7 @@ result := g.String()
 
 ```go
 g := genkit.NewGenKit()
-g.Inline("interface User {").
+g.Line("interface User {").
     Indent().
     Line("id: string").
     Line("name: string").
@@ -182,7 +182,7 @@ g.Inline("interface User {").
 
 ```go
 g := genkit.NewGenKit().WithSpaces(4)
-g.Inline("class User:").
+g.Line("class User:").
     Indent().
     Line("def __init__(self, name, age):").
     Indent().
@@ -200,7 +200,7 @@ g.Inline("class User:").
 
 ```go
 g := genkit.NewGenKit()
-g.Inline("type User struct {").
+g.Line("type User struct {").
     Indent().
     Line("ID   int").
     Line("Name string").
