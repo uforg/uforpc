@@ -26,16 +26,16 @@ type Position plexer.Position
 // Positions is a struct that contains the start and end positions of a node.
 //
 // Used to embed in structs that contain a start and end position and
-// automatically populate the Pos field, EndPos field, and the GetPositions
-// method.
+// automatically populate the Pos field, EndPos field, and the
+// GetPositions method.
 type Positions struct {
 	Pos    Position
 	EndPos Position
 }
 
 // GetPositions returns the start and end positions of the node.
-func (p Positions) GetPositions() (Position, Position) {
-	return p.Pos, p.EndPos
+func (p Positions) GetPositions() Positions {
+	return p
 }
 
 // Schema is the root of the URPC schema AST.
