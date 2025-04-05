@@ -79,17 +79,17 @@ func (f *schemaFormatter) loadNextChild() {
 //
 // Returns:
 //   - The child at the current index +- offset.
-//   - The line difference between the current child and the peeked child.
+//   - The line diff between the peeked child and the current child.
 //   - A boolean indicating if the peeked child is out of bounds (EOL).
-func (f *schemaFormatter) peekChild(offset int) (ast.SchemaChild, int, bool) {
+func (f *schemaFormatter) peekChild(offset int) (ast.SchemaChild, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex
 	peekIndexChild := ast.SchemaChild{}
-	lineDiff := 0
+	lineDiff := ast.LineDiff{}
 
 	if !peekIndexEOF {
 		peekIndexChild = *f.sch.Children[peekIndex]
-		lineDiff = peekIndexChild.Pos.Line - f.currentIndexChild.Pos.Line
+		lineDiff = ast.GetLineDiff(peekIndexChild, f.currentIndexChild)
 	}
 
 	return peekIndexChild, lineDiff, peekIndexEOF
@@ -130,7 +130,7 @@ func (f *schemaFormatter) LineAndComment(content string) {
 	next, nextLineDiff, nextEOF := f.peekChild(1)
 
 	// If next is an inline comment
-	if !nextEOF && next.Kind() == ast.SchemaChildKindComment && nextLineDiff == 0 {
+	if !nextEOF && next.Kind() == ast.SchemaChildKindComment && nextLineDiff.StartToEnd == 0 {
 		f.g.Inline(content)
 
 		if next.Comment.Simple != nil {
@@ -159,7 +159,7 @@ func (f *schemaFormatter) formatComment() {
 
 	shouldBreakBefore := false
 	if !prevEOF {
-		if prevLineDiff < -1 {
+		if prevLineDiff.StartToStart < -1 {
 			shouldBreakBefore = true
 		}
 	}
@@ -169,11 +169,11 @@ func (f *schemaFormatter) formatComment() {
 	}
 
 	if f.currentIndexChild.Comment.Simple != nil {
-		f.LineAndCommentf("//%s", *f.currentIndexChild.Comment.Simple)
+		f.g.Linef("//%s", *f.currentIndexChild.Comment.Simple)
 	}
 
 	if f.currentIndexChild.Comment.Block != nil {
-		f.LineAndCommentf("/*%s*/", *f.currentIndexChild.Comment.Block)
+		f.g.Linef("/*%s*/", *f.currentIndexChild.Comment.Block)
 	}
 }
 
@@ -190,7 +190,7 @@ func (f *schemaFormatter) formatImport() {
 			shouldBreakBefore = true
 		}
 
-		if prevLineDiff < -1 {
+		if prevLineDiff.StartToStart < -1 {
 			shouldBreakBefore = true
 		}
 	}
@@ -211,7 +211,7 @@ func (f *schemaFormatter) formatRule() {
 			shouldBreakBefore = true
 		}
 
-		if prevLineDiff < -1 {
+		if prevLineDiff.StartToStart < -1 {
 			shouldBreakBefore = true
 		}
 	}

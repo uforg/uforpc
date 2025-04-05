@@ -59,17 +59,17 @@ func (f *ruleFormatter) loadNextChild() {
 //
 // Returns:
 //   - The child at the current index +- offset.
-//   - The line difference between the current child and the peeked child.
+//   - The line diff between the peeked child and the current child.
 //   - A boolean indicating if the peeked child is out of bounds (EOL).
-func (f *ruleFormatter) peekChild(offset int) (ast.RuleDeclChild, int, bool) {
+func (f *ruleFormatter) peekChild(offset int) (ast.RuleDeclChild, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex
 	peekIndexChild := ast.RuleDeclChild{}
-	lineDiff := 0
+	lineDiff := ast.LineDiff{}
 
 	if !peekIndexEOF {
 		peekIndexChild = *f.rule.Children[peekIndex]
-		lineDiff = peekIndexChild.Pos.Line - f.currentIndexChild.Pos.Line
+		lineDiff = ast.GetLineDiff(peekIndexChild, f.currentIndexChild)
 	}
 
 	return peekIndexChild, lineDiff, peekIndexEOF
@@ -80,7 +80,7 @@ func (f *ruleFormatter) LineAndComment(content string) {
 	next, nextLineDiff, nextEOF := f.peekChild(1)
 
 	// If next is an inline comment
-	if !nextEOF && next.Comment != nil && nextLineDiff == 0 {
+	if !nextEOF && next.Comment != nil && nextLineDiff.StartToEnd == 0 {
 		f.g.Inline(content)
 
 		if next.Comment.Simple != nil {
@@ -169,7 +169,7 @@ func (f *ruleFormatter) formatComment() {
 
 	shouldBreakBefore := false
 	if !prevEOF {
-		if prevLineDiff < -1 {
+		if prevLineDiff.StartToStart < -1 {
 			shouldBreakBefore = true
 		}
 	}
@@ -179,11 +179,11 @@ func (f *ruleFormatter) formatComment() {
 	}
 
 	if f.currentIndexChild.Comment.Simple != nil {
-		f.LineAndCommentf("//%s", *f.currentIndexChild.Comment.Simple)
+		f.g.Linef("//%s", *f.currentIndexChild.Comment.Simple)
 	}
 
 	if f.currentIndexChild.Comment.Block != nil {
-		f.LineAndCommentf("/*%s*/", *f.currentIndexChild.Comment.Block)
+		f.g.Linef("/*%s*/", *f.currentIndexChild.Comment.Block)
 	}
 }
 
