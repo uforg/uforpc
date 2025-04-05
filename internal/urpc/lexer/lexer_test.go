@@ -314,6 +314,33 @@ func TestLexer(t *testing.T) {
 		require.Equal(t, tests, tokens)
 	})
 
+	t.Run("TestLexerCommentsPositions", func(t *testing.T) {
+		input := "// This is a comment\n\n/* This is a comment */\n\n// This is a comment"
+
+		tests := []token.Token{
+			{Type: token.Comment, Literal: " This is a comment", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 20},
+			{Type: token.CommentBlock, Literal: " This is a comment ", FileName: "test.urpc", LineStart: 3, ColumnStart: 1, LineEnd: 3, ColumnEnd: 23},
+			{Type: token.Comment, Literal: " This is a comment", FileName: "test.urpc", LineStart: 5, ColumnStart: 1, LineEnd: 5, ColumnEnd: 20},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 5, ColumnStart: 21, LineEnd: 5, ColumnEnd: 21},
+		}
+
+		lex1 := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex1.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
+			require.Equal(t, test.LineStart, tok.LineStart, "test %d", i)
+			require.Equal(t, test.ColumnStart, tok.ColumnStart, "test %d", i)
+			require.Equal(t, test.LineEnd, tok.LineEnd, "test %d", i)
+			require.Equal(t, test.ColumnEnd, tok.ColumnEnd, "test %d", i)
+		}
+
+		lex2 := NewLexer("test.urpc", input)
+		tokens := lex2.ReadTokens()
+		require.Equal(t, tests, tokens)
+	})
+
 	t.Run("TestLexerCommentBlocks", func(t *testing.T) {
 		input := "/* This is a multiline comment\nwith multiple lines */"
 
