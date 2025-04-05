@@ -68,34 +68,44 @@ import "c.urpc"  // (Here, an import following a type must be separated from the
 
 ### 4.1 Fields in a Type
 
-This section applies to fields in a type block, fields in an input, output or
-meta of a procedure, and fields in an inline object.
+This section applies to fields in a type block, as well as fields in a
+procedure’s input, output, meta, or inline object.
 
-- Each field within a type block is placed on its own line.
-- **Separate fields with one blank line.** This ensures a clear visual
-  separation between consecutive fields.
-- Field rules and inline comments (end-of-line comments) appear immediately
-  after the field definition (without an extra blank line).
+- Each field is placed on its own line.
+- **Field Separation:** It is recommended to leave one blank line between fields
+  that include validation rules or complex formatting, to visually separate
+  them. For simpler fields (with no rules or extra comments), fields may be
+  placed consecutively without a blank line.
 
-_Incorrect:_
+_Recommended for simple fields:_
+
+Do not use blank lines between fields.
 
 ```urpc
-address: { // Inline object field
+address: {
   street: string
   city: string
   zip: string
 }
 ```
 
-_Correct:_
+_Recommended for fields with rules or comments:_
+
+Use blank lines between fields to visually separate them.
 
 ```urpc
-address: { // Inline object field
-  street: string
+address: {
+  street: string // Inline comment
+    @rule1
+    @rule2(error: "Invalid street")
 
   city: string
+    @rule3
+    @rule4(error: "Invalid city") // Other comment
 
   zip: string
+    @rule5
+    @rule6(error: "Invalid zip")
 }
 ```
 
@@ -126,12 +136,10 @@ address: { // Inline object field
 
 Comment content is preserved exactly (including internal whitespace).
 
-- **Standalone Comments:**\
-  Use `//` or `/* … */` on their own lines; indent to the current block.
-
-- **End-of-Line (EOL) Comments:**\
-  Can use either `//` or block style (`/* … */`) following code on the same
-  line, with at least one space separating them.
+- **Standalone Comments:** Use `//` or `/* … */` on their own lines; indent to
+  the current block.
+- **End-of-Line (EOL) Comments:** Can use either `//` or block style (`/* … */`)
+  following code on the same line, with at least one space separating them.
 
 _Example:_
 
