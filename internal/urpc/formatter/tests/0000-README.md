@@ -9,15 +9,15 @@ URPC Formatter.
 
 All test files must follow the naming convention:
 
-`NNN-<descriptive-name>.urpc`
+`NNNN-<descriptive-name>.urpc`
 
 Where:
 
-- `NNN` is a three-digit number (e.g., `001`, `015`, `123`).
+- `NNNN` is a three-digit number (e.g., `0001`, `0015`, `1234`).
 - `<descriptive-name>` briefly explains the purpose of the test (e.g.,
   `rule-declaration`, `nested-fields`).
 
-Example: `001-simple-comment.urpc`
+Example: `0001-simple-comment.urpc`
 
 ## Test File Structure
 
