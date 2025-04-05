@@ -5,7 +5,7 @@ import (
 	"go/format"
 	"strings"
 
-	"github.com/uforg/uforpc/internal/codegen/genkit"
+	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/schema"
 )
 

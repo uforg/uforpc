@@ -3,7 +3,7 @@ package formatter
 import (
 	"fmt"
 
-	"github.com/uforg/uforpc/internal/codegen/genkit"
+	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/urpc/ast"
 )
 

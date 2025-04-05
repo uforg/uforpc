@@ -3,7 +3,7 @@ package golang
 import (
 	"fmt"
 
-	"github.com/uforg/uforpc/internal/codegen/genkit"
+	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/schema"
 	"github.com/uforg/uforpc/internal/util/strutil"
 )

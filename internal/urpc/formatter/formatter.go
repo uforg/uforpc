@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/internal/codegen/genkit"
+	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/internal/urpc/parser"
 )
