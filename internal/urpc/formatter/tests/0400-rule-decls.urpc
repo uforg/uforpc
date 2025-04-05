@@ -1,0 +1,47 @@
+
+rule 
+@foo                          {
+    
+            }
+
+rule @foo {for           : boolean}
+rule @foo {param : float}
+rule @foo {error  : "This is an error message"}
+
+rule @foo {
+for: string
+param: string
+error: "This is an error message"
+}
+
+rule @rangeRule {
+for: int param: int[]
+error: "Value out of range" }
+
+// >>>>
+
+rule @foo {}
+
+rule @foo {
+  for: boolean
+}
+
+rule @foo {
+  param: float
+}
+
+rule @foo {
+  error: "This is an error message"
+}
+
+rule @foo {
+  for: string
+  param: string
+  error: "This is an error message"
+}
+
+rule @rangeRule {
+  for: int
+  param: int[]
+  error: "Value out of range"
+}
