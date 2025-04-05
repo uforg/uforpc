@@ -41,7 +41,7 @@ func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) (any, error) {
 		Result: nil,
 	}
 
-	formattedText, err := formatter.Format(doc.rawText)
+	formattedText, err := formatter.Format(request.Params.TextDocument.URI, doc.rawText)
 	if err != nil {
 		// If formatting fails, return no edits.
 		return response, nil
