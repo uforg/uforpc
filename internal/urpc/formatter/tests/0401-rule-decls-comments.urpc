@@ -1,13 +1,12 @@
       // Comment
-rule 
-@foo                          { // This is a comment
+rule @foo                          { // This is a comment
     
             } // Comment
 
 
-rule @foo {/* Comment */
+rule@foo{/* Comment */
 // Comment
-for: string// Comment
+for: string/* Comment */// Comment
 // Comment
 
 // Comment
@@ -23,7 +22,8 @@ rule @foo { // This is a comment
 
 rule @foo { /* Comment */
   // Comment
-  for: string // Comment
+  for: string /* Comment */
+  // Comment
   // Comment
 
   // Comment
