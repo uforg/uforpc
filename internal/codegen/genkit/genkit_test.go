@@ -15,7 +15,7 @@ func TestBasicIndentation(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "\nif (true) {\n  console.log('hello')\n}"
+		want := "if (true) {\n  console.log('hello')\n}\n"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -27,7 +27,7 @@ func TestBasicIndentation(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "\nif (true) {\n    console.log('hello')\n}"
+		want := "if (true) {\n    console.log('hello')\n}\n"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -39,7 +39,7 @@ func TestBasicIndentation(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "\nif (true) {\n\tconsole.log('hello')\n}"
+		want := "if (true) {\n\tconsole.log('hello')\n}\n"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -50,7 +50,7 @@ func TestBasicIndentation(t *testing.T) {
 			Break().
 			Line("// This is other comment")
 
-		want := "\n// This is a comment\n\n\n// This is other comment"
+		want := "// This is a comment\n\n\n// This is other comment\n"
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -64,7 +64,7 @@ func TestChainable(t *testing.T) {
 			Dedent().
 			Line("}")
 
-		want := "\nif (true) {\n\tconsole.log('hello')\n}"
+		want := "if (true) {\n\tconsole.log('hello')\n}\n"
 		assert.Equal(t, want, g.String())
 	})
 
@@ -76,7 +76,7 @@ func TestChainable(t *testing.T) {
 		g.Dedent()
 		g.Line("}")
 
-		want := "\nif (true) {\n\tconsole.log('hello')\n}"
+		want := "if (true) {\n\tconsole.log('hello')\n}\n"
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -91,11 +91,11 @@ func TestBlock(t *testing.T) {
 			}).
 			Line("}")
 
-		want := `
-if (true) {
+		want := `if (true) {
   console.log('hello')
   console.log('world')
-}`
+}
+`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -115,14 +115,14 @@ if (true) {
 			}).
 			Line("}")
 
-		want := `
-function example() {
+		want := `function example() {
   if (condition) {
     console.log('condition true')
   } else {
     console.log('condition false')
   }
-}`
+}
+`
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -132,8 +132,8 @@ func TestLinef(t *testing.T) {
 		g := NewGenKit().WithSpaces(2)
 		g.Linef("const greeting = %q", "Hello, World!")
 
-		want := `
-const greeting = "Hello, World!"`
+		want := `const greeting = "Hello, World!"
+`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -146,11 +146,11 @@ const greeting = "Hello, World!"`
 			Dedent().
 			Line("}")
 
-		want := `
-interface User {
+		want := `interface User {
   id: string
   age: number
-}`
+}
+`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -163,11 +163,11 @@ interface User {
 			Dedent().
 			Line("}")
 
-		want := `
-type User struct {
+		want := `type User struct {
   ID   int
   Name string
-}`
+}
+`
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -189,14 +189,14 @@ func TestMultiLanguageExamples(t *testing.T) {
 			Dedent().
 			Dedent()
 
-		want := `
-class User:
+		want := `class User:
     def __init__(self, name, age):
         self.name = name
         self.age = age
 
     def greet(self):
-        return f"Hello, {self.name}!"`
+        return f"Hello, {self.name}!"
+`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -219,8 +219,7 @@ class User:
 			Dedent().
 			Line("end")
 
-		want := `
-class User
+		want := `class User
   def initialize(name, age)
     @name = name
     @age = age
@@ -229,7 +228,8 @@ class User
   def greet
     puts "Hello, #{@name}!"
   end
-end`
+end
+`
 		assert.Equal(t, want, g.String())
 	})
 
@@ -255,8 +255,7 @@ end`
 			Dedent().
 			Line("}")
 
-		want := `
-public class User {
+		want := `public class User {
     private String name;
     private int age;
 
@@ -268,7 +267,8 @@ public class User {
     public String greet() {
         return "Hello, " + name + "!";
     }
-}`
+}
+`
 		assert.Equal(t, want, g.String())
 	})
 }
@@ -328,7 +328,7 @@ func TestInlinef(t *testing.T) {
 func TestSublines(t *testing.T) {
 	t.Run("If a line contains newlines, each line will be properly indented", func(t *testing.T) {
 		g := NewGenKit().WithSpaces(2)
-		g.Inline("function test() {")
+		g.Line("function test() {")
 		g.Block(func() {
 			g.Line("console.log('hello')\nconsole.log('world')")
 		})
@@ -337,7 +337,40 @@ func TestSublines(t *testing.T) {
 		want := `function test() {
   console.log('hello')
   console.log('world')
-}`
+}
+`
+		assert.Equal(t, want, g.String())
+	})
+}
+
+func TestInlineContinuation(t *testing.T) {
+	t.Run("Inline multiple times on same line", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Line("const x = ").
+			Indent().
+			Inline("1").
+			Inline(" + ").
+			Inline("2;")
+
+		want := "const x = \n  1 + 2;"
+		assert.Equal(t, want, g.String())
+	})
+
+	t.Run("Inline after Line", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Line("line1")
+		g.Inline("line2")
+
+		want := "line1\nline2"
+		assert.Equal(t, want, g.String())
+	})
+
+	t.Run("Line after Inline", func(t *testing.T) {
+		g := NewGenKit().WithSpaces(2)
+		g.Inline("line1")
+		g.Line("line2")
+
+		want := "line1line2\n"
 		assert.Equal(t, want, g.String())
 	})
 }
