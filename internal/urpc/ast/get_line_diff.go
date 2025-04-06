@@ -1,10 +1,14 @@
 package ast
 
 type LineDiff struct {
+	// The difference in lines between the start of the first position and the start of the second position.
 	StartToStart int
-	StartToEnd   int
-	EndToStart   int
-	EndToEnd     int
+	// The difference in lines between the start of the first position and the end of the second position.
+	StartToEnd int
+	// The difference in lines between the end of the first position and the start of the second position.
+	EndToStart int
+	// The difference in lines between the end of the first position and the end of the second position.
+	EndToEnd int
 }
 
 // GetLineDiff returns the line diff between two positions.
