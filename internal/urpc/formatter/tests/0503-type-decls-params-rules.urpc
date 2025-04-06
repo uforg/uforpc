@@ -1,0 +1,79 @@
+type Foo {
+  field1: string @uppercase // This is a comment
+  field2: int /* This is a comment */ @min(0) @max(100)
+
+  field3: float @min(0.0) @max(100.0)
+
+
+
+  field4: boolean @equals(true) field5: datetime @min("2021-01-01") @max("2021-12-31")
+
+  field6: string @minlen(3) @maxlen(100,
+  error: "Name too long")
+
+
+  field7: { // This is a comment
+    subField1: datetime[]
+      @min("2021-01-01") @max("2021-12-31")
+    subField2: {
+      subSubField1: string
+    @enum(["foo", "bar", "baz"])
+    }[]
+    subField3: datetime
+  }[]
+  @minlen(3, error: "Too short")
+
+  field8:{
+    sub1: string @enum(["foo", "bar", "baz"], error: "error")
+     @enum([1,2,3], error: "error")
+    @enum([1.1,2.2,3.3], error: "error")
+    @enum([true, true , false,true], error: "error")
+    
+
+
+  }
+}
+
+// >>>>
+
+type Foo {
+  field1: string
+    @uppercase // This is a comment
+  field2: int /* This is a comment */
+    @min(0)
+    @max(100)
+
+  field3: float
+    @min(0.0)
+    @max(100.0)
+
+  field4: boolean
+    @equals(true)
+  field5: datetime
+    @min("2021-01-01")
+    @max("2021-12-31")
+
+  field6: string
+    @minlen(3)
+    @maxlen(100, error: "Name too long")
+
+  field7: { // This is a comment
+    subField1: datetime[]
+      @min("2021-01-01")
+      @max("2021-12-31")
+    subField2: {
+      subSubField1: string
+        @enum(["foo", "bar", "baz"])
+    }[]
+    subField3: datetime
+  }[]
+    @minlen(3, error: "Too short")
+
+  field8:{
+    sub1: string
+      @enum(["foo", "bar", "baz"], error: "error")
+      @enum([1,2,3], error: "error")
+      @enum([1.1,2.2,3.3], error: "error")
+      @enum([true, true , false,true], error: "error")
+  }
+}
