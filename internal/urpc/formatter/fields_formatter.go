@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/urpc/ast"
@@ -195,5 +196,23 @@ func (f *fieldsFormatter) formatField() {
 		f.g.Inlinef("%s: ", f.currentIndexChild.Field.Name)
 	}
 
-	f.LineAndCommentf("%s", *f.currentIndexChild.Field.Type.Base.Named)
+	typeLiteral := ""
+
+	if f.currentIndexChild.Field.Type.Base.Named != nil {
+		typeLiteral = *f.currentIndexChild.Field.Type.Base.Named
+	}
+
+	if f.currentIndexChild.Field.Type.Base.Object != nil {
+		children := f.currentIndexChild.Field.Type.Base.Object.Children
+		nestedFormatter := newFieldsFormatter(f.currentIndexChild, children)
+		typeLiteral = strings.TrimSpace(nestedFormatter.format().String())
+	}
+
+	for range f.currentIndexChild.Field.Type.Depth {
+		typeLiteral = typeLiteral + "[]"
+	}
+
+	// TODO: Handle rules
+
+	f.LineAndComment(typeLiteral)
 }
