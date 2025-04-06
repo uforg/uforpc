@@ -8,4 +8,5 @@ import (
 
 var Parser = participle.MustBuild[ast.Schema](
 	participle.Lexer(&lexer.ParticipleLexer{}),
+	participle.Elide("Whitespace"),
 )
