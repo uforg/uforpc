@@ -1,0 +1,35 @@
+type Foo {  field1: string [] field2: { // This is a comment
+    subField1: datetime[]
+      subField2: {      subSubField1: string[]
+      [][][ ][][][ ]
+      } [ ]
+  }[]
+  field3: int[ ]    []  field4: {}
+
+
+  field5: {
+    // This is a comment
+  }
+  field6: string
+}
+
+// >>>>
+
+type Foo {
+  field1: string[]
+  field2: { // This is a comment
+    subField1: datetime[]
+    subField2: {
+      subSubField1: string[][][][][][][]
+    }[]
+  }[]
+
+  field3: int[][]
+  field4: {}
+
+  field5: {
+    // This is a comment
+  }
+
+  field6: string
+}
