@@ -1,0 +1,42 @@
+type Foo { // This is a comment
+  
+                      }
+
+
+type Foo{ /* This is a comment */}
+
+type Foo {
+  // This is a comment
+}
+
+type Foo {
+  /* This is a comment */ field1: string  field2: int
+  field3: float
+
+
+
+  field4: boolean
+  field5: datetime
+}
+
+// >>>>
+
+type Foo { // This is a comment
+}
+
+type Foo { /* This is a comment */
+}
+
+type Foo {
+  // This is a comment
+}
+
+type Foo {
+  /* This is a comment */
+  field1: string
+  field2: int
+  field3: float
+
+  field4: boolean
+  field5: datetime
+}
