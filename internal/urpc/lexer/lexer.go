@@ -76,6 +76,22 @@ func (l *Lexer) peekChar(depth int) (byte, bool) {
 	return l.input[indexToPeek], false
 }
 
+// readWhitespace reads whitespace characters from the current index to the next non-whitespace character.
+func (l *Lexer) readWhitespace() string {
+	var literal string
+	for isWhitespace(l.currentChar) {
+		literal += string(l.currentChar)
+
+		nextChar, eofReached := l.peekChar(1)
+		if eofReached || !isWhitespace(nextChar) {
+			break
+		}
+
+		l.readNextChar()
+	}
+	return literal
+}
+
 // readIdentifier reads an identifier from the current index to the next non-letter/non-number character.
 func (l *Lexer) readIdentifier() string {
 	var ident string
@@ -287,16 +303,8 @@ func (l *Lexer) readComment() (string, bool) {
 	return comment, isMultilineComment
 }
 
-// skipWhitespace skips whitespace characters from the current index to the next non-whitespace character.
-func (l *Lexer) skipWhitespace() {
-	for isWhitespace(l.currentChar) {
-		l.readNextChar()
-	}
-}
-
 // NextToken returns the next token from the input.
 func (l *Lexer) NextToken() token.Token {
-	l.skipWhitespace()
 	if l.currentIndexIsEOF {
 		return token.Token{
 			Type:        token.Eof,
@@ -311,6 +319,38 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Prepare the next character when the function returns
 	defer l.readNextChar()
+
+	// Handle whitespace
+	if isWhitespace(l.currentChar) {
+		startLine := l.CurrentLine
+		startColumn := l.CurrentColumn
+		literal := l.readWhitespace()
+		endLine := l.CurrentLine
+
+		// End column is the last column of the last character in the literal
+		// but cant use len() because it can be a multi-line whitespace so
+		// the last character could be in a different line
+		endColumn := startColumn
+		for i, char := range literal {
+			if i == 0 { // Skip the first character, it's already counted by the startColumn
+				continue
+			}
+			endColumn++
+			if char == '\n' {
+				endColumn = 1
+			}
+		}
+
+		return token.Token{
+			Type:        token.Whitespace,
+			Literal:     literal,
+			FileName:    l.FileName,
+			LineStart:   startLine,
+			ColumnStart: startColumn,
+			LineEnd:     endLine,
+			ColumnEnd:   endColumn,
+		}
+	}
 
 	// Handle delimiters
 	if token.IsDelimiter(l.currentChar) {
