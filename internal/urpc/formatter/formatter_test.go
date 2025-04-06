@@ -3,6 +3,7 @@ package formatter
 import (
 	"embed"
 	"path"
+	"strings"
 	"testing"
 
 	_ "embed"
@@ -29,6 +30,32 @@ func TestFormat(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, file := range files {
+		content, err := testFiles.ReadFile(path.Join("tests", file.Name()))
+		require.NoError(t, err)
+
+		separator := "\n// >>>>\n\n"
+		input := strutil.GetStrBefore(string(content), separator)
+		expected := strutil.GetStrAfter(string(content), separator)
+
+		formatted, err := Format(file.Name(), input)
+		require.NoError(t, err, "error formatting %s", file.Name())
+		require.Equal(t, expected, formatted, "incorrect formatting for %s", file.Name())
+	}
+}
+
+// This test is used to debug the formatter using a single file.
+// Feel free to modify the prefix to test other files.
+func TestFormatOnlyOne(t *testing.T) {
+	filePrefix := "0100"
+
+	files, err := testFiles.ReadDir("tests")
+	require.NoError(t, err)
+
+	for _, file := range files {
+		if !strings.HasPrefix(file.Name(), filePrefix) {
+			continue
+		}
+
 		content, err := testFiles.ReadFile(path.Join("tests", file.Name()))
 		require.NoError(t, err)
 
