@@ -212,7 +212,190 @@ func (f *fieldsFormatter) formatField() {
 		typeLiteral = typeLiteral + "[]"
 	}
 
-	// TODO: Handle rules
+	if f.currentIndexChild.Field.Children != nil {
+		rulesFormatter := newFieldRulesFormatter(f.currentIndexChild, f.currentIndexChild.Field.Children)
+		children := rulesFormatter.format()
+		typeLiteral = typeLiteral + children.String()
+	}
 
 	f.LineAndComment(typeLiteral)
+}
+
+////////////////////
+////////////////////
+////////////////////
+
+type fieldRulesFormatter struct {
+	g                 *genkit.GenKit
+	parent            ast.WithPositions
+	children          []*ast.FieldChild
+	maxIndex          int
+	currentIndex      int
+	currentIndexEOF   bool
+	currentIndexChild ast.FieldChild
+}
+
+func newFieldRulesFormatter(parent ast.WithPositions, children []*ast.FieldChild) *fieldRulesFormatter {
+	if children == nil {
+		children = []*ast.FieldChild{}
+	}
+
+	maxIndex := max(len(children)-1, 0)
+	currentIndex := 0
+	currentIndexEOF := len(children) < 1
+	currentIndexChild := ast.FieldChild{}
+
+	if !currentIndexEOF {
+		currentIndexChild = *children[0]
+	}
+
+	return &fieldRulesFormatter{
+		g:                 genkit.NewGenKit().WithSpaces(2),
+		parent:            parent,
+		children:          children,
+		maxIndex:          maxIndex,
+		currentIndex:      currentIndex,
+		currentIndexEOF:   currentIndexEOF,
+		currentIndexChild: currentIndexChild,
+	}
+}
+
+// loadNextChild moves the current index to the next child.
+func (f *fieldRulesFormatter) loadNextChild() {
+	currentIndex := f.currentIndex + 1
+	currentIndexEOF := currentIndex > f.maxIndex
+	currentIndexChild := ast.FieldChild{}
+
+	if !currentIndexEOF {
+		currentIndexChild = *f.children[currentIndex]
+	}
+
+	f.currentIndex = currentIndex
+	f.currentIndexEOF = currentIndexEOF
+	f.currentIndexChild = currentIndexChild
+}
+
+// peekChild returns information about the child at the current index +- offset.
+//
+// Returns:
+//   - The child at the current index +- offset.
+//   - The line diff between the peeked child and the current child.
+//   - A boolean indicating if the peeked child is out of bounds (EOL).
+func (f *fieldRulesFormatter) peekChild(offset int) (ast.FieldChild, ast.LineDiff, bool) {
+	peekIndex := f.currentIndex + offset
+	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex
+	peekIndexChild := ast.FieldChild{}
+	lineDiff := ast.LineDiff{}
+
+	if !peekIndexEOF {
+		peekIndexChild = *f.children[peekIndex]
+		lineDiff = ast.GetLineDiff(peekIndexChild, f.currentIndexChild)
+	}
+
+	return peekIndexChild, lineDiff, peekIndexEOF
+}
+
+// format formats the entire rule, handling spacing and EOL comments.
+func (f *fieldRulesFormatter) format() *genkit.GenKit {
+	if f.currentIndexEOF {
+		return f.g
+	}
+
+	hasInlineComment := false
+	if f.currentIndexChild.Comment != nil {
+		lineDiff := ast.GetLineDiff(f.currentIndexChild, f.parent)
+		if lineDiff.StartToStart == 0 {
+			hasInlineComment = true
+		}
+	}
+
+	if hasInlineComment {
+		f.g.Inline(" ")
+		f.formatComment()
+		f.loadNextChild()
+	}
+
+	f.g.Block(func() {
+		for {
+			if f.currentIndexEOF {
+				break
+			}
+
+			if f.currentIndexChild.Comment != nil {
+				f.formatComment()
+			}
+
+			if f.currentIndexChild.Rule != nil {
+				f.formatRule()
+			}
+
+			f.loadNextChild()
+		}
+	})
+
+	return f.g
+}
+
+func (f *fieldRulesFormatter) formatComment() {
+	_, prevLineDiff, prevEOF := f.peekChild(-1)
+
+	shouldBreakBefore := !prevEOF && prevLineDiff.EndToStart < -1
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
+	shouldSpaceBefore := !prevEOF && prevLineDiff.EndToStart == 0
+	if shouldSpaceBefore {
+		f.g.Inline(" ")
+	}
+
+	if f.currentIndexChild.Comment.Simple != nil {
+		f.g.Inlinef("//%s", *f.currentIndexChild.Comment.Simple)
+	}
+
+	if f.currentIndexChild.Comment.Block != nil {
+		f.g.Inlinef("/*%s*/", *f.currentIndexChild.Comment.Block)
+	}
+}
+
+func (f *fieldRulesFormatter) formatRule() {
+	_, prevLineDiff, prevEOF := f.peekChild(-1)
+
+	shouldBreakBefore := !prevEOF && prevLineDiff.EndToStart < -1
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
+	f.g.Break()
+	f.g.Inlinef("@%s", f.currentIndexChild.Rule.Name)
+
+	if f.currentIndexChild.Rule.Body != nil {
+		f.g.Inline("(")
+
+		if f.currentIndexChild.Rule.Body.ParamSingle != nil {
+			f.g.Inlinef("%s", *f.currentIndexChild.Rule.Body.ParamSingle)
+		}
+
+		if f.currentIndexChild.Rule.Body.ParamListString != nil {
+			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListString, ", "))
+		}
+
+		if f.currentIndexChild.Rule.Body.ParamListInt != nil {
+			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListInt, ", "))
+		}
+
+		if f.currentIndexChild.Rule.Body.ParamListFloat != nil {
+			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListFloat, ", "))
+		}
+
+		if f.currentIndexChild.Rule.Body.ParamListBoolean != nil {
+			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListBoolean, ", "))
+		}
+
+		if f.currentIndexChild.Rule.Body.Error != nil {
+			f.g.Inlinef(", error: %s", *f.currentIndexChild.Rule.Body.Error)
+		}
+
+		f.g.Inline(")")
+	}
 }
