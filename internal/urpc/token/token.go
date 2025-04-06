@@ -38,16 +38,17 @@ const (
 	FalseLiteral  TokenType = "FalseLiteral"
 
 	// Operators and delimiters
-	Colon    TokenType = "Colon"
-	Comma    TokenType = "Comma"
-	LParen   TokenType = "LParen"
-	RParen   TokenType = "RParen"
-	LBrace   TokenType = "LBrace"
-	RBrace   TokenType = "RBrace"
-	LBracket TokenType = "LBracket"
-	RBracket TokenType = "RBracket"
-	At       TokenType = "At"
-	Question TokenType = "Question"
+	Whitespace TokenType = "Whitespace" // Can be spaces, tabs, newlines, etc.
+	Colon      TokenType = "Colon"
+	Comma      TokenType = "Comma"
+	LParen     TokenType = "LParen"
+	RParen     TokenType = "RParen"
+	LBrace     TokenType = "LBrace"
+	RBrace     TokenType = "RBrace"
+	LBracket   TokenType = "LBracket"
+	RBracket   TokenType = "RBracket"
+	At         TokenType = "At"
+	Question   TokenType = "Question"
 
 	// Keywords
 	Version  TokenType = "Version"
@@ -88,6 +89,7 @@ var TokenTypes = []TokenType{
 	FalseLiteral,
 
 	// Operators and delimiters
+	Whitespace,
 	Colon,
 	Comma,
 	LParen,
