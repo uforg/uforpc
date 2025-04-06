@@ -225,6 +225,25 @@ func (f *schemaFormatter) formatRule() {
 }
 
 func (f *schemaFormatter) formatType() {
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
+
+	shouldBreakBefore := false
+	if !prevEOF {
+		if prev.Kind() != ast.SchemaChildKindComment {
+			shouldBreakBefore = true
+		}
+
+		if prevLineDiff.StartToStart < -1 {
+			shouldBreakBefore = true
+		}
+	}
+
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
+	typeFormatter := newTypeFormatter(f.currentIndexChild.Type)
+	f.LineAndComment(strings.TrimSpace(typeFormatter.format().String()))
 }
 
 func (f *schemaFormatter) formatProc() {
