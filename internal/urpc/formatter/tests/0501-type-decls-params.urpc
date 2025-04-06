@@ -15,7 +15,7 @@ type Foo {
 
 
 
-  field4: boolean
+  field4?: boolean
   field5: datetime
 }
 
@@ -37,6 +37,6 @@ type Foo {
   field2: int
   field3: float
 
-  field4: boolean
+  field4?: boolean
   field5: datetime
 }
