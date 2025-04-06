@@ -181,7 +181,7 @@ func (f *fieldsFormatter) formatField() {
 
 	shouldBreakBefore := false
 	if !prevEOF {
-		if prevLineDiff.StartToStart < -1 {
+		if prevLineDiff.EndToStart < -1 {
 			shouldBreakBefore = true
 		}
 	}
