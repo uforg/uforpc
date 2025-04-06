@@ -120,8 +120,8 @@ func (f *ruleFormatter) format() *genkit.GenKit {
 
 	hasInlineComment := false
 	if f.currentIndexChild.Comment != nil {
-		lineDiff := f.currentIndexChild.Pos.Line - f.rule.Pos.Line
-		if lineDiff == 0 {
+		lineDiff := ast.GetLineDiff(f.currentIndexChild, f.rule)
+		if lineDiff.StartToStart == 0 {
 			hasInlineComment = true
 		}
 	}
