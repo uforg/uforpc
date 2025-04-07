@@ -1,0 +1,409 @@
+version 1
+
+    /* Import other schema */
+    import "foo.urpc" // Comment
+    import "bar.urpc"
+
+    // Custom rule declarations
+
+    """
+    This rule validates if a string matches a regular expression pattern.
+    Useful for emails, URLs, and other formatted strings.
+    """
+    rule @regex {
+      for: string
+      param: string
+      error: "Invalid format"
+    }
+
+    """ Validate "category" with custom logic """
+    rule @validateCategory {
+      for: Category
+      error: "Field \"category\" is not valid"
+    }
+
+    // Type declarations
+
+    type FirstDummyType {
+      dummyField: datetime
+        @min("1900-01-01T00:00:00Z")
+        @max("2100-01-01T00:00:00Z")
+    }
+
+    type SecondDummyType {
+      dummyField: int
+    }
+
+    type ThirdDummyType extends FirstDummyType, SecondDummyType {
+      dummyField: string
+    }
+
+    """
+    Category represents a product category in the system.
+    This type is used across the catalog module.
+    """
+    type Category extends ThirdDummyType {
+      id: string
+        @uuid(error: "Must be a valid UUID")
+        @minlen(36)
+        @maxlen(36, error: "UUID must be exactly 36 characters")
+      name: string
+        @minlen(3, error: "Name must be at least 3 characters long")
+      description?: string
+      isActive: boolean
+        @equals(true)
+      parentId?: string
+        @uuid
+    }
+
+    """
+    Product represents a sellable item in the store.
+    Products have complex validation rules and can be
+    nested inside catalogs.
+    """
+    type Product {
+      id: string
+        @uuid
+      name: string
+        @minlen(2)
+        @maxlen(100, error: "Name cannot exceed 100 characters")
+      price: float
+        @min(0.01, error: "Price must be greater than zero")
+      stock: int
+        @min(0)
+        @range([0, 1000], error: "Stock must be between 0 and 1000")
+      category: Category
+        @validateCategory(error: "Invalid category custom message")
+      tags?: string[]
+        @minlen(1, error: "At least one tag is required")
+        @maxlen(10)
+
+      details: {
+        dimensions: {
+          width: float
+            @min(0.0, error: "Width cannot be negative")
+          height: float
+            @min(0.0)
+          depth?: float
+        }
+        weight?: float
+        colors: string[]
+          @enum(["red", "green", "blue", "black", "white"], error: "Color must be one of the allowed values")
+        attributes?: {
+          name: string
+          value: string
+        }[]
+      }
+
+      variations: {
+        sku: string
+        price: float
+          @min(0.01, error: "Variation price must be greater than zero")
+        attributes: {
+          name: string
+          value: string
+        }[]
+      }[]
+    }
+
+    // Procedure declarations
+
+    """
+    GetCategory retrieves a category by its ID.
+    This is a basic read operation.
+    """
+    proc GetCategory {
+      input {
+        id: string
+          @uuid(error: "Category ID must be a valid UUID")
+      }
+      output {
+        category: Category
+        exists: boolean
+      }
+      meta {
+        cache: true
+        cacheTime: 300
+        requiresAuth: false
+        apiVersion: "1.0.0"
+      }
+    }
+
+      """
+    CreateProduct adds a new product to the catalog.
+    This procedure handles complex validation and returns
+    detailed success information.
+    """
+    proc CreateProduct {
+      input {
+        product: Product
+        options?: {
+          draft: boolean
+          notify: boolean
+          scheduledFor?: string
+            @iso8601(error: "Must be a valid ISO8601 date")
+          tags?: string[]
+        }
+
+        validation: {
+          skipValidation?: boolean
+          customRules?: {
+            name: string
+            severity: int 							@enum([1, 2, 3], error: "Severity must be 1, 2, or 3")
+            message: string
+          }[]
+        }
+      }
+
+      output {
+        success: boolean
+        productId: string
+          @uuid(error: "Product ID must be a valid UUID")
+        errors?: {
+          code: int
+          message: string
+          field?: string
+        }[]
+
+        analytics: {
+          duration: float
+          processingSteps: {
+            name: string
+            duration: float
+            success: boolean
+          }[]
+          serverInfo: {
+            id: string
+            region: string
+            load: float
+              @min(0.0)
+              @max(1.0, error: "Load factor cannot exceed 1.0")
+          }
+        }
+      }
+
+      meta {
+        auth: "required"
+        roles: "admin,product-manager"
+        rateLimit: 100
+        timeout: 30.5
+        audit: true
+        apiVersion: "1.2.0"
+      }
+    }
+    """
+    Validates if a value is within a specified range.
+    """
+    rule @range{
+      for: int
+      param: int[]
+      error: "Value out of range"
+    }
+
+// >>>>
+
+version 1
+
+/* Import other schema */
+import "foo.urpc" // Comment
+import "bar.urpc"
+
+// Custom rule declarations
+
+"""
+    This rule validates if a string matches a regular expression pattern.
+    Useful for emails, URLs, and other formatted strings.
+    """
+rule @regex {
+  for: string
+  param: string
+  error: "Invalid format"
+}
+
+""" Validate "category" with custom logic """
+rule @validateCategory {
+  for: Category
+  error: "Field \"category\" is not valid"
+}
+
+// Type declarations
+
+type FirstDummyType {
+  dummyField: datetime
+    @min("1900-01-01T00:00:00Z")
+    @max("2100-01-01T00:00:00Z")
+}
+
+type SecondDummyType {
+  dummyField: int
+}
+
+type ThirdDummyType extends FirstDummyType, SecondDummyType {
+  dummyField: string
+}
+
+"""
+    Category represents a product category in the system.
+    This type is used across the catalog module.
+    """
+type Category extends ThirdDummyType {
+  id: string
+    @uuid(error: "Must be a valid UUID")
+    @minlen(36)
+    @maxlen(36, error: "UUID must be exactly 36 characters")
+  name: string
+    @minlen(3, error: "Name must be at least 3 characters long")
+  description?: string
+  isActive: boolean
+    @equals(true)
+  parentId?: string
+    @uuid
+}
+
+"""
+    Product represents a sellable item in the store.
+    Products have complex validation rules and can be
+    nested inside catalogs.
+    """
+type Product {
+  id: string
+    @uuid
+  name: string
+    @minlen(2)
+    @maxlen(100, error: "Name cannot exceed 100 characters")
+  price: float
+    @min(0.01, error: "Price must be greater than zero")
+  stock: int
+    @min(0)
+    @range([0, 1000], error: "Stock must be between 0 and 1000")
+  category: Category
+    @validateCategory(error: "Invalid category custom message")
+  tags?: string[]
+    @minlen(1, error: "At least one tag is required")
+    @maxlen(10)
+
+  details: {
+    dimensions: {
+      width: float
+        @min(0.0, error: "Width cannot be negative")
+      height: float
+        @min(0.0)
+      depth?: float
+    }
+    weight?: float
+    colors: string[]
+      @enum(["red", "green", "blue", "black", "white"], error: "Color must be one of the allowed values")
+    attributes?: {
+      name: string
+      value: string
+    }[]
+  }
+
+  variations: {
+    sku: string
+    price: float
+      @min(0.01, error: "Variation price must be greater than zero")
+    attributes: {
+      name: string
+      value: string
+    }[]
+  }[]
+}
+
+// Procedure declarations
+
+"""
+    GetCategory retrieves a category by its ID.
+    This is a basic read operation.
+    """
+proc GetCategory {
+  input {
+    id: string
+      @uuid(error: "Category ID must be a valid UUID")
+  }
+
+  output {
+    category: Category
+    exists: boolean
+  }
+
+  meta {
+    cache: true
+    cacheTime: 300
+    requiresAuth: false
+    apiVersion: "1.0.0"
+  }
+}
+
+"""
+    CreateProduct adds a new product to the catalog.
+    This procedure handles complex validation and returns
+    detailed success information.
+    """
+proc CreateProduct {
+  input {
+    product: Product
+    options?: {
+      draft: boolean
+      notify: boolean
+      scheduledFor?: string
+        @iso8601(error: "Must be a valid ISO8601 date")
+      tags?: string[]
+    }
+
+    validation: {
+      skipValidation?: boolean
+      customRules?: {
+        name: string
+        severity: int
+          @enum([1, 2, 3], error: "Severity must be 1, 2, or 3")
+        message: string
+      }[]
+    }
+  }
+
+  output {
+    success: boolean
+    productId: string
+      @uuid(error: "Product ID must be a valid UUID")
+    errors?: {
+      code: int
+      message: string
+      field?: string
+    }[]
+
+    analytics: {
+      duration: float
+      processingSteps: {
+        name: string
+        duration: float
+        success: boolean
+      }[]
+      serverInfo: {
+        id: string
+        region: string
+        load: float
+          @min(0.0)
+          @max(1.0, error: "Load factor cannot exceed 1.0")
+      }
+    }
+  }
+
+  meta {
+    auth: "required"
+    roles: "admin,product-manager"
+    rateLimit: 100
+    timeout: 30.5
+    audit: true
+    apiVersion: "1.2.0"
+  }
+}
+
+"""
+    Validates if a value is within a specified range.
+    """
+rule @range {
+  for: int
+  param: int[]
+  error: "Value out of range"
+}
