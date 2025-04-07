@@ -1,0 +1,84 @@
+// Comment
+proc Test {// Comment
+  input {/* Comment */
+    field: { // Comment
+      subfield: {
+        subsubfield: string[]
+          @uppercase
+      }[]
+    }[]
+  }
+  // Comment
+  output { // Comment
+    field: { // Comment
+      subfield: { // Comment
+        subsubfield: string[]
+          @uppercase
+      }[]
+    }[]
+  }
+
+  // Comment
+  // Comment
+
+  // Comment
+  /* Comment */
+  // Comment
+  // Comment
+  meta { // Comment
+    field: "string" // Comment
+    // Comment
+    field: 1
+    field: 1.1
+
+    // Comment
+
+    field: true
+    /* Comment */
+    field: false
+  }
+}
+
+// >>>>
+
+// Comment
+proc Test { // Comment
+  input { /* Comment */
+    field: { // Comment
+      subfield: {
+        subsubfield: string[]
+          @uppercase
+      }[]
+    }[]
+  }
+
+  // Comment
+  output { // Comment
+    field: { // Comment
+      subfield: { // Comment
+        subsubfield: string[]
+          @uppercase
+      }[]
+    }[]
+  }
+
+  // Comment
+  // Comment
+
+  // Comment
+  /* Comment */
+  // Comment
+  // Comment
+  meta { // Comment
+    field: "string" // Comment
+    // Comment
+    field: 1
+    field: 1.1
+
+    // Comment
+
+    field: true
+    /* Comment */
+    field: false
+  }
+}
