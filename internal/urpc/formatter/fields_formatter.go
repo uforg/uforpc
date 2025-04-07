@@ -373,11 +373,18 @@ func (f *fieldRulesFormatter) formatRule() {
 		f.g.Inline("(")
 
 		if f.currentIndexChild.Rule.Body.ParamSingle != nil {
-			f.g.Inlinef("%s", *f.currentIndexChild.Rule.Body.ParamSingle)
+			f.g.Inlinef("%s", f.currentIndexChild.Rule.Body.ParamSingle.String())
 		}
 
 		if f.currentIndexChild.Rule.Body.ParamListString != nil {
-			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListString, ", "))
+			f.g.Inline("[")
+			for i, param := range f.currentIndexChild.Rule.Body.ParamListString {
+				if i > 0 {
+					f.g.Inline(", ")
+				}
+				f.g.Inlinef(`"%s"`, param)
+			}
+			f.g.Inline("]")
 		}
 
 		if f.currentIndexChild.Rule.Body.ParamListInt != nil {
@@ -393,7 +400,7 @@ func (f *fieldRulesFormatter) formatRule() {
 		}
 
 		if f.currentIndexChild.Rule.Body.Error != nil {
-			f.g.Inlinef(", error: %s", *f.currentIndexChild.Rule.Body.Error)
+			f.g.Inlinef(`, error: "%s"`, *f.currentIndexChild.Rule.Body.Error)
 		}
 
 		f.g.Inline(")")
