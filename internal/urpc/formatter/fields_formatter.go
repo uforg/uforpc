@@ -6,6 +6,7 @@ import (
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
 type fieldsFormatter struct {
@@ -382,7 +383,7 @@ func (f *fieldRulesFormatter) formatRule() {
 				if i > 0 {
 					f.g.Inline(", ")
 				}
-				f.g.Inlinef(`"%s"`, param)
+				f.g.Inlinef(`"%s"`, strutil.EscapeQuotes(param))
 			}
 			f.g.Inline("]")
 		}
