@@ -27,7 +27,9 @@ type Foo {
     sub1: string @enum(["foo", "bar", "baz"], error: "error")
      @enum([1,2,3], error: "error")
     @enum([1.1,2.2,3.3], error: "error")
-    @enum([true, true , false,true], error: "error")
+    @enum([true, true 
+    , false,true], error: 
+        "error")
     
 
 
@@ -69,11 +71,11 @@ type Foo {
   }[]
     @minlen(3, error: "Too short")
 
-  field8:{
+  field8: {
     sub1: string
       @enum(["foo", "bar", "baz"], error: "error")
-      @enum([1,2,3], error: "error")
-      @enum([1.1,2.2,3.3], error: "error")
-      @enum([true, true , false,true], error: "error")
+      @enum([1, 2, 3], error: "error")
+      @enum([1.1, 2.2, 3.3], error: "error")
+      @enum([true, true, false, true], error: "error")
   }
 }
