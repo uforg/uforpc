@@ -1,0 +1,103 @@
+// Nested fields
+proc 
+Test   {    
+  input {
+
+  field: {
+    subfield:{
+      subsubfield: string[]@uppercase
+  }
+    }
+  } output {
+
+  field: {
+    subfield:{
+      subsubfield: string[]@uppercase
+  }
+    }
+  }
+                    }
+
+// Array fields
+proc Test {input{
+  field: string[]@minlen(3)
+}output{field:string[]@minlen(3)}
+}
+
+// Nested array fields
+proc 
+Test   {    
+  input {
+
+  field: {
+    subfield:{
+      subsubfield: string[]@uppercase
+  }[]
+    }[]
+  } output {
+
+  field: {
+    subfield:{
+      subsubfield: string[]@uppercase
+  }[]
+    }[]
+  }
+                    }
+
+
+// >>>>
+
+// Nested fields
+proc Test {
+  input {
+    field: {
+      subfield: {
+        subsubfield: string[]
+          @uppercase
+      }
+    }
+  }
+
+  output {
+    field: {
+      subfield: {
+        subsubfield: string[]
+          @uppercase
+      }
+    }
+  }
+}
+
+// Array fields
+proc Test {
+  input {
+    field: string[]
+      @minlen(3)
+  }
+
+  output {
+    field: string[]
+      @minlen(3)
+  }
+}
+
+// Nested array fields
+proc Test {
+  input {
+    field: {
+      subfield: {
+        subsubfield: string[]
+          @uppercase
+      }[]
+    }[]
+  }
+
+  output {
+    field: {
+      subfield: {
+        subsubfield: string[]
+          @uppercase
+      }[]
+    }[]
+  }
+}
