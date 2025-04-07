@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"strings"
+)
+
 // This AST is used for parsing the URPC schema and it uses the
 // participle library for parsing.
 //
@@ -235,13 +239,46 @@ type ProcDeclChildMetaChild struct {
 // ProcDeclChildMetaKV represents a key-value pair within a MetaBlock.
 type ProcDeclChildMetaKV struct {
 	Positions
-	Key   string `parser:"@Ident"`
-	Value string `parser:"Colon @(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)"`
+	Key   string     `parser:"@Ident"`
+	Value AnyLiteral `parser:"Colon @@"`
 }
 
 //////////////////
 // SHARED TYPES //
 //////////////////
+
+// AnyLiteral represents any of the built-in literal types.
+type AnyLiteral struct {
+	Positions
+	Str   *string `parser:"  @StringLiteral"`
+	Int   *string `parser:"| @IntLiteral"`
+	Float *string `parser:"| @FloatLiteral"`
+	True  *string `parser:"| @TrueLiteral"`
+	False *string `parser:"| @FalseLiteral"`
+}
+
+// String returns the string representation of the value of the literal.
+func (al AnyLiteral) String() string {
+	if al.Str != nil {
+		// Escape double quotes and backslashes
+		escaped := strings.ReplaceAll(*al.Str, `"`, `\"`)
+		escaped = strings.ReplaceAll(escaped, `\`, `\\`)
+		return `"` + escaped + `"`
+	}
+	if al.Int != nil {
+		return *al.Int
+	}
+	if al.Float != nil {
+		return *al.Float
+	}
+	if al.True != nil {
+		return "true"
+	}
+	if al.False != nil {
+		return "false"
+	}
+	return ""
+}
 
 // FieldOrComment represents a child node within blocks that contain fields,
 // such as TypeDecl, ProcDeclChildInput, ProcDeclChildOutput, and FieldTypeObject.
@@ -306,7 +343,7 @@ type FieldTypeObject struct {
 type FieldRule struct {
 	Positions
 	Name string         `parser:"At @Ident"`
-	Body *FieldRuleBody `parser:"(LParen @@ RParen)?"` // Body is optional and captured as a single unit if present
+	Body *FieldRuleBody `parser:"(LParen @@ RParen)?"` // Body is optional
 }
 
 // FieldRuleBody represents the body of a validation rule applied to a field.
@@ -314,12 +351,11 @@ type FieldRule struct {
 type FieldRuleBody struct {
 	Positions
 	// Parameters are captured positionally; validation must ensure correct number/type.
-	// Capturing specific list types requires more complex parsing or post-processing.
-	ParamSingle      *string  `parser:"@(StringLiteral | IntLiteral | FloatLiteral | TrueLiteral | FalseLiteral)?"`
-	ParamListString  []string `parser:"(LBracket @StringLiteral (Comma @StringLiteral)* RBracket)?"`
-	ParamListInt     []string `parser:"(LBracket @IntLiteral (Comma @IntLiteral)* RBracket)?"`
-	ParamListFloat   []string `parser:"(LBracket @FloatLiteral (Comma @FloatLiteral)* RBracket)?"`
-	ParamListBoolean []string `parser:"(LBracket @(TrueLiteral | FalseLiteral) (Comma @(TrueLiteral | FalseLiteral))* RBracket)?"`
+	ParamSingle      *AnyLiteral `parser:"@@?"`
+	ParamListString  []string    `parser:"(LBracket @StringLiteral (Comma @StringLiteral)* RBracket)?"`
+	ParamListInt     []string    `parser:"(LBracket @IntLiteral (Comma @IntLiteral)* RBracket)?"`
+	ParamListFloat   []string    `parser:"(LBracket @FloatLiteral (Comma @FloatLiteral)* RBracket)?"`
+	ParamListBoolean []string    `parser:"(LBracket @(TrueLiteral | FalseLiteral) (Comma @(TrueLiteral | FalseLiteral))* RBracket)?"`
 	// Error clause, if present, must appear after parameters.
 	Error *string `parser:"(Comma? Error Colon @StringLiteral)?"`
 }
