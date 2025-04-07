@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"strings"
+	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
 // This AST is used for parsing the URPC schema and it uses the
@@ -260,10 +260,7 @@ type AnyLiteral struct {
 // String returns the string representation of the value of the literal.
 func (al AnyLiteral) String() string {
 	if al.Str != nil {
-		// Escape double quotes and backslashes
-		escaped := strings.ReplaceAll(*al.Str, `"`, `\"`)
-		escaped = strings.ReplaceAll(escaped, `\`, `\\`)
-		return `"` + escaped + `"`
+		return `"` + strutil.EscapeQuotes(*al.Str) + `"`
 	}
 	if al.Int != nil {
 		return *al.Int
