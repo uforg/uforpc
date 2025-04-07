@@ -1,5 +1,7 @@
 type Foo {
   field1: string @uppercase // This is a comment
+  @uppercase(
+    error: "Invalid uppercase")
   field2: int /* This is a comment */ @min(0) @max(100)
 
   field3: float @min(0.0) @max(100.0)
@@ -17,7 +19,7 @@ type Foo {
       @min("2021-01-01") @max("2021-12-31")
     subField2: {
       subSubField1: string
-    @enum(["foo", "bar", "baz"])
+    @enum(["foo", "bar", "baz \"escaped\" \\"])
     }[]
     subField3: datetime
   }[]
@@ -41,6 +43,7 @@ type Foo {
 type Foo {
   field1: string
     @uppercase // This is a comment
+    @uppercase(error: "Invalid uppercase")
   field2: int /* This is a comment */
     @min(0)
     @max(100)
@@ -65,7 +68,7 @@ type Foo {
       @max("2021-12-31")
     subField2: {
       subSubField1: string
-        @enum(["foo", "bar", "baz"])
+        @enum(["foo", "bar", "baz \"escaped\" \\"])
     }[]
     subField3: datetime
   }[]
