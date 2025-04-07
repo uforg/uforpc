@@ -165,18 +165,69 @@ func (f *procFormatter) formatComment() {
 }
 
 func (f *procFormatter) formatInput() {
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
+	prevWasComment := prev.Comment == nil
+
+	shouldBreakBefore := false
+	if !prevEOF {
+		if prevLineDiff.StartToStart < -1 {
+			shouldBreakBefore = true
+		}
+	}
+	if !prevWasComment {
+		shouldBreakBefore = true
+	}
+
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
 	f.g.Inline("input ")
 	fieldsFormatter := newFieldsFormatter(f.currentIndexChild, f.currentIndexChild.Input.Children)
 	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
 }
 
 func (f *procFormatter) formatOutput() {
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
+	prevWasComment := prev.Comment == nil
+
+	shouldBreakBefore := false
+	if !prevEOF {
+		if prevLineDiff.StartToStart < -1 {
+			shouldBreakBefore = true
+		}
+	}
+	if !prevWasComment {
+		shouldBreakBefore = true
+	}
+
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
 	f.g.Inline("output ")
 	fieldsFormatter := newFieldsFormatter(f.currentIndexChild, f.currentIndexChild.Output.Children)
 	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
 }
 
 func (f *procFormatter) formatMeta() {
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
+	prevWasComment := prev.Comment == nil
+
+	shouldBreakBefore := false
+	if !prevEOF {
+		if prevLineDiff.StartToStart < -1 {
+			shouldBreakBefore = true
+		}
+	}
+	if !prevWasComment {
+		shouldBreakBefore = true
+	}
+
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
 	f.g.Inline("meta ")
 	metaFormatter := newProcMetaFormatter(f.currentIndexChild.Meta)
 	f.g.Line(strings.TrimSpace(metaFormatter.format().String()))
