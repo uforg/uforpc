@@ -3,7 +3,7 @@ version 1
 // UFO RPC Schema example
 // More info: https://github.com/uforg/uforpc
 
-type FooType struct {
+type FooType {
   firstField: string
   secondField: int[]
 }
