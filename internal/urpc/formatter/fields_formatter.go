@@ -372,9 +372,11 @@ func (f *fieldRulesFormatter) formatRule() {
 
 	if f.currentIndexChild.Rule.Body != nil {
 		f.g.Inline("(")
+		hasParam := false
 
 		if f.currentIndexChild.Rule.Body.ParamSingle != nil {
 			f.g.Inlinef("%s", f.currentIndexChild.Rule.Body.ParamSingle.String())
+			hasParam = true
 		}
 
 		if f.currentIndexChild.Rule.Body.ParamListString != nil {
@@ -386,22 +388,29 @@ func (f *fieldRulesFormatter) formatRule() {
 				f.g.Inlinef(`"%s"`, strutil.EscapeQuotes(param))
 			}
 			f.g.Inline("]")
+			hasParam = true
 		}
 
 		if f.currentIndexChild.Rule.Body.ParamListInt != nil {
 			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListInt, ", "))
+			hasParam = true
 		}
 
 		if f.currentIndexChild.Rule.Body.ParamListFloat != nil {
 			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListFloat, ", "))
+			hasParam = true
 		}
 
 		if f.currentIndexChild.Rule.Body.ParamListBoolean != nil {
 			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListBoolean, ", "))
+			hasParam = true
 		}
 
 		if f.currentIndexChild.Rule.Body.Error != nil {
-			f.g.Inlinef(`, error: "%s"`, *f.currentIndexChild.Rule.Body.Error)
+			if hasParam {
+				f.g.Inline(", ")
+			}
+			f.g.Inlinef(`error: "%s"`, *f.currentIndexChild.Rule.Body.Error)
 		}
 
 		f.g.Inline(")")
