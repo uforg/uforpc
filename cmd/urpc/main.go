@@ -27,15 +27,18 @@ type initCmd struct {
 type lspCmd struct{}
 
 func main() {
+	// If the LSP is called, then omit the arg parser to avoid taking
+	// control of the stdin/stdout because the LSP will need it.
+	if len(os.Args) > 1 && os.Args[1] == "lsp" {
+		lspCmdFn(nil)
+		return
+	}
+
 	var args allArgs
 	arg.MustParse(&args)
 
 	if args.Init != nil {
 		initCmdFn(args.Init)
-	}
-
-	if args.LSP != nil {
-		lspCmdFn(args.LSP)
 	}
 }
 
