@@ -892,7 +892,7 @@ func TestParserField(t *testing.T) {
 											Rule: &ast.FieldRule{
 												Name: "contains",
 												Body: &ast.FieldRuleBody{
-													ParamSingle: ptr("hello"),
+													ParamSingle: &ast.AnyLiteral{Str: ptr("hello")},
 													Error:       ptr("Field must contain 'hello'"),
 												},
 											},
@@ -1101,19 +1101,19 @@ func TestParserProcDecl(t *testing.T) {
 								Meta: &ast.ProcDeclChildMeta{
 									Children: []*ast.ProcDeclChildMetaChild{
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key1", Value: "hello"},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key1", Value: ast.AnyLiteral{Str: ptr("hello")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key2", Value: "123"},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key2", Value: ast.AnyLiteral{Int: ptr("123")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key3", Value: "1.23"},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key3", Value: ast.AnyLiteral{Float: ptr("1.23")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key4", Value: "true"},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key4", Value: ast.AnyLiteral{True: ptr("true")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key5", Value: "false"},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key5", Value: ast.AnyLiteral{False: ptr("false")}},
 										},
 									},
 								},
@@ -1192,31 +1192,31 @@ func TestParserProcDecl(t *testing.T) {
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key1",
-												Value: "hello",
+												Value: ast.AnyLiteral{Str: ptr("hello")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key2",
-												Value: "123",
+												Value: ast.AnyLiteral{Int: ptr("123")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key3",
-												Value: "1.23",
+												Value: ast.AnyLiteral{Float: ptr("1.23")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key4",
-												Value: "true",
+												Value: ast.AnyLiteral{True: ptr("true")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key5",
-												Value: "false",
+												Value: ast.AnyLiteral{False: ptr("false")},
 											},
 										},
 									},
@@ -1480,7 +1480,7 @@ func TestParserComments(t *testing.T) {
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key",
-												Value: "value",
+												Value: ast.AnyLiteral{Str: ptr("value")},
 											},
 										},
 									},
@@ -1656,7 +1656,7 @@ func TestParserComments(t *testing.T) {
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key1",
-												Value: "value1",
+												Value: ast.AnyLiteral{Str: ptr("value1")},
 											},
 										},
 										{
@@ -1665,7 +1665,7 @@ func TestParserComments(t *testing.T) {
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key2",
-												Value: "123",
+												Value: ast.AnyLiteral{Int: ptr("123")},
 											},
 										},
 										{
@@ -1792,9 +1792,11 @@ func TestParserComments(t *testing.T) {
 										{
 											Rule: &ast.FieldRule{
 												Name: "rule2",
-												Body: &ast.FieldRuleBody{ParamSingle: ptr("param")},
+												Body: &ast.FieldRuleBody{
+													ParamSingle: &ast.AnyLiteral{Str: ptr("param")},
+												},
 											},
-										}, // Assuming param is captured as ParamSingle
+										},
 										{
 											Comment: &ast.Comment{Simple: ptr(" Trailing comment after rules")},
 										},
@@ -1924,7 +1926,7 @@ func TestParserComments(t *testing.T) {
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "k",
-												Value: "v",
+												Value: ast.AnyLiteral{Str: ptr("v")},
 											},
 										},
 									},
@@ -2345,7 +2347,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "min",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("1900-01-01T00:00:00Z"),
+												ParamSingle: &ast.AnyLiteral{Str: ptr("1900-01-01T00:00:00Z")},
 											},
 										},
 									},
@@ -2353,7 +2355,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "max",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("2100-01-01T00:00:00Z"),
+												ParamSingle: &ast.AnyLiteral{Str: ptr("2100-01-01T00:00:00Z")},
 											},
 										},
 									},
@@ -2430,7 +2432,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("36"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("36")},
 											},
 										},
 									},
@@ -2438,7 +2440,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "maxlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("36"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("36")},
 												Error:       ptr("UUID must be exactly 36 characters"),
 											},
 										},
@@ -2459,7 +2461,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("3"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("3")},
 												Error:       ptr("Name must be at least 3 characters long"),
 											},
 										},
@@ -2491,7 +2493,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "equals",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("true"),
+												ParamSingle: &ast.AnyLiteral{True: ptr("true")},
 											},
 										},
 									},
@@ -2554,7 +2556,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("2"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("2")},
 											},
 										},
 									},
@@ -2562,7 +2564,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "maxlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("100"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("100")},
 												Error:       ptr("Name cannot exceed 100 characters"),
 											},
 										},
@@ -2583,7 +2585,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "min",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("0.01"),
+												ParamSingle: &ast.AnyLiteral{Float: ptr("0.01")},
 												Error:       ptr("Price must be greater than zero"),
 											},
 										},
@@ -2604,7 +2606,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "min",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("0"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("0")},
 											},
 										},
 									},
@@ -2612,11 +2614,8 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "range",
 											Body: &ast.FieldRuleBody{
-												ParamListInt: []string{
-													"0",
-													"1000",
-												},
-												Error: ptr("Stock must be between 0 and 1000"),
+												ParamListInt: []string{"0", "1000"},
+												Error:        ptr("Stock must be between 0 and 1000"),
 											},
 										},
 									},
@@ -2658,7 +2657,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("1"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("1")},
 												Error:       ptr("At least one tag is required"),
 											},
 										},
@@ -2667,7 +2666,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "maxlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: ptr("10"),
+												ParamSingle: &ast.AnyLiteral{Int: ptr("10")},
 											},
 										},
 									},
@@ -2701,7 +2700,7 @@ func TestParserFullSchema(t *testing.T) {
 																						Rule: &ast.FieldRule{
 																							Name: "min",
 																							Body: &ast.FieldRuleBody{
-																								ParamSingle: ptr("0.0"),
+																								ParamSingle: &ast.AnyLiteral{Float: ptr("0.0")},
 																								Error:       ptr("Width cannot be negative"),
 																							},
 																						},
@@ -2722,7 +2721,7 @@ func TestParserFullSchema(t *testing.T) {
 																						Rule: &ast.FieldRule{
 																							Name: "min",
 																							Body: &ast.FieldRuleBody{
-																								ParamSingle: ptr("0.0"),
+																								ParamSingle: &ast.AnyLiteral{Float: ptr("0.0")},
 																							},
 																						},
 																					},
@@ -2857,7 +2856,7 @@ func TestParserFullSchema(t *testing.T) {
 																Rule: &ast.FieldRule{
 																	Name: "min",
 																	Body: &ast.FieldRuleBody{
-																		ParamSingle: ptr("0.01"),
+																		ParamSingle: &ast.AnyLiteral{Float: ptr("0.01")},
 																		Error:       ptr("Variation price must be greater than zero"),
 																	},
 																},
@@ -2976,25 +2975,25 @@ func TestParserFullSchema(t *testing.T) {
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "cache",
-											Value: "true",
+											Value: ast.AnyLiteral{True: ptr("true")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "cacheTime",
-											Value: "300",
+											Value: ast.AnyLiteral{Int: ptr("300")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "requiresAuth",
-											Value: "false",
+											Value: ast.AnyLiteral{False: ptr("false")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "apiVersion",
-											Value: "1.0.0",
+											Value: ast.AnyLiteral{Str: ptr("1.0.0")},
 										},
 									},
 								},
@@ -3355,7 +3354,7 @@ func TestParserFullSchema(t *testing.T) {
 																									Rule: &ast.FieldRule{
 																										Name: "min",
 																										Body: &ast.FieldRuleBody{
-																											ParamSingle: ptr("0.0"),
+																											ParamSingle: &ast.AnyLiteral{Float: ptr("0.0")},
 																										},
 																									},
 																								},
@@ -3363,7 +3362,7 @@ func TestParserFullSchema(t *testing.T) {
 																									Rule: &ast.FieldRule{
 																										Name: "max",
 																										Body: &ast.FieldRuleBody{
-																											ParamSingle: ptr("1.0"),
+																											ParamSingle: &ast.AnyLiteral{Float: ptr("1.0")},
 																											Error:       ptr("Load factor cannot exceed 1.0"),
 																										},
 																									},
@@ -3392,37 +3391,37 @@ func TestParserFullSchema(t *testing.T) {
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "auth",
-											Value: "required",
+											Value: ast.AnyLiteral{Str: ptr("required")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "roles",
-											Value: "admin,product-manager",
+											Value: ast.AnyLiteral{Str: ptr("admin,product-manager")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "rateLimit",
-											Value: "100",
+											Value: ast.AnyLiteral{Int: ptr("100")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "timeout",
-											Value: "30.5",
+											Value: ast.AnyLiteral{Float: ptr("30.5")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "audit",
-											Value: "true",
+											Value: ast.AnyLiteral{True: ptr("true")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "apiVersion",
-											Value: "1.2.0",
+											Value: ast.AnyLiteral{Str: ptr("1.2.0")},
 										},
 									},
 								},
