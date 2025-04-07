@@ -19,7 +19,7 @@ type RequestMessageTextDocumentFormattingParams struct {
 
 type ResponseMessageTextDocumentFormatting struct {
 	ResponseMessage
-	Result *[]TextDocumentTextEdit `json:"result,omitempty"`
+	Result *[]TextDocumentTextEdit `json:"result"`
 }
 
 func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) (any, error) {
