@@ -5,6 +5,7 @@ import (
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
 type ruleFormatter struct {
@@ -200,5 +201,5 @@ func (f *ruleFormatter) formatParam() {
 }
 
 func (f *ruleFormatter) formatError() {
-	f.LineAndCommentf("error: \"%s\"", f.currentIndexChild.Error.Error)
+	f.LineAndCommentf("error: \"%s\"", strutil.EscapeQuotes(f.currentIndexChild.Error.Error))
 }

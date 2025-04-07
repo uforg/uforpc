@@ -6,7 +6,7 @@ rule
 
 rule @foo {for           : boolean}
 rule @foo {param : float}
-rule @foo {error  : "This is an error message"}
+rule @foo {error  : "This is an \"error\" \\ message"}
 
 rule @foo {
 for: string
@@ -34,7 +34,7 @@ rule @foo {
 }
 
 rule @foo {
-  error: "This is an error message"
+  error: "This is an \"error\" \\ message"
 }
 
 rule @foo {
