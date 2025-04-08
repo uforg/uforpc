@@ -6,6 +6,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "uforg.urpc",
         "golang.go",
         "denoland.vscode-deno",
         "mhutchie.git-graph",
@@ -14,6 +15,8 @@
         "donjayamanne.githistory"
       ],
       "settings": {
+        // Disable to avoid auto-formatting, the formatter tests require full control of the file
+        "urpc.enable": false,
         "deno.enable": true,
         "editor.formatOnSave": true,
         "editor.foldingStrategy": "indentation",
