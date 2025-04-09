@@ -34,7 +34,7 @@ func (e *AnalyzerError) Error() string {
 
 // Analyzer is a semantic analyzer for the URPC schema.
 type Analyzer struct {
-	sch             *ast.URPCSchema
+	sch             *ast.Schema
 	customRuleNames map[string]ast.RuleDecl
 	customTypeNames map[string]ast.TypeDecl
 	procNames       map[string]ast.ProcDecl
@@ -42,7 +42,7 @@ type Analyzer struct {
 }
 
 // NewAnalyzer creates a new Analyzer for the given URPC schema.
-func NewAnalyzer(sch *ast.URPCSchema) *Analyzer {
+func NewAnalyzer(sch *ast.Schema) *Analyzer {
 	return &Analyzer{
 		sch:             sch,
 		customRuleNames: map[string]ast.RuleDecl{},
@@ -94,7 +94,9 @@ func (a *Analyzer) Analyze() ([]AnalyzerError, error) {
 
 // validateVersion validates the version of the URPC schema.
 func (a *Analyzer) validateVersion() *AnalyzerError {
-	if a.sch.Version == nil {
+	versionsLen := len(a.sch.GetVersions())
+
+	if versionsLen == 0 {
 		return &AnalyzerError{
 			Message: "version is required",
 			Pos:     a.sch.Pos,
@@ -102,11 +104,19 @@ func (a *Analyzer) validateVersion() *AnalyzerError {
 		}
 	}
 
-	if a.sch.Version.Number != 1 {
+	if versionsLen > 1 {
+		return &AnalyzerError{
+			Message: "only one version is allowed",
+			Pos:     a.sch.GetVersions()[1].Pos,
+			EndPos:  a.sch.GetVersions()[1].EndPos,
+		}
+	}
+
+	if a.sch.GetVersions()[0].Number != 1 {
 		return &AnalyzerError{
 			Message: "version must be 1",
-			Pos:     a.sch.Version.Pos,
-			EndPos:  a.sch.Version.EndPos,
+			Pos:     a.sch.GetVersions()[0].Pos,
+			EndPos:  a.sch.GetVersions()[0].EndPos,
 		}
 	}
 
@@ -232,18 +242,38 @@ func (a *Analyzer) collectAndValidateProcNames() *AnalyzerError {
 	return nil
 }
 
+// Helper function to extract fields from FieldOrComment array
+func extractFields(fieldOrComments []*ast.FieldOrComment) []*ast.Field {
+	var fields []*ast.Field
+	for _, foc := range fieldOrComments {
+		if foc.Field != nil {
+			fields = append(fields, foc.Field)
+		}
+	}
+	return fields
+}
+
 // validateCustomRuleReferences validates that all custom rule references are valid.
 func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
+	// Map of built-in rules and the types they can be applied to
 	builtInRulesMap := map[string][]string{
-		"equals":    {"string", "boolean"},
+		// String rules
+		"equals":    {"string", "boolean", "int", "float"},
 		"contains":  {"string"},
 		"minlen":    {"string", "array"},
 		"maxlen":    {"string", "array"},
-		"enum":      {"string", "int"},
+		"enum":      {"string", "int", "float"},
 		"lowercase": {"string"},
 		"uppercase": {"string"},
-		"min":       {"int", "float", "datetime"},
-		"max":       {"int", "float", "datetime"},
+		"email":     {"string"},
+		"uuid":      {"string"},
+		"iso8601":   {"string"},
+		"json":      {"string"},
+
+		// Number rules
+		"min":   {"int", "float", "datetime"},
+		"max":   {"int", "float", "datetime"},
+		"range": {"int", "float"},
 	}
 
 	getFieldBaseType := func(field *ast.Field) (string, bool) {
@@ -263,15 +293,27 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 
 	canRuleApplyToType := func(ruleName, fieldType string, isArray bool) bool {
 		if rule, isCustomRule := a.customRuleNames[ruleName]; isCustomRule {
-			if rule.Body.For == "array" && isArray {
+			// Find the 'for' clause in the rule declaration
+			var forType string
+			for _, child := range rule.Children {
+				if child.For != nil {
+					forType = child.For.For
+					break
+				}
+			}
+
+			// Check if rule applies to arrays
+			if forType == "array" && isArray {
 				return true
 			}
 
+			// Check if rule applies to custom types
 			if _, isCustomType := a.customTypeNames[fieldType]; isCustomType {
-				return true
+				return forType == fieldType
 			}
 
-			return rule.Body.For == fieldType
+			// Check if rule applies to the field type
+			return forType == fieldType
 		}
 
 		if supportedTypes, exists := builtInRulesMap[ruleName]; exists {
@@ -296,7 +338,13 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 		for _, field := range fields {
 			baseType, isArray := getFieldBaseType(field)
 
-			for _, rule := range field.Rules {
+			// Check rules in field.Children
+			for _, child := range field.Children {
+				if child.Rule == nil {
+					continue
+				}
+
+				rule := child.Rule
 				if _, isBuiltIn := builtInRulesMap[rule.Name]; !isBuiltIn {
 					if _, isCustomRule := a.customRuleNames[rule.Name]; !isCustomRule {
 						return &AnalyzerError{
@@ -311,7 +359,15 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 					var ruleAppliesTo string
 
 					if customRule, isCustomRule := a.customRuleNames[rule.Name]; isCustomRule {
-						ruleAppliesTo = customRule.Body.For
+						// Find the 'for' clause in the rule declaration
+						var forType string
+						for _, ruleChild := range customRule.Children {
+							if ruleChild.For != nil {
+								forType = ruleChild.For.For
+								break
+							}
+						}
+						ruleAppliesTo = forType
 					} else if supportedTypes, isBuiltIn := builtInRulesMap[rule.Name]; isBuiltIn {
 						ruleAppliesTo = strings.Join(supportedTypes, " or ")
 					} else {
@@ -336,8 +392,10 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 				}
 			}
 
+			// Check inline object fields
 			if field.Type.Base.Object != nil {
-				if err := checkFieldRules(field.Type.Base.Object.Fields, fmt.Sprintf("inline object in field \"%s\"", field.Name)); err != nil {
+				inlineFields := extractFields(field.Type.Base.Object.Children)
+				if err := checkFieldRules(inlineFields, fmt.Sprintf("inline object in field \"%s\"", field.Name)); err != nil {
 					return err
 				}
 			}
@@ -345,22 +403,31 @@ func (a *Analyzer) validateCustomRuleReferences() *AnalyzerError {
 		return nil
 	}
 
+	// Check type declarations
 	for _, typeDecl := range a.sch.GetTypes() {
-		if err := checkFieldRules(typeDecl.Fields, fmt.Sprintf("type \"%s\"", typeDecl.Name)); err != nil {
+		typeFields := extractFields(typeDecl.Children)
+		if err := checkFieldRules(typeFields, fmt.Sprintf("type \"%s\"", typeDecl.Name)); err != nil {
 			return err
 		}
 	}
 
+	// Check procedure declarations
 	for _, proc := range a.sch.GetProcs() {
-		if proc.Body.Input != nil {
-			if err := checkFieldRules(proc.Body.Input, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {
-				return err
+		// Check input fields
+		for _, child := range proc.Children {
+			if child.Input != nil {
+				inputFields := extractFields(child.Input.Children)
+				if err := checkFieldRules(inputFields, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {
+					return err
+				}
 			}
-		}
 
-		if proc.Body.Output != nil {
-			if err := checkFieldRules(proc.Body.Output, fmt.Sprintf("output of procedure \"%s\"", proc.Name)); err != nil {
-				return err
+			// Check output fields
+			if child.Output != nil {
+				outputFields := extractFields(child.Output.Children)
+				if err := checkFieldRules(outputFields, fmt.Sprintf("output of procedure \"%s\"", proc.Name)); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -399,7 +466,9 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 					}
 				}
 			} else if field.Type.Base.Object != nil {
-				if err := checkFieldTypeReferences(field.Type.Base.Object.Fields, fmt.Sprintf("inline object in field \"%s\"", field.Name)); err != nil {
+				// Extract fields from inline object
+				inlineFields := extractFields(field.Type.Base.Object.Children)
+				if err := checkFieldTypeReferences(inlineFields, fmt.Sprintf("inline object in field \"%s\"", field.Name)); err != nil {
 					return err
 				}
 			}
@@ -407,7 +476,9 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 		return nil
 	}
 
+	// Check type declarations
 	for _, typeDecl := range a.sch.GetTypes() {
+		// Check extends clauses
 		for _, extendTypeName := range typeDecl.Extends {
 			if !isValidType(extendTypeName) {
 				return &AnalyzerError{
@@ -418,21 +489,30 @@ func (a *Analyzer) validateCustomTypeReferences() *AnalyzerError {
 			}
 		}
 
-		if err := checkFieldTypeReferences(typeDecl.Fields, fmt.Sprintf("type \"%s\"", typeDecl.Name)); err != nil {
+		// Check fields
+		typeFields := extractFields(typeDecl.Children)
+		if err := checkFieldTypeReferences(typeFields, fmt.Sprintf("type \"%s\"", typeDecl.Name)); err != nil {
 			return err
 		}
 	}
 
+	// Check procedure declarations
 	for _, proc := range a.sch.GetProcs() {
-		if proc.Body.Input != nil {
-			if err := checkFieldTypeReferences(proc.Body.Input, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {
-				return err
+		for _, child := range proc.Children {
+			// Check input fields
+			if child.Input != nil {
+				inputFields := extractFields(child.Input.Children)
+				if err := checkFieldTypeReferences(inputFields, fmt.Sprintf("input of procedure \"%s\"", proc.Name)); err != nil {
+					return err
+				}
 			}
-		}
 
-		if proc.Body.Output != nil {
-			if err := checkFieldTypeReferences(proc.Body.Output, fmt.Sprintf("output of procedure \"%s\"", proc.Name)); err != nil {
-				return err
+			// Check output fields
+			if child.Output != nil {
+				outputFields := extractFields(child.Output.Children)
+				if err := checkFieldTypeReferences(outputFields, fmt.Sprintf("output of procedure \"%s\"", proc.Name)); err != nil {
+					return err
+				}
 			}
 		}
 	}
