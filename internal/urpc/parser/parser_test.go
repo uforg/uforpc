@@ -2051,6 +2051,105 @@ func TestParserComments(t *testing.T) {
 	})
 }
 
+func TestParserDocstrings(t *testing.T) {
+	t.Run("Standalone docstrings", func(t *testing.T) {
+		input := `
+			""" This is a standalone docstring. """
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Docstring: &ast.Docstring{Value: " This is a standalone docstring. "},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Multiple standalone docstrings", func(t *testing.T) {
+		input := `
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Standalone docstrings and associated docstrings", func(t *testing.T) {
+		input := `
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """
+			""" This is an associated docstring. """
+			type MyType {}
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """""" This is an associated docstring. """type MyType {}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{
+					Type: &ast.TypeDecl{
+						Docstring: " This is an associated docstring. ",
+						Name:      "MyType",
+					},
+				},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{
+					Type: &ast.TypeDecl{
+						Docstring: " This is an associated docstring. ",
+						Name:      "MyType",
+					},
+				},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+
+	t.Run("Standalone docstrings should not associate if there is a blank line", func(t *testing.T) {
+		input := `
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """
+			""" This is a standalone docstring. """
+
+			type MyType {}
+		`
+		parsed, err := Parser.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
+				{Type: &ast.TypeDecl{Name: "MyType"}},
+			},
+		}
+		equalNoPos(t, expected, parsed)
+	})
+}
+
 func TestParserFullSchema(t *testing.T) {
 	input := `
 		version 1

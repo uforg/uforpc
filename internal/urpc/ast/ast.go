@@ -41,6 +41,17 @@ func (s *Schema) GetComments() []*Comment {
 	return comments
 }
 
+// GetDocstrings returns all docstrings in the URPC schema.
+func (s *Schema) GetDocstrings() []*Docstring {
+	docstrings := []*Docstring{}
+	for _, node := range s.Children {
+		if node.Kind() == SchemaChildKindDocstring {
+			docstrings = append(docstrings, node.Docstring)
+		}
+	}
+	return docstrings
+}
+
 // GetImports returns all import statements in the URPC schema.
 func (s *Schema) GetImports() []*Import {
 	imports := []*Import{}
@@ -89,31 +100,36 @@ func (s *Schema) GetProcs() []*ProcDecl {
 type SchemaChildKind string
 
 const (
-	SchemaChildKindVersion SchemaChildKind = "Version"
-	SchemaChildKindComment SchemaChildKind = "Comment"
-	SchemaChildKindImport  SchemaChildKind = "Import"
-	SchemaChildKindRule    SchemaChildKind = "Rule"
-	SchemaChildKindType    SchemaChildKind = "Type"
-	SchemaChildKindProc    SchemaChildKind = "Proc"
+	SchemaChildKindVersion   SchemaChildKind = "Version"
+	SchemaChildKindComment   SchemaChildKind = "Comment"
+	SchemaChildKindDocstring SchemaChildKind = "Docstring"
+	SchemaChildKindImport    SchemaChildKind = "Import"
+	SchemaChildKindRule      SchemaChildKind = "Rule"
+	SchemaChildKindType      SchemaChildKind = "Type"
+	SchemaChildKindProc      SchemaChildKind = "Proc"
 )
 
 // SchemaChild represents a child node of the Schema root node.
 type SchemaChild struct {
 	Positions
-	Version *Version  `parser:"  @@"`
-	Comment *Comment  `parser:"| @@"`
-	Import  *Import   `parser:"| @@"`
-	Rule    *RuleDecl `parser:"| @@"`
-	Type    *TypeDecl `parser:"| @@"`
-	Proc    *ProcDecl `parser:"| @@"`
+	Version   *Version   `parser:"  @@"`
+	Comment   *Comment   `parser:"| @@"`
+	Import    *Import    `parser:"| @@"`
+	Rule      *RuleDecl  `parser:"| @@"`
+	Type      *TypeDecl  `parser:"| @@"`
+	Proc      *ProcDecl  `parser:"| @@"`
+	Docstring *Docstring `parser:"| @@"`
 }
 
 func (n *SchemaChild) Kind() SchemaChildKind {
+	if n.Version != nil {
+		return SchemaChildKindVersion
+	}
 	if n.Comment != nil {
 		return SchemaChildKindComment
 	}
-	if n.Version != nil {
-		return SchemaChildKindVersion
+	if n.Docstring != nil {
+		return SchemaChildKindDocstring
 	}
 	if n.Import != nil {
 		return SchemaChildKindImport
@@ -130,6 +146,12 @@ func (n *SchemaChild) Kind() SchemaChildKind {
 	return ""
 }
 
+// Version represents the version of the URPC schema.
+type Version struct {
+	Positions
+	Number int `parser:"Version @IntLiteral"`
+}
+
 // Comment represents both simple and block comments in the URPC schema.
 type Comment struct {
 	Positions
@@ -137,10 +159,10 @@ type Comment struct {
 	Block  *string `parser:"| @CommentBlock"`
 }
 
-// Version represents the version of the URPC schema.
-type Version struct {
+// Docstring represents a docstring in the URPC schema.
+type Docstring struct {
 	Positions
-	Number int `parser:"Version @IntLiteral"`
+	Value string `parser:"@Docstring"`
 }
 
 // Import represents an import statement.
@@ -152,7 +174,7 @@ type Import struct {
 // RuleDecl represents a custom validation rule declaration.
 type RuleDecl struct {
 	Positions
-	Docstring string           `parser:"@Docstring?"`
+	Docstring string           `parser:"(@Docstring (?! Newline Newline))?"`
 	Name      string           `parser:"Rule At @Ident"`
 	Children  []*RuleDeclChild `parser:"LBrace @@* RBrace"`
 }
@@ -188,7 +210,7 @@ type RuleDeclChildError struct {
 // TypeDecl represents a custom type declaration.
 type TypeDecl struct {
 	Positions
-	Docstring string            `parser:"@Docstring?"`
+	Docstring string            `parser:"(@Docstring (?! Newline Newline))?"`
 	Name      string            `parser:"Type @Ident"`
 	Extends   []string          `parser:"(Extends @Ident (Comma @Ident)*)?"`
 	Children  []*FieldOrComment `parser:"LBrace @@* RBrace"`
@@ -197,7 +219,7 @@ type TypeDecl struct {
 // ProcDecl represents a procedure declaration.
 type ProcDecl struct {
 	Positions
-	Docstring string           `parser:"@Docstring?"`
+	Docstring string           `parser:"(@Docstring (?! Newline Newline))?"`
 	Name      string           `parser:"Proc @Ident"`
 	Children  []*ProcDeclChild `parser:"LBrace @@* RBrace"`
 }
