@@ -26,7 +26,7 @@ const (
 
 	// Identifiers, comments and docstrings
 	Ident        TokenType = "Ident"
-	Comment      TokenType = "Comment"
+	Comment      TokenType = "Comment"      // Single line comment with //
 	CommentBlock TokenType = "CommentBlock" // Multiline comment with /* */
 	Docstring    TokenType = "Docstring"
 
@@ -38,7 +38,8 @@ const (
 	FalseLiteral  TokenType = "FalseLiteral"
 
 	// Operators and delimiters
-	Whitespace TokenType = "Whitespace" // Can be spaces, tabs, newlines, etc.
+	Newline    TokenType = "Newline"
+	Whitespace TokenType = "Whitespace"
 	Colon      TokenType = "Colon"
 	Comma      TokenType = "Comma"
 	LParen     TokenType = "LParen"
@@ -89,6 +90,7 @@ var TokenTypes = []TokenType{
 	FalseLiteral,
 
 	// Operators and delimiters
+	Newline,
 	Whitespace,
 	Colon,
 	Comma,
@@ -123,16 +125,17 @@ var TokenTypes = []TokenType{
 
 // delimiters is a map of delimiters to their corresponding token types.
 var delimiters = map[string]TokenType{
-	":": Colon,
-	",": Comma,
-	"(": LParen,
-	")": RParen,
-	"{": LBrace,
-	"}": RBrace,
-	"[": LBracket,
-	"]": RBracket,
-	"@": At,
-	"?": Question,
+	"\n": Newline,
+	":":  Colon,
+	",":  Comma,
+	"(":  LParen,
+	")":  RParen,
+	"{":  LBrace,
+	"}":  RBrace,
+	"[":  LBracket,
+	"]":  RBracket,
+	"@":  At,
+	"?":  Question,
 }
 
 // IsDelimiter returns true if the character is a delimiter.

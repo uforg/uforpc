@@ -48,18 +48,18 @@ func TestLexer(t *testing.T) {
 		tests := []token.Token{
 			{Type: token.Comma, Literal: ",", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 1},
 			{Type: token.Colon, Literal: ":", FileName: "test.urpc", LineStart: 1, ColumnStart: 2, LineEnd: 1, ColumnEnd: 2},
-			{Type: token.Whitespace, Literal: "\n", FileName: "test.urpc", LineStart: 1, ColumnStart: 3, LineEnd: 1, ColumnEnd: 3},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 1, ColumnStart: 3, LineEnd: 1, ColumnEnd: 3},
 			{Type: token.LParen, Literal: "(", FileName: "test.urpc", LineStart: 2, ColumnStart: 1, LineEnd: 2, ColumnEnd: 1},
 			{Type: token.RParen, Literal: ")", FileName: "test.urpc", LineStart: 2, ColumnStart: 2, LineEnd: 2, ColumnEnd: 2},
 			{Type: token.LBrace, Literal: "{", FileName: "test.urpc", LineStart: 2, ColumnStart: 3, LineEnd: 2, ColumnEnd: 3},
-			{Type: token.Whitespace, Literal: "\n", FileName: "test.urpc", LineStart: 2, ColumnStart: 4, LineEnd: 2, ColumnEnd: 4},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 2, ColumnStart: 4, LineEnd: 2, ColumnEnd: 4},
 			{Type: token.RBrace, Literal: "}", FileName: "test.urpc", LineStart: 3, ColumnStart: 1, LineEnd: 3, ColumnEnd: 1},
-			{Type: token.Whitespace, Literal: "\n", FileName: "test.urpc", LineStart: 3, ColumnStart: 2, LineEnd: 3, ColumnEnd: 2},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 3, ColumnStart: 2, LineEnd: 3, ColumnEnd: 2},
 			{Type: token.LBracket, Literal: "[", FileName: "test.urpc", LineStart: 4, ColumnStart: 1, LineEnd: 4, ColumnEnd: 1},
 			{Type: token.RBracket, Literal: "]", FileName: "test.urpc", LineStart: 4, ColumnStart: 2, LineEnd: 4, ColumnEnd: 2},
 			{Type: token.At, Literal: "@", FileName: "test.urpc", LineStart: 4, ColumnStart: 3, LineEnd: 4, ColumnEnd: 3},
 			{Type: token.Question, Literal: "?", FileName: "test.urpc", LineStart: 4, ColumnStart: 4, LineEnd: 4, ColumnEnd: 4},
-			{Type: token.Whitespace, Literal: "\n", FileName: "test.urpc", LineStart: 4, ColumnStart: 5, LineEnd: 4, ColumnEnd: 5},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 4, ColumnStart: 5, LineEnd: 4, ColumnEnd: 5},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 5, ColumnStart: 1, LineEnd: 5, ColumnEnd: 1},
 		}
 
@@ -331,7 +331,7 @@ func TestLexer(t *testing.T) {
 
 		tests := []token.Token{
 			{Type: token.Comment, Literal: " This is a comment", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 20},
-			{Type: token.Whitespace, Literal: "\n", FileName: "test.urpc", LineStart: 1, ColumnStart: 21, LineEnd: 1, ColumnEnd: 21},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 1, ColumnStart: 21, LineEnd: 1, ColumnEnd: 21},
 			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 2, ColumnStart: 1, LineEnd: 2, ColumnEnd: 7},
 			{Type: token.Colon, Literal: ":", FileName: "test.urpc", LineStart: 2, ColumnStart: 8, LineEnd: 2, ColumnEnd: 8},
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 2, ColumnStart: 9, LineEnd: 2, ColumnEnd: 9},
@@ -361,9 +361,11 @@ func TestLexer(t *testing.T) {
 
 		tests := []token.Token{
 			{Type: token.Comment, Literal: " This is a comment", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 1, ColumnEnd: 20},
-			{Type: token.Whitespace, Literal: "\n\n", FileName: "test.urpc", LineStart: 1, ColumnStart: 21, LineEnd: 2, ColumnEnd: 1},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 1, ColumnStart: 21, LineEnd: 1, ColumnEnd: 21},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 2, ColumnStart: 1, LineEnd: 2, ColumnEnd: 1},
 			{Type: token.CommentBlock, Literal: " This is a comment ", FileName: "test.urpc", LineStart: 3, ColumnStart: 1, LineEnd: 3, ColumnEnd: 23},
-			{Type: token.Whitespace, Literal: "\n\n", FileName: "test.urpc", LineStart: 3, ColumnStart: 24, LineEnd: 4, ColumnEnd: 1},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 3, ColumnStart: 24, LineEnd: 3, ColumnEnd: 24},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 4, ColumnStart: 1, LineEnd: 4, ColumnEnd: 1},
 			{Type: token.Comment, Literal: " This is a comment", FileName: "test.urpc", LineStart: 5, ColumnStart: 1, LineEnd: 5, ColumnEnd: 20},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 5, ColumnStart: 21, LineEnd: 5, ColumnEnd: 21},
 		}
@@ -490,7 +492,7 @@ func TestLexer(t *testing.T) {
 
 		tests := []token.Token{
 			{Type: token.Docstring, Literal: " This is a multiline docstring\nwith multiple lines ", FileName: "test.urpc", LineStart: 1, ColumnStart: 1, LineEnd: 2, ColumnEnd: 23},
-			{Type: token.Whitespace, Literal: "\n", FileName: "test.urpc", LineStart: 2, ColumnStart: 24, LineEnd: 2, ColumnEnd: 24},
+			{Type: token.Newline, Literal: "\n", FileName: "test.urpc", LineStart: 2, ColumnStart: 24, LineEnd: 2, ColumnEnd: 24},
 			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 3, ColumnStart: 1, LineEnd: 3, ColumnEnd: 1},
 		}
 
@@ -667,19 +669,19 @@ func TestLexer(t *testing.T) {
 		lex := NewLexer("test.urpc", input)
 		tokens := lex.ReadTokens()
 
-		// This test does not test whitespace tokens to avoid verbosity
+		// This test does not test newline and whitespace tokens to avoid verbosity
 		// They're already tested in previous tests
 
-		nonWhitespaceTokens := []token.Token{}
+		testableTokens := []token.Token{}
 		for _, tok := range tokens {
-			if tok.Type == token.Whitespace {
+			if tok.Type == token.Newline || tok.Type == token.Whitespace {
 				continue
 			}
-			nonWhitespaceTokens = append(nonWhitespaceTokens, tok)
+			testableTokens = append(testableTokens, tok)
 		}
 
 		for i, test := range tests {
-			tok := nonWhitespaceTokens[i]
+			tok := testableTokens[i]
 
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)

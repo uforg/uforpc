@@ -10,9 +10,10 @@ func isNumber(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
 
-// isWhitespace returns true if the character is a whitespace.
+// isWhitespace returns true if the character is a whitespace. Line breaks
+// are not considered whitespace.
 func isWhitespace(ch byte) bool {
-	return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n'
+	return ch == ' ' || ch == '\t' || ch == '\r'
 }
 
 // isNewline returns true if the character is a newline.
