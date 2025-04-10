@@ -51,12 +51,12 @@ proc <ProcedureName> {
     <field>[?]: <PrimitiveType> | <CustomType>
       [@<validationRule>(<param>, [error: <"message">])]
   }
-  
+
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
       [@<validationRule>(<param>, [error: <"message">])]
   }
-  
+
   meta {
     <key>: <value>
   }
@@ -76,9 +76,9 @@ import "<schema_path>"
 
 ### 3.1 Conflict resolution
 
-If there are conflicting custom validaion rules, custom types or procedures, the
-transpiler will throw an error. Make sure to use unique names across schemas to
-avoid issues.
+If there are conflicting custom validation rules, custom types or procedures,
+the transpiler will throw an error. Make sure to use unique names across schemas
+to avoid issues.
 
 ## 4. Types
 
@@ -104,7 +104,7 @@ create more complex data structures.
 
 ```urpc
 // Array
-ElementType[]  // E.g.: string[] 
+ElementType[]  // E.g.: string[]
 
 // Inline object
 {
@@ -172,12 +172,12 @@ proc <ProcedureName> {
     <field>[?]: <PrimitiveType> | <CustomType>
       [@<validationRule>(<param>, [error: <"message">])]
   }
-  
+
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
       [@<validationRule>(<param>, [error: <"message">])]
   }
-  
+
   meta {
     <key>: <value>
   }
@@ -215,7 +215,7 @@ You can only define values of the following types:
 meta {
   // Allowed values
   <key>: string|int|float|boolean
-  
+
   // Examples
   cache: true
   ttl: 300
@@ -367,12 +367,81 @@ input {
 - If a custom type is used as a field type in another type, the validation rules
   of the referenced type will be applied to the field.
 
-## 7. Complete Example
+## 7. Documentation
+
+### 7.1 Docstrings
+
+Docstrings can be used in two ways: associated with specific elements (rules,
+types, or procedures) or as standalone documentation.
+
+1. Associated docstrings: These are placed immediately before a rule, type, or
+   procedure definition and provide specific documentation for that element.
+
+   ```urpc
+   """
+   This is documentation for MyType.
+   """
+   type MyType {
+     // ...
+   }
+   ```
+
+2. Standalone docstrings: These provide general documentation for the schema and
+   are not associated with any specific element. To create a standalone
+   docstring, ensure there is at least one blank line between the docstring and
+   any following element.
+
+   ```urpc
+   """
+   This is general documentation for the entire schema.
+   It can include multiple paragraphs and Markdown formatting.
+   """
+
+   // At least one blank line here
+
+   type MyType {
+     // ...
+   }
+   ```
+
+Docstrings support Markdown syntax, allowing you to format your documentation
+with headings, lists, code blocks, and more.
+
+### 7.2 External Documentation Files
+
+For extensive documentation, you can reference external Markdown files:
+
+```urpc
+version 1
+
+// Standalone documentation
+""" ./docs/welcome.md """
+""" ./docs/authentication.md """
+
+// Associated documentation
+""" ./docs/myproc.md """
+proc MyProc {
+  // ...
+}
+```
+
+When a docstring contains only a valid path to a Markdown file, the content of
+that file will be used as documentation. This approach helps maintain clean and
+focused schema files while allowing for detailed documentation in separate
+files.
+
+Remember to keep external documentation files up to date with your schema
+changes.
+
+## 8. Complete Example
 
 ```urpc
 version 1
 
 import "path/to/other_schema.urpc"
+
+""" ./docs/welcome.md """
+""" ./docs/authentication.md """
 
 // Custom Rules
 rule @regex {
@@ -468,7 +537,7 @@ proc GetProduct {
 }
 ```
 
-## 8. Known Limitations
+## 9. Known Limitations
 
 1. Keywords can't be used as identifiers
 2. Custom validators require external implementation
