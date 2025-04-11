@@ -15,7 +15,7 @@ func Format(filename, content string) (string, error) {
 		return "", nil
 	}
 
-	schema, err := parser.Parser.ParseString(filename, content)
+	schema, err := parser.ParserInstance.ParseString(filename, content)
 	if err != nil {
 		return "", fmt.Errorf("error parsing URPC: %w", err)
 	}

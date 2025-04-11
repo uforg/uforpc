@@ -93,7 +93,7 @@ func ptr[T any](v T) *T {
 func TestParserPositions(t *testing.T) {
 	t.Run("Version position", func(t *testing.T) {
 		input := `version 1`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 		require.NotNil(t, parsed)
 
@@ -156,7 +156,7 @@ func TestParserPositions(t *testing.T) {
 func TestParserVersion(t *testing.T) {
 	t.Run("Correct version parsing", func(t *testing.T) {
 		input := `version 1`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 
 		require.NoError(t, err)
 		require.NotNil(t, parsed)
@@ -176,25 +176,25 @@ func TestParserVersion(t *testing.T) {
 
 	t.Run("More than one version should fail", func(t *testing.T) {
 		input := `version 1 version: 2`
-		_, err := Parser.ParseString("schema.urpc", input)
+		_, err := ParserInstance.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
 
 	t.Run("Version as float should fail", func(t *testing.T) {
 		input := `version 1.0`
-		_, err := Parser.ParseString("schema.urpc", input)
+		_, err := ParserInstance.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
 
 	t.Run("Version as identifier should fail", func(t *testing.T) {
 		input := `version: version`
-		_, err := Parser.ParseString("schema.urpc", input)
+		_, err := ParserInstance.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
 
 	t.Run("Version as string should fail", func(t *testing.T) {
 		input := `version: "1"`
-		_, err := Parser.ParseString("schema.urpc", input)
+		_, err := ParserInstance.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
 }
@@ -202,7 +202,7 @@ func TestParserVersion(t *testing.T) {
 func TestParserImport(t *testing.T) {
 	t.Run("Import parsing", func(t *testing.T) {
 		input := `import "../../my_sub_schema.urpc"`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -226,7 +226,7 @@ func TestParserRuleDecl(t *testing.T) {
 					for: string
 				}
 			`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -251,7 +251,7 @@ func TestParserRuleDecl(t *testing.T) {
 
 	t.Run("Rule with no body not allowed", func(t *testing.T) {
 		input := `rule @myRule`
-		_, err := Parser.ParseString("schema.urpc", input)
+		_, err := ParserInstance.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
 
@@ -264,7 +264,7 @@ func TestParserRuleDecl(t *testing.T) {
 					for: string
 				}
 			`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -295,7 +295,7 @@ func TestParserRuleDecl(t *testing.T) {
 					param: string[]
 				}
 			`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -333,7 +333,7 @@ func TestParserRuleDecl(t *testing.T) {
 					error: "My error message"
 				}
 			`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -376,7 +376,7 @@ func TestParserTypeDecl(t *testing.T) {
 				field: string
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -409,7 +409,7 @@ func TestParserTypeDecl(t *testing.T) {
 				field: string
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -442,7 +442,7 @@ func TestParserTypeDecl(t *testing.T) {
 				field: string
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -475,7 +475,7 @@ func TestParserTypeDecl(t *testing.T) {
 				field: string
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -509,7 +509,7 @@ func TestParserTypeDecl(t *testing.T) {
 				field: string
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -543,7 +543,7 @@ func TestParserTypeDecl(t *testing.T) {
 				field: MyCustomType
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -581,7 +581,7 @@ func TestParserField(t *testing.T) {
 				field5: datetime
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -646,7 +646,7 @@ func TestParserField(t *testing.T) {
 				field2: MyOtherCustomType
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -687,7 +687,7 @@ func TestParserField(t *testing.T) {
 				field2?: MyCustomType
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -738,7 +738,7 @@ func TestParserField(t *testing.T) {
 				}[][][][][][][]
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -853,7 +853,7 @@ func TestParserField(t *testing.T) {
 					@enum([true, false])
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -952,7 +952,7 @@ func TestParserField(t *testing.T) {
 			}
 		`
 
-		_, err := Parser.ParseString("schema.urpc", input)
+		_, err := ParserInstance.ParseString("schema.urpc", input)
 		require.Error(t, err)
 	})
 }
@@ -962,7 +962,7 @@ func TestParserProcDecl(t *testing.T) {
 		input := `
 			proc MyProc {}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -983,7 +983,7 @@ func TestParserProcDecl(t *testing.T) {
 			""" MyProc is a procedure that does something. """
 			proc MyProc {}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1008,7 +1008,7 @@ func TestParserProcDecl(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1046,7 +1046,7 @@ func TestParserProcDecl(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1088,7 +1088,7 @@ func TestParserProcDecl(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1146,7 +1146,7 @@ func TestParserProcDecl(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1247,7 +1247,7 @@ func TestParserComments(t *testing.T) {
 			proc MyProc {}
 			/* Trailing comment */
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1321,7 +1321,7 @@ func TestParserComments(t *testing.T) {
 				// Trailing comment in rule
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1369,7 +1369,7 @@ func TestParserComments(t *testing.T) {
 				// Trailing comment in type
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1428,7 +1428,7 @@ func TestParserComments(t *testing.T) {
 				// Trailing comment in proc
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1509,7 +1509,7 @@ func TestParserComments(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1573,7 +1573,7 @@ func TestParserComments(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1637,7 +1637,7 @@ func TestParserComments(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1694,7 +1694,7 @@ func TestParserComments(t *testing.T) {
 				}
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1764,7 +1764,7 @@ func TestParserComments(t *testing.T) {
 					// Trailing comment after rules
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1829,7 +1829,7 @@ func TestParserComments(t *testing.T) {
 				meta { k: "v" } // EOL on meta
 			} // EOL on proc end
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -1960,7 +1960,7 @@ func TestParserComments(t *testing.T) {
 				field: { /* Nested Comment */ }
 			}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -2056,7 +2056,7 @@ func TestParserDocstrings(t *testing.T) {
 		input := `
 			""" This is a standalone docstring. """
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -2075,7 +2075,7 @@ func TestParserDocstrings(t *testing.T) {
 			""" This is a standalone docstring. """
 			""" This is a standalone docstring. """
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -2099,7 +2099,7 @@ func TestParserDocstrings(t *testing.T) {
 			""" This is a standalone docstring. """
 			""" This is a standalone docstring. """""" This is an associated docstring. """type MyType {}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -2135,7 +2135,7 @@ func TestParserDocstrings(t *testing.T) {
 
 			type MyType {}
 		`
-		parsed, err := Parser.ParseString("schema.urpc", input)
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
 
 		expected := &ast.Schema{
@@ -2358,7 +2358,7 @@ func TestParserFullSchema(t *testing.T) {
 		}
 	`
 
-	parsed, err := Parser.ParseString("schema.urpc", input)
+	parsed, err := ParserInstance.ParseString("schema.urpc", input)
 	require.NoError(t, err)
 
 	expected := &ast.Schema{

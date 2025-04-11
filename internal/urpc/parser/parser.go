@@ -6,7 +6,9 @@ import (
 	"github.com/uforg/uforpc/internal/urpc/lexer"
 )
 
-var Parser = participle.MustBuild[ast.Schema](
+type Parser = participle.Parser[ast.Schema]
+
+var ParserInstance = participle.MustBuild[ast.Schema](
 	participle.Lexer(&lexer.ParticipleLexer{}),
 	participle.Elide("Newline", "Whitespace"),
 )
