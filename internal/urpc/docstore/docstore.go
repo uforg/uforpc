@@ -4,10 +4,16 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
+)
+
+var (
+	ErrFileNotFound = os.ErrNotExist
 )
 
 // MemCacheFile is a file that is stored in memory and cached in Docstore.
@@ -32,6 +38,7 @@ type DiskCacheFile struct {
 type Docstore struct {
 	memCache  map[string]MemCacheFile  // Normalized Path -> MemCacheFile
 	diskCache map[string]DiskCacheFile // Normalized Path -> DiskCacheFile
+	mu        sync.RWMutex             // Protects concurrent access to memCache and diskCache
 }
 
 // NewDocstore creates a new Docstore. Read more about at Docstore documentation.
@@ -39,6 +46,7 @@ func NewDocstore() *Docstore {
 	return &Docstore{
 		memCache:  make(map[string]MemCacheFile),
 		diskCache: make(map[string]DiskCacheFile),
+		mu:        sync.RWMutex{},
 	}
 }
 
@@ -47,15 +55,16 @@ func NewDocstore() *Docstore {
 //
 // Parameters:
 //
-//   - relativeToFilePath: An optional absolute file path if the filePath is relative.
-//   - filePath: The file path to normalize, if no relativeToFilePath is provided, this should be absolute.
-func (d *Docstore) normalizePath(relativeToFilePath string, filePath string) (string, error) {
-	filePath = strings.TrimPrefix(filePath, "file://")
-	filePath = filepath.Clean(filePath)
+//   - relativeToFilePath: An optional absolute file path or URI if the filePath is relative.
+//   - filePath: The file path or URI to normalize, if no relativeToFilePath is provided, this should be absolute.
+func normalizePath(relativeToFilePath string, filePath string) (string, error) {
+	// Convert URI to file path if needed
+	filePath = uriToFilePath(filePath)
 
 	if relativeToFilePath != "" {
-		relativeToFilePath = strings.TrimPrefix(relativeToFilePath, "file://")
-		relativeToFilePath = filepath.Clean(relativeToFilePath)
+		// Convert URI to file path if needed
+		relativeToFilePath = uriToFilePath(relativeToFilePath)
+
 		if !filepath.IsAbs(relativeToFilePath) {
 			return "", fmt.Errorf("relativeToFilePath must be an absolute path, got %s", relativeToFilePath)
 		}
@@ -64,7 +73,9 @@ func (d *Docstore) normalizePath(relativeToFilePath string, filePath string) (st
 		relativeToFilePath = filepath.Dir(relativeToFilePath)
 	}
 
-	newNormFilePath := filepath.Join(relativeToFilePath, filePath)
+	// Join paths and clean the result
+	newNormFilePath := filepath.Clean(filepath.Join(relativeToFilePath, filePath))
+
 	if !filepath.IsAbs(newNormFilePath) {
 		return newNormFilePath, fmt.Errorf("file path must be an absolute path, got %s", filePath)
 	}
@@ -72,15 +83,45 @@ func (d *Docstore) normalizePath(relativeToFilePath string, filePath string) (st
 	return newNormFilePath, nil
 }
 
+// uriToFilePath converts a URI to a file path.
+// It handles both "file://" URIs and regular file paths.
+func uriToFilePath(uriOrPath string) string {
+	// If it's not a URI, return as is
+	if !strings.HasPrefix(uriOrPath, "file://") {
+		return filepath.Clean(uriOrPath)
+	}
+
+	// Parse the URI
+	u, err := url.Parse(uriOrPath)
+	if err != nil || u.Scheme != "file" {
+		// If parsing fails or it's not a file URI, fall back to simple trimming
+		return filepath.Clean(strings.TrimPrefix(uriOrPath, "file://"))
+	}
+
+	// Convert the URI path to a file path
+	path := u.Path
+
+	// On Windows, handle drive letters correctly
+	if len(path) >= 3 && path[0] == '/' && path[2] == ':' {
+		// Remove leading slash for Windows drive paths: /C:/path -> C:/path
+		path = path[1:]
+	}
+
+	return filepath.Clean(path)
+}
+
 // OpenInMem opens a file in memory and caches it in the Docstore.
 func (d *Docstore) OpenInMem(filePath string, content string) error {
-	normFilePath, err := d.normalizePath("", filePath)
+	normFilePath, err := normalizePath("", filePath)
 	if err != nil {
 		return fmt.Errorf("error normalizing file path: %w", err)
 	}
 
 	sum := sha256.Sum256([]byte(content))
-	hash := string(sum[:])
+	hash := fmt.Sprintf("%x", sum)
+
+	d.mu.Lock()
+	defer d.mu.Unlock()
 
 	d.memCache[normFilePath] = MemCacheFile{
 		Content: content,
@@ -101,10 +142,13 @@ func (d *Docstore) ChangeInMem(filePath string, content string) error {
 
 // CloseInMem closes a file in memory and removes it from the Docstore.
 func (d *Docstore) CloseInMem(filePath string) error {
-	normFilePath, err := d.normalizePath("", filePath)
+	normFilePath, err := normalizePath("", filePath)
 	if err != nil {
 		return fmt.Errorf("error normalizing file path: %w", err)
 	}
+
+	d.mu.Lock()
+	defer d.mu.Unlock()
 
 	delete(d.memCache, normFilePath)
 
@@ -116,13 +160,16 @@ func (d *Docstore) CloseInMem(filePath string) error {
 //
 // Parameters:
 //
-//   - relativeToFilePath: An optional absolute file path if the filePath is relative.
-//   - filePath: The file path to get, if no relativeToFilePath is provided, this should be absolute.
+//   - relativeToFilePath: An optional absolute file path or URI if the filePath is relative.
+//   - filePath: The file path or URI to get, if no relativeToFilePath is provided, this should be absolute.
 func (d *Docstore) GetInMemory(relativeToFilePath string, filePath string) (string, string, bool, error) {
-	normFilePath, err := d.normalizePath(relativeToFilePath, filePath)
+	normFilePath, err := normalizePath(relativeToFilePath, filePath)
 	if err != nil {
 		return "", "", false, fmt.Errorf("error normalizing file path: %w", err)
 	}
+
+	d.mu.RLock()
+	defer d.mu.RUnlock()
 
 	cachedFile, ok := d.memCache[normFilePath]
 	if !ok {
@@ -141,22 +188,71 @@ func (d *Docstore) GetInMemory(relativeToFilePath string, filePath string) (stri
 //
 // Parameters:
 //
-//   - relativeToFilePath: An optional absolute file path if the filePath is relative.
-//   - filePath: The file path to get, if no relativeToFilePath is provided, this should be absolute.
+//   - relativeToFilePath: An optional absolute file path or URI if the filePath is relative.
+//   - filePath: The file path or URI to get, if no relativeToFilePath is provided, this should be absolute.
 func (d *Docstore) GetFromDisk(relativeToFilePath string, filePath string) (string, string, bool, error) {
 	// 1. Normalize the file path
-	normFilePath, err := d.normalizePath(relativeToFilePath, filePath)
+	normFilePath, err := normalizePath(relativeToFilePath, filePath)
 	if err != nil {
 		return "", "", false, fmt.Errorf("error normalizing file path: %w", err)
 	}
 
-	// 2. Check if the file exists in diskCache
-	cachedFile, ok := d.diskCache[normFilePath]
+	// Use a loop instead of recursion to avoid potential stack overflow
+	for {
+		// Start with a read lock
+		d.mu.RLock()
 
-	// 2.1 If not found in diskCache then read the file from disk and cache it
-	if !ok {
+		// 2. Check if the file exists in diskCache
+		cachedFile, ok := d.diskCache[normFilePath]
+
+		if !ok {
+			// Not in cache, release read lock
+			d.mu.RUnlock()
+
+			// Check if file exists and get info
+			fileInfo, err := os.Stat(normFilePath)
+			if errors.Is(err, os.ErrNotExist) {
+				return "", "", false, nil
+			}
+			if err != nil {
+				return "", "", false, fmt.Errorf("error getting file info: %w", err)
+			}
+			if fileInfo.IsDir() {
+				return "", "", false, fmt.Errorf("file path is a directory: %s", normFilePath)
+			}
+
+			// Read file content
+			content, err := os.ReadFile(normFilePath)
+			if err != nil {
+				return "", "", false, fmt.Errorf("error reading file: %w", err)
+			}
+
+			// Calculate hash
+			sum := sha256.Sum256(content)
+			hash := fmt.Sprintf("%x", sum)
+
+			// Acquire write lock to update cache
+			d.mu.Lock()
+			d.diskCache[normFilePath] = DiskCacheFile{
+				Content: string(content),
+				Hash:    hash,
+				Mtime:   fileInfo.ModTime(),
+			}
+			d.mu.Unlock()
+
+			return string(content), hash, true, nil
+		}
+
+		// File is in cache, get file info to check if it's stale
+		// We can release the read lock while checking the file
+		d.mu.RUnlock()
+
 		fileInfo, err := os.Stat(normFilePath)
 		if errors.Is(err, os.ErrNotExist) {
+			// File no longer exists, acquire write lock to remove from cache
+			d.mu.Lock()
+			delete(d.diskCache, normFilePath)
+			d.mu.Unlock()
 			return "", "", false, nil
 		}
 		if err != nil {
@@ -166,44 +262,20 @@ func (d *Docstore) GetFromDisk(relativeToFilePath string, filePath string) (stri
 			return "", "", false, fmt.Errorf("file path is a directory: %s", normFilePath)
 		}
 
-		content, err := os.ReadFile(normFilePath)
-		if err != nil {
-			return "", "", false, fmt.Errorf("error reading file: %w", err)
+		// Check if file has been modified
+		mtime := fileInfo.ModTime()
+		if mtime != cachedFile.Mtime {
+			// File has changed, acquire write lock to remove from cache
+			d.mu.Lock()
+			delete(d.diskCache, normFilePath)
+			d.mu.Unlock()
+			// Continue the loop to read the updated file
+			continue
 		}
 
-		sum := sha256.Sum256(content)
-		hash := string(sum[:])
-
-		d.diskCache[normFilePath] = DiskCacheFile{
-			Content: string(content),
-			Hash:    hash,
-			Mtime:   fileInfo.ModTime(),
-		}
-
-		return string(content), hash, true, nil
+		// File is in cache and not stale, return cached content
+		return cachedFile.Content, cachedFile.Hash, true, nil
 	}
-
-	// 2.2 If found in diskCache then compare the mtime of the file to avoid stale content
-	fileInfo, err := os.Stat(normFilePath)
-	if errors.Is(err, os.ErrNotExist) {
-		return "", "", false, nil
-	}
-	if err != nil {
-		return "", "", false, fmt.Errorf("error getting file info: %w", err)
-	}
-	if fileInfo.IsDir() {
-		return "", "", false, fmt.Errorf("file path is a directory: %s", normFilePath)
-	}
-
-	// 2.2.1 If mtime is different then invalidate the cache and try again
-	mtime := fileInfo.ModTime()
-	if mtime != cachedFile.Mtime {
-		delete(d.diskCache, normFilePath)
-		return d.GetFromDisk(relativeToFilePath, filePath)
-	}
-
-	// When cache hit and content not stale, return the cached content
-	return cachedFile.Content, cachedFile.Hash, true, nil
 }
 
 // GetFileAndHash implements analyzer.FileProvider.GetFileAndHash. It first checks
@@ -226,5 +298,6 @@ func (d *Docstore) GetFileAndHash(relativeTo string, path string) (string, strin
 		return content, hash, nil
 	}
 
-	return "", "", fmt.Errorf("file not found: %s", path)
+	// Return a standard error that can be checked with errors.Is
+	return "", "", fmt.Errorf("file not found: %s: %w", path, os.ErrNotExist)
 }

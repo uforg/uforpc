@@ -127,14 +127,12 @@ func TestDocstoreMemCache(t *testing.T) {
 	})
 
 	t.Run("Relative Paths with relativeToFilePath", func(t *testing.T) {
-		d := NewDocstore()
-
 		// Test relative path normalization
 		relativeTo := "/base/dir/file.txt"
 		relativePath := "../other/./file.txt"
 
 		// Normalize the path
-		normalizedPath, err := d.normalizePath(relativeTo, relativePath)
+		normalizedPath, err := normalizePath(relativeTo, relativePath)
 		require.NoError(t, err)
 		require.Equal(t, "/base/other/file.txt", normalizedPath)
 
@@ -142,7 +140,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		relativeTo = "file:///base/dir/file.txt"
 		relativePath = "../other/file.txt"
 
-		normalizedPath, err = d.normalizePath(relativeTo, relativePath)
+		normalizedPath, err = normalizePath(relativeTo, relativePath)
 		require.NoError(t, err)
 		require.Equal(t, "/base/other/file.txt", normalizedPath)
 	})
@@ -177,10 +175,8 @@ func TestDocstoreMemCache(t *testing.T) {
 	})
 
 	t.Run("Error Cases", func(t *testing.T) {
-		d := NewDocstore()
-
 		// Test with non-absolute relativeToFilePath
-		_, err := d.normalizePath("relative/path", "file.txt")
+		_, err := normalizePath("relative/path", "file.txt")
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "relativeToFilePath must be an absolute path")
 
