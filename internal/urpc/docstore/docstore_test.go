@@ -26,7 +26,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		err := d.OpenInMem(filePath, content)
 		require.NoError(t, err)
 
-		gotContent, gotHash, exists, err := d.GetInMemory(filePath)
+		gotContent, gotHash, exists, err := d.GetInMemory("", filePath)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, content, gotContent)
@@ -44,7 +44,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		require.NoError(t, err)
 
 		// Get initial content
-		gotContent, gotHash1, exists, err := d.GetInMemory(filePath)
+		gotContent, gotHash1, exists, err := d.GetInMemory("", filePath)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, initialContent, gotContent)
@@ -55,7 +55,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		require.NoError(t, err)
 
 		// Get updated content
-		gotContent, gotHash2, exists, err := d.GetInMemory(filePath)
+		gotContent, gotHash2, exists, err := d.GetInMemory("", filePath)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, updatedContent, gotContent)
@@ -81,7 +81,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		require.NoError(t, err)
 
 		// Get updated content
-		gotContent, _, exists, err := d.GetInMemory(filePath)
+		gotContent, _, exists, err := d.GetInMemory("", filePath)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, updatedContent, gotContent)
@@ -91,7 +91,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		require.NoError(t, err)
 
 		// Try to get file after closing
-		_, _, exists, err = d.GetInMemory(filePath)
+		_, _, exists, err = d.GetInMemory("", filePath)
 		require.NoError(t, err)
 		require.False(t, exists)
 	})
@@ -118,7 +118,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		// Try to get the file using different path formats
 		for _, path := range paths {
 			t.Run(path, func(t *testing.T) {
-				gotContent, _, exists, err := d.GetInMemory(path)
+				gotContent, _, exists, err := d.GetInMemory("", path)
 				require.NoError(t, err)
 				require.True(t, exists)
 				require.Equal(t, "Test content", gotContent)
@@ -145,6 +145,35 @@ func TestDocstoreMemCache(t *testing.T) {
 		normalizedPath, err = d.normalizePath(relativeTo, relativePath)
 		require.NoError(t, err)
 		require.Equal(t, "/base/other/file.txt", normalizedPath)
+	})
+
+	t.Run("GetInMemory with relative path", func(t *testing.T) {
+		d := NewDocstore()
+
+		// Create a file in memory
+		absolutePath := "/base/other/file.txt"
+		content := "Content for relative path test"
+		err := d.OpenInMem(absolutePath, content)
+		require.NoError(t, err)
+
+		// Get the file using a relative path
+		relativeTo := "/base/dir/file.txt"
+		relativePath := "../other/file.txt"
+
+		// Get the file using the relative path
+		gotContent, _, exists, err := d.GetInMemory(relativeTo, relativePath)
+		require.NoError(t, err)
+		require.True(t, exists)
+		require.Equal(t, content, gotContent)
+
+		// Test with file:// prefix
+		relativeTo = "file:///base/dir/file.txt"
+		relativePath = "../other/file.txt"
+
+		gotContent, _, exists, err = d.GetInMemory(relativeTo, relativePath)
+		require.NoError(t, err)
+		require.True(t, exists)
+		require.Equal(t, content, gotContent)
 	})
 
 	t.Run("Error Cases", func(t *testing.T) {
@@ -179,7 +208,7 @@ func TestDocstoreMemCache(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify the file is in memCache
-		gotContent, _, exists, err := d.GetInMemory(filePath)
+		gotContent, _, exists, err := d.GetInMemory("", filePath)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, "Memory content", gotContent)
@@ -333,7 +362,7 @@ func TestDocstoreDiskCache(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify the file is in memCache
-		gotContent, _, exists, err = d.GetInMemory(filePath)
+		gotContent, _, exists, err = d.GetInMemory("", filePath)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, memContent, gotContent)
@@ -383,5 +412,123 @@ func TestDocstoreDiskCache(t *testing.T) {
 		_, _, _, err = d.GetFromDisk("", filePath)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "file path is a directory")
+	})
+}
+
+func TestDocstoreGetFileAndHash(t *testing.T) {
+	// Create a single temporary directory for all test files
+	tempDir, err := os.MkdirTemp("", "urpc-docstore-getfileandhash-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	t.Run("Get file from memory", func(t *testing.T) {
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Create a file in memory
+		filePath := "/test/memory-file.txt"
+		content := "Content in memory"
+		err := d.OpenInMem(filePath, content)
+		require.NoError(t, err)
+
+		// Get the file using GetFileAndHash
+		gotContent, gotHash, err := d.GetFileAndHash("", filePath)
+		require.NoError(t, err)
+		require.Equal(t, content, gotContent)
+		require.NotEmpty(t, gotHash)
+	})
+
+	t.Run("Get file from disk", func(t *testing.T) {
+		// Create a test file on disk
+		filePath := filepath.Join(tempDir, "disk-file.txt")
+		content := "Content on disk"
+		err = os.WriteFile(filePath, []byte(content), 0644)
+		require.NoError(t, err)
+
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Get the file using GetFileAndHash
+		gotContent, gotHash, err := d.GetFileAndHash("", filePath)
+		require.NoError(t, err)
+		require.Equal(t, content, gotContent)
+		require.NotEmpty(t, gotHash)
+	})
+
+	t.Run("Memory takes precedence over disk", func(t *testing.T) {
+		// Create a test file on disk
+		filePath := filepath.Join(tempDir, "precedence-file.txt")
+		diskContent := "Content on disk"
+		err = os.WriteFile(filePath, []byte(diskContent), 0644)
+		require.NoError(t, err)
+
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Create the same file in memory with different content
+		memContent := "Content in memory"
+		err = d.OpenInMem(filePath, memContent)
+		require.NoError(t, err)
+
+		// Get the file using GetFileAndHash - should return memory content
+		gotContent, gotHash, err := d.GetFileAndHash("", filePath)
+		require.NoError(t, err)
+		require.Equal(t, memContent, gotContent)
+		require.NotEmpty(t, gotHash)
+	})
+
+	t.Run("File not found", func(t *testing.T) {
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Try to get a non-existent file
+		filePath := filepath.Join(tempDir, "non-existent-file.txt")
+		_, _, err := d.GetFileAndHash("", filePath)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "file not found")
+	})
+
+	t.Run("With relative path", func(t *testing.T) {
+		// Create subdirectories
+		baseDir := filepath.Join(tempDir, "base", "dir")
+		otherDir := filepath.Join(tempDir, "base", "other")
+		err = os.MkdirAll(baseDir, 0755)
+		require.NoError(t, err)
+		err = os.MkdirAll(otherDir, 0755)
+		require.NoError(t, err)
+
+		// Create a target file
+		targetFilePath := filepath.Join(otherDir, "target-file.txt")
+		targetContent := "Target file content"
+		err = os.WriteFile(targetFilePath, []byte(targetContent), 0644)
+		require.NoError(t, err)
+
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Get the file using a relative path
+		baseFilePath := filepath.Join(baseDir, "base-file.txt")
+		relativePath := "../other/target-file.txt"
+
+		// Get the file using GetFileAndHash with relative path
+		gotContent, gotHash, err := d.GetFileAndHash(baseFilePath, relativePath)
+		require.NoError(t, err)
+		require.Equal(t, targetContent, gotContent)
+		require.NotEmpty(t, gotHash)
+	})
+
+	t.Run("Error handling for invalid paths", func(t *testing.T) {
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Try to get a file with an invalid relative path
+		_, _, err := d.GetFileAndHash("relative/path", "file.txt")
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "error getting file from memCache")
+
+		// Try to get a directory
+		_, _, err = d.GetFileAndHash("", tempDir)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "error getting file from diskCache")
 	})
 }

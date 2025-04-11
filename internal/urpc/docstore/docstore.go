@@ -113,8 +113,13 @@ func (d *Docstore) CloseInMem(filePath string) error {
 
 // GetInMemory returns the content of a file in memory, the hash and a boolean
 // indicating if the file exists in memory.
-func (d *Docstore) GetInMemory(filePath string) (string, string, bool, error) {
-	normFilePath, err := d.normalizePath("", filePath)
+//
+// Parameters:
+//
+//   - relativeToFilePath: An optional absolute file path if the filePath is relative.
+//   - filePath: The file path to get, if no relativeToFilePath is provided, this should be absolute.
+func (d *Docstore) GetInMemory(relativeToFilePath string, filePath string) (string, string, bool, error) {
+	normFilePath, err := d.normalizePath(relativeToFilePath, filePath)
 	if err != nil {
 		return "", "", false, fmt.Errorf("error normalizing file path: %w", err)
 	}
@@ -199,4 +204,27 @@ func (d *Docstore) GetFromDisk(relativeToFilePath string, filePath string) (stri
 
 	// When cache hit and content not stale, return the cached content
 	return cachedFile.Content, cachedFile.Hash, true, nil
+}
+
+// GetFileAndHash implements analyzer.FileProvider.GetFileAndHash. It first checks
+// try to get the file from memCache using GetInMemory, if not found then try to get
+// the file from diskCache using GetFromDisk. If both fails then return an error.
+func (d *Docstore) GetFileAndHash(relativeTo string, path string) (string, string, error) {
+	content, hash, exists, err := d.GetInMemory(relativeTo, path)
+	if err != nil {
+		return "", "", fmt.Errorf("error getting file from memCache: %w", err)
+	}
+	if exists {
+		return content, hash, nil
+	}
+
+	content, hash, exists, err = d.GetFromDisk(relativeTo, path)
+	if err != nil {
+		return "", "", fmt.Errorf("error getting file from diskCache: %w", err)
+	}
+	if exists {
+		return content, hash, nil
+	}
+
+	return "", "", fmt.Errorf("file not found: %s", path)
 }
