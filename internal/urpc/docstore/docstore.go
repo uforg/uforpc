@@ -2,7 +2,9 @@ package docstore
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -122,5 +124,79 @@ func (d *Docstore) GetInMemory(filePath string) (string, string, bool, error) {
 		return "", "", false, nil
 	}
 
+	return cachedFile.Content, cachedFile.Hash, true, nil
+}
+
+// GetFromDisk returns the content of a file on disk, the hash and a boolean
+// indicating if the file exists on disk.
+//
+// It first checks the diskCache, if found then compares the mtime of the file
+// to avoid stale content. If not found in diskCache then it reads the file
+// from disk and caches it in diskCache.
+//
+// Parameters:
+//
+//   - relativeToFilePath: An optional absolute file path if the filePath is relative.
+//   - filePath: The file path to get, if no relativeToFilePath is provided, this should be absolute.
+func (d *Docstore) GetFromDisk(relativeToFilePath string, filePath string) (string, string, bool, error) {
+	// 1. Normalize the file path
+	normFilePath, err := d.normalizePath(relativeToFilePath, filePath)
+	if err != nil {
+		return "", "", false, fmt.Errorf("error normalizing file path: %w", err)
+	}
+
+	// 2. Check if the file exists in diskCache
+	cachedFile, ok := d.diskCache[normFilePath]
+
+	// 2.1 If not found in diskCache then read the file from disk and cache it
+	if !ok {
+		fileInfo, err := os.Stat(normFilePath)
+		if errors.Is(err, os.ErrNotExist) {
+			return "", "", false, nil
+		}
+		if err != nil {
+			return "", "", false, fmt.Errorf("error getting file info: %w", err)
+		}
+		if fileInfo.IsDir() {
+			return "", "", false, fmt.Errorf("file path is a directory: %s", normFilePath)
+		}
+
+		content, err := os.ReadFile(normFilePath)
+		if err != nil {
+			return "", "", false, fmt.Errorf("error reading file: %w", err)
+		}
+
+		sum := sha256.Sum256(content)
+		hash := string(sum[:])
+
+		d.diskCache[normFilePath] = DiskCacheFile{
+			Content: string(content),
+			Hash:    hash,
+			Mtime:   fileInfo.ModTime(),
+		}
+
+		return string(content), hash, true, nil
+	}
+
+	// 2.2 If found in diskCache then compare the mtime of the file to avoid stale content
+	fileInfo, err := os.Stat(normFilePath)
+	if errors.Is(err, os.ErrNotExist) {
+		return "", "", false, nil
+	}
+	if err != nil {
+		return "", "", false, fmt.Errorf("error getting file info: %w", err)
+	}
+	if fileInfo.IsDir() {
+		return "", "", false, fmt.Errorf("file path is a directory: %s", normFilePath)
+	}
+
+	// 2.2.1 If mtime is different then invalidate the cache and try again
+	mtime := fileInfo.ModTime()
+	if mtime != cachedFile.Mtime {
+		delete(d.diskCache, normFilePath)
+		return d.GetFromDisk(relativeToFilePath, filePath)
+	}
+
+	// When cache hit and content not stale, return the cached content
 	return cachedFile.Content, cachedFile.Hash, true, nil
 }
