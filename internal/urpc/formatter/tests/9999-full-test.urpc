@@ -3,6 +3,8 @@ version 1
     /* Import other schema */
     import "foo.urpc" // Comment
     import "bar.urpc"
+    """ ./docs/welcome.md """ // Welcome and introduction to the API
+    """ ./docs/authentication.md """ // Authentication guide
 
     // Custom rule declarations
 
@@ -207,6 +209,9 @@ version 1
 /* Import other schema */
 import "foo.urpc" // Comment
 import "bar.urpc"
+
+""" ./docs/welcome.md """ // Welcome and introduction to the API
+""" ./docs/authentication.md """ // Authentication guide
 
 // Custom rule declarations
 
