@@ -6,12 +6,11 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
+
+	"github.com/uforg/uforpc/internal/util/filepathutil"
 )
 
 var (
@@ -56,70 +55,10 @@ func NewDocstore() *Docstore {
 	}
 }
 
-// normalizePath converts file paths or URIs to absolute, canonical file paths.
-// It handles relative paths by resolving them against a base path.
-//
-// Parameters:
-//   - relativeToFilePath: Optional base path for resolving relative paths
-//   - filePath: Path to normalize (absolute or relative to relativeToFilePath)
-func normalizePath(relativeToFilePath string, filePath string) (string, error) {
-	// Convert URI to file path if needed
-	filePath = uriToFilePath(filePath)
-
-	if relativeToFilePath != "" {
-		// Convert URI to file path if needed
-		relativeToFilePath = uriToFilePath(relativeToFilePath)
-
-		if !filepath.IsAbs(relativeToFilePath) {
-			return "", fmt.Errorf("relativeToFilePath must be an absolute path, got %s", relativeToFilePath)
-		}
-
-		// Keep only the directory
-		relativeToFilePath = filepath.Dir(relativeToFilePath)
-	}
-
-	// Join paths and clean the result
-	newNormFilePath := filepath.Clean(filepath.Join(relativeToFilePath, filePath))
-
-	if !filepath.IsAbs(newNormFilePath) {
-		return newNormFilePath, fmt.Errorf("file path must be an absolute path, got %s", filePath)
-	}
-
-	return newNormFilePath, nil
-}
-
-// uriToFilePath converts a URI to a file path.
-// It handles file:// URIs, regular file paths, and Windows-specific paths.
-// For URIs, it properly decodes escaped characters and handles drive letters on Windows.
-func uriToFilePath(uriOrPath string) string {
-	// If it's not a URI, return as is
-	if !strings.HasPrefix(uriOrPath, "file://") {
-		return filepath.Clean(uriOrPath)
-	}
-
-	// Parse the URI
-	u, err := url.Parse(uriOrPath)
-	if err != nil || u.Scheme != "file" {
-		// If parsing fails or it's not a file URI, fall back to simple trimming
-		return filepath.Clean(strings.TrimPrefix(uriOrPath, "file://"))
-	}
-
-	// Convert the URI path to a file path
-	path := u.Path
-
-	// On Windows, handle drive letters correctly
-	if len(path) >= 3 && path[0] == '/' && path[2] == ':' {
-		// Remove leading slash for Windows drive paths: /C:/path -> C:/path
-		path = path[1:]
-	}
-
-	return filepath.Clean(path)
-}
-
 // OpenInMem stores file content in memory cache with its hash.
 // It normalizes the path and removes any existing disk cache entry for the same path.
 func (d *Docstore) OpenInMem(filePath string, content string) error {
-	normFilePath, err := normalizePath("", filePath)
+	normFilePath, err := filepathutil.Normalize("", filePath)
 	if err != nil {
 		return fmt.Errorf("error normalizing file path: %w", err)
 	}
@@ -151,7 +90,7 @@ func (d *Docstore) ChangeInMem(filePath string, content string) error {
 // CloseInMem removes a file from memory cache.
 // The file will still be accessible from disk if it exists there.
 func (d *Docstore) CloseInMem(filePath string) error {
-	normFilePath, err := normalizePath("", filePath)
+	normFilePath, err := filepathutil.Normalize("", filePath)
 	if err != nil {
 		return fmt.Errorf("error normalizing file path: %w", err)
 	}
@@ -171,7 +110,7 @@ func (d *Docstore) CloseInMem(filePath string) error {
 //   - relativeToFilePath: Optional base path for resolving relative paths
 //   - filePath: Path to retrieve (absolute or relative to relativeToFilePath)
 func (d *Docstore) GetInMemory(relativeToFilePath string, filePath string) (string, string, bool, error) {
-	normFilePath, err := normalizePath(relativeToFilePath, filePath)
+	normFilePath, err := filepathutil.Normalize(relativeToFilePath, filePath)
 	if err != nil {
 		return "", "", false, fmt.Errorf("error normalizing file path: %w", err)
 	}
@@ -196,7 +135,7 @@ func (d *Docstore) GetInMemory(relativeToFilePath string, filePath string) (stri
 //   - filePath: Path to retrieve (absolute or relative to relativeToFilePath)
 func (d *Docstore) GetFromDisk(relativeToFilePath string, filePath string) (string, string, bool, error) {
 	// 1. Normalize the file path
-	normFilePath, err := normalizePath(relativeToFilePath, filePath)
+	normFilePath, err := filepathutil.Normalize(relativeToFilePath, filePath)
 	if err != nil {
 		return "", "", false, fmt.Errorf("error normalizing file path: %w", err)
 	}
