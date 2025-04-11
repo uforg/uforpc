@@ -1,7 +1,6 @@
 package docstore
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,6 +8,202 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
+
+func TestUriToFilePath(t *testing.T) {
+	t.Run("Regular file paths", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			input    string
+			expected string
+		}{
+			{"Absolute path", "/path/to/file.txt", "/path/to/file.txt"},
+			{"Path with redundant slashes", "/path//to/file.txt", "/path/to/file.txt"},
+			{"Path with dot segments", "/path/./to/file.txt", "/path/to/file.txt"},
+			{"Path with parent segments", "/path/to/../to/file.txt", "/path/to/file.txt"},
+			{"Relative path", "path/to/file.txt", "path/to/file.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result := uriToFilePath(tc.input)
+				require.Equal(t, tc.expected, result)
+			})
+		}
+	})
+
+	t.Run("File URIs", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			input    string
+			expected string
+		}{
+			{"Simple file URI", "file:///path/to/file.txt", "/path/to/file.txt"},
+			{"File URI with redundant slashes", "file:///path//to/file.txt", "/path/to/file.txt"},
+			{"File URI with dot segments", "file:///path/./to/file.txt", "/path/to/file.txt"},
+			{"File URI with parent segments", "file:///path/to/../to/file.txt", "/path/to/file.txt"},
+			{"File URI with query parameters", "file:///path/to/file.txt?query=value", "/path/to/file.txt"},
+			{"File URI with fragment", "file:///path/to/file.txt#fragment", "/path/to/file.txt"},
+			{"File URI with encoded characters", "file:///path/to/file%20with spaces.txt", "/path/to/file with spaces.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result := uriToFilePath(tc.input)
+				require.Equal(t, tc.expected, result)
+			})
+		}
+	})
+
+	t.Run("Windows paths", func(t *testing.T) {
+		// These tests will run on all platforms but simulate Windows paths
+		testCases := []struct {
+			name     string
+			input    string
+			expected string
+		}{
+			{"Windows drive path", "C:/path/to/file.txt", "C:/path/to/file.txt"},
+			{"Windows drive path with backslashes", "C:\\path\\to\\file.txt", "C:\\path\\to\\file.txt"},
+			{"Windows UNC path", "\\\\server\\share\\path\\file.txt", "\\\\server\\share\\path\\file.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result := uriToFilePath(tc.input)
+				require.Equal(t, tc.expected, result)
+				require.NotEmpty(t, result)
+			})
+		}
+	})
+
+	t.Run("Windows file URIs", func(t *testing.T) {
+		// These tests will run on all platforms but simulate Windows file URIs
+		testCases := []struct {
+			name     string
+			input    string
+			expected string
+		}{
+			{"Windows drive file URI", "file:///C:/path/to/file.txt", "C:/path/to/file.txt"},
+			{"Windows drive file URI with spaces", "file:///C:/path/to/file%20with spaces.txt", "C:/path/to/file with spaces.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result := uriToFilePath(tc.input)
+				require.Equal(t, tc.expected, result)
+				require.NotEmpty(t, result)
+			})
+		}
+	})
+
+	t.Run("Invalid URIs", func(t *testing.T) {
+		testCases := []struct {
+			name  string
+			input string
+		}{
+			{"Invalid URI scheme", "http://example.com/file.txt"},
+			{"Malformed URI", "file:/path/to/file.txt"},
+			{"Empty URI", "file://"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// These should not panic, but return something
+				result := uriToFilePath(tc.input)
+				require.NotPanics(t, func() { uriToFilePath(tc.input) })
+				require.NotEmpty(t, result)
+			})
+		}
+	})
+}
+
+func TestNormalizePath(t *testing.T) {
+	t.Run("Basic path normalization", func(t *testing.T) {
+		testCases := []struct {
+			name               string
+			relativeToFilePath string
+			filePath           string
+			expectedPath       string
+		}{
+			{"Absolute path", "", "/path/to/file.txt", "/path/to/file.txt"},
+			{"Path with redundant slashes", "", "/path//to/file.txt", "/path/to/file.txt"},
+			{"Path with dot segments", "", "/path/./to/file.txt", "/path/to/file.txt"},
+			{"Path with parent segments", "", "/path/to/../to/file.txt", "/path/to/file.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result, err := normalizePath(tc.relativeToFilePath, tc.filePath)
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedPath, result)
+			})
+		}
+	})
+
+	t.Run("Relative paths with base", func(t *testing.T) {
+		testCases := []struct {
+			name               string
+			relativeToFilePath string
+			filePath           string
+			expectedPath       string
+		}{
+			{"Simple relative path", "/base/dir/file.txt", "other.txt", "/base/dir/other.txt"},
+			{"Parent directory", "/base/dir/file.txt", "../other.txt", "/base/other.txt"},
+			{"Multiple parent directories", "/base/dir/subdir/file.txt", "../../other.txt", "/base/other.txt"},
+			{"Absolute path with base", "/base/dir/file.txt", "/absolute/path.txt", "/base/dir/absolute/path.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result, err := normalizePath(tc.relativeToFilePath, tc.filePath)
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedPath, result)
+			})
+		}
+	})
+
+	t.Run("URI handling", func(t *testing.T) {
+		testCases := []struct {
+			name               string
+			relativeToFilePath string
+			filePath           string
+			expectedPath       string
+		}{
+			{"File URI", "", "file:///path/to/file.txt", "/path/to/file.txt"},
+			{"File URI with base", "/base/dir/file.txt", "file:///path/to/file.txt", "/base/dir/path/to/file.txt"},
+			{"Base as file URI", "file:///base/dir/file.txt", "other.txt", "/base/dir/other.txt"},
+			{"Both as file URIs", "file:///base/dir/file.txt", "file:///path/to/file.txt", "/base/dir/path/to/file.txt"},
+			{"Relative path with base as URI", "file:///base/dir/file.txt", "../other.txt", "/base/other.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result, err := normalizePath(tc.relativeToFilePath, tc.filePath)
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedPath, result)
+			})
+		}
+	})
+
+	t.Run("Error cases", func(t *testing.T) {
+		testCases := []struct {
+			name               string
+			relativeToFilePath string
+			filePath           string
+			errorPattern       string
+		}{
+			{"Non-absolute relativeToFilePath", "relative/path", "file.txt", "relativeToFilePath must be an absolute path"},
+			{"Non-absolute result path", "", "relative/path", "file path must be an absolute path"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				_, err := normalizePath(tc.relativeToFilePath, tc.filePath)
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errorPattern)
+			})
+		}
+	})
+}
 
 func TestDocstoreMemCache(t *testing.T) {
 	t.Run("Initialize Docstore", func(t *testing.T) {
@@ -127,22 +322,23 @@ func TestDocstoreMemCache(t *testing.T) {
 	})
 
 	t.Run("Relative Paths with relativeToFilePath", func(t *testing.T) {
-		// Test relative path normalization
+		d := NewDocstore()
+
+		// Create a file in memory
+		absolutePath := "/base/other/file.txt"
+		content := "Content for relative path test"
+		err := d.OpenInMem(absolutePath, content)
+		require.NoError(t, err)
+
+		// Get the file using a relative path
 		relativeTo := "/base/dir/file.txt"
-		relativePath := "../other/./file.txt"
+		relativePath := "../other/file.txt"
 
-		// Normalize the path
-		normalizedPath, err := normalizePath(relativeTo, relativePath)
+		// Get the file using the relative path
+		gotContent, _, exists, err := d.GetInMemory(relativeTo, relativePath)
 		require.NoError(t, err)
-		require.Equal(t, "/base/other/file.txt", normalizedPath)
-
-		// Test with file:// prefix
-		relativeTo = "file:///base/dir/file.txt"
-		relativePath = "../other/file.txt"
-
-		normalizedPath, err = normalizePath(relativeTo, relativePath)
-		require.NoError(t, err)
-		require.Equal(t, "/base/other/file.txt", normalizedPath)
+		require.True(t, exists)
+		require.Equal(t, content, gotContent)
 	})
 
 	t.Run("GetInMemory with relative path", func(t *testing.T) {
@@ -175,18 +371,19 @@ func TestDocstoreMemCache(t *testing.T) {
 	})
 
 	t.Run("Error Cases", func(t *testing.T) {
+		d := NewDocstore()
+
 		// Test with non-absolute relativeToFilePath
-		_, err := normalizePath("relative/path", "file.txt")
+		_, _, exists, err := d.GetInMemory("relative/path", "file.txt")
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "relativeToFilePath must be an absolute path")
+		require.False(t, exists)
+		require.Contains(t, err.Error(), "error normalizing file path")
 
 		// Test with non-absolute result path
-		// For this test, we'll just directly check the error message
-
-		// Create a simple error message to test
-		err = fmt.Errorf("file path must be an absolute path, got %s", "relative/path")
+		_, _, exists, err = d.GetInMemory("", "relative/path")
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "file path must be an absolute path")
+		require.False(t, exists)
+		require.Contains(t, err.Error(), "error normalizing file path")
 	})
 
 	t.Run("DiskCache Interaction", func(t *testing.T) {
