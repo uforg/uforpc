@@ -107,6 +107,8 @@ func (f *schemaFormatter) format() *genkit.GenKit {
 		switch f.currentIndexChild.Kind() {
 		case ast.SchemaChildKindComment:
 			f.formatComment()
+		case ast.SchemaChildKindDocstring:
+			f.formatStandaloneDocstring()
 		case ast.SchemaChildKindVersion:
 			f.formatVersion()
 		case ast.SchemaChildKindImport:
@@ -175,6 +177,27 @@ func (f *schemaFormatter) formatComment() {
 	if f.currentIndexChild.Comment.Block != nil {
 		f.g.Linef("/*%s*/", *f.currentIndexChild.Comment.Block)
 	}
+}
+
+func (f *schemaFormatter) formatStandaloneDocstring() {
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
+
+	shouldBreakBefore := false
+	if !prevEOF {
+		if prev.Kind() != ast.SchemaChildKindDocstring && prev.Kind() != ast.SchemaChildKindComment {
+			shouldBreakBefore = true
+		}
+
+		if prevLineDiff.StartToStart < -1 {
+			shouldBreakBefore = true
+		}
+	}
+
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
+	f.LineAndCommentf(`"""%s"""`, f.currentIndexChild.Docstring.Value)
 }
 
 func (f *schemaFormatter) formatVersion() {

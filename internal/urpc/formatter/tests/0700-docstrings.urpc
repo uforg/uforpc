@@ -1,0 +1,49 @@
+""" Standalone """
+
+""" Standalone """ // Comment
+""" Standalone """
+
+
+""" Standalone """/* Comment */""" Standalone """""" Associated """ type Test {} """ Standalone """
+
+""" Associated """ rule @test {}""" Associated """ type Test {}""" Associated """ proc Test {}
+
+""" Standalone """
+// Comment
+""" Standalone """
+
+// Comment
+
+""" Standalone """
+
+// >>>>
+
+""" Standalone """
+
+""" Standalone """ // Comment
+""" Standalone """
+
+""" Standalone """ /* Comment */
+""" Standalone """
+
+""" Associated """
+type Test {}
+
+""" Standalone """
+
+""" Associated """
+rule @test {}
+
+""" Associated """
+type Test {}
+
+""" Associated """
+proc Test {}
+
+""" Standalone """
+// Comment
+""" Standalone """
+
+// Comment
+
+""" Standalone """
