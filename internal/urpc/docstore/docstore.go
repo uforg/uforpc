@@ -1,3 +1,5 @@
+// Package docstore provides a file caching system with memory and disk tiers.
+// It's designed for efficient file access in language servers and analyzers.
 package docstore
 
 import (
@@ -13,35 +15,39 @@ import (
 )
 
 var (
+	// ErrFileNotFound is returned when a requested file cannot be found.
+	// It's an alias to os.ErrNotExist for compatibility with standard libraries.
 	ErrFileNotFound = os.ErrNotExist
 )
 
-// MemCacheFile is a file that is stored in memory and cached in Docstore.
+// MemCacheFile represents a file stored in memory.
+// It contains the file content and its SHA-256 hash.
 type MemCacheFile struct {
-	Content string
-	Hash    string
+	Content string // File content
+	Hash    string // SHA-256 hash of content in hex format
 }
 
-// DiskCacheFile is a file that is stored on disk and cached in memory in Docstore.
+// DiskCacheFile represents a file from disk cached in memory.
+// It includes content, hash, and modification time for cache invalidation.
 type DiskCacheFile struct {
-	Content string
-	Hash    string
-	Mtime   time.Time
+	Content string    // File content
+	Hash    string    // SHA-256 hash of content in hex format
+	Mtime   time.Time // Last modification time for cache invalidation
 }
 
-// Docstore is an implementation of analyzer.FileProvider that caches files in memory.
+// Docstore provides file access with a two-tier caching system.
+// It implements analyzer.FileProvider and manages file content with thread safety.
 //
-// It has two caches:
-//
-//   - memCache: Caches files that are opened in memory (can or can't exist on disk).
-//   - diskCache: Caches files that are opened on disk (used as fallback of memCache).
+// The two caches are:
+//   - memCache: Primary cache for files opened or modified in memory
+//   - diskCache: Secondary cache for files read from disk (used as fallback when not in memCache)
 type Docstore struct {
 	memCache  map[string]MemCacheFile  // Normalized Path -> MemCacheFile
 	diskCache map[string]DiskCacheFile // Normalized Path -> DiskCacheFile
 	mu        sync.RWMutex             // Protects concurrent access to memCache and diskCache
 }
 
-// NewDocstore creates a new Docstore. Read more about at Docstore documentation.
+// NewDocstore creates a new Docstore with initialized caches and mutex.
 func NewDocstore() *Docstore {
 	return &Docstore{
 		memCache:  make(map[string]MemCacheFile),
@@ -50,13 +56,12 @@ func NewDocstore() *Docstore {
 	}
 }
 
-// normalizePath ensures that the Path is an absolute path and canonicalizes
-// it so that it can be used as a key in the cache.
+// normalizePath converts file paths or URIs to absolute, canonical file paths.
+// It handles relative paths by resolving them against a base path.
 //
 // Parameters:
-//
-//   - relativeToFilePath: An optional absolute file path or URI if the filePath is relative.
-//   - filePath: The file path or URI to normalize, if no relativeToFilePath is provided, this should be absolute.
+//   - relativeToFilePath: Optional base path for resolving relative paths
+//   - filePath: Path to normalize (absolute or relative to relativeToFilePath)
 func normalizePath(relativeToFilePath string, filePath string) (string, error) {
 	// Convert URI to file path if needed
 	filePath = uriToFilePath(filePath)
@@ -84,7 +89,8 @@ func normalizePath(relativeToFilePath string, filePath string) (string, error) {
 }
 
 // uriToFilePath converts a URI to a file path.
-// It handles both "file://" URIs and regular file paths.
+// It handles file:// URIs, regular file paths, and Windows-specific paths.
+// For URIs, it properly decodes escaped characters and handles drive letters on Windows.
 func uriToFilePath(uriOrPath string) string {
 	// If it's not a URI, return as is
 	if !strings.HasPrefix(uriOrPath, "file://") {
@@ -110,7 +116,8 @@ func uriToFilePath(uriOrPath string) string {
 	return filepath.Clean(path)
 }
 
-// OpenInMem opens a file in memory and caches it in the Docstore.
+// OpenInMem stores file content in memory cache with its hash.
+// It normalizes the path and removes any existing disk cache entry for the same path.
 func (d *Docstore) OpenInMem(filePath string, content string) error {
 	normFilePath, err := normalizePath("", filePath)
 	if err != nil {
@@ -135,12 +142,14 @@ func (d *Docstore) OpenInMem(filePath string, content string) error {
 	return nil
 }
 
-// ChangeInMem changes the content of a file in memory and caches it in the Docstore.
+// ChangeInMem updates file content in memory cache.
+// It's equivalent to OpenInMem and provided for semantic clarity.
 func (d *Docstore) ChangeInMem(filePath string, content string) error {
 	return d.OpenInMem(filePath, content)
 }
 
-// CloseInMem closes a file in memory and removes it from the Docstore.
+// CloseInMem removes a file from memory cache.
+// The file will still be accessible from disk if it exists there.
 func (d *Docstore) CloseInMem(filePath string) error {
 	normFilePath, err := normalizePath("", filePath)
 	if err != nil {
@@ -155,13 +164,12 @@ func (d *Docstore) CloseInMem(filePath string) error {
 	return nil
 }
 
-// GetInMemory returns the content of a file in memory, the hash and a boolean
-// indicating if the file exists in memory.
+// GetInMemory retrieves file content from memory cache.
+// Returns content, hash, existence flag, and any error encountered.
 //
 // Parameters:
-//
-//   - relativeToFilePath: An optional absolute file path or URI if the filePath is relative.
-//   - filePath: The file path or URI to get, if no relativeToFilePath is provided, this should be absolute.
+//   - relativeToFilePath: Optional base path for resolving relative paths
+//   - filePath: Path to retrieve (absolute or relative to relativeToFilePath)
 func (d *Docstore) GetInMemory(relativeToFilePath string, filePath string) (string, string, bool, error) {
 	normFilePath, err := normalizePath(relativeToFilePath, filePath)
 	if err != nil {
@@ -179,17 +187,13 @@ func (d *Docstore) GetInMemory(relativeToFilePath string, filePath string) (stri
 	return cachedFile.Content, cachedFile.Hash, true, nil
 }
 
-// GetFromDisk returns the content of a file on disk, the hash and a boolean
-// indicating if the file exists on disk.
-//
-// It first checks the diskCache, if found then compares the mtime of the file
-// to avoid stale content. If not found in diskCache then it reads the file
-// from disk and caches it in diskCache.
+// GetFromDisk retrieves file content from disk with caching.
+// It checks disk cache first, validates freshness via mtime, and reads from disk if needed.
+// Thread-safe with proper lock handling for concurrent access.
 //
 // Parameters:
-//
-//   - relativeToFilePath: An optional absolute file path or URI if the filePath is relative.
-//   - filePath: The file path or URI to get, if no relativeToFilePath is provided, this should be absolute.
+//   - relativeToFilePath: Optional base path for resolving relative paths
+//   - filePath: Path to retrieve (absolute or relative to relativeToFilePath)
 func (d *Docstore) GetFromDisk(relativeToFilePath string, filePath string) (string, string, bool, error) {
 	// 1. Normalize the file path
 	normFilePath, err := normalizePath(relativeToFilePath, filePath)
@@ -278,9 +282,9 @@ func (d *Docstore) GetFromDisk(relativeToFilePath string, filePath string) (stri
 	}
 }
 
-// GetFileAndHash implements analyzer.FileProvider.GetFileAndHash. It first checks
-// try to get the file from memCache using GetInMemory, if not found then try to get
-// the file from diskCache using GetFromDisk. If both fails then return an error.
+// GetFileAndHash retrieves file content with a two-tier cache strategy.
+// It implements analyzer.FileProvider.GetFileAndHash by checking memory cache first,
+// then falling back to disk cache. Returns standard os.ErrNotExist if file not found.
 func (d *Docstore) GetFileAndHash(relativeTo string, path string) (string, string, error) {
 	content, hash, exists, err := d.GetInMemory(relativeTo, path)
 	if err != nil {
