@@ -86,8 +86,8 @@ func (f *procFormatter) peekChild(offset int) (ast.ProcDeclChild, ast.LineDiff, 
 //
 // Returns the formatted genkit.GenKit.
 func (f *procFormatter) format() *genkit.GenKit {
-	if f.procDecl.Docstring != "" {
-		f.g.Linef(`"""%s"""`, f.procDecl.Docstring)
+	if f.procDecl.Docstring != nil {
+		f.g.Linef(`"""%s"""`, f.procDecl.Docstring.Value)
 	}
 	f.g.Inlinef(`proc %s `, f.procDecl.Name)
 

@@ -271,8 +271,10 @@ func TestParserRuleDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Rule: &ast.RuleDecl{
-						Docstring: "\n\t\t\t\tMy rule description\n\t\t\t\t",
-						Name:      "myRule",
+						Docstring: &ast.Docstring{
+							Value: "\n\t\t\t\tMy rule description\n\t\t\t\t",
+						},
+						Name: "myRule",
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
@@ -340,8 +342,10 @@ func TestParserRuleDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Rule: &ast.RuleDecl{
-						Docstring: " My rule description ",
-						Name:      "myRule",
+						Docstring: &ast.Docstring{
+							Value: " My rule description ",
+						},
+						Name: "myRule",
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
@@ -416,8 +420,10 @@ func TestParserTypeDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Type: &ast.TypeDecl{
-						Docstring: " My type description ",
-						Name:      "MyType",
+						Docstring: &ast.Docstring{
+							Value: " My type description ",
+						},
+						Name: "MyType",
 						Children: []*ast.FieldOrComment{
 							{
 								Field: &ast.Field{
@@ -516,9 +522,11 @@ func TestParserTypeDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Type: &ast.TypeDecl{
-						Docstring: " My type description ",
-						Name:      "MyType",
-						Extends:   []string{"OtherType"},
+						Docstring: &ast.Docstring{
+							Value: " My type description ",
+						},
+						Name:    "MyType",
+						Extends: []string{"OtherType"},
 						Children: []*ast.FieldOrComment{
 							{
 								Field: &ast.Field{
@@ -990,8 +998,10 @@ func TestParserProcDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Proc: &ast.ProcDecl{
-						Docstring: " MyProc is a procedure that does something. ",
-						Name:      "MyProc",
+						Docstring: &ast.Docstring{
+							Value: " MyProc is a procedure that does something. ",
+						},
+						Name: "MyProc",
 					},
 				},
 			},
@@ -1153,8 +1163,10 @@ func TestParserProcDecl(t *testing.T) {
 			Children: []*ast.SchemaChild{
 				{
 					Proc: &ast.ProcDecl{
-						Docstring: " MyProc is a procedure that does something. ",
-						Name:      "MyProc",
+						Docstring: &ast.Docstring{
+							Value: " MyProc is a procedure that does something. ",
+						},
+						Name: "MyProc",
 						Children: []*ast.ProcDeclChild{
 							{
 								Input: &ast.ProcDeclChildInput{
@@ -2109,7 +2121,7 @@ func TestParserDocstrings(t *testing.T) {
 				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
 				{
 					Type: &ast.TypeDecl{
-						Docstring: " This is an associated docstring. ",
+						Docstring: &ast.Docstring{Value: " This is an associated docstring. "},
 						Name:      "MyType",
 					},
 				},
@@ -2118,7 +2130,7 @@ func TestParserDocstrings(t *testing.T) {
 				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
 				{
 					Type: &ast.TypeDecl{
-						Docstring: " This is an associated docstring. ",
+						Docstring: &ast.Docstring{Value: " This is an associated docstring. "},
 						Name:      "MyType",
 					},
 				},
@@ -2385,8 +2397,10 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Rule: &ast.RuleDecl{
-					Docstring: "\n\t\tThis rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.\n\t\t",
-					Name:      "regex",
+					Docstring: &ast.Docstring{
+						Value: "\n\t\tThis rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.\n\t\t",
+					},
+					Name: "regex",
 					Children: []*ast.RuleDeclChild{
 						{
 							For: &ast.RuleDeclChildFor{
@@ -2408,8 +2422,10 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Rule: &ast.RuleDecl{
-					Docstring: " Validate \"category\" with custom logic ",
-					Name:      "validateCategory",
+					Docstring: &ast.Docstring{
+						Value: " Validate \"category\" with custom logic ",
+					},
+					Name: "validateCategory",
 					Children: []*ast.RuleDeclChild{
 						{
 							For: &ast.RuleDeclChildFor{
@@ -2504,8 +2520,10 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Type: &ast.TypeDecl{
-					Docstring: "\n\t\tCategory represents a product category in the system.\n\t\tThis type is used across the catalog module.\n\t\t",
-					Name:      "Category",
+					Docstring: &ast.Docstring{
+						Value: "\n\t\tCategory represents a product category in the system.\n\t\tThis type is used across the catalog module.\n\t\t",
+					},
+					Name: "Category",
 					Extends: []string{
 						"ThirdDummyType",
 					},
@@ -2622,8 +2640,10 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Type: &ast.TypeDecl{
-					Docstring: "\n\t\tProduct represents a sellable item in the store.\n\t\tProducts have complex validation rules and can be\n\t\tnested inside catalogs.\n\t\t",
-					Name:      "Product",
+					Docstring: &ast.Docstring{
+						Value: "\n\t\tProduct represents a sellable item in the store.\n\t\tProducts have complex validation rules and can be\n\t\tnested inside catalogs.\n\t\t",
+					},
+					Name: "Product",
 					Children: []*ast.FieldOrComment{
 						{
 							Field: &ast.Field{
@@ -3013,8 +3033,10 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Proc: &ast.ProcDecl{
-					Docstring: "\n\t\tGetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.\n\t\t",
-					Name:      "GetCategory",
+					Docstring: &ast.Docstring{
+						Value: "\n\t\tGetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.\n\t\t",
+					},
+					Name: "GetCategory",
 					Children: []*ast.ProcDeclChild{
 						{
 							Input: &ast.ProcDeclChildInput{
@@ -3103,8 +3125,10 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Proc: &ast.ProcDecl{
-					Docstring: "\n\t\tCreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.\n\t\t",
-					Name:      "CreateProduct",
+					Docstring: &ast.Docstring{
+						Value: "\n\t\tCreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.\n\t\t",
+					},
+					Name: "CreateProduct",
 					Children: []*ast.ProcDeclChild{
 						{
 							Input: &ast.ProcDeclChildInput{
@@ -3531,8 +3555,10 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Rule: &ast.RuleDecl{
-					Docstring: "\n\t\tValidates if a value is within a specified range.\n\t\t",
-					Name:      "range",
+					Docstring: &ast.Docstring{
+						Value: "\n\t\tValidates if a value is within a specified range.\n\t\t",
+					},
+					Name: "range",
 					Children: []*ast.RuleDeclChild{
 						{
 							For: &ast.RuleDeclChildFor{

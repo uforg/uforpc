@@ -159,12 +159,6 @@ type Comment struct {
 	Block  *string `parser:"| @CommentBlock"`
 }
 
-// Docstring represents a docstring in the URPC schema.
-type Docstring struct {
-	Positions
-	Value string `parser:"@Docstring"`
-}
-
 // Import represents an import statement.
 type Import struct {
 	Positions
@@ -174,7 +168,7 @@ type Import struct {
 // RuleDecl represents a custom validation rule declaration.
 type RuleDecl struct {
 	Positions
-	Docstring string           `parser:"(@Docstring (?! Newline Newline))?"`
+	Docstring *Docstring       `parser:"(@@ (?! Newline Newline))?"`
 	Name      string           `parser:"Rule At @Ident"`
 	Children  []*RuleDeclChild `parser:"LBrace @@* RBrace"`
 }
@@ -210,7 +204,7 @@ type RuleDeclChildError struct {
 // TypeDecl represents a custom type declaration.
 type TypeDecl struct {
 	Positions
-	Docstring string            `parser:"(@Docstring (?! Newline Newline))?"`
+	Docstring *Docstring        `parser:"(@@ (?! Newline Newline))?"`
 	Name      string            `parser:"Type @Ident"`
 	Extends   []string          `parser:"(Extends @Ident (Comma @Ident)*)?"`
 	Children  []*FieldOrComment `parser:"LBrace @@* RBrace"`
@@ -219,7 +213,7 @@ type TypeDecl struct {
 // ProcDecl represents a procedure declaration.
 type ProcDecl struct {
 	Positions
-	Docstring string           `parser:"(@Docstring (?! Newline Newline))?"`
+	Docstring *Docstring       `parser:"(@@ (?! Newline Newline))?"`
 	Name      string           `parser:"Proc @Ident"`
 	Children  []*ProcDeclChild `parser:"LBrace @@* RBrace"`
 }
@@ -268,6 +262,12 @@ type ProcDeclChildMetaKV struct {
 //////////////////
 // SHARED TYPES //
 //////////////////
+
+// Docstring represents a docstring in the URPC schema.
+type Docstring struct {
+	Positions
+	Value string `parser:"@Docstring"`
+}
 
 // AnyLiteral represents any of the built-in literal types.
 type AnyLiteral struct {

@@ -109,8 +109,8 @@ func (f *ruleFormatter) LineAndCommentf(format string, args ...any) {
 //
 // Returns the formatted genkit.GenKit.
 func (f *ruleFormatter) format() *genkit.GenKit {
-	if f.rule.Docstring != "" {
-		f.g.Linef(`"""%s"""`, f.rule.Docstring)
+	if f.rule.Docstring != nil {
+		f.g.Linef(`"""%s"""`, f.rule.Docstring.Value)
 	}
 	f.g.Inlinef(`rule @%s `, f.rule.Name)
 

@@ -27,8 +27,8 @@ func newTypeFormatter(typeDecl *ast.TypeDecl) *typeFormatter {
 //
 // Returns the formatted genkit.GenKit.
 func (f *typeFormatter) format() *genkit.GenKit {
-	if f.typeDecl.Docstring != "" {
-		f.g.Linef(`"""%s"""`, f.typeDecl.Docstring)
+	if f.typeDecl.Docstring != nil {
+		f.g.Linef(`"""%s"""`, f.typeDecl.Docstring.Value)
 	}
 	f.g.Inlinef(`type %s `, f.typeDecl.Name)
 
