@@ -34,6 +34,11 @@ func newResolver(fileProvider FileProvider) *resolver {
 }
 
 // resolve is the main entry point for resolving imports and combining schemas
+//
+// Returns:
+//   - The combined schema.
+//   - A list of diagnostics that occurred during the analysis.
+//   - The first diagnostic converted to Error interface if any.
 func (r *resolver) resolve(entryPointFilePath string) (CombinedSchema, []Diagnostic, error) {
 	// Initialize the import context
 	ctx := &resolverContext{
