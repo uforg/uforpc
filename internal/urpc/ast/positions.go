@@ -11,7 +11,7 @@ import plexer "github.com/alecthomas/participle/v2/lexer"
 // https://github.com/alecthomas/participle/blob/master/README.md#error-reporting
 
 // Position is an alias for the participle.Position type.
-type Position plexer.Position
+type Position = plexer.Position
 
 // Positions is a struct that contains the start and end positions of a node.
 //
