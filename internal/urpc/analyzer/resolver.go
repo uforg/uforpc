@@ -173,38 +173,37 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 	combinedSchema := &ast.Schema{}
 	combinedSchema.Positions = schema.Positions
 
-	// First process imports to maintain the order: imports first, then local declarations
-	for _, importNode := range schema.GetImports() {
-		importPath, err := filepathutil.Normalize(filePath, importNode.Path)
-		if err != nil {
-			// Create a diagnostic for the import path normalization error
-			ctx.diagnostics = append(ctx.diagnostics, Diagnostic{
-				Positions: Positions{
-					Pos:    importNode.Pos,
-					EndPos: importNode.EndPos,
-				},
-				Message: fmt.Sprintf("Error resolving import path: %v", err),
-			})
-			continue
-		}
+	// Process all children of the schema in order, both imports and non-imports
+	for _, child := range schema.Children {
+		if child.Kind() == ast.SchemaChildKindImport {
+			importPath, err := filepathutil.Normalize(filePath, child.Import.Path)
+			if err != nil {
+				// Create a diagnostic for the import path normalization error
+				ctx.diagnostics = append(ctx.diagnostics, Diagnostic{
+					Positions: Positions{
+						Pos:    child.Import.Pos,
+						EndPos: child.Import.EndPos,
+					},
+					Message: fmt.Sprintf("Error resolving import path: %v", err),
+				})
+				continue
+			}
 
-		// Recursively resolve the imported file
-		importedSchema := r.resolveFile(importPath, ctx)
-		if importedSchema == nil {
-			// Skip this import if resolution failed (diagnostics already added)
-			continue
-		}
+			// Recursively resolve the imported file
+			importedSchema := r.resolveFile(importPath, ctx)
+			if importedSchema == nil {
+				// Skip this import if resolution failed (diagnostics already added)
+				continue
+			}
 
-		// Add all non-import children from the imported schema to the combined schema
-		for _, child := range importedSchema.Children {
-			if child.Kind() != ast.SchemaChildKindImport {
-				combinedSchema.Children = append(combinedSchema.Children, child)
+			// Add all non-import children from the imported schema to the combined schema
+			for _, child := range importedSchema.Children {
+				if child.Kind() != ast.SchemaChildKindImport {
+					combinedSchema.Children = append(combinedSchema.Children, child)
+				}
 			}
 		}
-	}
 
-	// Then add all non-import children from the current schema
-	for _, child := range schema.Children {
 		if child.Kind() != ast.SchemaChildKindImport {
 			combinedSchema.Children = append(combinedSchema.Children, child)
 		}
