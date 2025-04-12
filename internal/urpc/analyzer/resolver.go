@@ -53,10 +53,10 @@ func (r *resolver) resolve(entryPointFilePath string) (CombinedSchema, []Diagnos
 		// Create a diagnostic for the normalization error
 		diag := Diagnostic{
 			Positions: Positions{
-				Pos:    ast.Position{Filename: entryPointFilePath},
-				EndPos: ast.Position{Filename: entryPointFilePath},
+				Pos:    ast.Position{Filename: entryPointFilePath, Line: 1, Column: 1, Offset: 0},
+				EndPos: ast.Position{Filename: entryPointFilePath, Line: 1, Column: 1, Offset: 0},
 			},
-			Message: fmt.Sprintf("Error normalizing entry point file path: %v", err),
+			Message: fmt.Sprintf("error normalizing entry point file path: %v", err),
 		}
 		ctx.diagnostics = append(ctx.diagnostics, diag)
 		return CombinedSchema{}, ctx.diagnostics, diag
@@ -138,7 +138,7 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 				Pos:    ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0},
 				EndPos: ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0},
 			},
-			Message: fmt.Sprintf("Error reading file: %v", err),
+			Message: fmt.Sprintf("error reading file: %v", err),
 		}
 		ctx.diagnostics = append(ctx.diagnostics, diag)
 		return nil
@@ -153,7 +153,7 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 					Pos:    parserErr.Position(),
 					EndPos: parserErr.Position(),
 				},
-				Message: fmt.Sprintf("Error parsing file: %v", parserErr),
+				Message: fmt.Sprintf("error parsing file: %v", parserErr),
 			})
 			return nil
 		}
@@ -164,9 +164,15 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 				Pos:    ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0},
 				EndPos: ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0},
 			},
-			Message: fmt.Sprintf("Error parsing file: %v", err),
+			Message: fmt.Sprintf("error parsing file: %v", err),
 		}
 		ctx.diagnostics = append(ctx.diagnostics, diag)
+		return nil
+	}
+
+	// Validate the file version, returns false if version is invalid
+	// and all diagnostics are added to the context by the function
+	if !r.validateFileVersion(schema, ctx) {
 		return nil
 	}
 
@@ -180,6 +186,11 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 
 	// Process all children of the schema in order, both imports and non-imports
 	for _, child := range schema.Children {
+		// Skip version because it's already validated
+		if child.Kind() == ast.SchemaChildKindVersion {
+			continue
+		}
+
 		if child.Kind() == ast.SchemaChildKindImport {
 			importPath, err := filepathutil.Normalize(filePath, child.Import.Path)
 			if err != nil {
@@ -189,7 +200,7 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 						Pos:    child.Import.Pos,
 						EndPos: child.Import.EndPos,
 					},
-					Message: fmt.Sprintf("Error resolving import path: %v", err),
+					Message: fmt.Sprintf("error resolving import path: %v", err),
 				})
 				continue
 			}
@@ -223,6 +234,51 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 	return combinedSchema
 }
 
+func (r *resolver) validateFileVersion(schema *ast.Schema, ctx *resolverContext) bool {
+	if len(schema.Children) == 0 {
+		return true
+	}
+
+	firstChild := schema.Children[0]
+	if firstChild.Kind() != ast.SchemaChildKindVersion {
+		ctx.diagnostics = append(ctx.diagnostics, Diagnostic{
+			Positions: Positions{
+				Pos:    firstChild.Pos,
+				EndPos: firstChild.EndPos,
+			},
+			Message: "the first statement must be a version statement",
+		})
+		return false
+	}
+	if firstChild.Version.Number != 1 {
+		ctx.diagnostics = append(ctx.diagnostics, Diagnostic{
+			Positions: Positions{
+				Pos:    firstChild.Version.Pos,
+				EndPos: firstChild.Version.EndPos,
+			},
+			Message: "at the moment, the only supported version is 1",
+		})
+		return false
+	}
+
+	versions := schema.GetVersions()
+	for i, version := range versions {
+		if i == 0 {
+			continue
+		}
+
+		ctx.diagnostics = append(ctx.diagnostics, Diagnostic{
+			Positions: Positions{
+				Pos:    version.Pos,
+				EndPos: version.EndPos,
+			},
+			Message: "version statement already defined for this schema",
+		})
+	}
+
+	return len(versions) == 1
+}
+
 // detectCircularImport checks if the given file path creates a circular import in the current import chain.
 // If a circular import is detected, it adds a diagnostic and returns true.
 func (r *resolver) detectCircularImport(filePath string, ctx *resolverContext) bool {
@@ -248,7 +304,7 @@ func (r *resolver) detectCircularImport(filePath string, ctx *resolverContext) b
 								Pos:    importNode.Pos,
 								EndPos: importNode.EndPos,
 							},
-							Message: fmt.Sprintf("Circular import detected: %s", strings.Join(circularChain, " -> ")),
+							Message: fmt.Sprintf("circular import detected: %s", strings.Join(circularChain, " -> ")),
 						})
 						break
 					}
