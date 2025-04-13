@@ -68,8 +68,8 @@ func TestResolver(t *testing.T) {
 
 		// Verify that no schema was processed
 		require.NotNil(t, combined.Schema)
-		require.Empty(t, combined.TypeDefs)
-		require.Empty(t, combined.ProcDefs)
+		require.Empty(t, combined.TypeDecls)
+		require.Empty(t, combined.ProcDecls)
 	})
 
 	t.Run("Schema with unsupported version", func(t *testing.T) {
@@ -112,8 +112,8 @@ func TestResolver(t *testing.T) {
 
 		// Verify that no schema was processed
 		require.NotNil(t, combined.Schema)
-		require.Empty(t, combined.TypeDefs)
-		require.Empty(t, combined.ProcDefs)
+		require.Empty(t, combined.TypeDecls)
+		require.Empty(t, combined.ProcDecls)
 	})
 
 	t.Run("Schema with multiple version statements", func(t *testing.T) {
@@ -150,16 +150,16 @@ func TestResolver(t *testing.T) {
 		combined, diagnostics, err := analyzer.Analyze("/main.urpc")
 		// Expect an error for multiple version statements
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "version statement already defined for this schema")
+		require.Contains(t, err.Error(), "version statement already declared for this schema")
 
 		// Verify that error diagnostics were generated
 		require.NotEmpty(t, diagnostics)
-		require.Contains(t, diagnostics[0].Message, "version statement already defined for this schema")
+		require.Contains(t, diagnostics[0].Message, "version statement already declared for this schema")
 
 		// Verify that no schema was processed
 		require.NotNil(t, combined.Schema)
-		require.Empty(t, combined.TypeDefs)
-		require.Empty(t, combined.ProcDefs)
+		require.Empty(t, combined.TypeDecls)
+		require.Empty(t, combined.ProcDecls)
 	})
 
 	t.Run("Schema with imported file missing version", func(t *testing.T) {
@@ -206,8 +206,8 @@ func TestResolver(t *testing.T) {
 
 		// Verify that the main schema was processed but not the imported one
 		require.NotNil(t, combined.Schema)
-		require.Empty(t, combined.TypeDefs)  // No types should be defined
-		require.Len(t, combined.ProcDefs, 1) // Only the proc from main file
+		require.Empty(t, combined.TypeDecls)  // No types should be declared
+		require.Len(t, combined.ProcDecls, 1) // Only the proc from main file
 	})
 
 	t.Run("Schema with external markdown", func(t *testing.T) {
@@ -294,8 +294,8 @@ func TestResolver(t *testing.T) {
 
 		// Verify that the schema was still processed
 		require.NotNil(t, combined.Schema)
-		require.Len(t, combined.TypeDefs, 1)
-		require.Len(t, combined.ProcDefs, 1)
+		require.Len(t, combined.TypeDecls, 1)
+		require.Len(t, combined.ProcDecls, 1)
 	})
 
 	t.Run("Schema with external markdowns in different nodes", func(t *testing.T) {
@@ -411,8 +411,8 @@ func TestResolver(t *testing.T) {
 
 		// Verify that the main schema was processed but not the imported one
 		require.NotNil(t, combined.Schema)
-		require.Empty(t, combined.TypeDefs)  // No types should be defined
-		require.Len(t, combined.ProcDefs, 1) // Only the proc from main file
+		require.Empty(t, combined.TypeDecls)  // No types should be declared
+		require.Len(t, combined.ProcDecls, 1) // Only the proc from main file
 	})
 
 	t.Run("Basic schema with no imports", func(t *testing.T) {
@@ -455,11 +455,11 @@ func TestResolver(t *testing.T) {
 		require.Equal(t, "User", combined.Schema.GetTypes()[0].Name)
 		require.Equal(t, "GetUser", combined.Schema.GetProcs()[0].Name)
 
-		// Verify the definition maps
-		require.Len(t, combined.TypeDefs, 1)
-		require.Len(t, combined.ProcDefs, 1)
-		require.Contains(t, combined.TypeDefs, "User")
-		require.Contains(t, combined.ProcDefs, "GetUser")
+		// Verify the declaration maps
+		require.Len(t, combined.TypeDecls, 1)
+		require.Len(t, combined.ProcDecls, 1)
+		require.Contains(t, combined.TypeDecls, "User")
+		require.Contains(t, combined.ProcDecls, "GetUser")
 	})
 
 	t.Run("Schema with imports", func(t *testing.T) {
@@ -522,14 +522,14 @@ func TestResolver(t *testing.T) {
 		require.Len(t, combined.Schema.GetProcs(), 1)
 		require.Len(t, combined.Schema.GetRules(), 1)
 
-		// Verify the definition maps
-		require.Len(t, combined.TypeDefs, 2)
-		require.Len(t, combined.ProcDefs, 1)
-		require.Len(t, combined.RuleDefs, 1)
-		require.Contains(t, combined.TypeDefs, "User")
-		require.Contains(t, combined.TypeDefs, "Profile")
-		require.Contains(t, combined.ProcDefs, "GetUser")
-		require.Contains(t, combined.RuleDefs, "validBio")
+		// Verify the declaration maps
+		require.Len(t, combined.TypeDecls, 2)
+		require.Len(t, combined.ProcDecls, 1)
+		require.Len(t, combined.RuleDecls, 1)
+		require.Contains(t, combined.TypeDecls, "User")
+		require.Contains(t, combined.TypeDecls, "Profile")
+		require.Contains(t, combined.ProcDecls, "GetUser")
+		require.Contains(t, combined.RuleDecls, "validBio")
 	})
 
 	t.Run("Circular imports", func(t *testing.T) {
@@ -590,9 +590,9 @@ func TestResolver(t *testing.T) {
 
 		// Verify that the schema was still combined despite the circular imports
 		require.NotNil(t, combined.Schema)
-		require.Len(t, combined.TypeDefs, 2)
-		require.Contains(t, combined.TypeDefs, "User")
-		require.Contains(t, combined.TypeDefs, "Profile")
+		require.Len(t, combined.TypeDecls, 2)
+		require.Contains(t, combined.TypeDecls, "User")
+		require.Contains(t, combined.TypeDecls, "Profile")
 	})
 
 	t.Run("Missing import file", func(t *testing.T) {
@@ -632,7 +632,7 @@ func TestResolver(t *testing.T) {
 
 		// Verify that the main schema was still processed
 		require.NotNil(t, combined.Schema)
-		require.Len(t, combined.ProcDefs, 1)
-		require.Contains(t, combined.ProcDefs, "GetUser")
+		require.Len(t, combined.ProcDecls, 1)
+		require.Contains(t, combined.ProcDecls, "GetUser")
 	})
 }

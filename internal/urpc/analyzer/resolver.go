@@ -77,32 +77,32 @@ func (r *resolver) resolve(entryPointFilePath string) (CombinedSchema, []Diagnos
 	// add a diagnostic to the context.
 	r.resolveExternalDocstrings(combinedSchema, ctx)
 
-	// Collect all definitions from the combined schema
-	ruleDefs := make(map[string]*ast.RuleDecl)
-	typeDefs := make(map[string]*ast.TypeDecl)
-	procDefs := make(map[string]*ast.ProcDecl)
+	// Collect all declarations from the combined schema
+	ruleDecls := make(map[string]*ast.RuleDecl)
+	typeDecls := make(map[string]*ast.TypeDecl)
+	procDecls := make(map[string]*ast.ProcDecl)
 
-	// Collect rule definitions
+	// Collect rule declarations
 	for _, rule := range combinedSchema.GetRules() {
-		ruleDefs[rule.Name] = rule
+		ruleDecls[rule.Name] = rule
 	}
 
-	// Collect type definitions
+	// Collect type declarations
 	for _, typeDecl := range combinedSchema.GetTypes() {
-		typeDefs[typeDecl.Name] = typeDecl
+		typeDecls[typeDecl.Name] = typeDecl
 	}
 
-	// Collect procedure definitions
+	// Collect procedure declarations
 	for _, proc := range combinedSchema.GetProcs() {
-		procDefs[proc.Name] = proc
+		procDecls[proc.Name] = proc
 	}
 
 	// Create the final combined schema
 	result := CombinedSchema{
-		Schema:   combinedSchema,
-		RuleDefs: ruleDefs,
-		TypeDefs: typeDefs,
-		ProcDefs: procDefs,
+		Schema:    combinedSchema,
+		RuleDecls: ruleDecls,
+		TypeDecls: typeDecls,
+		ProcDecls: procDecls,
 	}
 
 	// Return the first diagnostic as error if any
@@ -270,7 +270,7 @@ func (r *resolver) validateFileVersion(schema *ast.Schema, ctx *resolverContext)
 				Pos:    version.Pos,
 				EndPos: version.EndPos,
 			},
-			Message: "version statement already defined for this schema",
+			Message: "version statement already declared for this schema",
 		})
 	}
 
