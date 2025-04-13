@@ -1,90 +1,12 @@
 package parser
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/internal/util/testutil"
 )
-
-//////////////////
-// TEST HELPERS //
-//////////////////
-
-// cleanPositionsRecursively cleans all position fields recursively in any struct or array of structs.
-// If includeRoot is true, it will also clean the position fields of the root object.
-func cleanPositionsRecursively(val reflect.Value, emptyPos reflect.Value, includeRoot bool) {
-	if !val.IsValid() {
-		return
-	}
-
-	switch val.Kind() {
-	case reflect.Ptr:
-		if !val.IsNil() {
-			// Skip cleaning root if includeRoot is false
-			cleanPositionsRecursively(val.Elem(), emptyPos, includeRoot)
-		}
-	case reflect.Struct:
-		// Set Pos and EndPos fields to empty value if they exist and we should process this level
-		if includeRoot {
-			if f := val.FieldByName("Pos"); f.IsValid() && f.CanSet() && f.Type() == emptyPos.Type() {
-				f.Set(emptyPos)
-			}
-			if f := val.FieldByName("EndPos"); f.IsValid() && f.CanSet() && f.Type() == emptyPos.Type() {
-				f.Set(emptyPos)
-			}
-		}
-
-		// Always process fields recursively - after processing the current level
-		for i := range val.NumField() {
-			field := val.Field(i)
-			if field.CanInterface() {
-				// Always clean position fields in children
-				cleanPositionsRecursively(field, emptyPos, true)
-			}
-		}
-	case reflect.Slice:
-		// Handle arrays/slices recursively
-		for i := range val.Len() {
-			cleanPositionsRecursively(val.Index(i), emptyPos, true)
-		}
-	}
-}
-
-// equal compares two URPC structs and fails if they are not equal.
-// The validation includes the positions of the AST nodes.
-func equal(t *testing.T, expected, actual *ast.Schema) {
-	t.Helper()
-	require.Equal(t, expected, actual)
-}
-
-// equalNoPos compares two URPC structs and fails if they are not equal.
-// It ignores the positions of any nested AST nodes.
-func equalNoPos(t *testing.T, expected, actual *ast.Schema) {
-	t.Helper()
-
-	cleanPositions := func(schema *ast.Schema) *ast.Schema {
-		// Make a deep copy to avoid modifying the original
-		schemaCopy := &ast.Schema{}
-		*schemaCopy = *schema
-
-		// Recursively clean all positions in the copy
-		schemaVal := reflect.ValueOf(schemaCopy)
-		cleanPositionsRecursively(schemaVal, reflect.ValueOf(ast.Position{}), true)
-
-		return schemaCopy
-	}
-
-	expected = cleanPositions(expected)
-	actual = cleanPositions(actual)
-	equal(t, expected, actual)
-}
-
-// ptr creates a pointer to the given value.
-func ptr[T any](v T) *T {
-	return &v
-}
 
 ////////////////
 // TEST CASES //
@@ -149,7 +71,7 @@ func TestParserPositions(t *testing.T) {
 			},
 		}
 
-		equal(t, expected, parsed)
+		testutil.ASTEqual(t, expected, parsed)
 	})
 }
 
@@ -171,7 +93,7 @@ func TestParserVersion(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("More than one version should fail", func(t *testing.T) {
@@ -215,7 +137,7 @@ func TestParserImport(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 }
 
@@ -246,7 +168,7 @@ func TestParserRuleDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Rule with no body not allowed", func(t *testing.T) {
@@ -287,7 +209,7 @@ func TestParserRuleDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Rule with array param", func(t *testing.T) {
@@ -323,7 +245,7 @@ func TestParserRuleDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Rule with all options", func(t *testing.T) {
@@ -369,7 +291,7 @@ func TestParserRuleDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 }
 
@@ -393,7 +315,7 @@ func TestParserTypeDecl(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 								},
 							},
@@ -403,7 +325,7 @@ func TestParserTypeDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Type declaration With Docstring", func(t *testing.T) {
@@ -429,7 +351,7 @@ func TestParserTypeDecl(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 								},
 							},
@@ -439,7 +361,7 @@ func TestParserTypeDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Type declaration with extends", func(t *testing.T) {
@@ -462,7 +384,7 @@ func TestParserTypeDecl(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 								},
 							},
@@ -472,7 +394,7 @@ func TestParserTypeDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Type declaration with multiple extends", func(t *testing.T) {
@@ -495,7 +417,7 @@ func TestParserTypeDecl(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 								},
 							},
@@ -505,7 +427,7 @@ func TestParserTypeDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Type declaration with extends and docstring", func(t *testing.T) {
@@ -532,7 +454,7 @@ func TestParserTypeDecl(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 								},
 							},
@@ -542,7 +464,7 @@ func TestParserTypeDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Type declaration with custom type field", func(t *testing.T) {
@@ -564,7 +486,7 @@ func TestParserTypeDecl(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("MyCustomType")},
 									},
 								},
 							},
@@ -574,7 +496,7 @@ func TestParserTypeDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 }
 
@@ -602,7 +524,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field1",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 								},
 							},
@@ -610,7 +532,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field2",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("int")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 									},
 								},
 							},
@@ -618,7 +540,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field3",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("float")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("float")},
 									},
 								},
 							},
@@ -626,7 +548,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field4",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("boolean")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("boolean")},
 									},
 								},
 							},
@@ -634,7 +556,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field5",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("datetime")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("datetime")},
 									},
 								},
 							},
@@ -644,7 +566,7 @@ func TestParserField(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Fields with custom types", func(t *testing.T) {
@@ -667,7 +589,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field1",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("MyCustomType")},
 									},
 								},
 							},
@@ -675,7 +597,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field2",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("MyOtherCustomType")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("MyOtherCustomType")},
 									},
 								},
 							},
@@ -685,7 +607,7 @@ func TestParserField(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Optional fields", func(t *testing.T) {
@@ -708,7 +630,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field1",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 									Optional: true,
 								},
@@ -717,7 +639,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field2",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("MyCustomType")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("MyCustomType")},
 									},
 									Optional: true,
 								},
@@ -728,7 +650,7 @@ func TestParserField(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Complex array and nested object fields", func(t *testing.T) {
@@ -761,7 +683,7 @@ func TestParserField(t *testing.T) {
 									Type: ast.FieldType{
 										Depth: 1,
 										Base: &ast.FieldTypeBase{
-											Named: ptr("string"),
+											Named: testutil.Pointer("string"),
 										},
 									},
 								},
@@ -777,7 +699,7 @@ func TestParserField(t *testing.T) {
 														Field: &ast.Field{
 															Name: "subfield",
 															Type: ast.FieldType{
-																Base: &ast.FieldTypeBase{Named: ptr("string")},
+																Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 															},
 														},
 													},
@@ -793,7 +715,7 @@ func TestParserField(t *testing.T) {
 									Type: ast.FieldType{
 										Depth: 2,
 										Base: &ast.FieldTypeBase{
-											Named: ptr("int"),
+											Named: testutil.Pointer("int"),
 										},
 									},
 								},
@@ -821,7 +743,7 @@ func TestParserField(t *testing.T) {
 																					Type: ast.FieldType{
 																						Depth: 3,
 																						Base: &ast.FieldTypeBase{
-																							Named: ptr("datetime"),
+																							Named: testutil.Pointer("datetime"),
 																						},
 																					},
 																				},
@@ -844,7 +766,7 @@ func TestParserField(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Field with rules", func(t *testing.T) {
@@ -874,7 +796,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field1",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 									Children: []*ast.FieldChild{
 										{
@@ -892,7 +814,7 @@ func TestParserField(t *testing.T) {
 											Rule: &ast.FieldRule{
 												Name: "uppercase",
 												Body: &ast.FieldRuleBody{
-													Error: ptr("Field must be uppercase"),
+													Error: testutil.Pointer("Field must be uppercase"),
 												},
 											},
 										},
@@ -900,8 +822,8 @@ func TestParserField(t *testing.T) {
 											Rule: &ast.FieldRule{
 												Name: "contains",
 												Body: &ast.FieldRuleBody{
-													ParamSingle: &ast.AnyLiteral{Str: ptr("hello")},
-													Error:       ptr("Field must contain 'hello'"),
+													ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("hello")},
+													Error:       testutil.Pointer("Field must contain 'hello'"),
 												},
 											},
 										},
@@ -910,7 +832,7 @@ func TestParserField(t *testing.T) {
 												Name: "enum",
 												Body: &ast.FieldRuleBody{
 													ParamListString: []string{"hello", "world"},
-													Error:           ptr("Field must be 'hello' or 'world'"),
+													Error:           testutil.Pointer("Field must be 'hello' or 'world'"),
 												},
 											},
 										},
@@ -947,7 +869,7 @@ func TestParserField(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Rules with array parameters of multiple types not allowed", func(t *testing.T) {
@@ -983,7 +905,7 @@ func TestParserProcDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Procedure with docstring", func(t *testing.T) {
@@ -1007,7 +929,7 @@ func TestParserProcDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Procedure with input", func(t *testing.T) {
@@ -1033,7 +955,7 @@ func TestParserProcDecl(t *testing.T) {
 										{
 											Field: &ast.Field{
 												Name: "field1",
-												Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("string")}},
+												Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")}},
 											},
 										},
 									},
@@ -1045,7 +967,7 @@ func TestParserProcDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Procedure with output", func(t *testing.T) {
@@ -1071,7 +993,7 @@ func TestParserProcDecl(t *testing.T) {
 										{
 											Field: &ast.Field{
 												Name: "field1",
-												Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: ptr("int")}},
+												Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")}},
 											},
 										},
 									},
@@ -1083,7 +1005,7 @@ func TestParserProcDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Procedure with meta", func(t *testing.T) {
@@ -1111,19 +1033,19 @@ func TestParserProcDecl(t *testing.T) {
 								Meta: &ast.ProcDeclChildMeta{
 									Children: []*ast.ProcDeclChildMetaChild{
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key1", Value: ast.AnyLiteral{Str: ptr("hello")}},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key1", Value: ast.AnyLiteral{Str: testutil.Pointer("hello")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key2", Value: ast.AnyLiteral{Int: ptr("123")}},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key2", Value: ast.AnyLiteral{Int: testutil.Pointer("123")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key3", Value: ast.AnyLiteral{Float: ptr("1.23")}},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key3", Value: ast.AnyLiteral{Float: testutil.Pointer("1.23")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key4", Value: ast.AnyLiteral{True: ptr("true")}},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key4", Value: ast.AnyLiteral{True: testutil.Pointer("true")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key5", Value: ast.AnyLiteral{False: ptr("false")}},
+											KV: &ast.ProcDeclChildMetaKV{Key: "key5", Value: ast.AnyLiteral{False: testutil.Pointer("false")}},
 										},
 									},
 								},
@@ -1134,7 +1056,7 @@ func TestParserProcDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Full procedure", func(t *testing.T) {
@@ -1176,7 +1098,7 @@ func TestParserProcDecl(t *testing.T) {
 												Name: "input1",
 												Type: ast.FieldType{
 													Depth: 2,
-													Base:  &ast.FieldTypeBase{Named: ptr("string")},
+													Base:  &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 												},
 											},
 										},
@@ -1191,7 +1113,7 @@ func TestParserProcDecl(t *testing.T) {
 												Name:     "output1",
 												Optional: true,
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("int")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
 											},
 										},
@@ -1204,31 +1126,31 @@ func TestParserProcDecl(t *testing.T) {
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key1",
-												Value: ast.AnyLiteral{Str: ptr("hello")},
+												Value: ast.AnyLiteral{Str: testutil.Pointer("hello")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key2",
-												Value: ast.AnyLiteral{Int: ptr("123")},
+												Value: ast.AnyLiteral{Int: testutil.Pointer("123")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key3",
-												Value: ast.AnyLiteral{Float: ptr("1.23")},
+												Value: ast.AnyLiteral{Float: testutil.Pointer("1.23")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key4",
-												Value: ast.AnyLiteral{True: ptr("true")},
+												Value: ast.AnyLiteral{True: testutil.Pointer("true")},
 											},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key5",
-												Value: ast.AnyLiteral{False: ptr("false")},
+												Value: ast.AnyLiteral{False: testutil.Pointer("false")},
 											},
 										},
 									},
@@ -1240,7 +1162,7 @@ func TestParserProcDecl(t *testing.T) {
 			},
 		}
 
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 }
 
@@ -1265,19 +1187,19 @@ func TestParserComments(t *testing.T) {
 		expected := &ast.Schema{
 			Children: []*ast.SchemaChild{
 				{
-					Comment: &ast.Comment{Simple: ptr(" Version comment")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" Version comment")},
 				},
 				{
 					Version: &ast.Version{Number: 1},
 				},
 				{
-					Comment: &ast.Comment{Block: ptr(" Import comment ")},
+					Comment: &ast.Comment{Block: testutil.Pointer(" Import comment ")},
 				},
 				{
 					Import: &ast.Import{Path: "path/to/file.urpc"},
 				},
 				{
-					Comment: &ast.Comment{Simple: ptr(" Rule comment")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" Rule comment")},
 				},
 				{
 					Rule: &ast.RuleDecl{
@@ -1290,7 +1212,7 @@ func TestParserComments(t *testing.T) {
 					},
 				},
 				{
-					Comment: &ast.Comment{Block: ptr(" Type comment ")},
+					Comment: &ast.Comment{Block: testutil.Pointer(" Type comment ")},
 				},
 				{
 					Type: &ast.TypeDecl{
@@ -1300,7 +1222,7 @@ func TestParserComments(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("int")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 									},
 								},
 							},
@@ -1308,17 +1230,17 @@ func TestParserComments(t *testing.T) {
 					},
 				},
 				{
-					Comment: &ast.Comment{Simple: ptr(" Proc comment")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" Proc comment")},
 				},
 				{
 					Proc: &ast.ProcDecl{Name: "MyProc"},
 				},
 				{
-					Comment: &ast.Comment{Block: ptr(" Trailing comment ")},
+					Comment: &ast.Comment{Block: testutil.Pointer(" Trailing comment ")},
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments within RuleDecl", func(t *testing.T) {
@@ -1343,32 +1265,32 @@ func TestParserComments(t *testing.T) {
 						Name: "myRule",
 						Children: []*ast.RuleDeclChild{
 							{
-								Comment: &ast.Comment{Simple: ptr(" Before for")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Before for")},
 							},
 							{
 								For: &ast.RuleDeclChildFor{For: "string"},
 							},
 							{
-								Comment: &ast.Comment{Block: ptr(" Between for and param ")},
+								Comment: &ast.Comment{Block: testutil.Pointer(" Between for and param ")},
 							},
 							{
 								Param: &ast.RuleDeclChildParam{Param: "int"},
 							},
 							{
-								Comment: &ast.Comment{Simple: ptr(" Before error")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Before error")},
 							},
 							{
 								Error: &ast.RuleDeclChildError{Error: "msg"},
 							},
 							{
-								Comment: &ast.Comment{Simple: ptr(" Trailing comment in rule")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in rule")},
 							},
 						},
 					},
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments within TypeDecl", func(t *testing.T) {
@@ -1391,17 +1313,17 @@ func TestParserComments(t *testing.T) {
 						Name: "MyType",
 						Children: []*ast.FieldOrComment{
 							{
-								Comment: &ast.Comment{Simple: ptr(" Before field1")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Before field1")},
 							},
 							{
 								Field: &ast.Field{
 									Name: "field1",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 									Children: []*ast.FieldChild{
 										{
-											Comment: &ast.Comment{Block: ptr(" Between field1 and field2 ")},
+											Comment: &ast.Comment{Block: testutil.Pointer(" Between field1 and field2 ")},
 										},
 									},
 								},
@@ -1411,11 +1333,11 @@ func TestParserComments(t *testing.T) {
 									Name:     "field2",
 									Optional: true,
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("int")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 									},
 									Children: []*ast.FieldChild{
 										{
-											Comment: &ast.Comment{Simple: ptr(" Trailing comment in type")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in type")},
 										},
 									},
 								},
@@ -1425,7 +1347,7 @@ func TestParserComments(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments within ProcDecl (between blocks)", func(t *testing.T) {
@@ -1450,7 +1372,7 @@ func TestParserComments(t *testing.T) {
 						Name: "MyProc",
 						Children: []*ast.ProcDeclChild{
 							{
-								Comment: &ast.Comment{Simple: ptr(" Before input")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Before input")},
 							},
 							{
 								Input: &ast.ProcDeclChildInput{
@@ -1459,7 +1381,7 @@ func TestParserComments(t *testing.T) {
 											Field: &ast.Field{
 												Name: "fieldIn",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("string")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 												},
 											},
 										},
@@ -1467,7 +1389,7 @@ func TestParserComments(t *testing.T) {
 								},
 							},
 							{
-								Comment: &ast.Comment{Block: ptr(" Between input and output ")},
+								Comment: &ast.Comment{Block: testutil.Pointer(" Between input and output ")},
 							},
 							{
 								Output: &ast.ProcDeclChildOutput{
@@ -1476,7 +1398,7 @@ func TestParserComments(t *testing.T) {
 											Field: &ast.Field{
 												Name: "fieldOut",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("int")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
 											},
 										},
@@ -1484,7 +1406,7 @@ func TestParserComments(t *testing.T) {
 								},
 							},
 							{
-								Comment: &ast.Comment{Simple: ptr(" Between output and meta")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Between output and meta")},
 							},
 							{
 								Meta: &ast.ProcDeclChildMeta{
@@ -1492,21 +1414,21 @@ func TestParserComments(t *testing.T) {
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key",
-												Value: ast.AnyLiteral{Str: ptr("value")},
+												Value: ast.AnyLiteral{Str: testutil.Pointer("value")},
 											},
 										},
 									},
 								},
 							},
 							{
-								Comment: &ast.Comment{Simple: ptr(" Trailing comment in proc")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in proc")},
 							},
 						},
 					},
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments within ProcDecl Input block", func(t *testing.T) {
@@ -1534,17 +1456,17 @@ func TestParserComments(t *testing.T) {
 								Input: &ast.ProcDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
-											Comment: &ast.Comment{Simple: ptr(" Before fieldIn1")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Before fieldIn1")},
 										},
 										{
 											Field: &ast.Field{
 												Name: "fieldIn1",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("string")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 												},
 												Children: []*ast.FieldChild{
 													{
-														Comment: &ast.Comment{Block: ptr(" Between fieldIn1 and fieldIn2 ")},
+														Comment: &ast.Comment{Block: testutil.Pointer(" Between fieldIn1 and fieldIn2 ")},
 													},
 												},
 											},
@@ -1553,11 +1475,11 @@ func TestParserComments(t *testing.T) {
 											Field: &ast.Field{
 												Name: "fieldIn2",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("int")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
 												Children: []*ast.FieldChild{
 													{
-														Comment: &ast.Comment{Simple: ptr(" Trailing comment in input")},
+														Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in input")},
 													},
 												},
 											},
@@ -1570,7 +1492,7 @@ func TestParserComments(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments within ProcDecl Output block", func(t *testing.T) {
@@ -1598,17 +1520,17 @@ func TestParserComments(t *testing.T) {
 								Output: &ast.ProcDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
-											Comment: &ast.Comment{Simple: ptr(" Before fieldOut1")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Before fieldOut1")},
 										},
 										{
 											Field: &ast.Field{
 												Name: "fieldOut1",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("string")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 												},
 												Children: []*ast.FieldChild{
 													{
-														Comment: &ast.Comment{Block: ptr(" Between fieldOut1 and fieldOut2 ")},
+														Comment: &ast.Comment{Block: testutil.Pointer(" Between fieldOut1 and fieldOut2 ")},
 													},
 												},
 											},
@@ -1617,11 +1539,11 @@ func TestParserComments(t *testing.T) {
 											Field: &ast.Field{
 												Name: "fieldOut2",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("int")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
 												Children: []*ast.FieldChild{
 													{
-														Comment: &ast.Comment{Simple: ptr(" Trailing comment in output")},
+														Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in output")},
 													},
 												},
 											},
@@ -1634,7 +1556,7 @@ func TestParserComments(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments within ProcDecl Meta block", func(t *testing.T) {
@@ -1663,25 +1585,25 @@ func TestParserComments(t *testing.T) {
 
 									Children: []*ast.ProcDeclChildMetaChild{
 										{
-											Comment: &ast.Comment{Simple: ptr(" Before key1")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Before key1")},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key1",
-												Value: ast.AnyLiteral{Str: ptr("value1")},
+												Value: ast.AnyLiteral{Str: testutil.Pointer("value1")},
 											},
 										},
 										{
-											Comment: &ast.Comment{Block: ptr(" Between key1 and key2 ")},
+											Comment: &ast.Comment{Block: testutil.Pointer(" Between key1 and key2 ")},
 										},
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "key2",
-												Value: ast.AnyLiteral{Int: ptr("123")},
+												Value: ast.AnyLiteral{Int: testutil.Pointer("123")},
 											},
 										},
 										{
-											Comment: &ast.Comment{Simple: ptr(" Trailing comment in meta")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in meta")},
 										},
 									},
 								},
@@ -1691,7 +1613,7 @@ func TestParserComments(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments within FieldTypeObject (nested type)", func(t *testing.T) {
@@ -1723,17 +1645,17 @@ func TestParserComments(t *testing.T) {
 											Object: &ast.FieldTypeObject{
 												Children: []*ast.FieldOrComment{
 													{
-														Comment: &ast.Comment{Simple: ptr(" Before sub1")},
+														Comment: &ast.Comment{Simple: testutil.Pointer(" Before sub1")},
 													},
 													{
 														Field: &ast.Field{
 															Name: "sub1",
 															Type: ast.FieldType{
-																Base: &ast.FieldTypeBase{Named: ptr("string")},
+																Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 															},
 															Children: []*ast.FieldChild{
 																{
-																	Comment: &ast.Comment{Block: ptr(" Between sub1 and sub2 ")},
+																	Comment: &ast.Comment{Block: testutil.Pointer(" Between sub1 and sub2 ")},
 																},
 															},
 														},
@@ -1742,11 +1664,11 @@ func TestParserComments(t *testing.T) {
 														Field: &ast.Field{
 															Name: "sub2",
 															Type: ast.FieldType{
-																Base: &ast.FieldTypeBase{Named: ptr("int")},
+																Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 															},
 															Children: []*ast.FieldChild{
 																{
-																	Comment: &ast.Comment{Simple: ptr(" Trailing comment in nested")},
+																	Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in nested")},
 																},
 															},
 														},
@@ -1762,7 +1684,7 @@ func TestParserComments(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments between Field rules", func(t *testing.T) {
@@ -1789,28 +1711,28 @@ func TestParserComments(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 									Children: []*ast.FieldChild{
 										{
-											Comment: &ast.Comment{Simple: ptr(" Before rule1")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Before rule1")},
 										},
 										{
 											Rule: &ast.FieldRule{Name: "rule1"},
 										},
 										{
-											Comment: &ast.Comment{Block: ptr(" Between rule1 and rule2 ")},
+											Comment: &ast.Comment{Block: testutil.Pointer(" Between rule1 and rule2 ")},
 										},
 										{
 											Rule: &ast.FieldRule{
 												Name: "rule2",
 												Body: &ast.FieldRuleBody{
-													ParamSingle: &ast.AnyLiteral{Str: ptr("param")},
+													ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("param")},
 												},
 											},
 										},
 										{
-											Comment: &ast.Comment{Simple: ptr(" Trailing comment after rules")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment after rules")},
 										},
 									},
 								},
@@ -1820,7 +1742,7 @@ func TestParserComments(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("End-of-line comments", func(t *testing.T) {
@@ -1850,44 +1772,44 @@ func TestParserComments(t *testing.T) {
 					Version: &ast.Version{Number: 1},
 				},
 				{
-					Comment: &ast.Comment{Simple: ptr(" EOL on version")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on version")},
 				},
 				{
 					Import: &ast.Import{Path: "path"},
 				},
 				{
-					Comment: &ast.Comment{Simple: ptr(" EOL on import")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on import")},
 				},
 				{
 					Rule: &ast.RuleDecl{
 						Name: "myRule",
 						Children: []*ast.RuleDeclChild{
-							{Comment: &ast.Comment{Simple: ptr(" EOL on rule start")}}, // Comment inside the block
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule start")}}, // Comment inside the block
 							{For: &ast.RuleDeclChildFor{For: "string"}},
-							{Comment: &ast.Comment{Simple: ptr(" EOL on for")}},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on for")}},
 							{Param: &ast.RuleDeclChildParam{Param: "int"}},
-							{Comment: &ast.Comment{Simple: ptr(" EOL on param")}},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on param")}},
 						},
 					},
 				},
 				{
-					Comment: &ast.Comment{Simple: ptr(" EOL on rule end")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule end")},
 				}, // Comment after the block
 				{
 					Type: &ast.TypeDecl{
 						Name: "MyType",
 						Children: []*ast.FieldOrComment{
-							{Comment: &ast.Comment{Simple: ptr(" EOL on type start")}}, // Comment inside the block
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on type start")}}, // Comment inside the block
 							{
 								Field: &ast.Field{
 									Name: "field",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: ptr("string")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
 									Children: []*ast.FieldChild{
-										{Comment: &ast.Comment{Simple: ptr(" EOL on field")}}, // Comment after type, before rule
+										{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on field")}}, // Comment after type, before rule
 										{Rule: &ast.FieldRule{Name: "rule1"}},
-										{Comment: &ast.Comment{Simple: ptr(" EOL on rule")}}, // Comment after rule
+										{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule")}}, // Comment after rule
 									},
 								},
 							},
@@ -1895,13 +1817,13 @@ func TestParserComments(t *testing.T) {
 					},
 				},
 				{
-					Comment: &ast.Comment{Simple: ptr(" EOL on type end")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on type end")},
 				}, // Comment after the block
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
 						Children: []*ast.ProcDeclChild{
-							{Comment: &ast.Comment{Simple: ptr(" EOL on proc start")}}, // Comment inside the block
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on proc start")}}, // Comment inside the block
 							{
 								Input: &ast.ProcDeclChildInput{
 									Children: []*ast.FieldOrComment{
@@ -1909,14 +1831,14 @@ func TestParserComments(t *testing.T) {
 											Field: &ast.Field{
 												Name: "f",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("int")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
 											},
 										},
 									},
 								},
 							},
-							{Comment: &ast.Comment{Simple: ptr(" EOL on input")}},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on input")}},
 							{
 								Output: &ast.ProcDeclChildOutput{
 									Children: []*ast.FieldOrComment{
@@ -1924,36 +1846,36 @@ func TestParserComments(t *testing.T) {
 											Field: &ast.Field{
 												Name: "o",
 												Type: ast.FieldType{
-													Base: &ast.FieldTypeBase{Named: ptr("int")},
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
 											},
 										},
 									},
 								},
 							},
-							{Comment: &ast.Comment{Simple: ptr(" EOL on output")}},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on output")}},
 							{
 								Meta: &ast.ProcDeclChildMeta{
 									Children: []*ast.ProcDeclChildMetaChild{
 										{
 											KV: &ast.ProcDeclChildMetaKV{
 												Key:   "k",
-												Value: ast.AnyLiteral{Str: ptr("v")},
+												Value: ast.AnyLiteral{Str: testutil.Pointer("v")},
 											},
 										},
 									},
 								},
 							},
-							{Comment: &ast.Comment{Simple: ptr(" EOL on meta")}},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on meta")}},
 						},
 					},
 				},
 				{
-					Comment: &ast.Comment{Simple: ptr(" EOL on proc end")},
+					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on proc end")},
 				}, // Comment after the block
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Comments inside empty blocks", func(t *testing.T) {
@@ -1982,7 +1904,7 @@ func TestParserComments(t *testing.T) {
 						Name: "emptyRule",
 						Children: []*ast.RuleDeclChild{
 							{
-								Comment: &ast.Comment{Block: ptr(" Rule Comment ")},
+								Comment: &ast.Comment{Block: testutil.Pointer(" Rule Comment ")},
 							},
 						},
 					},
@@ -1992,7 +1914,7 @@ func TestParserComments(t *testing.T) {
 						Name: "EmptyType",
 						Children: []*ast.FieldOrComment{
 							{
-								Comment: &ast.Comment{Simple: ptr(" Type Comment")},
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Type Comment")},
 							},
 						},
 					},
@@ -2002,13 +1924,13 @@ func TestParserComments(t *testing.T) {
 						Name: "EmptyProc",
 						Children: []*ast.ProcDeclChild{
 							{
-								Comment: &ast.Comment{Block: ptr(" Proc Comment ")},
+								Comment: &ast.Comment{Block: testutil.Pointer(" Proc Comment ")},
 							},
 							{
 								Input: &ast.ProcDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
-											Comment: &ast.Comment{Block: ptr(" Input Comment ")},
+											Comment: &ast.Comment{Block: testutil.Pointer(" Input Comment ")},
 										},
 									},
 								},
@@ -2017,7 +1939,7 @@ func TestParserComments(t *testing.T) {
 								Output: &ast.ProcDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
-											Comment: &ast.Comment{Simple: ptr(" Output Comment")},
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Output Comment")},
 										},
 									},
 								},
@@ -2026,7 +1948,7 @@ func TestParserComments(t *testing.T) {
 								Meta: &ast.ProcDeclChildMeta{
 									Children: []*ast.ProcDeclChildMetaChild{
 										{
-											Comment: &ast.Comment{Block: ptr(" Meta Comment ")},
+											Comment: &ast.Comment{Block: testutil.Pointer(" Meta Comment ")},
 										},
 									},
 								},
@@ -2046,7 +1968,7 @@ func TestParserComments(t *testing.T) {
 											Object: &ast.FieldTypeObject{
 												Children: []*ast.FieldOrComment{
 													{
-														Comment: &ast.Comment{Block: ptr(" Nested Comment ")},
+														Comment: &ast.Comment{Block: testutil.Pointer(" Nested Comment ")},
 													},
 												},
 											},
@@ -2059,7 +1981,7 @@ func TestParserComments(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 }
 
@@ -2078,7 +2000,7 @@ func TestParserDocstrings(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Multiple standalone docstrings", func(t *testing.T) {
@@ -2097,7 +2019,7 @@ func TestParserDocstrings(t *testing.T) {
 				{Docstring: &ast.Docstring{Value: " This is a standalone docstring. "}},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Standalone docstrings and associated docstrings", func(t *testing.T) {
@@ -2136,7 +2058,7 @@ func TestParserDocstrings(t *testing.T) {
 				},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
 	t.Run("Standalone docstrings should not associate if there is a blank line", func(t *testing.T) {
@@ -2158,7 +2080,7 @@ func TestParserDocstrings(t *testing.T) {
 				{Type: &ast.TypeDecl{Name: "MyType"}},
 			},
 		}
-		equalNoPos(t, expected, parsed)
+		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 }
 
@@ -2382,7 +2304,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Block: ptr(" Import other schema "),
+					Block: testutil.Pointer(" Import other schema "),
 				},
 			},
 			{
@@ -2392,7 +2314,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Simple: ptr(" Custom rule declarations"),
+					Simple: testutil.Pointer(" Custom rule declarations"),
 				},
 			},
 			{
@@ -2442,7 +2364,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Simple: ptr(" Type declarations"),
+					Simple: testutil.Pointer(" Type declarations"),
 				},
 			},
 			{
@@ -2454,7 +2376,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "dummyField",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("datetime"),
+										Named: testutil.Pointer("datetime"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2462,7 +2384,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "min",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Str: ptr("1900-01-01T00:00:00Z")},
+												ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("1900-01-01T00:00:00Z")},
 											},
 										},
 									},
@@ -2470,7 +2392,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "max",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Str: ptr("2100-01-01T00:00:00Z")},
+												ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("2100-01-01T00:00:00Z")},
 											},
 										},
 									},
@@ -2489,7 +2411,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "dummyField",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("int"),
+										Named: testutil.Pointer("int"),
 									},
 								},
 							},
@@ -2510,7 +2432,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "dummyField",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 							},
@@ -2533,7 +2455,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "id",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2541,7 +2463,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "uuid",
 											Body: &ast.FieldRuleBody{
-												Error: ptr("Must be a valid UUID"),
+												Error: testutil.Pointer("Must be a valid UUID"),
 											},
 										},
 									},
@@ -2549,7 +2471,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("36")},
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("36")},
 											},
 										},
 									},
@@ -2557,8 +2479,8 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "maxlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("36")},
-												Error:       ptr("UUID must be exactly 36 characters"),
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("36")},
+												Error:       testutil.Pointer("UUID must be exactly 36 characters"),
 											},
 										},
 									},
@@ -2570,7 +2492,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "name",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2578,8 +2500,8 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("3")},
-												Error:       ptr("Name must be at least 3 characters long"),
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("3")},
+												Error:       testutil.Pointer("Name must be at least 3 characters long"),
 											},
 										},
 									},
@@ -2592,7 +2514,7 @@ func TestParserFullSchema(t *testing.T) {
 								Optional: true,
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 							},
@@ -2602,7 +2524,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "isActive",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("boolean"),
+										Named: testutil.Pointer("boolean"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2610,7 +2532,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "equals",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{True: ptr("true")},
+												ParamSingle: &ast.AnyLiteral{True: testutil.Pointer("true")},
 											},
 										},
 									},
@@ -2623,7 +2545,7 @@ func TestParserFullSchema(t *testing.T) {
 								Optional: true,
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2650,7 +2572,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "id",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2667,7 +2589,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "name",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2675,7 +2597,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("2")},
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("2")},
 											},
 										},
 									},
@@ -2683,8 +2605,8 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "maxlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("100")},
-												Error:       ptr("Name cannot exceed 100 characters"),
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("100")},
+												Error:       testutil.Pointer("Name cannot exceed 100 characters"),
 											},
 										},
 									},
@@ -2696,7 +2618,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "price",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("float"),
+										Named: testutil.Pointer("float"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2704,8 +2626,8 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "min",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Float: ptr("0.01")},
-												Error:       ptr("Price must be greater than zero"),
+												ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.01")},
+												Error:       testutil.Pointer("Price must be greater than zero"),
 											},
 										},
 									},
@@ -2717,7 +2639,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "stock",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("int"),
+										Named: testutil.Pointer("int"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2725,7 +2647,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "min",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("0")},
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("0")},
 											},
 										},
 									},
@@ -2734,7 +2656,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "range",
 											Body: &ast.FieldRuleBody{
 												ParamListInt: []string{"0", "1000"},
-												Error:        ptr("Stock must be between 0 and 1000"),
+												Error:        testutil.Pointer("Stock must be between 0 and 1000"),
 											},
 										},
 									},
@@ -2746,7 +2668,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "category",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: ptr("Category"),
+										Named: testutil.Pointer("Category"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2754,7 +2676,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "validateCategory",
 											Body: &ast.FieldRuleBody{
-												Error: ptr("Invalid category custom message"),
+												Error: testutil.Pointer("Invalid category custom message"),
 											},
 										},
 									},
@@ -2768,7 +2690,7 @@ func TestParserFullSchema(t *testing.T) {
 								Type: ast.FieldType{
 									Depth: 1,
 									Base: &ast.FieldTypeBase{
-										Named: ptr("string"),
+										Named: testutil.Pointer("string"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -2776,8 +2698,8 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "minlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("1")},
-												Error:       ptr("At least one tag is required"),
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("1")},
+												Error:       testutil.Pointer("At least one tag is required"),
 											},
 										},
 									},
@@ -2785,7 +2707,7 @@ func TestParserFullSchema(t *testing.T) {
 										Rule: &ast.FieldRule{
 											Name: "maxlen",
 											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: ptr("10")},
+												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("10")},
 											},
 										},
 									},
@@ -2811,7 +2733,7 @@ func TestParserFullSchema(t *testing.T) {
 																				Name: "width",
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
-																						Named: ptr("float"),
+																						Named: testutil.Pointer("float"),
 																					},
 																				},
 																				Children: []*ast.FieldChild{
@@ -2819,8 +2741,8 @@ func TestParserFullSchema(t *testing.T) {
 																						Rule: &ast.FieldRule{
 																							Name: "min",
 																							Body: &ast.FieldRuleBody{
-																								ParamSingle: &ast.AnyLiteral{Float: ptr("0.0")},
-																								Error:       ptr("Width cannot be negative"),
+																								ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.0")},
+																								Error:       testutil.Pointer("Width cannot be negative"),
 																							},
 																						},
 																					},
@@ -2832,7 +2754,7 @@ func TestParserFullSchema(t *testing.T) {
 																				Name: "height",
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
-																						Named: ptr("float"),
+																						Named: testutil.Pointer("float"),
 																					},
 																				},
 																				Children: []*ast.FieldChild{
@@ -2840,7 +2762,7 @@ func TestParserFullSchema(t *testing.T) {
 																						Rule: &ast.FieldRule{
 																							Name: "min",
 																							Body: &ast.FieldRuleBody{
-																								ParamSingle: &ast.AnyLiteral{Float: ptr("0.0")},
+																								ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.0")},
 																							},
 																						},
 																					},
@@ -2853,7 +2775,7 @@ func TestParserFullSchema(t *testing.T) {
 																				Optional: true,
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
-																						Named: ptr("float"),
+																						Named: testutil.Pointer("float"),
 																					},
 																				},
 																			},
@@ -2870,7 +2792,7 @@ func TestParserFullSchema(t *testing.T) {
 														Optional: true,
 														Type: ast.FieldType{
 															Base: &ast.FieldTypeBase{
-																Named: ptr("float"),
+																Named: testutil.Pointer("float"),
 															},
 														},
 													},
@@ -2881,7 +2803,7 @@ func TestParserFullSchema(t *testing.T) {
 														Type: ast.FieldType{
 															Depth: 1,
 															Base: &ast.FieldTypeBase{
-																Named: ptr("string"),
+																Named: testutil.Pointer("string"),
 															},
 														},
 														Children: []*ast.FieldChild{
@@ -2896,7 +2818,7 @@ func TestParserFullSchema(t *testing.T) {
 																			"black",
 																			"white",
 																		},
-																		Error: ptr("Color must be one of the allowed values"),
+																		Error: testutil.Pointer("Color must be one of the allowed values"),
 																	},
 																},
 															},
@@ -2917,7 +2839,7 @@ func TestParserFullSchema(t *testing.T) {
 																				Name: "name",
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
-																						Named: ptr("string"),
+																						Named: testutil.Pointer("string"),
 																					},
 																				},
 																			},
@@ -2927,7 +2849,7 @@ func TestParserFullSchema(t *testing.T) {
 																				Name: "value",
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
-																						Named: ptr("string"),
+																						Named: testutil.Pointer("string"),
 																					},
 																				},
 																			},
@@ -2957,7 +2879,7 @@ func TestParserFullSchema(t *testing.T) {
 														Name: "sku",
 														Type: ast.FieldType{
 															Base: &ast.FieldTypeBase{
-																Named: ptr("string"),
+																Named: testutil.Pointer("string"),
 															},
 														},
 													},
@@ -2967,7 +2889,7 @@ func TestParserFullSchema(t *testing.T) {
 														Name: "price",
 														Type: ast.FieldType{
 															Base: &ast.FieldTypeBase{
-																Named: ptr("float"),
+																Named: testutil.Pointer("float"),
 															},
 														},
 														Children: []*ast.FieldChild{
@@ -2975,8 +2897,8 @@ func TestParserFullSchema(t *testing.T) {
 																Rule: &ast.FieldRule{
 																	Name: "min",
 																	Body: &ast.FieldRuleBody{
-																		ParamSingle: &ast.AnyLiteral{Float: ptr("0.01")},
-																		Error:       ptr("Variation price must be greater than zero"),
+																		ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.01")},
+																		Error:       testutil.Pointer("Variation price must be greater than zero"),
 																	},
 																},
 															},
@@ -2996,7 +2918,7 @@ func TestParserFullSchema(t *testing.T) {
 																				Name: "name",
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
-																						Named: ptr("string"),
+																						Named: testutil.Pointer("string"),
 																					},
 																				},
 																			},
@@ -3006,7 +2928,7 @@ func TestParserFullSchema(t *testing.T) {
 																				Name: "value",
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
-																						Named: ptr("string"),
+																						Named: testutil.Pointer("string"),
 																					},
 																				},
 																			},
@@ -3028,7 +2950,7 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Simple: ptr(" Procedure declarations"),
+					Simple: testutil.Pointer(" Procedure declarations"),
 				},
 			},
 			{
@@ -3046,7 +2968,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "id",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: ptr("string"),
+													Named: testutil.Pointer("string"),
 												},
 											},
 											Children: []*ast.FieldChild{
@@ -3054,7 +2976,7 @@ func TestParserFullSchema(t *testing.T) {
 													Rule: &ast.FieldRule{
 														Name: "uuid",
 														Body: &ast.FieldRuleBody{
-															Error: ptr("Category ID must be a valid UUID"),
+															Error: testutil.Pointer("Category ID must be a valid UUID"),
 														},
 													},
 												},
@@ -3072,7 +2994,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "category",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: ptr("Category"),
+													Named: testutil.Pointer("Category"),
 												},
 											},
 										},
@@ -3082,7 +3004,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "exists",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: ptr("boolean"),
+													Named: testutil.Pointer("boolean"),
 												},
 											},
 										},
@@ -3096,25 +3018,25 @@ func TestParserFullSchema(t *testing.T) {
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "cache",
-											Value: ast.AnyLiteral{True: ptr("true")},
+											Value: ast.AnyLiteral{True: testutil.Pointer("true")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "cacheTime",
-											Value: ast.AnyLiteral{Int: ptr("300")},
+											Value: ast.AnyLiteral{Int: testutil.Pointer("300")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "requiresAuth",
-											Value: ast.AnyLiteral{False: ptr("false")},
+											Value: ast.AnyLiteral{False: testutil.Pointer("false")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "apiVersion",
-											Value: ast.AnyLiteral{Str: ptr("1.0.0")},
+											Value: ast.AnyLiteral{Str: testutil.Pointer("1.0.0")},
 										},
 									},
 								},
@@ -3138,7 +3060,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "product",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: ptr("Product"),
+													Named: testutil.Pointer("Product"),
 												},
 											},
 										},
@@ -3156,7 +3078,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name: "draft",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("boolean"),
+																			Named: testutil.Pointer("boolean"),
 																		},
 																	},
 																},
@@ -3166,7 +3088,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name: "notify",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("boolean"),
+																			Named: testutil.Pointer("boolean"),
 																		},
 																	},
 																},
@@ -3177,7 +3099,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Optional: true,
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
+																			Named: testutil.Pointer("string"),
 																		},
 																	},
 																	Children: []*ast.FieldChild{
@@ -3185,7 +3107,7 @@ func TestParserFullSchema(t *testing.T) {
 																			Rule: &ast.FieldRule{
 																				Name: "iso8601",
 																				Body: &ast.FieldRuleBody{
-																					Error: ptr("Must be a valid ISO8601 date"),
+																					Error: testutil.Pointer("Must be a valid ISO8601 date"),
 																				},
 																			},
 																		},
@@ -3199,7 +3121,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Type: ast.FieldType{
 																		Depth: 1,
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
+																			Named: testutil.Pointer("string"),
 																		},
 																	},
 																},
@@ -3223,7 +3145,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Optional: true,
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("boolean"),
+																			Named: testutil.Pointer("boolean"),
 																		},
 																	},
 																},
@@ -3242,7 +3164,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "name",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("string"),
+																									Named: testutil.Pointer("string"),
 																								},
 																							},
 																						},
@@ -3252,7 +3174,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "severity",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("int"),
+																									Named: testutil.Pointer("int"),
 																								},
 																							},
 																							Children: []*ast.FieldChild{
@@ -3265,7 +3187,7 @@ func TestParserFullSchema(t *testing.T) {
 																												"2",
 																												"3",
 																											},
-																											Error: ptr("Severity must be 1, 2, or 3"),
+																											Error: testutil.Pointer("Severity must be 1, 2, or 3"),
 																										},
 																									},
 																								},
@@ -3277,7 +3199,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "message",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("string"),
+																									Named: testutil.Pointer("string"),
 																								},
 																							},
 																						},
@@ -3305,7 +3227,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "success",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: ptr("boolean"),
+													Named: testutil.Pointer("boolean"),
 												},
 											},
 										},
@@ -3315,7 +3237,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "productId",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: ptr("string"),
+													Named: testutil.Pointer("string"),
 												},
 											},
 											Children: []*ast.FieldChild{
@@ -3323,7 +3245,7 @@ func TestParserFullSchema(t *testing.T) {
 													Rule: &ast.FieldRule{
 														Name: "uuid",
 														Body: &ast.FieldRuleBody{
-															Error: ptr("Product ID must be a valid UUID"),
+															Error: testutil.Pointer("Product ID must be a valid UUID"),
 														},
 													},
 												},
@@ -3344,7 +3266,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name: "code",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("int"),
+																			Named: testutil.Pointer("int"),
 																		},
 																	},
 																},
@@ -3354,7 +3276,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name: "message",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
+																			Named: testutil.Pointer("string"),
 																		},
 																	},
 																},
@@ -3365,7 +3287,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Optional: true,
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("string"),
+																			Named: testutil.Pointer("string"),
 																		},
 																	},
 																},
@@ -3388,7 +3310,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name: "duration",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: ptr("float"),
+																			Named: testutil.Pointer("float"),
 																		},
 																	},
 																},
@@ -3406,7 +3328,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "name",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("string"),
+																									Named: testutil.Pointer("string"),
 																								},
 																							},
 																						},
@@ -3416,7 +3338,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "duration",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("float"),
+																									Named: testutil.Pointer("float"),
 																								},
 																							},
 																						},
@@ -3426,7 +3348,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "success",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("boolean"),
+																									Named: testutil.Pointer("boolean"),
 																								},
 																							},
 																						},
@@ -3449,7 +3371,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "id",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("string"),
+																									Named: testutil.Pointer("string"),
 																								},
 																							},
 																						},
@@ -3459,7 +3381,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "region",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("string"),
+																									Named: testutil.Pointer("string"),
 																								},
 																							},
 																						},
@@ -3469,7 +3391,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "load",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: ptr("float"),
+																									Named: testutil.Pointer("float"),
 																								},
 																							},
 																							Children: []*ast.FieldChild{
@@ -3477,7 +3399,7 @@ func TestParserFullSchema(t *testing.T) {
 																									Rule: &ast.FieldRule{
 																										Name: "min",
 																										Body: &ast.FieldRuleBody{
-																											ParamSingle: &ast.AnyLiteral{Float: ptr("0.0")},
+																											ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.0")},
 																										},
 																									},
 																								},
@@ -3485,8 +3407,8 @@ func TestParserFullSchema(t *testing.T) {
 																									Rule: &ast.FieldRule{
 																										Name: "max",
 																										Body: &ast.FieldRuleBody{
-																											ParamSingle: &ast.AnyLiteral{Float: ptr("1.0")},
-																											Error:       ptr("Load factor cannot exceed 1.0"),
+																											ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("1.0")},
+																											Error:       testutil.Pointer("Load factor cannot exceed 1.0"),
 																										},
 																									},
 																								},
@@ -3514,37 +3436,37 @@ func TestParserFullSchema(t *testing.T) {
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "auth",
-											Value: ast.AnyLiteral{Str: ptr("required")},
+											Value: ast.AnyLiteral{Str: testutil.Pointer("required")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "roles",
-											Value: ast.AnyLiteral{Str: ptr("admin,product-manager")},
+											Value: ast.AnyLiteral{Str: testutil.Pointer("admin,product-manager")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "rateLimit",
-											Value: ast.AnyLiteral{Int: ptr("100")},
+											Value: ast.AnyLiteral{Int: testutil.Pointer("100")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "timeout",
-											Value: ast.AnyLiteral{Float: ptr("30.5")},
+											Value: ast.AnyLiteral{Float: testutil.Pointer("30.5")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "audit",
-											Value: ast.AnyLiteral{True: ptr("true")},
+											Value: ast.AnyLiteral{True: testutil.Pointer("true")},
 										},
 									},
 									{
 										KV: &ast.ProcDeclChildMetaKV{
 											Key:   "apiVersion",
-											Value: ast.AnyLiteral{Str: ptr("1.2.0")},
+											Value: ast.AnyLiteral{Str: testutil.Pointer("1.2.0")},
 										},
 									},
 								},
@@ -3582,5 +3504,5 @@ func TestParserFullSchema(t *testing.T) {
 		},
 	}
 
-	equalNoPos(t, expected, parsed)
+	testutil.ASTEqualNoPos(t, expected, parsed)
 }
