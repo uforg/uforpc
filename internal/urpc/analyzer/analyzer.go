@@ -20,6 +20,10 @@ func NewAnalyzer(fileProvider FileProvider) (*Analyzer, error) {
 // Analyze performs semantic analysis on a URPC schema starting from the given entry point.
 // It resolves all imports, combines the schemas, and returns the combined schema along with
 // any diagnostics encountered during the resolution and analysis phases.
+//
+// It consists of two phases:
+//   - Resolution phase: Resolves all imports and combines the schemas.
+//   - Semantic analysis phase: Performs semantic analysis on the combined schema.
 func (a *Analyzer) Analyze(entryPointFilePath string) (CombinedSchema, []Diagnostic, error) {
 	combinedSchema, resolverDiagnostics, _ := a.resolver.resolve(entryPointFilePath)
 
