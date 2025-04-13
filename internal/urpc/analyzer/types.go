@@ -47,8 +47,8 @@ func (d Diagnostic) Error() string {
 // CombinedSchema is the result of the process of combining multiple URPC schemas
 // based on an entry point and it's recursive import checks.
 type CombinedSchema struct {
-	Schema   *ast.Schema          // The combined AST of all schemas.
-	RuleDefs map[string]Positions // Map of all rule names -> Positions from the combined Schema.
-	TypeDefs map[string]Positions // Map of all type names -> Positions from the combined Schema.
-	ProcDefs map[string]Positions // Map of all proc names -> Positions from the combined Schema.
+	Schema   *ast.Schema              // The combined AST of all schemas.
+	RuleDefs map[string]*ast.RuleDecl // Map of all rule names -> ast.RuleDecl from the combined Schema.
+	TypeDefs map[string]*ast.TypeDecl // Map of all type names -> ast.TypeDecl from the combined Schema.
+	ProcDefs map[string]*ast.ProcDecl // Map of all proc names -> ast.ProcDecl from the combined Schema.
 }

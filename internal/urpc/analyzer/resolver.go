@@ -78,32 +78,23 @@ func (r *resolver) resolve(entryPointFilePath string) (CombinedSchema, []Diagnos
 	r.resolveExternalDocstrings(combinedSchema, ctx)
 
 	// Collect all definitions from the combined schema
-	ruleDefs := make(map[string]Positions)
-	typeDefs := make(map[string]Positions)
-	procDefs := make(map[string]Positions)
+	ruleDefs := make(map[string]*ast.RuleDecl)
+	typeDefs := make(map[string]*ast.TypeDecl)
+	procDefs := make(map[string]*ast.ProcDecl)
 
 	// Collect rule definitions
 	for _, rule := range combinedSchema.GetRules() {
-		ruleDefs[rule.Name] = Positions{
-			Pos:    rule.Pos,
-			EndPos: rule.EndPos,
-		}
+		ruleDefs[rule.Name] = rule
 	}
 
 	// Collect type definitions
 	for _, typeDecl := range combinedSchema.GetTypes() {
-		typeDefs[typeDecl.Name] = Positions{
-			Pos:    typeDecl.Pos,
-			EndPos: typeDecl.EndPos,
-		}
+		typeDefs[typeDecl.Name] = typeDecl
 	}
 
 	// Collect procedure definitions
 	for _, proc := range combinedSchema.GetProcs() {
-		procDefs[proc.Name] = Positions{
-			Pos:    proc.Pos,
-			EndPos: proc.EndPos,
-		}
+		procDefs[proc.Name] = proc
 	}
 
 	// Create the final combined schema
