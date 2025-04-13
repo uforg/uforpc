@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -206,7 +207,7 @@ func TestSemanalyzer_ValidProcedure(t *testing.T) {
 		  input {
 		    userId: string
 		  }
-		  
+
 		  output {
 		    user: User
 		  }
@@ -409,18 +410,18 @@ func TestSemanalyzer_BuiltInRuleValidation(t *testing.T) {
 		    @minlen(3)
 		    @maxlen(100)
 		    @contains("@")
-		  
+
 		  age: int
 		    @min(18)
 		    @max(120)
-		  
+
 		  price: float
 		    @min(0.0)
 		    @max(999.99)
-		  
+
 		  isActive: boolean
 		    @equals(true)
-		  
+
 		  tags: string[]
 		    @minlen(1)
 		    @maxlen(10)
@@ -710,7 +711,7 @@ func TestSemanalyzer_EnumValidation(t *testing.T) {
 		type Product {
 		  status: string
 		    @enum(["pending", "approved", "rejected"])
-		    
+
 		  priority: int
 		    @enum([1, 2, 3])
 		}
@@ -732,7 +733,7 @@ func TestSemanalyzer_DatetimeValidation(t *testing.T) {
 		type Event {
 		  startDate: datetime
 		    @min("2023-01-01T00:00:00Z")
-		    
+
 		  endDate: datetime
 		    @max("2030-12-31T23:59:59Z")
 		}
@@ -769,6 +770,314 @@ func TestSemanalyzer_OptionalFields(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Empty(t, errors)
+}
+
+func TestSemanalyzer_RecursiveTypeExtension(t *testing.T) {
+	input := `
+			version 1
+
+			// Direct recursive extension
+			type User extends User {
+			  id: string
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.NotEmpty(t, errors)
+
+	// Check that at least one error contains the expected message
+	found := false
+	for _, diag := range errors {
+		if strings.Contains(diag.Message, "recursive type extension detected") {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected to find an error about recursive type extension")
+}
+
+func TestSemanalyzer_IndirectRecursiveTypeExtension(t *testing.T) {
+	input := `
+			version 1
+
+			// Indirect recursive extension: A extends B, B extends C, C extends A
+			type A extends B {
+			  id: string
+			}
+
+			type B extends C {
+			  name: string
+			}
+
+			type C extends A {
+			  age: int
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.NotEmpty(t, errors)
+	require.Contains(t, errors[0].Message, "recursive type extension detected")
+}
+
+func TestSemanalyzer_DuplicateFieldsInTypeExtension(t *testing.T) {
+	input := `
+			version 1
+
+			type BaseUser {
+			  id: string
+			  email: string
+			}
+
+			// Duplicate field 'email' from BaseUser
+			type User extends BaseUser {
+			  name: string
+			  email: string  // This is a duplicate
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "is already defined in extended type")
+}
+
+func TestSemanalyzer_CircularTypeDependency(t *testing.T) {
+	input := `
+			version 1
+
+			// Circular dependency: User -> Post -> User
+			type User {
+			  id: string
+			  posts: Post[]
+			}
+
+			type Post {
+			  id: string
+			  author: User  // This creates a circular dependency
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.NotEmpty(t, errors)
+
+	// Check that at least one error contains the expected message
+	found := false
+	for _, diag := range errors {
+		if strings.Contains(diag.Message, "circular dependency detected between types") {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected to find an error about circular dependency")
+}
+
+func TestSemanalyzer_CircularTypeDependencyWithOptionalField(t *testing.T) {
+	input := `
+			version 1
+
+			// Circular dependency with optional field
+			type User {
+			  id: string
+			  posts: Post[]
+			}
+
+			type Post {
+			  id: string
+			  author?: User  // Optional field breaks the circular dependency
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.NoError(t, err)
+	require.Empty(t, errors)
+}
+
+func TestSemanalyzer_RuleWithoutForClause(t *testing.T) {
+	input := `
+			version 1
+
+			// Rule without 'for' clause
+			rule @invalidRule {
+			  error: "Invalid value"
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "must have exactly one 'for' clause")
+}
+
+func TestSemanalyzer_RuleWithMultipleForClauses(t *testing.T) {
+	input := `
+			version 1
+
+			// Rule with multiple 'for' clauses
+			rule @invalidRule {
+			  for: string
+			  for: int  // Duplicate 'for' clause
+			  error: "Invalid value"
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'for' clause")
+}
+
+func TestSemanalyzer_RuleWithMultipleParamClauses(t *testing.T) {
+	input := `
+			version 1
+
+			// Rule with multiple 'param' clauses
+			rule @invalidRule {
+			  for: string
+			  param: string
+			  param: int  // Duplicate 'param' clause
+			  error: "Invalid value"
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'param' clause")
+}
+
+func TestSemanalyzer_RuleWithMultipleErrorClauses(t *testing.T) {
+	input := `
+			version 1
+
+			// Rule with multiple 'error' clauses
+			rule @invalidRule {
+			  for: string
+			  error: "Invalid value"
+			  error: "Another error message"  // Duplicate 'error' clause
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'error' clause")
+}
+
+func TestSemanalyzer_ProcWithMultipleInputSections(t *testing.T) {
+	input := `
+			version 1
+
+			// Procedure with multiple 'input' sections
+			proc InvalidProc {
+			  input {
+			    id: string
+			  }
+
+			  input {  // Duplicate 'input' section
+			    name: string
+			  }
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'input' section")
+}
+
+func TestSemanalyzer_ProcWithMultipleOutputSections(t *testing.T) {
+	input := `
+			version 1
+
+			// Procedure with multiple 'output' sections
+			proc InvalidProc {
+			  output {
+			    success: boolean
+			  }
+
+			  output {  // Duplicate 'output' section
+			    message: string
+			  }
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'output' section")
+}
+
+func TestSemanalyzer_ProcWithMultipleMetaSections(t *testing.T) {
+	input := `
+			version 1
+
+			// Procedure with multiple 'meta' sections
+			proc InvalidProc {
+			  meta {
+			    requiresAuth: true
+			  }
+
+			  meta {  // Duplicate 'meta' section
+			    timeout: 30
+			  }
+			}
+		`
+	combinedSchema, err := parseToCombinedSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'meta' section")
 }
 
 func TestSemanalyzer_CompleteSchema(t *testing.T) {
