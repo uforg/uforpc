@@ -1,7 +1,9 @@
 package analyzer
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/uforg/uforpc/internal/urpc/ast"
@@ -69,6 +71,11 @@ func (r *resolver) resolve(entryPointFilePath string) (CombinedSchema, []Diagnos
 	if combinedSchema == nil {
 		combinedSchema = &ast.Schema{}
 	}
+
+	// Resolve external docstrings, if any error happens, or if the
+	// referenced markdown file is not found, the function will
+	// add a diagnostic to the context.
+	r.resolveExternalDocstrings(combinedSchema, ctx)
 
 	// Collect all definitions from the combined schema
 	ruleDefs := make(map[string]Positions)
@@ -314,4 +321,63 @@ func (r *resolver) detectCircularImport(filePath string, ctx *resolverContext) b
 		}
 	}
 	return false
+}
+
+// resolveExternalDocstrings resolves external docstrings in the combined schema
+// by reading the content of the referenced Markdown files and updating the docstring values.
+func (r *resolver) resolveExternalDocstrings(combinedSchema *ast.Schema, ctx *resolverContext) {
+	for _, docstring := range combinedSchema.GetDocstrings() {
+		r.resolveExternalDocstring(docstring, ctx)
+	}
+
+	for _, rule := range combinedSchema.GetRules() {
+		if rule.Docstring != nil {
+			r.resolveExternalDocstring(rule.Docstring, ctx)
+		}
+	}
+
+	for _, typeDecl := range combinedSchema.GetTypes() {
+		if typeDecl.Docstring != nil {
+			r.resolveExternalDocstring(typeDecl.Docstring, ctx)
+		}
+	}
+
+	for _, proc := range combinedSchema.GetProcs() {
+		if proc.Docstring != nil {
+			r.resolveExternalDocstring(proc.Docstring, ctx)
+		}
+	}
+}
+
+// resolveExternalDocstring is the logic to resolve a single external docstring
+// behind resolveExternalDocstrings.
+func (r *resolver) resolveExternalDocstring(docstring *ast.Docstring, ctx *resolverContext) {
+	externalPath, isExternal := docstring.GetExternal()
+	if !isExternal {
+		return
+	}
+
+	content, _, err := r.fileProvider.GetFileAndHash(docstring.Pos.Filename, externalPath)
+	if errors.Is(err, os.ErrNotExist) {
+		ctx.diagnostics = append(ctx.diagnostics, Diagnostic{
+			Positions: Positions{
+				Pos:    docstring.Pos,
+				EndPos: docstring.EndPos,
+			},
+			Message: fmt.Sprintf("external markdown file not found: %s", externalPath),
+		})
+		return
+	}
+	if err != nil {
+		ctx.diagnostics = append(ctx.diagnostics, Diagnostic{
+			Positions: Positions{
+				Pos:    docstring.Pos,
+				EndPos: docstring.EndPos,
+			},
+			Message: fmt.Sprintf("error reading external markdown file: %v", err),
+		})
+		return
+	}
+
+	docstring.Value = content
 }
