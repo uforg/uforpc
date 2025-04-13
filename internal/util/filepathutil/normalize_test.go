@@ -29,6 +29,29 @@ func TestNormalize(t *testing.T) {
 		}
 	})
 
+	t.Run("Absolute paths with base path", func(t *testing.T) {
+		testCases := []struct {
+			name               string
+			relativeToFilePath string
+			filePath           string
+			expectedPath       string
+		}{
+			{"Absolute path with empty base", "", "/absolute/path.txt", "/absolute/path.txt"},
+			{"Absolute path with base", "/base/dir/file.txt", "/absolute/path.txt", "/absolute/path.txt"},
+			{"Absolute path with base and redundant slashes", "/base/dir/file.txt", "/absolute//path.txt", "/absolute/path.txt"},
+			{"Absolute path with base and dot segments", "/base/dir/file.txt", "/absolute/./path.txt", "/absolute/path.txt"},
+			{"Absolute path with base and parent segments", "/base/dir/file.txt", "/absolute/../absolute/path.txt", "/absolute/path.txt"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result, err := Normalize(tc.relativeToFilePath, tc.filePath)
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedPath, result)
+			})
+		}
+	})
+
 	t.Run("Relative paths with base", func(t *testing.T) {
 		testCases := []struct {
 			name               string
@@ -39,7 +62,7 @@ func TestNormalize(t *testing.T) {
 			{"Simple relative path", "/base/dir/file.txt", "other.txt", "/base/dir/other.txt"},
 			{"Parent directory", "/base/dir/file.txt", "../other.txt", "/base/other.txt"},
 			{"Multiple parent directories", "/base/dir/subdir/file.txt", "../../other.txt", "/base/other.txt"},
-			{"Absolute path with base", "/base/dir/file.txt", "/absolute/path.txt", "/base/dir/absolute/path.txt"},
+			{"Relative path with base", "/base/dir/file.txt", "relative/path.txt", "/base/dir/relative/path.txt"},
 		}
 
 		for _, tc := range testCases {
@@ -59,9 +82,9 @@ func TestNormalize(t *testing.T) {
 			expectedPath       string
 		}{
 			{"File URI", "", "file:///path/to/file.txt", "/path/to/file.txt"},
-			{"File URI with base", "/base/dir/file.txt", "file:///path/to/file.txt", "/base/dir/path/to/file.txt"},
+			{"File URI with base", "/base/dir/file.txt", "file:///path/to/file.txt", "/path/to/file.txt"},
 			{"Base as file URI", "file:///base/dir/file.txt", "other.txt", "/base/dir/other.txt"},
-			{"Both as file URIs", "file:///base/dir/file.txt", "file:///path/to/file.txt", "/base/dir/path/to/file.txt"},
+			{"Both as file URIs", "file:///base/dir/file.txt", "file:///path/to/file.txt", "/path/to/file.txt"},
 			{"Relative path with base as URI", "file:///base/dir/file.txt", "../other.txt", "/base/other.txt"},
 		}
 

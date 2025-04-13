@@ -174,6 +174,34 @@ func TestDocstoreMemCache(t *testing.T) {
 		require.Equal(t, content, gotContent)
 	})
 
+	t.Run("GetInMemory with absolute path ignores relativeToFilePath", func(t *testing.T) {
+		d := NewDocstore()
+
+		// Create a file in memory
+		absolutePath := "/absolute/path/file.txt"
+		content := "Content for absolute path test"
+		err := d.OpenInMem(absolutePath, content)
+		require.NoError(t, err)
+
+		// Get the file using an absolute path with a different relativeToFilePath
+		relativeTo := "/some/other/path/file.txt"
+
+		// The relativeToFilePath should be ignored since absolutePath is absolute
+		gotContent, _, exists, err := d.GetInMemory(relativeTo, absolutePath)
+		require.NoError(t, err)
+		require.True(t, exists)
+		require.Equal(t, content, gotContent)
+
+		// Test with file:// prefix
+		fileURI := "file://" + absolutePath
+		relativeTo = "file:///some/other/path/file.txt"
+
+		gotContent, _, exists, err = d.GetInMemory(relativeTo, fileURI)
+		require.NoError(t, err)
+		require.True(t, exists)
+		require.Equal(t, content, gotContent)
+	})
+
 	t.Run("Error Cases", func(t *testing.T) {
 		d := NewDocstore()
 
@@ -335,6 +363,30 @@ func TestDocstoreDiskCache(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, targetContent, gotContent)
+	})
+
+	t.Run("Absolute path ignores relativeToFilePath", func(t *testing.T) {
+		// Create a test file
+		filePath := filepath.Join(tempDir, "absolute-path-test.txt")
+		content := "Absolute path content"
+		err = os.WriteFile(filePath, []byte(content), 0644)
+		require.NoError(t, err)
+
+		// Create a different directory to use as relativeToFilePath
+		baseDir := filepath.Join(tempDir, "different", "dir")
+		err = os.MkdirAll(baseDir, 0755)
+		require.NoError(t, err)
+		baseFilePath := filepath.Join(baseDir, "base-file.txt")
+
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Get the file using an absolute path with a relativeToFilePath
+		// The relativeToFilePath should be ignored
+		gotContent, _, exists, err := d.GetFromDisk(baseFilePath, filePath)
+		require.NoError(t, err)
+		require.True(t, exists)
+		require.Equal(t, content, gotContent)
 	})
 
 	t.Run("Memory cache takes precedence over disk cache", func(t *testing.T) {
@@ -511,6 +563,30 @@ func TestDocstoreGetFileAndHash(t *testing.T) {
 		gotContent, gotHash, err := d.GetFileAndHash(baseFilePath, relativePath)
 		require.NoError(t, err)
 		require.Equal(t, targetContent, gotContent)
+		require.NotEmpty(t, gotHash)
+	})
+
+	t.Run("With absolute path ignores relativeToFilePath", func(t *testing.T) {
+		// Create a test file
+		filePath := filepath.Join(tempDir, "absolute-getfileandhash-test.txt")
+		content := "Absolute path content for GetFileAndHash"
+		err = os.WriteFile(filePath, []byte(content), 0644)
+		require.NoError(t, err)
+
+		// Create a different directory to use as relativeToFilePath
+		baseDir := filepath.Join(tempDir, "different", "dir", "for", "getfileandhash")
+		err = os.MkdirAll(baseDir, 0755)
+		require.NoError(t, err)
+		baseFilePath := filepath.Join(baseDir, "base-file.txt")
+
+		// Initialize docstore
+		d := NewDocstore()
+
+		// Get the file using an absolute path with a relativeToFilePath
+		// The relativeToFilePath should be ignored
+		gotContent, gotHash, err := d.GetFileAndHash(baseFilePath, filePath)
+		require.NoError(t, err)
+		require.Equal(t, content, gotContent)
 		require.NotEmpty(t, gotHash)
 	})
 
