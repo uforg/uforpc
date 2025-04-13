@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"strings"
+
 	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
@@ -267,6 +269,25 @@ type ProcDeclChildMetaKV struct {
 type Docstring struct {
 	Positions
 	Value string `parser:"@Docstring"`
+}
+
+// GetExternal returns a path and a boolean indicating if the docstring
+// references an external Markdown file.
+func (d Docstring) GetExternal() (string, bool) {
+	trimmed := strings.TrimSpace(d.Value)
+	if strings.ContainsAny(trimmed, "\r\n") {
+		return "", false
+	}
+
+	if strings.TrimSuffix(".md", trimmed) == "" {
+		return "", false
+	}
+
+	if !strings.HasSuffix(trimmed, ".md") {
+		return "", false
+	}
+
+	return trimmed, true
 }
 
 // AnyLiteral represents any of the built-in literal types.
