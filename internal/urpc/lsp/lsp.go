@@ -118,6 +118,8 @@ func (l *LSP) handleMessage(rawBytes []byte) (bool, error) {
 		response, err = l.handleTextDocumentDidClose(rawBytes)
 	case "textDocument/formatting":
 		response, err = l.handleTextDocumentFormatting(rawBytes)
+	case "textDocument/definition":
+		response, err = l.handleTextDocumentDefinition(rawBytes)
 	}
 
 	if err != nil {

@@ -38,6 +38,8 @@ type ResponseMessageInitializeResultCapabilities struct {
 	TextDocumentSync           int  `json:"textDocumentSync"`
 	// Advertise diagnostic capabilities
 	DiagnosticProvider bool `json:"diagnosticProvider,omitempty"`
+	// Advertise definition capabilities
+	DefinitionProvider bool `json:"definitionProvider,omitempty"`
 }
 
 func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
@@ -71,6 +73,8 @@ func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
 				DocumentFormattingProvider: true,
 				// Diagnostics are supported if analyzer is available
 				DiagnosticProvider: l.analyzer != nil,
+				// Definition (go to definition) is supported if analyzer is available
+				DefinitionProvider: l.analyzer != nil,
 			},
 		},
 	}
