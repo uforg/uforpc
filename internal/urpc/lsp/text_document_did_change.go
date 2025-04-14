@@ -32,5 +32,10 @@ func (l *LSP) handleTextDocumentDidChange(rawMessage []byte) (any, error) {
 
 	l.logger.Info("text document did change", "uri", notification.Params.TextDocument.URI)
 
+	// Schedule analysis with debouncing
+	if l.analyzer != nil {
+		l.scheduleAnalysis(filePath)
+	}
+
 	return nil, nil
 }

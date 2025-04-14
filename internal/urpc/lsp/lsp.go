@@ -5,27 +5,47 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
+	"github.com/uforg/uforpc/internal/urpc/analyzer"
 	"github.com/uforg/uforpc/internal/urpc/docstore"
 )
 
 type LSP struct {
-	reader    io.Reader
-	writer    io.Writer
-	handlerMu sync.Mutex
-	logger    *LSPLogger
-	docstore  *docstore.Docstore
+	reader               io.Reader
+	writer               io.Writer
+	handlerMu            sync.Mutex
+	logger               *LSPLogger
+	docstore             *docstore.Docstore
+	analyzer             *analyzer.Analyzer
+	analysisTimer        *time.Timer
+	analysisTimerMu      sync.Mutex
+	analysisInProgress   bool
+	analysisInProgressMu sync.Mutex
 }
 
 // New creates a new LSP instance. It uses the given reader and writer to read and write
 // messages to the LSP server.
 func New(reader io.Reader, writer io.Writer) *LSP {
+	docstore := docstore.NewDocstore()
+	analyzerInstance, err := analyzer.NewAnalyzer(docstore)
+	if err != nil {
+		// If analyzer creation fails, we'll log it but continue without analyzer
+		logger := NewLSPLogger()
+		logger.Error("failed to create analyzer", "error", err)
+	}
+
 	return &LSP{
-		reader:    reader,
-		writer:    writer,
-		handlerMu: sync.Mutex{},
-		logger:    NewLSPLogger(),
-		docstore:  docstore.NewDocstore(),
+		reader:               reader,
+		writer:               writer,
+		handlerMu:            sync.Mutex{},
+		logger:               NewLSPLogger(),
+		docstore:             docstore,
+		analyzer:             analyzerInstance,
+		analysisTimer:        nil,
+		analysisTimerMu:      sync.Mutex{},
+		analysisInProgress:   false,
+		analysisInProgressMu: sync.Mutex{},
 	}
 }
 

@@ -25,5 +25,10 @@ func (l *LSP) handleTextDocumentDidClose(rawMessage []byte) (any, error) {
 
 	l.logger.Info("text document did close", "uri", notification.Params.TextDocument.URI)
 
+	// Clear diagnostics when a document is closed
+	if l.analyzer != nil {
+		l.clearDiagnostics(filePath)
+	}
+
 	return nil, nil
 }

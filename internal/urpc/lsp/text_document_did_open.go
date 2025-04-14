@@ -26,5 +26,10 @@ func (l *LSP) handleTextDocumentDidOpen(rawMessage []byte) (any, error) {
 
 	l.logger.Info("text document did open", "uri", notification.Params.TextDocument.URI)
 
+	// Trigger immediate analysis for newly opened documents
+	if l.analyzer != nil {
+		l.analyzeAndPublishDiagnostics(filePath)
+	}
+
 	return nil, nil
 }
