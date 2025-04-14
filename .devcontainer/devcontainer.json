@@ -16,6 +16,7 @@
       ],
       "settings": {
         "urpc.enable": false,
+        "urpc.binaryPath": "/workspaces/uforpc/dist/urpc",
         "deno.enable": true,
         "editor.formatOnSave": true,
         "editor.foldingStrategy": "indentation",

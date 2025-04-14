@@ -6,6 +6,9 @@ tasks:
   build:
     desc: Build all the binaries for all platforms
     cmds:
+      # Build for current platform
+      - go build -o ./dist/urpc ./cmd/urpc/.
+
       # LINUX builds
       - GOOS=linux GOARCH=amd64 go build -o ./dist/urpc-linux-amd64 ./cmd/urpc/.
       - GOOS=linux GOARCH=arm64 go build -o ./dist/urpc-linux-arm64 ./cmd/urpc/.
