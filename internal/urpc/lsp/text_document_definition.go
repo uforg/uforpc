@@ -105,11 +105,6 @@ func (l *LSP) findDefinition(content string, position ast.Position, combinedSche
 		return []Location{*location}
 	}
 
-	// Check if the token is a reference to a procedure
-	if location := findProcDefinition(token, position, combinedSchema); location != nil {
-		return []Location{*location}
-	}
-
 	return nil
 }
 
@@ -223,30 +218,6 @@ func findRuleDefinition(token string, _ ast.Position, combinedSchema analyzer.Co
 		Range: TextDocumentRange{
 			Start: convertASTPositionToLSPPosition(ruleDecl.Pos),
 			End:   convertASTPositionToLSPPosition(ruleDecl.EndPos),
-		},
-	}
-}
-
-// findProcDefinition finds the definition of a procedure.
-func findProcDefinition(token string, _ ast.Position, combinedSchema analyzer.CombinedSchema) *Location {
-	// Check if the token is a procedure name
-	procDecl, exists := combinedSchema.ProcDecls[token]
-	if !exists {
-		return nil
-	}
-
-	// Create a location for the procedure definition
-	// Ensure the URI has the file:// prefix
-	uri := procDecl.Pos.Filename
-	if !strings.HasPrefix(uri, "file://") {
-		uri = "file://" + uri
-	}
-
-	return &Location{
-		URI: uri,
-		Range: TextDocumentRange{
-			Start: convertASTPositionToLSPPosition(procDecl.Pos),
-			End:   convertASTPositionToLSPPosition(procDecl.EndPos),
 		},
 	}
 }
