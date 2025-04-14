@@ -11,9 +11,8 @@ import (
 // assertFlattenedSchema receives two strings representing the expected
 // flattened schema and the actual unflattened schema.
 //
-// It parses both strings, creates a TypeFlattener for the actual schema,
-// flattens it, and then compares the flattened schema with the expected
-// flattened schema.
+// It parses both strings, flattens the actual schema using the Flatten function,
+// and then compares the flattened schema with the expected flattened schema.
 func assertFlattenedSchema(t *testing.T, expected string, actual string) {
 	t.Helper()
 
@@ -26,8 +25,7 @@ func assertFlattenedSchema(t *testing.T, expected string, actual string) {
 	require.NoError(t, err)
 
 	// Flatten the actual schema
-	flattener := NewTypeFlattener(actualSchema)
-	actualSchema = flattener.Flatten()
+	actualSchema = Flatten(actualSchema)
 
 	// Compare the schemas directly, ignoring positions
 	testutil.ASTEqualNoPos(t, expectedSchema, actualSchema)
