@@ -40,6 +40,8 @@ type ResponseMessageInitializeResultCapabilities struct {
 	DiagnosticProvider bool `json:"diagnosticProvider,omitempty"`
 	// Advertise definition capabilities
 	DefinitionProvider bool `json:"definitionProvider,omitempty"`
+	// Advertise hover capabilities
+	HoverProvider bool `json:"hoverProvider,omitempty"`
 }
 
 func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
@@ -75,6 +77,8 @@ func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
 				DiagnosticProvider: l.analyzer != nil,
 				// Definition (go to definition) is supported if analyzer is available
 				DefinitionProvider: l.analyzer != nil,
+				// Hover is supported if analyzer is available
+				HoverProvider: l.analyzer != nil,
 			},
 		},
 	}
