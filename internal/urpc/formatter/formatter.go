@@ -20,13 +20,18 @@ func Format(filename, content string) (string, error) {
 		return "", fmt.Errorf("error parsing URPC: %w", err)
 	}
 
-	schFormatter := newSchemaFormatter(schema)
+	return FormatSchema(schema), nil
+}
+
+// FormatSchema formats an already parsed UFO RPC AST Schema.
+func FormatSchema(sch *ast.Schema) string {
+	schFormatter := newSchemaFormatter(sch)
 	formatted := schFormatter.format().String()
 
 	// Ensure the formatted string ends with exactly one newline
 	formatted = strings.TrimSpace(formatted)
 	formatted += "\n"
-	return formatted, nil
+	return formatted
 }
 
 // schemaFormatter is a formatter for a schema.
