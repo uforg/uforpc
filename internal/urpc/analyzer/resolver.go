@@ -151,7 +151,7 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 					Pos:    parserErr.Position(),
 					EndPos: parserErr.Position(),
 				},
-				Message: fmt.Sprintf(parserErr.Message()),
+				Message: parserErr.Message(),
 			})
 			return nil
 		}
