@@ -26,7 +26,7 @@ type RequestMessageTextDocumentDefinitionParams struct {
 type ResponseMessageTextDocumentDefinition struct {
 	ResponseMessage
 	// The result of the request. Can be a single location or an array of locations.
-	Result []Location `json:"result,omitempty"`
+	Result []Location `json:"result"`
 }
 
 // Location represents a location inside a resource, such as a line inside a text file.
