@@ -1321,12 +1321,10 @@ func TestParserComments(t *testing.T) {
 									Type: ast.FieldType{
 										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
-									Children: []*ast.FieldChild{
-										{
-											Comment: &ast.Comment{Block: testutil.Pointer(" Between field1 and field2 ")},
-										},
-									},
 								},
+							},
+							{
+								Comment: &ast.Comment{Block: testutil.Pointer(" Between field1 and field2 ")},
 							},
 							{
 								Field: &ast.Field{
@@ -1335,12 +1333,10 @@ func TestParserComments(t *testing.T) {
 									Type: ast.FieldType{
 										Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 									},
-									Children: []*ast.FieldChild{
-										{
-											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in type")},
-										},
-									},
 								},
+							},
+							{
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in type")},
 							},
 						},
 					},
@@ -1464,12 +1460,10 @@ func TestParserComments(t *testing.T) {
 												Type: ast.FieldType{
 													Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 												},
-												Children: []*ast.FieldChild{
-													{
-														Comment: &ast.Comment{Block: testutil.Pointer(" Between fieldIn1 and fieldIn2 ")},
-													},
-												},
 											},
+										},
+										{
+											Comment: &ast.Comment{Block: testutil.Pointer(" Between fieldIn1 and fieldIn2 ")},
 										},
 										{
 											Field: &ast.Field{
@@ -1477,12 +1471,10 @@ func TestParserComments(t *testing.T) {
 												Type: ast.FieldType{
 													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
-												Children: []*ast.FieldChild{
-													{
-														Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in input")},
-													},
-												},
 											},
+										},
+										{
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in input")},
 										},
 									},
 								},
@@ -1528,12 +1520,10 @@ func TestParserComments(t *testing.T) {
 												Type: ast.FieldType{
 													Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 												},
-												Children: []*ast.FieldChild{
-													{
-														Comment: &ast.Comment{Block: testutil.Pointer(" Between fieldOut1 and fieldOut2 ")},
-													},
-												},
 											},
+										},
+										{
+											Comment: &ast.Comment{Block: testutil.Pointer(" Between fieldOut1 and fieldOut2 ")},
 										},
 										{
 											Field: &ast.Field{
@@ -1541,12 +1531,10 @@ func TestParserComments(t *testing.T) {
 												Type: ast.FieldType{
 													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 												},
-												Children: []*ast.FieldChild{
-													{
-														Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in output")},
-													},
-												},
 											},
+										},
+										{
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in output")},
 										},
 									},
 								},
@@ -1653,12 +1641,10 @@ func TestParserComments(t *testing.T) {
 															Type: ast.FieldType{
 																Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 															},
-															Children: []*ast.FieldChild{
-																{
-																	Comment: &ast.Comment{Block: testutil.Pointer(" Between sub1 and sub2 ")},
-																},
-															},
 														},
+													},
+													{
+														Comment: &ast.Comment{Block: testutil.Pointer(" Between sub1 and sub2 ")},
 													},
 													{
 														Field: &ast.Field{
@@ -1666,12 +1652,10 @@ func TestParserComments(t *testing.T) {
 															Type: ast.FieldType{
 																Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
 															},
-															Children: []*ast.FieldChild{
-																{
-																	Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in nested")},
-																},
-															},
 														},
+													},
+													{
+														Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in nested")},
 													},
 												},
 											},
@@ -1687,7 +1671,7 @@ func TestParserComments(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
-	t.Run("Comments between Field rules", func(t *testing.T) {
+	t.Run("Comments between Field rules (are part of the field children)", func(t *testing.T) {
 		input := `
 			type MyType {
 				field: string
@@ -1695,7 +1679,8 @@ func TestParserComments(t *testing.T) {
 					@rule1
 					/* Between rule1 and rule2 */
 					@rule2("param")
-					// Trailing comment after rules
+
+				// Trailing comment after rules
 			}
 		`
 		parsed, err := ParserInstance.ParseString("schema.urpc", input)
@@ -1731,11 +1716,11 @@ func TestParserComments(t *testing.T) {
 												},
 											},
 										},
-										{
-											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment after rules")},
-										},
 									},
 								},
+							},
+							{
+								Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment after rules")},
 							},
 						},
 					},
@@ -1809,10 +1794,10 @@ func TestParserComments(t *testing.T) {
 									Children: []*ast.FieldChild{
 										{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on field")}}, // Comment after type, before rule
 										{Rule: &ast.FieldRule{Name: "rule1"}},
-										{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule")}}, // Comment after rule
 									},
 								},
 							},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule")}}, // Comment after rule
 						},
 					},
 				},

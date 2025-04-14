@@ -340,7 +340,9 @@ type Field struct {
 // FieldChild represents a child node following a Field's type definition (either a Comment or a FieldRule).
 type FieldChild struct {
 	Positions
-	Comment *Comment   `parser:"  @@"`
+	// Field comments are only captured if they are followed by a rule
+	// otherwise they are captured by the parent FieldOrComment
+	Comment *Comment   `parser:"  @@ (?= At Ident )"`
 	Rule    *FieldRule `parser:"| @@"`
 }
 
