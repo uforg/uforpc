@@ -151,7 +151,7 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 					Pos:    parserErr.Position(),
 					EndPos: parserErr.Position(),
 				},
-				Message: fmt.Sprintf("error parsing file: %v", parserErr),
+				Message: fmt.Sprintf(parserErr.Message()),
 			})
 			return nil
 		}
