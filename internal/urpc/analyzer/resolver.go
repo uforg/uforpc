@@ -65,7 +65,7 @@ func (r *resolver) resolve(entryPointFilePath string) (CombinedSchema, []Diagnos
 	}
 
 	// Resolve the entry point and all its imports
-	combinedSchema := r.resolveFile(normFilePath, ctx)
+	combinedSchema := r.resolveFile(nil, normFilePath, ctx)
 
 	// Create an empty schema if resolution failed completely
 	if combinedSchema == nil {
@@ -113,7 +113,7 @@ func (r *resolver) resolve(entryPointFilePath string) (CombinedSchema, []Diagnos
 }
 
 // resolveFile resolves a single file and all its imports
-func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schema {
+func (r *resolver) resolveFile(parentImport *ast.Import, filePath string, ctx *resolverContext) *ast.Schema {
 	// Check if we've already processed this file
 	if schema, exists := ctx.visitedFiles[filePath]; exists {
 		// Check for circular imports
@@ -130,11 +130,19 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 	// Read and parse the file
 	content, _, err := r.fileProvider.GetFileAndHash("", filePath)
 	if err != nil {
+		pos := ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0}
+		endPos := ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0}
+
+		if parentImport != nil {
+			pos = parentImport.Pos
+			endPos = parentImport.EndPos
+		}
+
 		// Create a diagnostic for the file reading error
 		diag := Diagnostic{
 			Positions: Positions{
-				Pos:    ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0},
-				EndPos: ast.Position{Filename: filePath, Line: 1, Column: 1, Offset: 0},
+				Pos:    pos,
+				EndPos: endPos,
 			},
 			Message: fmt.Sprintf("error reading file: %v", err),
 		}
@@ -204,7 +212,7 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 			}
 
 			// Recursively resolve the imported file
-			importedSchema := r.resolveFile(importPath, ctx)
+			importedSchema := r.resolveFile(child.Import, importPath, ctx)
 			if importedSchema == nil {
 				// Skip this import if resolution failed (diagnostics already added)
 				continue
@@ -216,11 +224,11 @@ func (r *resolver) resolveFile(filePath string, ctx *resolverContext) *ast.Schem
 					combinedSchema.Children = append(combinedSchema.Children, child)
 				}
 			}
+
+			continue
 		}
 
-		if child.Kind() != ast.SchemaChildKindImport {
-			combinedSchema.Children = append(combinedSchema.Children, child)
-		}
+		combinedSchema.Children = append(combinedSchema.Children, child)
 	}
 
 	// Remove this file from the import chain (backtracking)
