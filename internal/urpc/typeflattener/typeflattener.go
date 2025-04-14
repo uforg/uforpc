@@ -87,6 +87,7 @@ func (f *typeFlattener) collectFieldsFromExtendedTypes(typeDecl *ast.TypeDecl) [
 // hasCircularDependency checks if there is a circular dependency between types.
 // It returns true if the target type is found in the extends chain of the current type.
 func (f *typeFlattener) hasCircularDependency(currentType *ast.TypeDecl, targetName string, visited map[string]bool) bool {
+	// Mark current type as visited
 	visited[currentType.Name] = true
 
 	for _, extendTypeName := range currentType.Extends {
@@ -95,7 +96,7 @@ func (f *typeFlattener) hasCircularDependency(currentType *ast.TypeDecl, targetN
 			return true
 		}
 
-		// Skip if already visited
+		// Skip if already visited to prevent infinite recursion
 		if visited[extendTypeName] {
 			continue
 		}
@@ -106,8 +107,12 @@ func (f *typeFlattener) hasCircularDependency(currentType *ast.TypeDecl, targetN
 			continue
 		}
 
+		// Create a copy of the visited map for this branch of recursion
+		branchVisited := make(map[string]bool)
+		maps.Copy(branchVisited, visited)
+
 		// Recursively check the extended type
-		if f.hasCircularDependency(extendedType, targetName, make(map[string]bool)) {
+		if f.hasCircularDependency(extendedType, targetName, branchVisited) {
 			return true
 		}
 	}

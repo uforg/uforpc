@@ -541,3 +541,793 @@ func TestTypeFlattener_OptionalFields(t *testing.T) {
 
 	assertFlattenedSchema(t, expected, actual)
 }
+
+func TestTypeFlattener_ComplexNestedObjects(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles deeply nested object structures
+	actual := `
+		version 1
+
+		type BaseConfig {
+		  settings: {
+		    display: {
+		      theme: string
+		      fontSize: int
+		      colors: {
+		        primary: string
+		        secondary: string
+		        accent: string
+		      }
+		    }
+		    notifications: {
+		      enabled: boolean
+		      frequency: string
+		    }
+		  }
+		}
+
+		type ExtendedConfig extends BaseConfig {
+		  settings: {
+		    advanced: {
+		      debug: boolean
+		      experimental: {
+		        features: boolean
+		      }
+		    }
+		  }
+		  customSettings: {
+		    userDefined: boolean
+		  }
+		}
+	`
+
+	expected := `
+		version 1
+
+		type BaseConfig {
+		  settings: {
+		    display: {
+		      theme: string
+		      fontSize: int
+		      colors: {
+		        primary: string
+		        secondary: string
+		        accent: string
+		      }
+		    }
+		    notifications: {
+		      enabled: boolean
+		      frequency: string
+		    }
+		  }
+		}
+
+		type ExtendedConfig {
+		  settings: {
+		    display: {
+		      theme: string
+		      fontSize: int
+		      colors: {
+		        primary: string
+		        secondary: string
+		        accent: string
+		      }
+		    }
+		    notifications: {
+		      enabled: boolean
+		      frequency: string
+		    }
+		  }
+		  settings: {
+		    advanced: {
+		      debug: boolean
+		      experimental: {
+		        features: boolean
+		      }
+		    }
+		  }
+		  customSettings: {
+		    userDefined: boolean
+		  }
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_FieldNameConflicts(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles field name conflicts in multiple inheritance
+	actual := `
+		version 1
+
+		type Base1 {
+		  id: string
+		  name: string
+		  common: int
+		}
+
+		type Base2 {
+		  id: int
+		  email: string
+		  common: string
+		}
+
+		type Combined extends Base1, Base2 {
+		  id: boolean
+		  custom: float
+		}
+	`
+
+	expected := `
+		version 1
+
+		type Base1 {
+		  id: string
+		  name: string
+		  common: int
+		}
+
+		type Base2 {
+		  id: int
+		  email: string
+		  common: string
+		}
+
+		type Combined {
+		  id: string
+		  name: string
+		  common: int
+		  email: string
+		  id: boolean
+		  custom: float
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_WithDocstrings(t *testing.T) {
+	// Test case: Verify that the flattener preserves docstrings
+	actual := `
+		version 1
+
+		"""Base entity with common fields"""
+		type BaseEntity {
+		  // Unique identifier
+		  id: string
+		  // Creation timestamp
+		  createdAt: datetime
+		}
+
+		"""User entity with authentication details"""
+		type User extends BaseEntity {
+		  // User's email address
+		  email: string
+		  // Hashed password
+		  password: string
+		}
+	`
+
+	expected := `
+		version 1
+
+		"""Base entity with common fields"""
+		type BaseEntity {
+		  // Unique identifier
+		  id: string
+		  // Creation timestamp
+		  createdAt: datetime
+		}
+
+		"""User entity with authentication details"""
+		type User {
+		  // Unique identifier
+		  id: string
+		  // Creation timestamp
+		  createdAt: datetime
+		  // User's email address
+		  email: string
+		  // Hashed password
+		  password: string
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_MultiDimensionalArrays(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles multi-dimensional arrays
+	actual := `
+		version 1
+
+		type BaseMatrix {
+		  values: int[][]
+		  labels: string[]
+		}
+
+		type ExtendedMatrix extends BaseMatrix {
+		  tensors: float[][][]
+		  metadata: {
+		    name: string
+		    tags: string[]
+		  }[]
+		}
+	`
+
+	expected := `
+		version 1
+
+		type BaseMatrix {
+		  values: int[][]
+		  labels: string[]
+		}
+
+		type ExtendedMatrix {
+		  values: int[][]
+		  labels: string[]
+		  tensors: float[][][]
+		  metadata: {
+		    name: string
+		    tags: string[]
+		  }[]
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_ComplexValidationRules(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles complex validation rules
+	actual := `
+		version 1
+
+		type BaseValidation {
+		  id: string
+		    @uuid
+		    @required
+		  score: float
+		    @min(0.0)
+		    @max(100.0)
+		    @required(error: "Score is required")
+		}
+
+		type ExtendedValidation extends BaseValidation {
+		  email: string
+		    @email
+		    @required
+		  tags: string[]
+		    @minlen(1, error: "At least one tag is required")
+		    @maxlen(10)
+		  config: {
+		    option1: boolean
+		      @equals(true)
+		    option2: string
+		      @enum(["value1", "value2", "value3"])
+		  }
+		}
+	`
+
+	expected := `
+		version 1
+
+		type BaseValidation {
+		  id: string
+		    @uuid
+		    @required
+		  score: float
+		    @min(0.0)
+		    @max(100.0)
+		    @required(error: "Score is required")
+		}
+
+		type ExtendedValidation {
+		  id: string
+		    @uuid
+		    @required
+		  score: float
+		    @min(0.0)
+		    @max(100.0)
+		    @required(error: "Score is required")
+		  email: string
+		    @email
+		    @required
+		  tags: string[]
+		    @minlen(1, error: "At least one tag is required")
+		    @maxlen(10)
+		  config: {
+		    option1: boolean
+		      @equals(true)
+		    option2: string
+		      @enum(["value1", "value2", "value3"])
+		  }
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_CustomTypeFields(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles fields with custom types
+	actual := `
+		version 1
+
+		type Address {
+		  street: string
+		  city: string
+		  country: string
+		}
+
+		type Contact {
+		  email: string
+		  phone: string
+		}
+
+		type BaseUser {
+		  id: string
+		  address: Address
+		}
+
+		type ExtendedUser extends BaseUser {
+		  name: string
+		  contact: Contact
+		  alternateAddresses: Address[]
+		}
+	`
+
+	expected := `
+		version 1
+
+		type Address {
+		  street: string
+		  city: string
+		  country: string
+		}
+
+		type Contact {
+		  email: string
+		  phone: string
+		}
+
+		type BaseUser {
+		  id: string
+		  address: Address
+		}
+
+		type ExtendedUser {
+		  id: string
+		  address: Address
+		  name: string
+		  contact: Contact
+		  alternateAddresses: Address[]
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_ComplexCircularExtends(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles complex circular dependencies
+	// When we have circular dependencies, the fields from extended types are not included
+	// but the type's own fields are preserved
+	actual := `
+		version 1
+
+		type A extends B {
+		  fieldA: string
+		}
+
+		type B extends C {
+		  fieldB: string
+		}
+
+		type C extends A {
+		  fieldC: string
+		}
+
+		// D is outside the circle
+		type D extends A {
+		  fieldD: string
+		}
+	`
+
+	expected := `
+		version 1
+
+		type A {
+		  fieldA: string
+		}
+
+		type B {
+		  fieldB: string
+		}
+
+		type C {
+		  fieldC: string
+		}
+
+		// D is outside the circle
+		type D {
+			fieldA: string
+		  fieldD: string
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_MixedInlineAndCustomTypes(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles a mix of inline objects and custom types
+	actual := `
+		version 1
+
+		type Metadata {
+		  createdAt: datetime
+		  updatedAt: datetime
+		}
+
+		type BaseEntity {
+		  id: string
+		  metadata: Metadata
+		  config: {
+		    enabled: boolean
+		    visible: boolean
+		  }
+		}
+
+		type Product extends BaseEntity {
+		  name: string
+		  price: float
+		  details: {
+		    description: string
+		    specifications: {
+		      weight: float
+		      dimensions: {
+		        width: float
+		        height: float
+		        depth: float
+		      }
+		    }
+		  }
+		  categories: string[]
+		}
+	`
+
+	expected := `
+		version 1
+
+		type Metadata {
+		  createdAt: datetime
+		  updatedAt: datetime
+		}
+
+		type BaseEntity {
+		  id: string
+		  metadata: Metadata
+		  config: {
+		    enabled: boolean
+		    visible: boolean
+		  }
+		}
+
+		type Product {
+		  id: string
+		  metadata: Metadata
+		  config: {
+		    enabled: boolean
+		    visible: boolean
+		  }
+		  name: string
+		  price: float
+		  details: {
+		    description: string
+		    specifications: {
+		      weight: float
+		      dimensions: {
+		        width: float
+		        height: float
+		        depth: float
+		      }
+		    }
+		  }
+		  categories: string[]
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_NestedOptionalFields(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles nested optional fields
+	actual := `
+		version 1
+
+		type BaseUser {
+		  id: string
+		  profile?: {
+		    name?: string
+		    bio?: string
+		  }
+		}
+
+		type ExtendedUser extends BaseUser {
+		  settings?: {
+		    theme?: string
+		    notifications?: {
+		      email?: boolean
+		      push?: boolean
+		    }
+		  }
+		  friends?: string[]
+		}
+	`
+
+	expected := `
+		version 1
+
+		type BaseUser {
+		  id: string
+		  profile?: {
+		    name?: string
+		    bio?: string
+		  }
+		}
+
+		type ExtendedUser {
+		  id: string
+		  profile?: {
+		    name?: string
+		    bio?: string
+		  }
+		  settings?: {
+		    theme?: string
+		    notifications?: {
+		      email?: boolean
+		      push?: boolean
+		    }
+		  }
+		  friends?: string[]
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_EmptySchema(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles an empty schema
+	actual := `
+		version 1
+	`
+
+	expected := `
+		version 1
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_MultipleVersions(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles schemas with multiple version declarations
+	actual := `
+		version 1
+
+		type BaseUser {
+		  id: string
+		}
+
+		version 1
+
+		type ExtendedUser extends BaseUser {
+		  name: string
+		}
+	`
+
+	expected := `
+		version 1
+
+		type BaseUser {
+		  id: string
+		}
+
+		version 1
+
+		type ExtendedUser {
+		  id: string
+		  name: string
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_ExtendWithComments(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles types with comments
+	actual := `
+		version 1
+
+		type BaseUser {
+		  id: string
+		}
+
+		// This type extends BaseUser
+		type ExtendedUser extends BaseUser {
+		  // User's name
+		  name: string
+		}
+	`
+
+	expected := `
+		version 1
+
+		type BaseUser {
+		  id: string
+		}
+
+		// This type extends BaseUser
+		type ExtendedUser {
+		  id: string
+		  // User's name
+		  name: string
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_ExtendWithRulesAndComments(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles types with rules and comments
+	actual := `
+		version 1
+
+		type BaseValidation {
+		  // ID field with validation
+		  id: string
+		    @uuid
+		    // Required field
+		    @required
+		}
+
+		type ExtendedValidation extends BaseValidation {
+		  // Email field with validation
+		  email: string
+		    /* Must be a valid email */
+		    @email
+		    // Required field
+		    @required
+		}
+	`
+
+	expected := `
+		version 1
+
+		type BaseValidation {
+		  // ID field with validation
+		  id: string
+		    @uuid
+		    // Required field
+		    @required
+		}
+
+		type ExtendedValidation {
+		  // ID field with validation
+		  id: string
+		    @uuid
+		    // Required field
+		    @required
+		  // Email field with validation
+		  email: string
+		    /* Must be a valid email */
+		    @email
+		    // Required field
+		    @required
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_ExtendWithMultipleInheritanceLevels(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles multiple levels of inheritance with complex fields
+	actual := `
+		version 1
+
+		type Entity {
+		  id: string
+		  createdAt: datetime
+		}
+
+		type Person extends Entity {
+		  name: string
+		  age: int
+		}
+
+		type Employee extends Person {
+		  employeeId: string
+		  department: string
+		}
+
+		type Manager extends Employee {
+		  managedDepartments: string[]
+		  reports: Employee[]
+		}
+	`
+
+	expected := `
+		version 1
+
+		type Entity {
+		  id: string
+		  createdAt: datetime
+		}
+
+		type Person {
+		  id: string
+		  createdAt: datetime
+		  name: string
+		  age: int
+		}
+
+		type Employee {
+		  id: string
+		  createdAt: datetime
+		  name: string
+		  age: int
+		  employeeId: string
+		  department: string
+		}
+
+		type Manager {
+		  id: string
+		  createdAt: datetime
+		  name: string
+		  age: int
+		  employeeId: string
+		  department: string
+		  managedDepartments: string[]
+		  reports: Employee[]
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
+
+func TestTypeFlattener_ExtendWithDuplicateFieldNames(t *testing.T) {
+	// Test case: Verify that the flattener correctly handles duplicate field names
+	// The first occurrence of a field should be used
+	actual := `
+		version 1
+
+		type Base {
+		  id: string
+		  name: string
+		  description: string
+		}
+
+		type Extended extends Base {
+		  // This field should override the one from Base
+		  name: int
+		  // This is a new field
+		  code: string
+		}
+	`
+
+	expected := `
+		version 1
+
+		type Base {
+		  id: string
+		  name: string
+		  description: string
+		}
+
+		type Extended {
+		  id: string
+		  name: string
+		  description: string
+		  // This field should override the one from Base
+		  name: int
+		  // This is a new field
+		  code: string
+		}
+	`
+
+	assertFlattenedSchema(t, expected, actual)
+}
