@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"sync"
+
+	"github.com/uforg/uforpc/internal/urpc/docstore"
 )
 
 type LSP struct {
@@ -12,7 +14,7 @@ type LSP struct {
 	writer    io.Writer
 	handlerMu sync.Mutex
 	logger    *LSPLogger
-	docstore  *docstore
+	docstore  *docstore.Docstore
 }
 
 // New creates a new LSP instance. It uses the given reader and writer to read and write
@@ -23,7 +25,7 @@ func New(reader io.Reader, writer io.Writer) *LSP {
 		writer:    writer,
 		handlerMu: sync.Mutex{},
 		logger:    NewLSPLogger(),
-		docstore:  newDocstore(),
+		docstore:  docstore.NewDocstore(),
 	}
 }
 

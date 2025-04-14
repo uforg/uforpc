@@ -1,5 +1,7 @@
 package lsp
 
+import "fmt"
+
 type NotificationMessageTextDocumentDidChange struct {
 	NotificationMessage
 	Params NotificationMessageTextDocumentDidChangeParams `json:"params"`
@@ -18,8 +20,14 @@ func (l *LSP) handleTextDocumentDidChange(rawMessage []byte) (any, error) {
 		return nil, err
 	}
 
-	if err := l.docstore.change(notification.Params); err != nil {
-		return nil, err
+	if len(notification.Params.ContentChanges) == 0 {
+		return nil, fmt.Errorf("no content changes provided")
+	}
+
+	filePath := notification.Params.TextDocument.URI
+	content := notification.Params.ContentChanges[0].Text
+	if err := l.docstore.ChangeInMem(filePath, content); err != nil {
+		return nil, fmt.Errorf("failed to change in memory file: %w", err)
 	}
 
 	l.logger.Info("text document did change", "uri", notification.Params.TextDocument.URI)

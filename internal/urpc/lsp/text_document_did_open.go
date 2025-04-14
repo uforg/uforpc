@@ -1,5 +1,7 @@
 package lsp
 
+import "fmt"
+
 type NotificationMessageTextDocumentDidOpen struct {
 	NotificationMessage
 	Params NotificationMessageTextDocumentDidOpenParams `json:"params"`
@@ -16,8 +18,10 @@ func (l *LSP) handleTextDocumentDidOpen(rawMessage []byte) (any, error) {
 		return nil, err
 	}
 
-	if err := l.docstore.open(notification.Params); err != nil {
-		return nil, err
+	filePath := notification.Params.TextDocument.URI
+	content := notification.Params.TextDocument.Text
+	if err := l.docstore.OpenInMem(filePath, content); err != nil {
+		return nil, fmt.Errorf("failed to open in memory file: %w", err)
 	}
 
 	l.logger.Info("text document did open", "uri", notification.Params.TextDocument.URI)

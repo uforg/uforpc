@@ -28,9 +28,13 @@ func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) (any, error) {
 		return nil, fmt.Errorf("failed to decode text document formatting request: %w", err)
 	}
 
-	doc, err := l.docstore.get(request.Params.TextDocument.URI)
+	filePath := request.Params.TextDocument.URI
+	content, _, found, err := l.docstore.GetInMemory("", filePath)
+	if !found {
+		return nil, fmt.Errorf("text document not found in memory: %s", filePath)
+	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get text document: %w", err)
+		return nil, fmt.Errorf("failed to get in memory text document: %w", err)
 	}
 
 	response := ResponseMessageTextDocumentFormatting{
@@ -41,13 +45,13 @@ func (l *LSP) handleTextDocumentFormatting(rawMessage []byte) (any, error) {
 		Result: nil,
 	}
 
-	formattedText, err := formatter.Format(request.Params.TextDocument.URI, doc.rawText)
+	formattedText, err := formatter.Format(filePath, content)
 	if err != nil {
 		// If formatting fails, return no edits.
 		return response, nil
 	}
 
-	lines := strings.Split(doc.rawText, "\n")
+	lines := strings.Split(content, "\n")
 	lastLine := max(len(lines)-1, 0)
 	lastLineChar := len(lines[lastLine])
 
