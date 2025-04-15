@@ -356,6 +356,29 @@ func TestLexer(t *testing.T) {
 		require.Equal(t, tests, tokens)
 	})
 
+	t.Run("TestLexerEmptyComments", func(t *testing.T) {
+		input := "//\nversion 1/**/version 1"
+
+		tests := []token.Token{
+			{Type: token.Comment, Literal: ""},
+			{Type: token.Newline, Literal: "\n"},
+			{Type: token.Version, Literal: "version"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.IntLiteral, Literal: "1"},
+			{Type: token.CommentBlock, Literal: ""},
+			{Type: token.Version, Literal: "version"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.IntLiteral, Literal: "1"},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		for i, test := range tests {
+			tok := lex.NextToken()
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+		}
+	})
+
 	t.Run("TestLexerCommentsPositions", func(t *testing.T) {
 		input := "// This is a comment\n\n/* This is a comment */\n\n// This is a comment"
 

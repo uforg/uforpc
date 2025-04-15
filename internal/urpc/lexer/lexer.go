@@ -270,10 +270,31 @@ func (l *Lexer) readComment() (string, bool) {
 
 	// Skip the opening comment characters
 	l.readNextChar()
+
+	// Handle empty comments
+	if isSingleLine {
+		nextChar, eofReached := l.peekChar(1)
+		if eofReached || nextChar == '\n' {
+			return "", isMultiline
+		}
+	}
+
+	if isMultiline {
+		nextChar, eofReached := l.peekChar(1)
+		nextChar2, eofReached2 := l.peekChar(2)
+
+		if eofReached || eofReached2 || (nextChar == '*' && nextChar2 == '/') {
+			// Skip the closing comment characters
+			l.readNextChar()
+			l.readNextChar()
+			return "", isMultiline
+		}
+	}
+
+	// Read first character after the opening comment characters
 	l.readNextChar()
 
 	var comment string
-	isMultilineComment := false
 	for {
 		comment += string(l.currentChar)
 
@@ -292,15 +313,15 @@ func (l *Lexer) readComment() (string, bool) {
 				// Skip the closing comment characters
 				l.readNextChar()
 				l.readNextChar()
-				isMultilineComment = true
 				break
 			}
 		}
 
+		// Read the next character because it is not the end of the comment
 		l.readNextChar()
 	}
 
-	return comment, isMultilineComment
+	return comment, isMultiline
 }
 
 // NextToken returns the next token from the input.
