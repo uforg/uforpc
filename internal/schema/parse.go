@@ -7,7 +7,7 @@ import (
 
 // ParseSchema parses and validates a JSON schema string into a Schema struct
 func ParseSchema(schemaStr string) (Schema, error) {
-	if err := ValidateSchema(schemaStr); err != nil {
+	if err := validateSchema(schemaStr); err != nil {
 		return Schema{}, fmt.Errorf("invalid schema: %w", err)
 	}
 

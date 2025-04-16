@@ -29,9 +29,9 @@ func compileJSONSchema() (*jsonschema.Schema, error) {
 	return c.Compile(dummySchemaURL)
 }
 
-// ValidateSchema validates the input schema against the defined JSON schema
-func ValidateSchema(schema string) error {
-	unmarshaled, err := jsonschema.UnmarshalJSON(strings.NewReader(schema))
+// validateSchema validates the input schema against the defined JSON schema
+func validateSchema(inputSchema string) error {
+	unmarshaled, err := jsonschema.UnmarshalJSON(strings.NewReader(inputSchema))
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal input schema: %w", err)
 	}
