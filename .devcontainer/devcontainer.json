@@ -12,7 +12,8 @@
         "mhutchie.git-graph",
         "mutantdino.resourcemonitor",
         "Compile-TomaszKasperczyk.copy-to-llm",
-        "donjayamanne.githistory"
+        "donjayamanne.githistory",
+        "ryu1kn.partial-diff"
       ],
       "settings": {
         "urpc.enable": false,
