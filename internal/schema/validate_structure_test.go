@@ -617,4 +617,197 @@ func TestValidateStructure(t *testing.T) {
 		err = validateStructure(schema)
 		require.NoError(t, err)
 	})
+
+	t.Run("Field uses undefined rule", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "type",
+					"name": "User",
+					"fields": [
+						{
+							"name": "id",
+							"typeName": "string",
+							"depth": 0,
+							"optional": false,
+							"rules": [
+								{
+									"rule": "uuid",
+									"param": null,
+									"error": null
+								}
+							]
+						}
+					]
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+
+		err = validateStructure(schema)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "field 'id' in type 'User' uses undefined rule: uuid")
+	})
+
+	t.Run("Inline field uses undefined rule", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "type",
+					"name": "User",
+					"fields": [
+						{
+							"name": "address",
+							"typeInline": {
+								"fields": [
+									{
+										"name": "city",
+										"typeName": "string",
+										"depth": 0,
+										"optional": false,
+										"rules": [
+											{
+												"rule": "minlen",
+												"param": null,
+												"error": null
+											}
+										]
+									}
+								]
+							},
+							"depth": 0,
+							"optional": false,
+							"rules": []
+						}
+					]
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+
+		err = validateStructure(schema)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "field 'city' in inline type in field 'address' of type 'User' uses undefined rule: minlen")
+	})
+
+	t.Run("Procedure input field uses undefined rule", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "proc",
+					"name": "GetUser",
+					"input": [
+						{
+							"name": "id",
+							"typeName": "string",
+							"depth": 0,
+							"optional": false,
+							"rules": [
+								{
+									"rule": "required",
+									"param": null,
+									"error": null
+								}
+							]
+						}
+					],
+					"output": [],
+					"meta": {}
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+
+		err = validateStructure(schema)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "input field 'id' in procedure 'GetUser' uses undefined rule: required")
+	})
+
+	t.Run("Procedure output field uses undefined rule", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "proc",
+					"name": "GetUser",
+					"input": [],
+					"output": [
+						{
+							"name": "success",
+							"typeName": "boolean",
+							"depth": 0,
+							"optional": false,
+							"rules": [
+								{
+									"rule": "equals",
+									"param": null,
+									"error": null
+								}
+							]
+						}
+					],
+					"meta": {}
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+
+		err = validateStructure(schema)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "output field 'success' in procedure 'GetUser' uses undefined rule: equals")
+	})
+
+	t.Run("Valid schema with defined rules", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "rule",
+					"name": "uuid",
+					"for": "string"
+				},
+				{
+					"kind": "type",
+					"name": "User",
+					"fields": [
+						{
+							"name": "id",
+							"typeName": "string",
+							"depth": 0,
+							"optional": false,
+							"rules": [
+								{
+									"rule": "uuid",
+									"param": null,
+									"error": null
+								}
+							]
+						}
+					]
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+
+		err = validateStructure(schema)
+		require.NoError(t, err)
+	})
 }

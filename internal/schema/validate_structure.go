@@ -12,6 +12,7 @@ import (
 //   - No duplicate custom rule names
 //   - All custom types are defined
 //   - No duplicate custom type names
+//   - All rules applied to fields are defined
 //   - No circular custom type references (only optional circles are allowed)
 func validateStructure(sch Schema) error {
 	// Check for duplicate rule names
@@ -31,6 +32,11 @@ func validateStructure(sch Schema) error {
 
 	// Check that all custom types referenced in fields are defined
 	if err := validateFieldTypeReferences(sch); err != nil {
+		return err
+	}
+
+	// Check that all rules applied to fields are defined
+	if err := validateAppliedRules(sch); err != nil {
 		return err
 	}
 
@@ -323,6 +329,102 @@ func addInlineTypeDependencies(parentType string, fields []FieldDefinition, pare
 				dependencyGraph, optionalFields)
 		}
 	}
+}
+
+// validateAppliedRules checks that all rules applied to fields are defined
+func validateAppliedRules(sch Schema) error {
+	// Get all defined rule names
+	ruleNodes := sch.GetRuleNodes()
+	definedRules := make(map[string]bool)
+	for _, rule := range ruleNodes {
+		definedRules[rule.Name] = true
+	}
+
+	// Check rules in type fields
+	typeNodes := sch.GetTypeNodes()
+	for _, typeNode := range typeNodes {
+		for _, field := range typeNode.Fields {
+			if err := validateFieldRules(field, definedRules,
+				fmt.Sprintf("field '%s' in type '%s'", field.Name, typeNode.Name)); err != nil {
+				return err
+			}
+
+			// Check inline types recursively
+			if field.IsInline() {
+				if err := validateInlineTypeRules(field.TypeInline.Fields, definedRules,
+					fmt.Sprintf("inline type in field '%s' of type '%s'", field.Name, typeNode.Name)); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	// Check rules in procedure input and output fields
+	procNodes := sch.GetProcNodes()
+	for _, procNode := range procNodes {
+		// Check input fields
+		for _, field := range procNode.Input {
+			if err := validateFieldRules(field, definedRules,
+				fmt.Sprintf("input field '%s' in procedure '%s'", field.Name, procNode.Name)); err != nil {
+				return err
+			}
+
+			// Check inline types recursively
+			if field.IsInline() {
+				if err := validateInlineTypeRules(field.TypeInline.Fields, definedRules,
+					fmt.Sprintf("inline type in input field '%s' of procedure '%s'", field.Name, procNode.Name)); err != nil {
+					return err
+				}
+			}
+		}
+
+		// Check output fields
+		for _, field := range procNode.Output {
+			if err := validateFieldRules(field, definedRules,
+				fmt.Sprintf("output field '%s' in procedure '%s'", field.Name, procNode.Name)); err != nil {
+				return err
+			}
+
+			// Check inline types recursively
+			if field.IsInline() {
+				if err := validateInlineTypeRules(field.TypeInline.Fields, definedRules,
+					fmt.Sprintf("inline type in output field '%s' of procedure '%s'", field.Name, procNode.Name)); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// validateFieldRules checks that all rules applied to a field are defined
+func validateFieldRules(field FieldDefinition, definedRules map[string]bool, context string) error {
+	for _, rule := range field.Rules {
+		if !definedRules[rule.Rule] {
+			return fmt.Errorf("%s uses undefined rule: %s", context, rule.Rule)
+		}
+	}
+	return nil
+}
+
+// validateInlineTypeRules recursively checks rules in inline type definitions
+func validateInlineTypeRules(fields []FieldDefinition, definedRules map[string]bool, context string) error {
+	for _, field := range fields {
+		if err := validateFieldRules(field, definedRules,
+			fmt.Sprintf("field '%s' in %s", field.Name, context)); err != nil {
+			return err
+		}
+
+		// Recursively check nested inline types
+		if field.IsInline() {
+			nestedContext := fmt.Sprintf("inline type in field '%s' of %s", field.Name, context)
+			if err := validateInlineTypeRules(field.TypeInline.Fields, definedRules, nestedContext); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // detectCycle performs DFS to detect cycles in the dependency graph
