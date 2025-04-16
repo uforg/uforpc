@@ -17,6 +17,9 @@ import (
 // treat them literally as strings.
 //
 // All comments and comment blocks will be ignored.
+//
+// To get the string representation of the JSON Schema, you can use the
+// json.Marshal function.
 func ToJSON(astSchema ast.Schema) (schema.Schema, error) {
 	return schema.Schema{}, nil
 }
