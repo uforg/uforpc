@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"slices"
 
 	"github.com/orsinium-labs/enum"
 )
@@ -323,6 +324,16 @@ func (fd *FieldDefinition) IsNamed() bool {
 // IsInline checks if the field definition uses an inline type.
 func (fd *FieldDefinition) IsInline() bool {
 	return fd.TypeInline != nil
+}
+
+// IsBuiltInType checks if the field definition uses a built-in type.
+func (fd *FieldDefinition) IsBuiltInType() bool {
+	return fd.IsNamed() && slices.Contains([]string{"string", "int", "float", "boolean", "datetime"}, *fd.TypeName)
+}
+
+// IsCustomType checks if the field definition uses a custom type.
+func (fd *FieldDefinition) IsCustomType() bool {
+	return fd.IsNamed() && !fd.IsBuiltInType()
 }
 
 // InlineTypeDefinition represents the structure of an anonymous inline object type.
