@@ -2,204 +2,352 @@ package schema
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 
 	"github.com/orsinium-labs/enum"
 )
 
-// FieldType represents possible field types in the schema
-type FieldType enum.Member[string]
+///////////
+// ENUMS //
+///////////
 
-// Field types enum values
-var (
-	FieldTypeString  = FieldType{"string"}
-	FieldTypeInt     = FieldType{"int"}
-	FieldTypeFloat   = FieldType{"float"}
-	FieldTypeBoolean = FieldType{"boolean"}
-	FieldTypeObject  = FieldType{"object"}
-	FieldTypeArray   = FieldType{"array"}
+// PrimitiveType represents the primitive type names defined in the URPC specification.
+type PrimitiveType enum.Member[string]
 
-	// FieldTypes is the enum containing all built-in field types
-	FieldTypes = enum.New(
-		FieldTypeString,
-		FieldTypeInt,
-		FieldTypeFloat,
-		FieldTypeBoolean,
-		FieldTypeObject,
-		FieldTypeArray,
-	)
-)
-
-// MarshalJSON implements json.Marshaler for FieldType
-func (f FieldType) MarshalJSON() ([]byte, error) {
+func (f PrimitiveType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(f.Value)
 }
 
-// UnmarshalJSON implements json.Unmarshaler for FieldType
-func (f *FieldType) UnmarshalJSON(data []byte) error {
+func (f *PrimitiveType) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &f.Value)
 }
 
-// Schema represents the main schema structure containing types and procedures
+var (
+	PrimitiveTypeString   = PrimitiveType{Value: "string"}
+	PrimitiveTypeInt      = PrimitiveType{Value: "int"}
+	PrimitiveTypeFloat    = PrimitiveType{Value: "float"}
+	PrimitiveTypeBoolean  = PrimitiveType{Value: "boolean"}
+	PrimitiveTypeDatetime = PrimitiveType{Value: "datetime"}
+)
+
+// ParamPrimitiveType represents the primitive type names allowed in rule parameters.
+type ParamPrimitiveType enum.Member[string]
+
+func (f ParamPrimitiveType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(f.Value)
+}
+
+func (f *ParamPrimitiveType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &f.Value)
+}
+
+var (
+	ParamPrimitiveTypeString  = ParamPrimitiveType{Value: "string"}
+	ParamPrimitiveTypeInt     = ParamPrimitiveType{Value: "int"}
+	ParamPrimitiveTypeFloat   = ParamPrimitiveType{Value: "float"}
+	ParamPrimitiveTypeBoolean = ParamPrimitiveType{Value: "boolean"}
+)
+
+////////////////////
+// Main Structure //
+////////////////////
+
+// Node represents a generic node in the URPC schema structure.
+// All specific node types (DocNode, RuleNode, etc.) implement this interface.
+type Node interface {
+	NodeKind() string
+}
+
+// Schema represents the root of the intermediate JSON structure.
 type Schema struct {
-	Version    int                  `json:"version"`
-	Types      map[string]Type      `json:"types"`
-	Procedures map[string]Procedure `json:"procedures"`
+	// Version is the URPC specification version (always 1 according to the schema).
+	Version int `json:"version"`
+	// Nodes contains the ordered list of declared elements in the schema.
+	Nodes []Node `json:"nodes"`
 }
 
-// NewSchema creates a new Schema instance with initialized maps
-func NewSchema() Schema {
-	return Schema{
-		Version:    1,
-		Types:      make(map[string]Type),
-		Procedures: make(map[string]Procedure),
+// UnmarshalJSON implements custom JSON unmarshalling for Schema to handle the polymorphic Nodes array.
+func (s *Schema) UnmarshalJSON(data []byte) error {
+	// 1. Unmarshal into a temporary struct to get Version and raw Nodes data.
+	var rawSchema struct {
+		Version int               `json:"version"`
+		Nodes   []json.RawMessage `json:"nodes"`
 	}
+	if err := json.Unmarshal(data, &rawSchema); err != nil {
+		return fmt.Errorf("failed to unmarshal raw schema: %w", err)
+	}
+
+	// 2. Assign Version.
+	s.Version = rawSchema.Version
+	if s.Version != 1 {
+		return fmt.Errorf("unsupported schema version: %d", s.Version)
+	}
+
+	// 3. Process each raw node message.
+	s.Nodes = make([]Node, 0, len(rawSchema.Nodes))
+	var nodeKind struct {
+		Kind string `json:"kind"`
+	}
+
+	for i, rawNode := range rawSchema.Nodes {
+		// 3.1. Peek at the kind field.
+		if err := json.Unmarshal(rawNode, &nodeKind); err != nil {
+			return fmt.Errorf("failed to determine kind of node at index %d: %w", i, err)
+		}
+
+		// 3.2. Unmarshal into the specific node type based on kind.
+		var node Node
+		var err error
+		switch nodeKind.Kind {
+		case "doc":
+			var docNode NodeDoc
+			err = json.Unmarshal(rawNode, &docNode)
+			node = &docNode
+		case "rule":
+			var ruleNode NodeRule
+			err = json.Unmarshal(rawNode, &ruleNode)
+			node = &ruleNode
+		case "type":
+			var typeNode NodeType
+			err = json.Unmarshal(rawNode, &typeNode)
+			node = &typeNode
+		case "proc":
+			var procNode NodeProc
+			err = json.Unmarshal(rawNode, &procNode)
+			node = &procNode
+		default:
+			return fmt.Errorf("unknown node kind '%s' at index %d", nodeKind.Kind, i)
+		}
+
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal node of kind '%s' at index %d: %w", nodeKind.Kind, i, err)
+		}
+		s.Nodes = append(s.Nodes, node)
+	}
+
+	return nil
 }
 
-type Type struct {
-	Description string           `json:"description,omitempty"`
-	Fields      map[string]Field `json:"fields,omitempty"`
-}
-
-// Field represents a schema field with its type, description, validation rules and subelements
-type Field struct {
-	Type        string           `json:"type"`
-	Description string           `json:"description,omitempty"`
-	Optional    bool             `json:"optional,omitempty"`
-	Fields      map[string]Field `json:"fields,omitempty"`
-	ArrayType   *Field           `json:"arrayType,omitempty"`
-
-	Rules json.RawMessage `json:"rules,omitempty"`
-	// Processed rules - not directly marshaled/unmarshaled
-	ProcessedRules Rules `json:"-"`
-}
-
-// IsBuiltInType checks if the field has a built-in type (string, int, etc.)
-func (f Field) IsBuiltInType() bool {
-	for _, fieldType := range FieldTypes.Members() {
-		if fieldType.Value == f.Type {
-			return true
+// GetDocNodes returns all DocNode instances from the schema.
+func (s *Schema) GetDocNodes() []*NodeDoc {
+	docNodes := []*NodeDoc{}
+	for _, node := range s.Nodes {
+		if docNode, ok := node.(*NodeDoc); ok {
+			docNodes = append(docNodes, docNode)
 		}
 	}
-	return false
+	return docNodes
 }
 
-// IsCustomType checks if the field has a custom type defined in the schema
-func (f Field) IsCustomType() bool {
-	return !f.IsBuiltInType()
-}
-
-// GetFieldType returns the FieldType enum for built-in types
-func (f Field) GetFieldType() (FieldType, bool) {
-	for _, fieldType := range FieldTypes.Members() {
-		if fieldType.Value == f.Type {
-			return fieldType, true
+// GetRuleNodes returns all RuleNode instances from the schema.
+func (s *Schema) GetRuleNodes() []*NodeRule {
+	ruleNodes := []*NodeRule{}
+	for _, node := range s.Nodes {
+		if ruleNode, ok := node.(*NodeRule); ok {
+			ruleNodes = append(ruleNodes, ruleNode)
 		}
 	}
-	return FieldType{}, false
+	return ruleNodes
 }
 
-// Procedure represents a procedure definition with its inputs, outputs and metadata
-type Procedure struct {
-	Description string           `json:"description,omitzero"`
-	Input       map[string]Field `json:"input,omitzero"`
-	Output      map[string]Field `json:"output,omitzero"`
-	Meta        map[string]any   `json:"meta,omitempty"`
+// GetTypeNodes returns all TypeNode instances from the schema.
+func (s *Schema) GetTypeNodes() []*NodeType {
+	typeNodes := []*NodeType{}
+	for _, node := range s.Nodes {
+		if typeNode, ok := node.(*NodeType); ok {
+			typeNodes = append(typeNodes, typeNode)
+		}
+	}
+	return typeNodes
 }
 
-// Rules is the interface implemented by all rule types
-type Rules any
-
-// StringRules defines validation rules for string fields
-type StringRules struct {
-	Equals    RuleWithStringValue `json:"equals,omitzero"`
-	Contains  RuleWithStringValue `json:"contains,omitzero"`
-	MinLen    RuleWithIntValue    `json:"minLen,omitzero"`
-	MaxLen    RuleWithIntValue    `json:"maxLen,omitzero"`
-	Enum      RuleWithStringArray `json:"enum,omitzero"`
-	Email     RuleSimple          `json:"email,omitzero"`
-	ISO8601   RuleSimple          `json:"iso8601,omitzero"`
-	UUID      RuleSimple          `json:"uuid,omitzero"`
-	JSON      RuleSimple          `json:"json,omitzero"`
-	Lowercase RuleSimple          `json:"lowercase,omitzero"`
-	Uppercase RuleSimple          `json:"uppercase,omitzero"`
+// GetProcNodes returns all ProcNode instances from the schema.
+func (s *Schema) GetProcNodes() []*NodeProc {
+	procNodes := []*NodeProc{}
+	for _, node := range s.Nodes {
+		if procNode, ok := node.(*NodeProc); ok {
+			procNodes = append(procNodes, procNode)
+		}
+	}
+	return procNodes
 }
 
-// IntRules defines validation rules for integer fields
-type IntRules struct {
-	Equals RuleWithIntValue `json:"equals,omitzero"`
-	Min    RuleWithIntValue `json:"min,omitzero"`
-	Max    RuleWithIntValue `json:"max,omitzero"`
-	Enum   RuleWithIntArray `json:"enum,omitzero"`
+////////////////
+// Node Types //
+////////////////
+
+// NodeDoc represents a standalone documentation block.
+type NodeDoc struct {
+	Kind    string `json:"kind"` // Always "doc"
+	Content string `json:"content"`
 }
 
-// FloatRules defines validation rules for float fields
-type FloatRules struct {
-	Equals RuleWithNumberValue `json:"equals,omitzero"`
-	Min    RuleWithNumberValue `json:"min,omitzero"`
-	Max    RuleWithNumberValue `json:"max,omitzero"`
-	Enum   RuleWithNumberArray `json:"enum,omitzero"`
+func (n *NodeDoc) NodeKind() string { return n.Kind }
+
+// NodeRule represents the definition of a custom validation rule.
+type NodeRule struct {
+	Kind string `json:"kind"` // Always "rule"
+	Name string `json:"name"`
+	// Doc is the associated documentation string (optional).
+	Doc *string `json:"doc,omitempty"`
+	// For indicates the primitive or custom type name this rule applies to.
+	For string `json:"for"`
+	// Param defines the parameter structure expected by this rule (null if none).
+	Param *ParamDefinition `json:"paramDef,omitempty"` // Pointer handles null
+	// Error is the default error message for the rule (optional).
+	Error *string `json:"error,omitempty"`
 }
 
-// BooleanRules defines validation rules for boolean fields
-type BooleanRules struct {
-	Equals RuleWithBooleanValue `json:"equals,omitzero"`
+func (n *NodeRule) NodeKind() string { return n.Kind }
+
+// NodeType represents the definition of a custom data type.
+type NodeType struct {
+	Kind string `json:"kind"` // Always "type"
+	Name string `json:"name"`
+	// Doc is the associated documentation string (optional).
+	Doc *string `json:"doc,omitempty"`
+	// Fields is the ordered list of fields within the type.
+	Fields []FieldDefinition `json:"fields"`
 }
 
-// ObjectRules defines validation rules for object fields
-type ObjectRules struct{}
+func (n *NodeType) NodeKind() string { return n.Kind }
 
-// ArrayRules defines validation rules for array fields
-type ArrayRules struct {
-	MinLen RuleWithIntValue `json:"minLen,omitzero"`
-	MaxLen RuleWithIntValue `json:"maxLen,omitzero"`
+// NodeProc represents the definition of an RPC procedure.
+type NodeProc struct {
+	Kind string `json:"kind"` // Always "proc"
+	Name string `json:"name"`
+	// Doc is the associated documentation string (optional).
+	Doc *string `json:"doc,omitempty"`
+	// Input is the ordered list of input fields for the procedure.
+	Input []FieldDefinition `json:"input"`
+	// Output is the ordered list of output fields for the procedure.
+	Output []FieldDefinition `json:"output"`
+	// Meta contains optional key-value metadata.
+	Meta map[string]MetaValue `json:"meta,omitempty"`
 }
 
-// CustomTypeRules defines validation rules for custom type fields
-type CustomTypeRules struct{}
+func (n *NodeProc) NodeKind() string { return n.Kind }
 
-// RuleSimple represents a simple validation rule with an optional error message
-type RuleSimple struct {
-	ErrorMessage string `json:"errorMessage,omitempty"`
+//////////////////////////
+// Auxiliary Structures //
+//////////////////////////
+
+// MetaValue holds a metadata value, using mutually exclusive fields for type safety.
+type MetaValue struct {
+	StringVal *string  `json:"-"` // Ignored by standard JSON marshalling/unmarshalling
+	IntVal    *int64   `json:"-"`
+	FloatVal  *float64 `json:"-"`
+	BoolVal   *bool    `json:"-"`
 }
 
-// RuleWithStringValue represents a validation rule with a string value
-type RuleWithStringValue struct {
-	Value        string `json:"value"`
-	ErrorMessage string `json:"errorMessage,omitempty"`
+// UnmarshalJSON implements custom unmarshalling for MetaValue.
+// It validates the incoming JSON type and stores it in the corresponding field.
+func (mv *MetaValue) UnmarshalJSON(data []byte) error {
+	var rawValue any
+	if err := json.Unmarshal(data, &rawValue); err != nil {
+		return fmt.Errorf("failed to unmarshal meta value: %w", err)
+	}
+
+	// Reset fields before assigning
+	mv.StringVal = nil
+	mv.IntVal = nil
+	mv.FloatVal = nil
+	mv.BoolVal = nil
+
+	switch v := rawValue.(type) {
+	case string:
+		mv.StringVal = &v
+	case float64: // JSON numbers are float64
+		// Check if it's an integer without loss of precision
+		if math.Trunc(v) == v {
+			intVal := int64(v)
+			mv.IntVal = &intVal
+		} else {
+			mv.FloatVal = &v
+		}
+	case bool:
+		mv.BoolVal = &v
+	default:
+		return fmt.Errorf("invalid meta value type: expected string, number, or boolean, got %T", v)
+	}
+	return nil
 }
 
-// RuleWithIntValue represents a validation rule with an integer value
-type RuleWithIntValue struct {
-	Value        int    `json:"value"`
-	ErrorMessage string `json:"errorMessage,omitempty"`
+// MarshalJSON implements custom marshalling for MetaValue.
+// It marshals the non-nil field back to its original JSON type.
+func (mv MetaValue) MarshalJSON() ([]byte, error) {
+	if mv.StringVal != nil {
+		return json.Marshal(mv.StringVal)
+	}
+	if mv.IntVal != nil {
+		return json.Marshal(mv.IntVal)
+	}
+	if mv.FloatVal != nil {
+		return json.Marshal(mv.FloatVal)
+	}
+	if mv.BoolVal != nil {
+		return json.Marshal(mv.BoolVal)
+	}
+	// Should ideally not happen if unmarshalling is correct,
+	// but marshal as null if no value is set.
+	return json.Marshal(nil)
 }
 
-// RuleWithNumberValue represents a validation rule with a float value
-type RuleWithNumberValue struct {
-	Value        float64 `json:"value"`
-	ErrorMessage string  `json:"errorMessage,omitempty"`
+// ParamDefinition describes the parameter structure expected by a rule.
+type ParamDefinition struct {
+	Type    ParamPrimitiveType `json:"type"`
+	IsArray bool               `json:"isArray"`
 }
 
-// RuleWithBooleanValue represents a validation rule with a boolean value
-type RuleWithBooleanValue struct {
-	Value        bool   `json:"value"`
-	ErrorMessage string `json:"errorMessage,omitempty"`
+// FieldDefinition defines a field within a type or procedure input/output.
+type FieldDefinition struct {
+	Name string `json:"name"`
+	// TypeName holds the name if the type is named (primitive or custom). Mutually exclusive with TypeInline.
+	TypeName *string `json:"typeName,omitempty"`
+	// TypeInline holds the definition if the type is inline. Mutually exclusive with TypeName.
+	TypeInline *InlineTypeDefinition `json:"typeInline,omitempty"`
+	// Depth indicates array dimensions (0 for scalar, 1 for T[], etc.).
+	Depth int `json:"depth"`
+	// Optional indicates if the field is optional.
+	Optional bool `json:"optional"`
+	// Rules is the list of validation rules applied to this field.
+	Rules []AppliedRule `json:"rules"`
 }
 
-// RuleWithStringArray represents a validation rule with an array of strings
-type RuleWithStringArray struct {
-	Values       []string `json:"values"`
-	ErrorMessage string   `json:"errorMessage,omitempty"`
+// IsNamed checks if the field definition uses a named type.
+func (fd *FieldDefinition) IsNamed() bool {
+	return fd.TypeName != nil
 }
 
-// RuleWithIntArray represents a validation rule with an array of integers
-type RuleWithIntArray struct {
-	Values       []int  `json:"values"`
-	ErrorMessage string `json:"errorMessage,omitempty"`
+// IsInline checks if the field definition uses an inline type.
+func (fd *FieldDefinition) IsInline() bool {
+	return fd.TypeInline != nil
 }
 
-// RuleWithNumberArray represents a validation rule with an array of floats
-type RuleWithNumberArray struct {
-	Values       []float64 `json:"values"`
-	ErrorMessage string    `json:"errorMessage,omitempty"`
+// InlineTypeDefinition represents the structure of an anonymous inline object type.
+// It's used within the FieldDefinition.TypeInline field.
+type InlineTypeDefinition struct {
+	// Fields is the ordered list of fields within the inline type.
+	Fields []FieldDefinition `json:"fields"`
+}
+
+// AppliedRule represents a validation rule applied to a field.
+type AppliedRule struct {
+	Rule string `json:"rule"`
+	// Param holds the parameter value(s) passed to the rule instance (null if none).
+	Param *AppliedParam `json:"param,omitempty"` // Pointer handles null
+	// Error is the custom error message overriding the rule's default (optional).
+	Error *string `json:"error,omitempty"`
+}
+
+// AppliedParam holds the actual value(s) passed to a rule instance, represented as strings.
+type AppliedParam struct {
+	Type ParamPrimitiveType `json:"type"`
+	// IsArray indicates if the parameter was passed as an array.
+	IsArray bool `json:"isArray"`
+	// Value holds the single parameter value as a string (used if IsArray is false).
+	Value string `json:"value,omitempty,omitzero"`
+	// ArrayValues holds array parameter values as strings (used if IsArray is true).
+	ArrayValues []string `json:"arrayValues,omitempty"`
 }

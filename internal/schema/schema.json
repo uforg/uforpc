@@ -1,420 +1,319 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+
   "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "version",
-    "types",
-    "procedures"
-  ],
   "properties": {
     "version": {
+      "description": "The version number of the URPC schema specification used.",
       "const": 1
     },
-    "types": {
-      "type": "object",
-      "patternProperties": {
-        "^[A-Z][a-zA-Z0-9]*$": {
-          "$ref": "#/$defs/type"
-        }
-      },
-      "additionalProperties": false
-    },
-    "procedures": {
-      "type": "object",
-      "patternProperties": {
-        "^[A-Z][a-zA-Z0-9]*$": {
-          "$ref": "#/$defs/procedure"
-        }
-      },
-      "additionalProperties": false
+    "nodes": {
+      "description": "An ordered array of all declared elements (nodes) in the URPC schema.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/docNode" },
+          { "$ref": "#/$defs/ruleNode" },
+          { "$ref": "#/$defs/typeNode" },
+          { "$ref": "#/$defs/procNode" }
+        ]
+      }
     }
   },
+  "required": ["version", "nodes"],
+  "additionalProperties": false,
+
   "$defs": {
-    "ruleBoolean": {
-      "type": "boolean"
-    },
-    "ruleSimple": {
+    "docNode": {
+      "title": "Documentation Node",
+      "description": "Represents a standalone documentation block.",
       "type": "object",
-      "additionalProperties": false,
       "properties": {
-        "errorMessage": { "type": "string" }
-      }
-    },
-    "ruleWithStringValue": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["value"],
-      "properties": {
-        "value": { "type": "string" },
-        "errorMessage": { "type": "string" }
-      }
-    },
-    "ruleWithIntValue": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["value"],
-      "properties": {
-        "value": { "type": "integer" },
-        "errorMessage": { "type": "string" }
-      }
-    },
-    "ruleWithNumberValue": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["value"],
-      "properties": {
-        "value": { "type": "number" },
-        "errorMessage": { "type": "string" }
-      }
-    },
-    "ruleWithBooleanValue": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["value"],
-      "properties": {
-        "value": { "type": "boolean" },
-        "errorMessage": { "type": "string" }
-      }
-    },
-    "ruleWithStringArray": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["values"],
-      "properties": {
-        "values": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "type": "string" }
+        "kind": {
+          "description": "Node type identifier.",
+          "const": "doc"
         },
-        "errorMessage": { "type": "string" }
-      }
+        "content": {
+          "description": "The documentation content (Markdown or resolved external file).",
+          "type": "string"
+        }
+      },
+      "required": ["kind", "content"],
+      "additionalProperties": false
     },
-    "ruleWithIntArray": {
+
+    "ruleNode": {
+      "title": "Rule Definition Node",
+      "description": "Defines a custom validation rule.",
       "type": "object",
-      "additionalProperties": false,
-      "required": ["values"],
       "properties": {
-        "values": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "type": "integer" }
+        "kind": {
+          "description": "Node type identifier.",
+          "const": "rule"
         },
-        "errorMessage": { "type": "string" }
-      }
-    },
-    "ruleWithNumberArray": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["values"],
-      "properties": {
-        "values": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "type": "number" }
-        },
-        "errorMessage": { "type": "string" }
-      }
-    },
-    "stringRules": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "equals": { "$ref": "#/$defs/ruleWithStringValue" },
-        "contains": { "$ref": "#/$defs/ruleWithStringValue" },
-        "minLen": { "$ref": "#/$defs/ruleWithIntValue" },
-        "maxLen": { "$ref": "#/$defs/ruleWithIntValue" },
-        "enum": { "$ref": "#/$defs/ruleWithStringArray" },
-        "email": { "$ref": "#/$defs/ruleSimple" },
-        "iso8601": { "$ref": "#/$defs/ruleSimple" },
-        "uuid": { "$ref": "#/$defs/ruleSimple" },
-        "json": { "$ref": "#/$defs/ruleSimple" },
-        "lowercase": { "$ref": "#/$defs/ruleSimple" },
-        "uppercase": { "$ref": "#/$defs/ruleSimple" }
-      }
-    },
-    "intRules": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "equals": { "$ref": "#/$defs/ruleWithIntValue" },
-        "min": { "$ref": "#/$defs/ruleWithIntValue" },
-        "max": { "$ref": "#/$defs/ruleWithIntValue" },
-        "enum": { "$ref": "#/$defs/ruleWithIntArray" }
-      }
-    },
-    "floatRules": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "equals": { "$ref": "#/$defs/ruleWithNumberValue" },
-        "min": { "$ref": "#/$defs/ruleWithNumberValue" },
-        "max": { "$ref": "#/$defs/ruleWithNumberValue" },
-        "enum": { "$ref": "#/$defs/ruleWithNumberArray" }
-      }
-    },
-    "booleanRules": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "equals": { "$ref": "#/$defs/ruleWithBooleanValue" }
-      }
-    },
-    "objectRules": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {}
-    },
-    "arrayRules": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "minLen": { "$ref": "#/$defs/ruleWithIntValue" },
-        "maxLen": { "$ref": "#/$defs/ruleWithIntValue" }
-      }
-    },
-    "customTypeRules": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {}
-    },
-    "field": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "type"
-      ],
-      "properties": {
-        "type": {
+        "name": {
+          "description": "Name of the custom rule.",
           "type": "string",
-          "anyOf": [
+          "pattern": "^[a-z][a-zA-Z0-9]*$"
+        },
+        "doc": {
+          "description": "Associated documentation string (optional).",
+          "type": ["string", "null"]
+        },
+        "for": {
+          "description": "The primitive or custom type name this rule applies to.",
+          "oneOf": [
+            { "$ref": "#/$defs/PrimitiveTypeEnum" },
             {
-              "enum": [
-                "string",
-                "int",
-                "float",
-                "boolean",
-                "object",
-                "array"
-              ]
-            },
-            { "pattern": "^[A-Z][a-zA-Z0-9]*$" }
+              "type": "string",
+              "description": "Custom type name",
+              "pattern": "^[A-Z][a-zA-Z0-9]*$"
+            }
           ]
         },
-        "description": {
-          "type": "string"
+        "paramDef": {
+          "description": "Definition of the parameter this rule expects (null if none).",
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/paramDefinition" }
+          ]
+        },
+        "error": {
+          "description": "Default error message for the rule (optional).",
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["kind", "name", "for", "paramDef", "error"],
+      "additionalProperties": false
+    },
+
+    "paramDefinition": {
+      "title": "Parameter Definition",
+      "description": "Describes the type and structure expected for a rule's parameter.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The primitive type expected for the parameter (excluding datetime).",
+          "$ref": "#/$defs/paramPrimitiveTypeEnum"
+        },
+        "isArray": {
+          "description": "Indicates if the parameter is expected to be an array of the specified type.",
+          "type": "boolean"
+        }
+      },
+      "required": ["type", "isArray"],
+      "additionalProperties": false
+    },
+
+    "typeNode": {
+      "title": "Type Definition Node",
+      "description": "Defines a custom data type.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "description": "Node type identifier.",
+          "const": "type"
+        },
+        "name": {
+          "description": "Name of the custom type.",
+          "type": "string",
+          "pattern": "^[A-Z][a-zA-Z0-9]*$"
+        },
+        "doc": {
+          "description": "Associated documentation string (optional).",
+          "type": ["string", "null"]
+        },
+        "fields": {
+          "description": "Ordered list of fields within the type.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        }
+      },
+      "required": ["kind", "name", "fields"],
+      "additionalProperties": false
+    },
+
+    "procNode": {
+      "title": "Procedure Definition Node",
+      "description": "Defines an RPC procedure.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "description": "Node type identifier.",
+          "const": "proc"
+        },
+        "name": {
+          "description": "Name of the procedure.",
+          "type": "string",
+          "pattern": "^[A-Z][a-zA-Z0-9]*$"
+        },
+        "doc": {
+          "description": "Associated documentation string (optional).",
+          "type": ["string", "null"]
+        },
+        "input": {
+          "description": "Ordered list of input fields for the procedure.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        },
+        "output": {
+          "description": "Ordered list of output fields for the procedure.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        },
+        "meta": {
+          "description": "Optional key-value metadata associated with the procedure (null if none).",
+          "type": ["object", "null"],
+          "additionalProperties": {
+            "description": "Metadata value must be a primitive JSON type.",
+            "type": ["string", "integer", "number", "boolean"]
+          }
+        }
+      },
+      "required": ["kind", "name", "input", "output", "meta"],
+      "additionalProperties": false
+    },
+
+    "PrimitiveTypeEnum": {
+      "description": "Enumeration of allowed primitive type names.",
+      "type": "string",
+      "enum": ["string", "int", "float", "boolean", "datetime"]
+    },
+
+    "paramPrimitiveTypeEnum": {
+      "description": "Enumeration of allowed primitive type names for rule parameters.",
+      "type": "string",
+      "enum": ["string", "int", "float", "boolean"]
+    },
+
+    "fieldDefinition": {
+      "title": "Field Definition",
+      "description": "Defines a field within a type or procedure input/output.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the field.",
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]*$"
+        },
+        "typeName": {
+          "description": "Name of the primitive or custom type (used if the type is not inline).",
+          "type": ["string", "null"]
+        },
+        "typeInline": {
+          "description": "Definition of the inline object type (used if the type is not named).",
+          "oneOf": [
+            { "$ref": "#/$defs/inlineTypeDefinition" },
+            { "type": "null" }
+          ]
+        },
+        "depth": {
+          "description": "Array dimensions (0 for scalar, 1 for T[], 2 for T[][], etc.).",
+          "type": "integer",
+          "minimum": 0
         },
         "optional": {
+          "description": "Indicates if the field is optional.",
           "type": "boolean"
         },
         "rules": {
-          "type": "object"
-        },
-        "fields": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/field"
-          }
-        },
-        "arrayType": {
-          "$ref": "#/$defs/field"
+          "description": "List of validation rules applied to this field.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/appliedRule" }
         }
       },
+      "required": ["name", "depth", "optional", "rules"],
+      "additionalProperties": false
+    },
+
+    "inlineTypeDefinition": {
+      "title": "Inline Type Definition",
+      "description": "Defines the structure of an anonymous inline object type.",
+      "type": "object",
+      "properties": {
+        "fields": {
+          "description": "Ordered list of fields within the inline type.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        }
+      },
+      "required": ["fields"],
+      "additionalProperties": false
+    },
+
+    "appliedRule": {
+      "title": "Applied Rule",
+      "description": "Represents a validation rule applied to a field, including its parameters.",
+      "type": "object",
+      "properties": {
+        "rule": {
+          "description": "Name of the validation rule being applied.",
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
+        },
+        "param": {
+          "description": "The parameter value(s) passed to the rule instance (null if none).",
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/appliedParam" }
+          ]
+        },
+        "error": {
+          "description": "Custom error message overriding the rule's default (optional).",
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["rule", "param", "error"],
+      "additionalProperties": false
+    },
+
+    "appliedParam": {
+      "title": "Applied Parameter Value",
+      "description": "Holds the actual value(s) passed to a rule instance, represented as strings for precision.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The primitive type of the parameter value(s) (inferred from rule definition).",
+          "$ref": "#/$defs/paramPrimitiveTypeEnum"
+        },
+        "isArray": {
+          "description": "Indicates if the parameter was passed as an array.",
+          "type": "boolean"
+        },
+        "value": {
+          "description": "The single parameter value, represented as a string.",
+          "type": "string"
+        },
+        "arrayValues": {
+          "description": "The parameter values for an array parameter, each represented as a string.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["type", "isArray"],
       "allOf": [
         {
           "if": {
-            "properties": {
-              "type": {
-                "const": "object"
-              }
-            }
+            "properties": { "isArray": { "const": false } },
+            "required": ["isArray"]
           },
           "then": {
-            "required": [
-              "fields"
-            ]
+            "required": ["value"],
+            "properties": { "arrayValues": false }
           }
         },
         {
           "if": {
-            "properties": {
-              "type": {
-                "const": "array"
-              }
-            }
+            "properties": { "isArray": { "const": true } },
+            "required": ["isArray"]
           },
           "then": {
-            "required": [
-              "arrayType"
-            ]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "string"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "rules": {
-                "$ref": "#/$defs/stringRules"
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "int"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "rules": {
-                "$ref": "#/$defs/intRules"
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "float"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "rules": {
-                "$ref": "#/$defs/floatRules"
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "boolean"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "rules": {
-                "$ref": "#/$defs/booleanRules"
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "object"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "rules": {
-                "$ref": "#/$defs/objectRules"
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "const": "array"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "rules": {
-                "$ref": "#/$defs/arrayRules"
-              }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "type": {
-                "pattern": "^[A-Z][a-zA-Z0-9]*$"
-              }
-            }
-          },
-          "then": {
-            "properties": {
-              "rules": {
-                "$ref": "#/$defs/customTypeRules"
-              }
-            }
+            "required": ["arrayValues"],
+            "properties": { "value": false }
           }
         }
-      ]
-    },
-    "type": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "fields"
       ],
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "fields": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/field"
-          }
-        }
-      }
-    },
-    "procedure": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "input",
-        "output"
-      ],
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "input": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/field"
-          }
-        },
-        "output": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/field"
-          }
-        },
-        "meta": {
-          "type": "object",
-          "additionalProperties": {
-            "type": [
-              "string",
-              "number",
-              "boolean"
-            ]
-          }
-        }
-      }
+      "additionalProperties": false
     }
   }
 }
