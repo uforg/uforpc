@@ -1,0 +1,27 @@
+version 1
+
+type AllPrimitives {
+  stringValue: string
+  intValue: int
+  floatValue: float
+  booleanValue: boolean
+  datetimeValue: datetime
+  
+  stringArrayValue: string[]
+  intArrayValue: int[]
+  floatArrayValue: float[]
+  booleanArrayValue: boolean[]
+  datetimeArrayValue: datetime[]
+  
+  stringArrayArrayValue: string[][]
+  intArrayArrayValue: int[][]
+  floatArrayArrayValue: float[][]
+  booleanArrayArrayValue: boolean[][]
+  datetimeArrayArrayValue: datetime[][]
+  
+  optionalString?: string
+  optionalInt?: int
+  optionalFloat?: float
+  optionalBoolean?: boolean
+  optionalDatetime?: datetime
+}

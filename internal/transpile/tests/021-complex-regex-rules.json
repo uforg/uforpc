@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "rule",
+      "name": "complexRegex",
+      "for": "string",
+      "paramDef": {
+        "type": "string",
+        "isArray": false
+      },
+      "error": "String does not match the required pattern"
+    },
+    {
+      "kind": "type",
+      "name": "ComplexPatterns",
+      "fields": [
+        {
+          "name": "username",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "complexRegex",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^[a-zA-Z0-9_]+$"
+              }
+            }
+          ]
+        },
+        {
+          "name": "email",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "complexRegex",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              }
+            }
+          ]
+        },
+        {
+          "name": "phone",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "complexRegex",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^\\+?[0-9]{10,15}$"
+              }
+            }
+          ]
+        },
+        {
+          "name": "zipCode",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "complexRegex",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^[0-9]{5}(-[0-9]{4})?$"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

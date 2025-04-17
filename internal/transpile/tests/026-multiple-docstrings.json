@@ -1,0 +1,255 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "doc",
+      "content": "\nAPI for a content management system.\nThis schema defines the types and procedures for managing content.\n"
+    },
+    {
+      "kind": "doc",
+      "content": "\nAuthentication is required for most endpoints.\nUse JWT tokens for authentication.\n"
+    },
+    {
+      "kind": "rule",
+      "name": "required",
+      "for": "string",
+      "error": "This field is required"
+    },
+    {
+      "kind": "type",
+      "name": "ContentType",
+      "doc": "\nContent types supported by the CMS.\n",
+      "fields": [
+        {
+          "name": "id",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "name",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "description",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        }
+      ]
+    },
+    {
+      "kind": "type",
+      "name": "Role",
+      "doc": "\nUser roles and permissions.\n",
+      "fields": [
+        {
+          "name": "id",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "name",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "permissions",
+          "depth": 1,
+          "optional": false,
+          "typeName": "string"
+        }
+      ]
+    },
+    {
+      "kind": "type",
+      "name": "User",
+      "doc": "\nUser account information.\n",
+      "fields": [
+        {
+          "name": "id",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "username",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "required"
+            }
+          ]
+        },
+        {
+          "name": "email",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "required"
+            }
+          ]
+        },
+        {
+          "name": "roles",
+          "depth": 1,
+          "optional": false,
+          "typeName": "Role"
+        },
+        {
+          "name": "createdAt",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "updatedAt",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        }
+      ]
+    },
+    {
+      "kind": "type",
+      "name": "Content",
+      "doc": "\nContent item structure.\n",
+      "fields": [
+        {
+          "name": "id",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "title",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "required"
+            }
+          ]
+        },
+        {
+          "name": "body",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "contentType",
+          "depth": 0,
+          "optional": false,
+          "typeName": "ContentType"
+        },
+        {
+          "name": "author",
+          "depth": 0,
+          "optional": false,
+          "typeName": "User"
+        },
+        {
+          "name": "tags",
+          "depth": 1,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "published",
+          "depth": 0,
+          "optional": false,
+          "typeName": "boolean"
+        },
+        {
+          "name": "createdAt",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "updatedAt",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        }
+      ]
+    },
+    {
+      "kind": "proc",
+      "name": "CreateContent",
+      "doc": "\nCreates a new content item.\n",
+      "input": [
+        {
+          "name": "title",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "required"
+            }
+          ]
+        },
+        {
+          "name": "body",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "contentTypeId",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "required"
+            }
+          ]
+        },
+        {
+          "name": "tags",
+          "depth": 1,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "publish",
+          "depth": 0,
+          "optional": false,
+          "typeName": "boolean"
+        }
+      ],
+      "output": [
+        {
+          "name": "content",
+          "depth": 0,
+          "optional": false,
+          "typeName": "Content"
+        },
+        {
+          "name": "success",
+          "depth": 0,
+          "optional": false,
+          "typeName": "boolean"
+        },
+        {
+          "name": "message",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        }
+      ]
+    }
+  ]
+}

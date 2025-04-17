@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "type",
+      "name": "DeepNestedType",
+      "fields": [
+        {
+          "name": "level1",
+          "optional": false,
+          "depth": 0,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "level2",
+                "optional": false,
+                "depth": 0,
+                "typeInline": {
+                  "fields": [
+                    {
+                      "name": "level3",
+                      "optional": false,
+                      "depth": 0,
+                      "typeInline": {
+                        "fields": [
+                          {
+                            "name": "level4",
+                            "optional": false,
+                            "depth": 0,
+                            "typeInline": {
+                              "fields": [
+                                {
+                                  "name": "value",
+                                  "optional": false,
+                                  "depth": 0,
+                                  "typeName": "string"
+                                },
+                                {
+                                  "name": "index",
+                                  "optional": false,
+                                  "depth": 0,
+                                  "typeName": "int"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "name": "count",
+                            "optional": false,
+                            "depth": 0,
+                            "typeName": "int"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "enabled",
+                      "optional": false,
+                      "depth": 0,
+                      "typeName": "boolean"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "metadata",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              }
+            ]
+          }
+        },
+        {
+          "name": "summary",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string"
+        }
+      ]
+    }
+  ]
+}

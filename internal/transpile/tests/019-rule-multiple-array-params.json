@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "rule",
+      "name": "minLength",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "String must be at least the specified length"
+    },
+    {
+      "kind": "type",
+      "name": "SimpleType",
+      "fields": [
+        {
+          "name": "name",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "3"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

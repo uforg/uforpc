@@ -62,8 +62,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "36"
-              },
-              "error": null
+              }
             },
             {
               "rule": "maxLength",
@@ -71,8 +70,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "36"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -88,8 +86,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "5"
-              },
-              "error": null
+              }
             },
             {
               "rule": "maxLength",
@@ -97,8 +94,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "100"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -114,8 +110,7 @@
                 "type": "string",
                 "isArray": false,
                 "value": "^[a-z0-9-]+$"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -131,8 +126,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "10"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -181,8 +175,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "5"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -211,8 +204,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "5"
-              },
-              "error": null
+              }
             },
             {
               "rule": "maxLength",
@@ -220,8 +212,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "100"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -237,8 +228,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "10"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -254,8 +244,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "5"
-              },
-              "error": null
+              }
             }
           ]
         }

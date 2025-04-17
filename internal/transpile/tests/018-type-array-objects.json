@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "type",
+      "name": "ArrayOfObjects",
+      "fields": [
+        {
+          "name": "simpleArray",
+          "optional": false,
+          "typeName": "string",
+          "depth": 1
+        },
+        {
+          "name": "objectArray",
+          "optional": false,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "id",
+                "optional": false,
+                "depth": 0,
+                "typeName": "int"
+              },
+              {
+                "name": "name",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              }
+            ]
+          },
+          "depth": 1
+        },
+        {
+          "name": "nestedArrays",
+          "optional": false,
+          "typeName": "string",
+          "depth": 2
+        },
+        {
+          "name": "complexArray",
+          "optional": false,
+          "depth": 0,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "items",
+                "optional": false,
+                "depth": 0,
+                "typeInline": {
+                  "fields": [
+                    {
+                      "name": "id",
+                      "optional": false,
+                      "depth": 0,
+                      "typeName": "int"
+                    },
+                    {
+                      "name": "value",
+                      "optional": false,
+                      "depth": 0,
+                      "typeName": "string"
+                    }
+                  ]
+                },
+                "depth": 1
+              },
+              {
+                "name": "count",
+                "optional": false,
+                "depth": 0,
+                "typeName": "int"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

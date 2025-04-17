@@ -1,0 +1,19 @@
+version 1
+
+proc ComplexMetadata {
+  input {
+    id: string
+  }
+  
+  output {
+    success: boolean
+    message: string
+  }
+
+  meta {
+    auth: "jwt"
+    timeout: 30
+    endpoint: "/api/v2/complex"
+    tags: "public"
+  }
+}

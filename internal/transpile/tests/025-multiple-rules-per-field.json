@@ -52,38 +52,32 @@
       "error": "Value cannot exceed the specified maximum"
     },
     {
+      "kind": "rule",
+      "name": "positive",
+      "for": "int",
+      "error": "Value must be positive"
+    },
+    {
+      "kind": "rule",
+      "name": "email",
+      "for": "string",
+      "error": "Invalid email format"
+    },
+    {
+      "kind": "rule",
+      "name": "url",
+      "for": "string",
+      "error": "Invalid URL format"
+    },
+    {
       "kind": "type",
-      "name": "ValidatedUser",
+      "name": "MultipleRules",
       "fields": [
         {
-          "name": "id",
-          "typeName": "string",
-          "depth": 0,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "minLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "36"
-              }
-            },
-            {
-              "rule": "maxLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "36"
-              }
-            }
-          ]
-        },
-        {
           "name": "username",
-          "typeName": "string",
           "depth": 0,
           "optional": false,
+          "typeName": "string",
           "rules": [
             {
               "rule": "minLength",
@@ -107,31 +101,69 @@
                 "type": "string",
                 "isArray": false,
                 "value": "^[a-zA-Z0-9_]+$"
-              }
+              },
+              "error": "Username must be 3-20 characters and contain only letters, numbers, and underscores"
             }
           ]
         },
         {
           "name": "email",
-          "typeName": "string",
           "depth": 0,
           "optional": false,
+          "typeName": "string",
           "rules": [
+            {
+              "rule": "email"
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "100"
+              },
+              "error": "Please provide a valid email address (max 100 characters)"
+            }
+          ]
+        },
+        {
+          "name": "password",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "8"
+              }
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "64"
+              }
+            },
             {
               "rule": "regex",
               "param": {
                 "type": "string",
                 "isArray": false,
-                "value": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-              }
+                "value": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+              },
+              "error": "Password must be 8-64 characters and include at least one uppercase letter, one lowercase letter, one number, and one special character"
             }
           ]
         },
         {
           "name": "age",
-          "typeName": "int",
           "depth": 0,
           "optional": false,
+          "typeName": "int",
           "rules": [
             {
               "rule": "min",
@@ -147,31 +179,48 @@
                 "type": "int",
                 "isArray": false,
                 "value": "120"
-              }
+              },
+              "error": "Age must be between 18 and 120"
             }
           ]
         },
         {
           "name": "score",
-          "typeName": "float",
           "depth": 0,
           "optional": false,
+          "typeName": "int",
           "rules": [
             {
-              "rule": "min",
-              "param": {
-                "type": "float",
-                "isArray": false,
-                "value": "0.0"
-              }
+              "rule": "positive"
             },
             {
               "rule": "max",
               "param": {
-                "type": "float",
+                "type": "int",
                 "isArray": false,
-                "value": "100.0"
-              }
+                "value": "100"
+              },
+              "error": "Score must be a positive number up to 100"
+            }
+          ]
+        },
+        {
+          "name": "website",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string",
+          "rules": [
+            {
+              "rule": "url"
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "200"
+              },
+              "error": "Please provide a valid website URL (max 200 characters)"
             }
           ]
         }

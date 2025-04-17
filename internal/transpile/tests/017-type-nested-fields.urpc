@@ -1,0 +1,18 @@
+version 1
+
+type DeepNestedType {
+  level1: {
+    level2: {
+      level3: {
+        level4: {
+          value: string
+          index: int
+        }
+        count: int
+      }
+      enabled: boolean
+    }
+    metadata: string
+  }
+  summary: string
+}

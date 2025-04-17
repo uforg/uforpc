@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "type",
+      "name": "AllPrimitives",
+      "fields": [
+        {
+          "name": "stringValue",
+          "depth": 0,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "intValue",
+          "depth": 0,
+          "optional": false,
+          "typeName": "int"
+        },
+        {
+          "name": "floatValue",
+          "depth": 0,
+          "optional": false,
+          "typeName": "float"
+        },
+        {
+          "name": "booleanValue",
+          "depth": 0,
+          "optional": false,
+          "typeName": "boolean"
+        },
+        {
+          "name": "datetimeValue",
+          "depth": 0,
+          "optional": false,
+          "typeName": "datetime"
+        },
+        {
+          "name": "stringArrayValue",
+          "depth": 1,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "intArrayValue",
+          "depth": 1,
+          "optional": false,
+          "typeName": "int"
+        },
+        {
+          "name": "floatArrayValue",
+          "depth": 1,
+          "optional": false,
+          "typeName": "float"
+        },
+        {
+          "name": "booleanArrayValue",
+          "depth": 1,
+          "optional": false,
+          "typeName": "boolean"
+        },
+        {
+          "name": "datetimeArrayValue",
+          "depth": 1,
+          "optional": false,
+          "typeName": "datetime"
+        },
+        {
+          "name": "stringArrayArrayValue",
+          "depth": 2,
+          "optional": false,
+          "typeName": "string"
+        },
+        {
+          "name": "intArrayArrayValue",
+          "depth": 2,
+          "optional": false,
+          "typeName": "int"
+        },
+        {
+          "name": "floatArrayArrayValue",
+          "depth": 2,
+          "optional": false,
+          "typeName": "float"
+        },
+        {
+          "name": "booleanArrayArrayValue",
+          "depth": 2,
+          "optional": false,
+          "typeName": "boolean"
+        },
+        {
+          "name": "datetimeArrayArrayValue",
+          "depth": 2,
+          "optional": false,
+          "typeName": "datetime"
+        },
+        {
+          "name": "optionalString",
+          "depth": 0,
+          "optional": true,
+          "typeName": "string"
+        },
+        {
+          "name": "optionalInt",
+          "depth": 0,
+          "optional": true,
+          "typeName": "int"
+        },
+        {
+          "name": "optionalFloat",
+          "depth": 0,
+          "optional": true,
+          "typeName": "float"
+        },
+        {
+          "name": "optionalBoolean",
+          "depth": 0,
+          "optional": true,
+          "typeName": "boolean"
+        },
+        {
+          "name": "optionalDatetime",
+          "depth": 0,
+          "optional": true,
+          "typeName": "datetime"
+        }
+      ]
+    }
+  ]
+}

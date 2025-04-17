@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "proc",
+      "name": "ComplexMetadata",
+      "input": [
+        {
+          "name": "id",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string"
+        }
+      ],
+      "output": [
+        {
+          "name": "success",
+          "optional": false,
+          "depth": 0,
+          "typeName": "boolean"
+        },
+        {
+          "name": "message",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string"
+        }
+      ],
+      "meta": [
+        {
+          "key": "auth",
+          "value": "jwt"
+        },
+        {
+          "key": "timeout",
+          "value": 30
+        },
+        {
+          "key": "endpoint",
+          "value": "/api/v2/complex"
+        },
+        {
+          "key": "tags",
+          "value": "public"
+        }
+      ]
+    }
+  ]
+}

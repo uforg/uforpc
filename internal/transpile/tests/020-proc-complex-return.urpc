@@ -1,0 +1,48 @@
+version 1
+
+proc SearchResults {
+  input {
+    query: string
+    page: int
+    pageSize: int
+    filters: {
+      category?: string
+      minPrice?: float
+      maxPrice?: float
+      inStock?: boolean
+    }
+    sort: {
+      field: string
+      direction: string
+    }
+  }
+  
+  output {
+    results: {
+      id: string
+      title: string
+      description: string
+      price: float
+      rating: float
+      images: string[]
+      specs: {
+        key: string
+        value: string
+      }[]
+    }[]
+    pagination: {
+      currentPage: int
+      totalPages: int
+      totalResults: int
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+    }
+    facets: {
+      name: string
+      values: {
+        value: string
+        count: int
+      }[]
+    }[]
+  }
+}

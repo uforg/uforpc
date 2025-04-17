@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "proc",
+      "name": "SearchResults",
+      "input": [
+        {
+          "name": "query",
+          "optional": false,
+          "depth": 0,
+          "typeName": "string"
+        },
+        {
+          "name": "page",
+          "optional": false,
+          "depth": 0,
+          "typeName": "int"
+        },
+        {
+          "name": "pageSize",
+          "optional": false,
+          "depth": 0,
+          "typeName": "int"
+        },
+        {
+          "name": "filters",
+          "optional": false,
+          "depth": 0,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "category",
+                "optional": true,
+                "depth": 0,
+                "typeName": "string"
+              },
+              {
+                "name": "minPrice",
+                "optional": true,
+                "depth": 0,
+                "typeName": "float"
+              },
+              {
+                "name": "maxPrice",
+                "optional": true,
+                "depth": 0,
+                "typeName": "float"
+              },
+              {
+                "name": "inStock",
+                "optional": true,
+                "depth": 0,
+                "typeName": "boolean"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sort",
+          "optional": false,
+          "depth": 0,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "field",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              },
+              {
+                "name": "direction",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              }
+            ]
+          }
+        }
+      ],
+      "output": [
+        {
+          "name": "results",
+          "optional": false,
+          "depth": 0,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "id",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              },
+              {
+                "name": "title",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              },
+              {
+                "name": "description",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              },
+              {
+                "name": "price",
+                "optional": false,
+                "depth": 0,
+                "typeName": "float"
+              },
+              {
+                "name": "rating",
+                "optional": false,
+                "depth": 0,
+                "typeName": "float"
+              },
+              {
+                "name": "images",
+                "optional": false,
+                "typeName": "string",
+                "depth": 1
+              },
+              {
+                "name": "specs",
+                "optional": false,
+                "typeInline": {
+                  "fields": [
+                    {
+                      "name": "key",
+                      "optional": false,
+                      "depth": 0,
+                      "typeName": "string"
+                    },
+                    {
+                      "name": "value",
+                      "optional": false,
+                      "depth": 0,
+                      "typeName": "string"
+                    }
+                  ]
+                },
+                "depth": 1
+              }
+            ]
+          },
+          "depth": 1
+        },
+        {
+          "name": "pagination",
+          "optional": false,
+          "depth": 0,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "currentPage",
+                "optional": false,
+                "depth": 0,
+                "typeName": "int"
+              },
+              {
+                "name": "totalPages",
+                "optional": false,
+                "depth": 0,
+                "typeName": "int"
+              },
+              {
+                "name": "totalResults",
+                "optional": false,
+                "depth": 0,
+                "typeName": "int"
+              },
+              {
+                "name": "hasNextPage",
+                "optional": false,
+                "depth": 0,
+                "typeName": "boolean"
+              },
+              {
+                "name": "hasPreviousPage",
+                "optional": false,
+                "depth": 0,
+                "typeName": "boolean"
+              }
+            ]
+          }
+        },
+        {
+          "name": "facets",
+          "optional": false,
+          "depth": 0,
+          "typeInline": {
+            "fields": [
+              {
+                "name": "name",
+                "optional": false,
+                "depth": 0,
+                "typeName": "string"
+              },
+              {
+                "name": "values",
+                "optional": false,
+                "depth": 0,
+                "typeInline": {
+                  "fields": [
+                    {
+                      "name": "value",
+                      "optional": false,
+                      "depth": 0,
+                      "typeName": "string"
+                    },
+                    {
+                      "name": "count",
+                      "optional": false,
+                      "depth": 0,
+                      "typeName": "int"
+                    }
+                  ]
+                },
+                "depth": 1
+              }
+            ]
+          },
+          "depth": 1
+        }
+      ]
+    }
+  ]
+}

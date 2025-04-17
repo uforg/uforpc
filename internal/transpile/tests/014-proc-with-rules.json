@@ -57,8 +57,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "3"
-              },
-              "error": null
+              }
             },
             {
               "rule": "maxLength",
@@ -66,8 +65,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "20"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -83,8 +81,7 @@
                 "type": "string",
                 "isArray": false,
                 "value": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-              },
-              "error": null
+              }
             }
           ]
         },
@@ -100,8 +97,7 @@
                 "type": "int",
                 "isArray": false,
                 "value": "18"
-              },
-              "error": null
+              }
             }
           ]
         }
