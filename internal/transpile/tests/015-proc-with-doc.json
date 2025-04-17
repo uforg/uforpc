@@ -10,22 +10,19 @@
           "name": "username",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "password",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "rememberMe",
           "typeName": "boolean",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ],
       "output": [
@@ -33,22 +30,19 @@
           "name": "token",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "expiresAt",
           "typeName": "datetime",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "success",
           "typeName": "boolean",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ]
     }

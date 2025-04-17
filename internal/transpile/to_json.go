@@ -155,7 +155,6 @@ func convertFieldToJSON(field *ast.Field) (schema.FieldDefinition, error) {
 		Name:     field.Name,
 		Optional: field.Optional,
 		Depth:    int(field.Type.Depth),
-		Rules:    []schema.AppliedRule{},
 	}
 
 	// Process field type

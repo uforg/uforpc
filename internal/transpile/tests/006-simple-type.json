@@ -9,29 +9,25 @@
           "name": "id",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "name",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "age",
           "typeName": "int",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "isActive",
           "typeName": "boolean",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ]
     }

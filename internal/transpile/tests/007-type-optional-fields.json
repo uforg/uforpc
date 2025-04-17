@@ -9,43 +9,37 @@
           "name": "id",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "name",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "description",
           "typeName": "string",
           "depth": 0,
-          "optional": true,
-          "rules": []
+          "optional": true
         },
         {
           "name": "price",
           "typeName": "float",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "category",
           "typeName": "string",
           "depth": 0,
-          "optional": true,
-          "rules": []
+          "optional": true
         },
         {
           "name": "tags",
           "typeName": "string",
           "depth": 1,
-          "optional": true,
-          "rules": []
+          "optional": true
         }
       ]
     }

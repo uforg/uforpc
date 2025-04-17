@@ -140,8 +140,7 @@
           "name": "publishedAt",
           "typeName": "datetime",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "author",
@@ -151,28 +150,24 @@
                 "name": "id",
                 "typeName": "string",
                 "depth": 0,
-                "optional": false,
-                "rules": []
+                "optional": false
               },
               {
                 "name": "name",
                 "typeName": "string",
                 "depth": 0,
-                "optional": false,
-                "rules": []
+                "optional": false
               },
               {
                 "name": "email",
                 "typeName": "string",
                 "depth": 0,
-                "optional": false,
-                "rules": []
+                "optional": false
               }
             ]
           },
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "tags",
@@ -195,8 +190,7 @@
           "name": "isPublished",
           "typeName": "boolean",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ]
     },
@@ -271,15 +265,13 @@
           "name": "post",
           "typeName": "BlogPost",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "success",
           "typeName": "boolean",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ],
       "meta": [
@@ -302,8 +294,7 @@
           "name": "idOrSlug",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ],
       "output": [
@@ -311,15 +302,13 @@
           "name": "post",
           "typeName": "BlogPost",
           "depth": 0,
-          "optional": true,
-          "rules": []
+          "optional": true
         },
         {
           "name": "found",
           "typeName": "boolean",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ]
     }

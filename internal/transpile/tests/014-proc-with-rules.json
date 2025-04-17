@@ -111,15 +111,13 @@
           "name": "isValid",
           "typeName": "boolean",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "errors",
           "typeName": "string",
           "depth": 1,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ]
     }

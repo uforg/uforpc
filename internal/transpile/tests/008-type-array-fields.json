@@ -9,29 +9,25 @@
           "name": "id",
           "typeName": "string",
           "depth": 0,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "items",
           "typeName": "string",
           "depth": 1,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "matrix",
           "typeName": "int",
           "depth": 2,
-          "optional": false,
-          "rules": []
+          "optional": false
         },
         {
           "name": "cube",
           "typeName": "boolean",
           "depth": 3,
-          "optional": false,
-          "rules": []
+          "optional": false
         }
       ]
     }
