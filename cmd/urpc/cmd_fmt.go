@@ -11,7 +11,7 @@ import (
 
 type cmdFmtArgs struct {
 	Pattern string `arg:"positional" help:"The file pattern to format (support globs e.g. './rpc/**/*.urpc')"`
-	Silent  bool   `arg:"-s,--silent" help:"Silent mode, don't print every formatted file"`
+	Verbose bool   `arg:"-v,--verbose" help:"Verbose output prints all formatted files"`
 }
 
 func cmdFmt(args *cmdFmtArgs) {
@@ -43,7 +43,7 @@ func cmdFmt(args *cmdFmtArgs) {
 			log.Fatalf("failed to write file: %s", err)
 		}
 
-		if !args.Silent {
+		if args.Verbose {
 			log.Println("formatted", match)
 		}
 	}
