@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/internal/util/debugutil"
 )
 
 ///////////////////////////
@@ -54,14 +55,19 @@ func astCleanPositionsRecursively(val reflect.Value, emptyPos reflect.Value, inc
 
 // ASTEqual compares two URPC structs and fails if they are not ASTEqual.
 // The validation includes the positions of the AST nodes.
-func ASTEqual(t *testing.T, expected, actual *ast.Schema) {
+func ASTEqual(t *testing.T, expected, actual *ast.Schema, msgAndArgs ...any) {
 	t.Helper()
-	require.Equal(t, expected, actual)
+
+	// Prettify the JSON for better test error messages and diffs
+	expectedJSON := debugutil.ToBeautyJSON(expected)
+	actualJSON := debugutil.ToBeautyJSON(actual)
+
+	require.Equal(t, expectedJSON, actualJSON, msgAndArgs...)
 }
 
 // ASTEqualNoPos compares two URPC structs and fails if they are not equal.
 // It ignores the positions of any nested AST nodes.
-func ASTEqualNoPos(t *testing.T, expected, actual *ast.Schema) {
+func ASTEqualNoPos(t *testing.T, expected, actual *ast.Schema, msgAndArgs ...any) {
 	t.Helper()
 
 	cleanPositions := func(schema *ast.Schema) *ast.Schema {
@@ -78,5 +84,5 @@ func ASTEqualNoPos(t *testing.T, expected, actual *ast.Schema) {
 
 	expected = cleanPositions(expected)
 	actual = cleanPositions(actual)
-	ASTEqual(t, expected, actual)
+	ASTEqual(t, expected, actual, msgAndArgs...)
 }
