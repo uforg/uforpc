@@ -83,7 +83,7 @@
           "type": ["string", "null"]
         }
       },
-      "required": ["kind", "name", "for", "paramDef", "error"],
+      "required": ["kind", "name", "for"],
       "additionalProperties": false
     },
 
@@ -129,7 +129,7 @@
           "items": { "$ref": "#/$defs/fieldDefinition" }
         }
       },
-      "required": ["kind", "name", "fields"],
+      "required": ["kind", "name"],
       "additionalProperties": false
     },
 
@@ -163,14 +163,28 @@
         },
         "meta": {
           "description": "Optional key-value metadata associated with the procedure (null if none).",
-          "type": ["object", "null"],
-          "additionalProperties": {
-            "description": "Metadata value must be a primitive JSON type.",
-            "type": ["string", "integer", "number", "boolean"]
+          "type": "array",
+          "items": {
+            "title": "Meta Definition",
+            "description": "Defines a meta within a procedure.",
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "Key of the meta.",
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9]*$"
+              },
+              "value": {
+                "description": "Value of the meta.",
+                "type": ["string", "integer", "number", "boolean"]
+              }
+            },
+            "required": ["key", "value"],
+            "additionalProperties": false
           }
         }
       },
-      "required": ["kind", "name", "input", "output", "meta"],
+      "required": ["kind", "name"],
       "additionalProperties": false
     },
 
@@ -222,7 +236,7 @@
           "items": { "$ref": "#/$defs/appliedRule" }
         }
       },
-      "required": ["name", "depth", "optional", "rules"],
+      "required": ["name", "depth", "optional"],
       "additionalProperties": false
     },
 
@@ -263,7 +277,7 @@
           "type": ["string", "null"]
         }
       },
-      "required": ["rule", "param", "error"],
+      "required": ["rule"],
       "additionalProperties": false
     },
 

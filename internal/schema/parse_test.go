@@ -385,11 +385,20 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"rules": []
 						}
 					],
-					"meta": {
-						"http.method": "GET",
-						"http.path": "/users/{id}",
-						"auth": true
-					}
+					"meta": [
+						{
+							"key": "http.method",
+							"value": "GET"
+						},
+						{
+							"key": "http.path",
+							"value": "/users/{id}"
+						},
+						{
+							"key": "auth",
+							"value": true
+						}
+					]
 				}
 			]
 		}`
@@ -424,22 +433,19 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.Len(t, procNode.Meta, 3)
 
 		// Check http.method
-		httpMethod, ok := procNode.Meta["http.method"]
-		require.True(t, ok)
-		require.NotNil(t, httpMethod.StringVal)
-		require.Equal(t, "GET", *httpMethod.StringVal)
+		meta0 := procNode.Meta[0]
+		require.Equal(t, "http.method", meta0.Key)
+		require.Equal(t, "GET", *meta0.Value.StringVal)
 
 		// Check http.path
-		httpPath, ok := procNode.Meta["http.path"]
-		require.True(t, ok)
-		require.NotNil(t, httpPath.StringVal)
-		require.Equal(t, "/users/{id}", *httpPath.StringVal)
+		meta1 := procNode.Meta[1]
+		require.Equal(t, "http.path", meta1.Key)
+		require.Equal(t, "/users/{id}", *meta1.Value.StringVal)
 
 		// Check auth
-		auth, ok := procNode.Meta["auth"]
-		require.True(t, ok)
-		require.NotNil(t, auth.BoolVal)
-		require.True(t, *auth.BoolVal)
+		meta2 := procNode.Meta[2]
+		require.Equal(t, "auth", meta2.Key)
+		require.True(t, *meta2.Value.BoolVal)
 	})
 }
 
@@ -490,7 +496,7 @@ func TestGetNodeMethods(t *testing.T) {
 						"rules": []
 					}
 				],
-				"meta": {}
+				"meta": []
 			}
 		]
 	}`

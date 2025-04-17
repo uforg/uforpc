@@ -225,7 +225,7 @@ type NodeProc struct {
 	// Output is the ordered list of output fields for the procedure.
 	Output []FieldDefinition `json:"output"`
 	// Meta contains optional key-value metadata.
-	Meta map[string]MetaValue `json:"meta,omitempty"`
+	Meta []MetaKeyValue `json:"meta,omitempty"`
 }
 
 func (n *NodeProc) NodeKind() string { return n.Kind }
@@ -233,6 +233,12 @@ func (n *NodeProc) NodeKind() string { return n.Kind }
 //////////////////////////
 // Auxiliary Structures //
 //////////////////////////
+
+// MetaKeyValue represents a key-value pair within the NodeProc.Meta array.
+type MetaKeyValue struct {
+	Key   string    `json:"key"`
+	Value MetaValue `json:"value"`
+}
 
 // MetaValue holds a metadata value, using mutually exclusive fields for type safety.
 type MetaValue struct {

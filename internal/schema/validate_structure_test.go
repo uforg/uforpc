@@ -70,7 +70,7 @@ func TestValidateStructure(t *testing.T) {
 							"rules": []
 						}
 					],
-					"meta": {}
+					"meta": []
 				}
 			]
 		}`
@@ -291,7 +291,7 @@ func TestValidateStructure(t *testing.T) {
 						}
 					],
 					"output": [],
-					"meta": {}
+					"meta": []
 				}
 			]
 		}`
@@ -322,7 +322,7 @@ func TestValidateStructure(t *testing.T) {
 							"rules": []
 						}
 					],
-					"meta": {}
+					"meta": []
 				}
 			]
 		}`
@@ -721,7 +721,7 @@ func TestValidateStructure(t *testing.T) {
 						}
 					],
 					"output": [],
-					"meta": {}
+					"meta": []
 				}
 			]
 		}`
@@ -758,7 +758,7 @@ func TestValidateStructure(t *testing.T) {
 							]
 						}
 					],
-					"meta": {}
+					"meta": []
 				}
 			]
 		}`
