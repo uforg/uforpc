@@ -17,11 +17,7 @@ type cmdFmtArgs struct {
 func cmdFmt(args *cmdFmtArgs) {
 	var matches []string
 	var err error
-
 	startTime := time.Now()
-	defer func() {
-		log.Printf("formatted %d files in %s", len(matches), time.Since(startTime))
-	}()
 
 	matches, err = filepath.Glob(args.Pattern)
 	if err != nil {
@@ -47,4 +43,6 @@ func cmdFmt(args *cmdFmtArgs) {
 			log.Println("formatted", match)
 		}
 	}
+
+	log.Printf("formatted %d files in %s", len(matches), time.Since(startTime))
 }
