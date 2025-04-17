@@ -58,7 +58,7 @@
         },
         "doc": {
           "description": "Associated documentation string (optional).",
-          "type": ["string", "null"]
+          "type": "string"
         },
         "for": {
           "description": "The primitive or custom type name this rule applies to.",
@@ -73,14 +73,11 @@
         },
         "paramDef": {
           "description": "Definition of the parameter this rule expects (null if none).",
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "#/$defs/paramDefinition" }
-          ]
+          "$ref": "#/$defs/paramDefinition"
         },
         "error": {
           "description": "Default error message for the rule (optional).",
-          "type": ["string", "null"]
+          "type": "string"
         }
       },
       "required": ["kind", "name", "for"],
@@ -121,7 +118,7 @@
         },
         "doc": {
           "description": "Associated documentation string (optional).",
-          "type": ["string", "null"]
+          "type": "string"
         },
         "fields": {
           "description": "Ordered list of fields within the type.",
@@ -149,7 +146,7 @@
         },
         "doc": {
           "description": "Associated documentation string (optional).",
-          "type": ["string", "null"]
+          "type": "string"
         },
         "input": {
           "description": "Ordered list of input fields for the procedure.",
@@ -212,14 +209,11 @@
         },
         "typeName": {
           "description": "Name of the primitive or custom type (used if the type is not inline).",
-          "type": ["string", "null"]
+          "type": "string"
         },
         "typeInline": {
           "description": "Definition of the inline object type (used if the type is not named).",
-          "oneOf": [
-            { "$ref": "#/$defs/inlineTypeDefinition" },
-            { "type": "null" }
-          ]
+          "$ref": "#/$defs/inlineTypeDefinition"
         },
         "depth": {
           "description": "Array dimensions (0 for scalar, 1 for T[], 2 for T[][], etc.).",
@@ -267,14 +261,11 @@
         },
         "param": {
           "description": "The parameter value(s) passed to the rule instance (null if none).",
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "#/$defs/appliedParam" }
-          ]
+          "$ref": "#/$defs/appliedParam"
         },
         "error": {
           "description": "Custom error message overriding the rule's default (optional).",
-          "type": ["string", "null"]
+          "type": "string"
         }
       },
       "required": ["rule"],
@@ -312,8 +303,7 @@
             "required": ["isArray"]
           },
           "then": {
-            "required": ["value"],
-            "properties": { "arrayValues": false }
+            "required": ["value"]
           }
         },
         {
@@ -322,8 +312,7 @@
             "required": ["isArray"]
           },
           "then": {
-            "required": ["arrayValues"],
-            "properties": { "value": false }
+            "required": ["arrayValues"]
           }
         }
       ],
