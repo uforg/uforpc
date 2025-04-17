@@ -2,7 +2,6 @@ package transpile
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/uforg/uforpc/internal/schema"
 	"github.com/uforg/uforpc/internal/urpc/ast"
@@ -38,7 +37,7 @@ func ToJSON(astSchema ast.Schema) (schema.Schema, error) {
 		case child.Docstring != nil:
 			docNode := &schema.NodeDoc{
 				Kind:    "doc",
-				Content: strings.TrimSpace(child.Docstring.Value),
+				Content: child.Docstring.Value,
 			}
 			result.Nodes = append(result.Nodes, docNode)
 
