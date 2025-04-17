@@ -9,9 +9,10 @@ import (
 )
 
 type allArgs struct {
-	Init *cmdInitArgs `arg:"subcommand:init" help:"Initialize a new URPC schema in the specified path"`
-	Fmt  *cmdFmtArgs  `arg:"subcommand:fmt" help:"Format the URPC schema in the specified path"`
-	LSP  *cmdLSPArgs  `arg:"subcommand:lsp" help:"Start the LSP server"`
+	Init      *cmdInitArgs      `arg:"subcommand:init" help:"Initialize a new URPC schema in the specified path"`
+	Fmt       *cmdFmtArgs       `arg:"subcommand:fmt" help:"Format the URPC schema in the specified path"`
+	Transpile *cmdTranspileArgs `arg:"subcommand:transpile" help:"Transpile a URPC schema to JSON and vice versa, the result will be printed to stdout"`
+	LSP       *cmdLSPArgs       `arg:"subcommand:lsp" help:"Start the LSP server"`
 }
 
 func main() {
@@ -45,5 +46,9 @@ func main() {
 
 	if args.Fmt != nil {
 		cmdFmt(args.Fmt)
+	}
+
+	if args.Transpile != nil {
+		cmdTranspile(args.Transpile)
 	}
 }
