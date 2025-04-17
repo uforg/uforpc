@@ -58,6 +58,9 @@ RUN set -e && \
   # Make binaries executable
   chmod +x /usr/local/dl/bin/*
 
+# Go install binaries
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
 # Default git config
 # https://github.com/golangci/golangci-lint/issues/4033
 RUN git config --global --add safe.directory '*'
