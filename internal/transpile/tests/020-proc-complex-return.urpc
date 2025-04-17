@@ -16,7 +16,7 @@ proc SearchResults {
       direction: string
     }
   }
-  
+
   output {
     results: {
       id: string

@@ -4,7 +4,7 @@ proc GetUser {
   input {
     userId: string
   }
-  
+
   output {
     user: {
       id: string

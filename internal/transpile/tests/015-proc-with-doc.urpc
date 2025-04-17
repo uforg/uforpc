@@ -7,7 +7,7 @@ proc Login {
     password: string
     rememberMe: boolean
   }
-  
+
   output {
     token: string
     expiresAt: datetime

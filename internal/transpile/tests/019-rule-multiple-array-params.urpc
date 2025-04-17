@@ -7,5 +7,6 @@ rule @minLength {
 }
 
 type SimpleType {
-  name: string @minLength(3)
+  name: string
+    @minLength(3)
 }

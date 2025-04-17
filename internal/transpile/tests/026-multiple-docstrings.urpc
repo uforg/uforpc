@@ -38,8 +38,10 @@ User account information.
 """
 type User {
   id: string
-  username: string @required
-  email: string @required
+  username: string
+    @required
+  email: string
+    @required
   roles: Role[]
   createdAt: string
   updatedAt: string
@@ -50,7 +52,8 @@ Content item structure.
 """
 type Content {
   id: string
-  title: string @required
+  title: string
+    @required
   body: string
   contentType: ContentType
   author: User
@@ -64,16 +67,16 @@ type Content {
 Creates a new content item.
 """
 proc CreateContent {
-  
   input {
-    title: string @required
+    title: string
+      @required
     body: string
-    contentTypeId: string @required
+    contentTypeId: string
+      @required
     tags: string[]
     publish: boolean
   }
-  
-  
+
   output {
     content: Content
     success: boolean

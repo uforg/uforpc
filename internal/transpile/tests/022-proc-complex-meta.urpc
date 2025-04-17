@@ -4,7 +4,7 @@ proc ComplexMetadata {
   input {
     id: string
   }
-  
+
   output {
     success: boolean
     message: string

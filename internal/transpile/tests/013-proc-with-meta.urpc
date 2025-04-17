@@ -6,12 +6,12 @@ proc CreateUser {
     email: string
     password: string
   }
-  
+
   output {
     userId: string
     success: boolean
   }
-  
+
   meta {
     auth: true
     rateLimit: 10
