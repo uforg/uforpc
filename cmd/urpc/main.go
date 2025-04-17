@@ -1,16 +1,12 @@
 package main
 
 import (
-	_ "embed"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/alexflint/go-arg"
 )
-
-//go:embed init-schema.urpc
-var initSchema []byte
 
 type allArgs struct {
 	Init *cmdInitArgs `arg:"subcommand:init" help:"Initialize a new URPC schema in the specified path"`

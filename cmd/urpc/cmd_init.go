@@ -1,12 +1,16 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
 	"path"
 	"strings"
 )
+
+//go:embed cmd_init_schema.urpc
+var initSchema []byte
 
 type cmdInitArgs struct {
 	Path string `arg:"positional" help:"The file or directory path to initialize the URPC schema in, if no file name is provided, the file will be named 'schema.urpc'"`
