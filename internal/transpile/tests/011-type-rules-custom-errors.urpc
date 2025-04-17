@@ -1,0 +1,28 @@
+version 1
+
+rule @minLength {
+  for: string
+  param: int
+  error: "String must be at least the specified length"
+}
+
+rule @maxLength {
+  for: string
+  param: int
+  error: "String cannot exceed the specified length"
+}
+
+rule @regex {
+  for: string
+  param: string
+  error: "String must match the specified pattern"
+}
+
+type UserWithCustomErrors {
+  username: string
+    @minLength(3, error: "Username must be at least 3 characters long")
+    @maxLength(20, error: "Username cannot exceed 20 characters")
+  password: string
+    @minLength(8, error: "Password must be at least 8 characters long")
+    @regex("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", error: "Password must contain at least one letter and one number")
+}

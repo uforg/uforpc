@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "rule",
+      "name": "minLength",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "String must be at least the specified length"
+    },
+    {
+      "kind": "rule",
+      "name": "maxLength",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "String cannot exceed the specified length"
+    },
+    {
+      "kind": "rule",
+      "name": "regex",
+      "for": "string",
+      "paramDef": {
+        "type": "string",
+        "isArray": false
+      },
+      "error": "String must match the specified pattern"
+    },
+    {
+      "kind": "rule",
+      "name": "min",
+      "for": "int",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "Value must be at least the specified minimum"
+    },
+    {
+      "kind": "rule",
+      "name": "max",
+      "for": "int",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "Value cannot exceed the specified maximum"
+    },
+    {
+      "kind": "type",
+      "name": "ValidatedUser",
+      "fields": [
+        {
+          "name": "id",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "36"
+              },
+              "error": null
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "36"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "username",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "3"
+              },
+              "error": null
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "20"
+              },
+              "error": null
+            },
+            {
+              "rule": "regex",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^[a-zA-Z0-9_]+$"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "email",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "regex",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "age",
+          "typeName": "int",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "min",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "18"
+              },
+              "error": null
+            },
+            {
+              "rule": "max",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "120"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "score",
+          "typeName": "float",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "min",
+              "param": {
+                "type": "float",
+                "isArray": false,
+                "value": "0.0"
+              },
+              "error": null
+            },
+            {
+              "rule": "max",
+              "param": {
+                "type": "float",
+                "isArray": false,
+                "value": "100.0"
+              },
+              "error": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

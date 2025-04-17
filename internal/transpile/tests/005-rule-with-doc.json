@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "rule",
+      "name": "regex",
+      "doc": "Validates that a string matches a regular expression pattern",
+      "for": "string",
+      "paramDef": {
+        "type": "string",
+        "isArray": false
+      },
+      "error": "String must match the specified pattern"
+    }
+  ]
+}

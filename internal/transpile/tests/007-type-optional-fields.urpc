@@ -1,0 +1,10 @@
+version 1
+
+type Product {
+  id: string
+  name: string
+  description?: string
+  price: float
+  category?: string
+  tags?: string[]
+}

@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "proc",
+      "name": "CreateUser",
+      "input": [
+        {
+          "name": "username",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "email",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "password",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ],
+      "output": [
+        {
+          "name": "userId",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "success",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ],
+      "meta": [
+        {
+          "key": "auth",
+          "value": true
+        },
+        {
+          "key": "rateLimit",
+          "value": 10
+        },
+        {
+          "key": "timeout",
+          "value": 30.5
+        },
+        {
+          "key": "endpoint",
+          "value": "api/v1/users"
+        },
+        {
+          "key": "tags",
+          "value": "user,create,registration"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "doc",
+      "content": "This is a simple docstring"
+    }
+  ]
+}

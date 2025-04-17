@@ -1,0 +1,8 @@
+version 1
+
+"""Validates that a string matches a regular expression pattern"""
+rule @regex {
+  for: string
+  param: string
+  error: "String must match the specified pattern"
+}

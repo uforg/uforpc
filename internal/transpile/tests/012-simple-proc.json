@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "proc",
+      "name": "GetUser",
+      "input": [
+        {
+          "name": "userId",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ],
+      "output": [
+        {
+          "name": "user",
+          "typeInline": {
+            "fields": [
+              {
+                "name": "id",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "name",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "email",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              }
+            ]
+          },
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "success",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "type",
+      "name": "Collection",
+      "fields": [
+        {
+          "name": "id",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "items",
+          "typeName": "string",
+          "depth": 1,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "matrix",
+          "typeName": "int",
+          "depth": 2,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "cube",
+          "typeName": "boolean",
+          "depth": 3,
+          "optional": false,
+          "rules": []
+        }
+      ]
+    }
+  ]
+}

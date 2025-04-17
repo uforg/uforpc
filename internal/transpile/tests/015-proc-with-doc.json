@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "proc",
+      "name": "Login",
+      "doc": "Authenticates a user and returns a session token",
+      "input": [
+        {
+          "name": "username",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "password",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "rememberMe",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ],
+      "output": [
+        {
+          "name": "token",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "expiresAt",
+          "typeName": "datetime",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "success",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ]
+    }
+  ]
+}

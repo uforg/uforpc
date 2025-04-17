@@ -1,0 +1,22 @@
+version 1
+
+proc CreateUser {
+  input {
+    username: string
+    email: string
+    password: string
+  }
+  
+  output {
+    userId: string
+    success: boolean
+  }
+  
+  meta {
+    auth: true
+    rateLimit: 10
+    timeout: 30.5
+    endpoint: "api/v1/users"
+    tags: "user,create,registration"
+  }
+}

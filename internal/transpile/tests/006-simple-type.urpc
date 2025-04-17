@@ -1,0 +1,8 @@
+version 1
+
+type User {
+  id: string
+  name: string
+  age: int
+  isActive: boolean
+}

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "rule",
+      "name": "enum",
+      "for": "string",
+      "paramDef": {
+        "type": "string",
+        "isArray": true
+      },
+      "error": "Value must be one of the allowed values"
+    }
+  ]
+}

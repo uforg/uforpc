@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "rule",
+      "name": "minLength",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "String must be at least the specified length"
+    },
+    {
+      "kind": "rule",
+      "name": "maxLength",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "String cannot exceed the specified length"
+    },
+    {
+      "kind": "rule",
+      "name": "regex",
+      "for": "string",
+      "paramDef": {
+        "type": "string",
+        "isArray": false
+      },
+      "error": "String must match the specified pattern"
+    },
+    {
+      "kind": "type",
+      "name": "UserWithCustomErrors",
+      "fields": [
+        {
+          "name": "username",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "3"
+              },
+              "error": "Username must be at least 3 characters long"
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "20"
+              },
+              "error": "Username cannot exceed 20 characters"
+            }
+          ]
+        },
+        {
+          "name": "password",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "8"
+              },
+              "error": "Password must be at least 8 characters long"
+            },
+            {
+              "rule": "regex",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"
+              },
+              "error": "Password must contain at least one letter and one number"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "type",
+      "name": "User",
+      "fields": [
+        {
+          "name": "id",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "name",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "age",
+          "typeName": "int",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "isActive",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ]
+    }
+  ]
+}

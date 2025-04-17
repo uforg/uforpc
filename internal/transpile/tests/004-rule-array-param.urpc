@@ -1,0 +1,7 @@
+version 1
+
+rule @enum {
+  for: string
+  param: string[]
+  error: "Value must be one of the allowed values"
+}

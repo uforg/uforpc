@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "type",
+      "name": "Order",
+      "fields": [
+        {
+          "name": "id",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "customer",
+          "typeInline": {
+            "fields": [
+              {
+                "name": "id",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "name",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "email",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              }
+            ]
+          },
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "items",
+          "typeInline": {
+            "fields": [
+              {
+                "name": "productId",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "quantity",
+                "typeName": "int",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "price",
+                "typeName": "float",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              }
+            ]
+          },
+          "depth": 1,
+          "optional": false,
+          "rules": []
+        }
+      ]
+    }
+  ]
+}

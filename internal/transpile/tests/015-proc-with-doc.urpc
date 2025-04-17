@@ -1,0 +1,16 @@
+version 1
+
+"""Authenticates a user and returns a session token"""
+proc Login {
+  input {
+    username: string
+    password: string
+    rememberMe: boolean
+  }
+  
+  output {
+    token: string
+    expiresAt: datetime
+    success: boolean
+  }
+}

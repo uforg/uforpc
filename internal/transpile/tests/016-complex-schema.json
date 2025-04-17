@@ -1,0 +1,327 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "doc",
+      "content": "API for managing a blog platform"
+    },
+    {
+      "kind": "rule",
+      "name": "minLength",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "String must be at least the specified length"
+    },
+    {
+      "kind": "rule",
+      "name": "maxLength",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "String cannot exceed the specified length"
+    },
+    {
+      "kind": "rule",
+      "name": "slug",
+      "for": "string",
+      "paramDef": {
+        "type": "string",
+        "isArray": false
+      },
+      "error": "Invalid slug format"
+    },
+    {
+      "kind": "rule",
+      "name": "tags",
+      "for": "string",
+      "paramDef": {
+        "type": "int",
+        "isArray": false
+      },
+      "error": "Too many tags"
+    },
+    {
+      "kind": "type",
+      "name": "BlogPost",
+      "doc": "Represents a blog post",
+      "fields": [
+        {
+          "name": "id",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "36"
+              },
+              "error": null
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "36"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "title",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "5"
+              },
+              "error": null
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "100"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "slug",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "slug",
+              "param": {
+                "type": "string",
+                "isArray": false,
+                "value": "^[a-z0-9-]+$"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "content",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "10"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "publishedAt",
+          "typeName": "datetime",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "author",
+          "typeInline": {
+            "fields": [
+              {
+                "name": "id",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "name",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              },
+              {
+                "name": "email",
+                "typeName": "string",
+                "depth": 0,
+                "optional": false,
+                "rules": []
+              }
+            ]
+          },
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "tags",
+          "typeName": "string",
+          "depth": 1,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "tags",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "5"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "isPublished",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ]
+    },
+    {
+      "kind": "proc",
+      "name": "CreatePost",
+      "doc": "Creates a new blog post",
+      "input": [
+        {
+          "name": "title",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "5"
+              },
+              "error": null
+            },
+            {
+              "rule": "maxLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "100"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "content",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "minLength",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "10"
+              },
+              "error": null
+            }
+          ]
+        },
+        {
+          "name": "tags",
+          "typeName": "string",
+          "depth": 1,
+          "optional": false,
+          "rules": [
+            {
+              "rule": "tags",
+              "param": {
+                "type": "int",
+                "isArray": false,
+                "value": "5"
+              },
+              "error": null
+            }
+          ]
+        }
+      ],
+      "output": [
+        {
+          "name": "post",
+          "typeName": "BlogPost",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        },
+        {
+          "name": "success",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ],
+      "meta": [
+        {
+          "key": "auth",
+          "value": true
+        },
+        {
+          "key": "role",
+          "value": "author"
+        }
+      ]
+    },
+    {
+      "kind": "proc",
+      "name": "GetPost",
+      "doc": "Retrieves a blog post by its ID or slug",
+      "input": [
+        {
+          "name": "idOrSlug",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ],
+      "output": [
+        {
+          "name": "post",
+          "typeName": "BlogPost",
+          "depth": 0,
+          "optional": true,
+          "rules": []
+        },
+        {
+          "name": "found",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false,
+          "rules": []
+        }
+      ]
+    }
+  ]
+}

@@ -29,46 +29,40 @@ func ToJSON(astSchema ast.Schema) (schema.Schema, error) {
 		Nodes:   []schema.Node{},
 	}
 
-	// Get the version from the schema if available
-	versions := astSchema.GetVersions()
-	if len(versions) > 0 {
-		result.Version = versions[0].Number
-	}
+	// Process all nodes in the original order
+	for _, child := range astSchema.Children {
+		switch {
+		case child.Version != nil:
+			result.Version = child.Version.Number
 
-	// Process standalone docstrings
-	for _, docstring := range astSchema.GetDocstrings() {
-		docNode := &schema.NodeDoc{
-			Kind:    "doc",
-			Content: strings.TrimSpace(docstring.Value),
-		}
-		result.Nodes = append(result.Nodes, docNode)
-	}
+		case child.Docstring != nil:
+			docNode := &schema.NodeDoc{
+				Kind:    "doc",
+				Content: strings.TrimSpace(child.Docstring.Value),
+			}
+			result.Nodes = append(result.Nodes, docNode)
 
-	// Process rules
-	for _, rule := range astSchema.GetRules() {
-		ruleNode, err := convertRuleToJSON(rule)
-		if err != nil {
-			return schema.Schema{}, fmt.Errorf("error converting rule '%s': %w", rule.Name, err)
-		}
-		result.Nodes = append(result.Nodes, ruleNode)
-	}
+		case child.Rule != nil:
+			ruleNode, err := convertRuleToJSON(child.Rule)
+			if err != nil {
+				return schema.Schema{}, fmt.Errorf("error converting rule '%s': %w", child.Rule.Name, err)
+			}
+			result.Nodes = append(result.Nodes, ruleNode)
 
-	// Process types
-	for _, typeDecl := range astSchema.GetTypes() {
-		typeNode, err := convertTypeToJSON(typeDecl)
-		if err != nil {
-			return schema.Schema{}, fmt.Errorf("error converting type '%s': %w", typeDecl.Name, err)
-		}
-		result.Nodes = append(result.Nodes, typeNode)
-	}
+		case child.Type != nil:
+			typeNode, err := convertTypeToJSON(child.Type)
+			if err != nil {
+				return schema.Schema{}, fmt.Errorf("error converting type '%s': %w", child.Type.Name, err)
+			}
+			result.Nodes = append(result.Nodes, typeNode)
 
-	// Process procedures
-	for _, procDecl := range astSchema.GetProcs() {
-		procNode, err := convertProcToJSON(procDecl)
-		if err != nil {
-			return schema.Schema{}, fmt.Errorf("error converting procedure '%s': %w", procDecl.Name, err)
+		case child.Proc != nil:
+			procNode, err := convertProcToJSON(child.Proc)
+			if err != nil {
+				return schema.Schema{}, fmt.Errorf("error converting procedure '%s': %w", child.Proc.Name, err)
+			}
+			result.Nodes = append(result.Nodes, procNode)
 		}
-		result.Nodes = append(result.Nodes, procNode)
 	}
 
 	return result, nil
@@ -104,7 +98,7 @@ func convertRuleToJSON(rule *ast.RuleDecl) (*schema.NodeRule, error) {
 			}
 		}
 		if child.Error != nil {
-			errorMsg := strings.Trim(child.Error.Error, `"`)
+			errorMsg := child.Error.Error
 			ruleNode.Error = &errorMsg
 		}
 	}
@@ -112,17 +106,32 @@ func convertRuleToJSON(rule *ast.RuleDecl) (*schema.NodeRule, error) {
 	return ruleNode, nil
 }
 
+// convertParamTypeToJSON converts a string parameter type to a schema ParamPrimitiveType
+func convertParamTypeToJSON(paramType string) (schema.ParamPrimitiveType, error) {
+	switch paramType {
+	case "string":
+		return schema.ParamPrimitiveTypeString, nil
+	case "int":
+		return schema.ParamPrimitiveTypeInt, nil
+	case "float":
+		return schema.ParamPrimitiveTypeFloat, nil
+	case "boolean":
+		return schema.ParamPrimitiveTypeBoolean, nil
+	default:
+		return schema.ParamPrimitiveType{}, fmt.Errorf("invalid parameter type: %s", paramType)
+	}
+}
+
 // convertTypeToJSON converts an AST TypeDecl to a schema NodeType
 func convertTypeToJSON(typeDecl *ast.TypeDecl) (*schema.NodeType, error) {
 	typeNode := &schema.NodeType{
-		Kind:   "type",
-		Name:   typeDecl.Name,
-		Fields: []schema.FieldDefinition{},
+		Kind: "type",
+		Name: typeDecl.Name,
 	}
 
 	// Add docstring if available
 	if typeDecl.Docstring != nil {
-		docValue := strings.TrimSpace(typeDecl.Docstring.Value)
+		docValue := typeDecl.Docstring.Value
 		typeNode.Doc = &docValue
 	}
 
@@ -140,60 +149,6 @@ func convertTypeToJSON(typeDecl *ast.TypeDecl) (*schema.NodeType, error) {
 	return typeNode, nil
 }
 
-// convertProcToJSON converts an AST ProcDecl to a schema NodeProc
-func convertProcToJSON(procDecl *ast.ProcDecl) (*schema.NodeProc, error) {
-	procNode := &schema.NodeProc{
-		Kind:   "proc",
-		Name:   procDecl.Name,
-		Input:  []schema.FieldDefinition{},
-		Output: []schema.FieldDefinition{},
-		Meta:   make(map[string]schema.MetaValue),
-	}
-
-	// Add docstring if available
-	if procDecl.Docstring != nil {
-		docValue := strings.TrimSpace(procDecl.Docstring.Value)
-		procNode.Doc = &docValue
-	}
-
-	// Process procedure children
-	for _, child := range procDecl.Children {
-		if child.Input != nil {
-			for _, fieldOrComment := range child.Input.Children {
-				if fieldOrComment.Field != nil {
-					fieldDef, err := convertFieldToJSON(fieldOrComment.Field)
-					if err != nil {
-						return nil, fmt.Errorf("error converting input field '%s': %w", fieldOrComment.Field.Name, err)
-					}
-					procNode.Input = append(procNode.Input, fieldDef)
-				}
-			}
-		} else if child.Output != nil {
-			for _, fieldOrComment := range child.Output.Children {
-				if fieldOrComment.Field != nil {
-					fieldDef, err := convertFieldToJSON(fieldOrComment.Field)
-					if err != nil {
-						return nil, fmt.Errorf("error converting output field '%s': %w", fieldOrComment.Field.Name, err)
-					}
-					procNode.Output = append(procNode.Output, fieldDef)
-				}
-			}
-		} else if child.Meta != nil {
-			for _, metaChild := range child.Meta.Children {
-				if metaChild.KV != nil {
-					metaValue, err := convertMetaValueToJSON(metaChild.KV.Value)
-					if err != nil {
-						return nil, fmt.Errorf("error converting meta value for key '%s': %w", metaChild.KV.Key, err)
-					}
-					procNode.Meta[metaChild.KV.Key] = metaValue
-				}
-			}
-		}
-	}
-
-	return procNode, nil
-}
-
 // convertFieldToJSON converts an AST Field to a schema FieldDefinition
 func convertFieldToJSON(field *ast.Field) (schema.FieldDefinition, error) {
 	fieldDef := schema.FieldDefinition{
@@ -207,10 +162,10 @@ func convertFieldToJSON(field *ast.Field) (schema.FieldDefinition, error) {
 	if field.Type.Base.Named != nil {
 		typeName := *field.Type.Base.Named
 		fieldDef.TypeName = &typeName
-	} else if field.Type.Base.Object != nil {
-		inlineType := &schema.InlineTypeDefinition{
-			Fields: []schema.FieldDefinition{},
-		}
+	}
+
+	if field.Type.Base.Object != nil {
+		inlineType := &schema.InlineTypeDefinition{}
 
 		// Process inline object fields
 		for _, child := range field.Type.Base.Object.Children {
@@ -246,124 +201,176 @@ func convertFieldRuleToJSON(fieldRule *ast.FieldRule) (schema.AppliedRule, error
 		Rule: fieldRule.Name,
 	}
 
-	// Process rule body if available
-	if fieldRule.Body != nil {
-		// Process error message if available
-		if fieldRule.Body.Error != nil {
-			errorMsg := strings.Trim(*fieldRule.Body.Error, `"`)
-			rule.Error = &errorMsg
+	// Early return if there's no rule body
+	if fieldRule.Body == nil {
+		return rule, nil
+	}
+
+	// Process error message if available
+	if fieldRule.Body.Error != nil {
+		errorMsg := *fieldRule.Body.Error
+		rule.Error = &errorMsg
+	}
+
+	// Process parameters
+	if fieldRule.Body.ParamSingle != nil ||
+		len(fieldRule.Body.ParamListString) > 0 ||
+		len(fieldRule.Body.ParamListInt) > 0 ||
+		len(fieldRule.Body.ParamListFloat) > 0 ||
+		len(fieldRule.Body.ParamListBoolean) > 0 {
+
+		param := &schema.AppliedParam{}
+
+		// Handle single parameter
+		if fieldRule.Body.ParamSingle != nil {
+			paramType, paramValue, err := extractParamValue(*fieldRule.Body.ParamSingle)
+			if err != nil {
+				return schema.AppliedRule{}, err
+			}
+			param.Type = paramType
+			param.IsArray = false
+			param.Value = paramValue
 		}
 
-		// Process parameters
-		if fieldRule.Body.ParamSingle != nil ||
-			len(fieldRule.Body.ParamListString) > 0 ||
-			len(fieldRule.Body.ParamListInt) > 0 ||
-			len(fieldRule.Body.ParamListFloat) > 0 ||
-			len(fieldRule.Body.ParamListBoolean) > 0 {
-
-			param := &schema.AppliedParam{}
-
-			// Handle single parameter
-			if fieldRule.Body.ParamSingle != nil {
-				paramType, paramValue, err := extractParamValue(*fieldRule.Body.ParamSingle)
-				if err != nil {
-					return schema.AppliedRule{}, err
-				}
-				param.Type = paramType
-				param.IsArray = false
-				param.Value = paramValue
-			}
-
-			// Handle array parameters
-			if len(fieldRule.Body.ParamListString) > 0 {
-				param.Type = schema.ParamPrimitiveTypeString
-				param.IsArray = true
-				param.ArrayValues = make([]string, len(fieldRule.Body.ParamListString))
-				for i, val := range fieldRule.Body.ParamListString {
-					param.ArrayValues[i] = strings.Trim(val, `"`)
-				}
-			} else if len(fieldRule.Body.ParamListInt) > 0 {
-				param.Type = schema.ParamPrimitiveTypeInt
-				param.IsArray = true
-				param.ArrayValues = fieldRule.Body.ParamListInt
-			} else if len(fieldRule.Body.ParamListFloat) > 0 {
-				param.Type = schema.ParamPrimitiveTypeFloat
-				param.IsArray = true
-				param.ArrayValues = fieldRule.Body.ParamListFloat
-			} else if len(fieldRule.Body.ParamListBoolean) > 0 {
-				param.Type = schema.ParamPrimitiveTypeBoolean
-				param.IsArray = true
-				param.ArrayValues = fieldRule.Body.ParamListBoolean
-			}
-
-			rule.Param = param
+		// Handle array parameters
+		if len(fieldRule.Body.ParamListString) > 0 {
+			param.Type = schema.ParamPrimitiveTypeString
+			param.IsArray = true
+			param.ArrayValues = fieldRule.Body.ParamListString
 		}
+		if len(fieldRule.Body.ParamListInt) > 0 {
+			param.Type = schema.ParamPrimitiveTypeInt
+			param.IsArray = true
+			param.ArrayValues = fieldRule.Body.ParamListInt
+		}
+		if len(fieldRule.Body.ParamListFloat) > 0 {
+			param.Type = schema.ParamPrimitiveTypeFloat
+			param.IsArray = true
+			param.ArrayValues = fieldRule.Body.ParamListFloat
+		}
+		if len(fieldRule.Body.ParamListBoolean) > 0 {
+			param.Type = schema.ParamPrimitiveTypeBoolean
+			param.IsArray = true
+			param.ArrayValues = fieldRule.Body.ParamListBoolean
+		}
+
+		rule.Param = param
 	}
 
 	return rule, nil
 }
 
-// convertMetaValueToJSON converts an AST AnyLiteral to a schema MetaValue
-func convertMetaValueToJSON(literal ast.AnyLiteral) (schema.MetaValue, error) {
-	var metaValue schema.MetaValue
-
-	if literal.Str != nil {
-		strValue := strings.Trim(*literal.Str, `"`)
-		metaValue.StringVal = &strValue
-	} else if literal.Int != nil {
-		var intValue int64
-		if _, err := fmt.Sscanf(*literal.Int, "%d", &intValue); err != nil {
-			return schema.MetaValue{}, fmt.Errorf("invalid integer value: %s", *literal.Int)
-		}
-		metaValue.IntVal = &intValue
-	} else if literal.Float != nil {
-		var floatValue float64
-		if _, err := fmt.Sscanf(*literal.Float, "%f", &floatValue); err != nil {
-			return schema.MetaValue{}, fmt.Errorf("invalid float value: %s", *literal.Float)
-		}
-		metaValue.FloatVal = &floatValue
-	} else if literal.True != nil {
-		boolValue := true
-		metaValue.BoolVal = &boolValue
-	} else if literal.False != nil {
-		boolValue := false
-		metaValue.BoolVal = &boolValue
-	} else {
-		return schema.MetaValue{}, fmt.Errorf("empty literal value")
-	}
-
-	return metaValue, nil
-}
-
 // extractParamValue extracts the parameter type and value from an AnyLiteral
 func extractParamValue(literal ast.AnyLiteral) (schema.ParamPrimitiveType, string, error) {
 	if literal.Str != nil {
-		return schema.ParamPrimitiveTypeString, strings.Trim(*literal.Str, `"`), nil
-	} else if literal.Int != nil {
+		return schema.ParamPrimitiveTypeString, *literal.Str, nil
+	}
+	if literal.Int != nil {
 		return schema.ParamPrimitiveTypeInt, *literal.Int, nil
-	} else if literal.Float != nil {
+	}
+	if literal.Float != nil {
 		return schema.ParamPrimitiveTypeFloat, *literal.Float, nil
-	} else if literal.True != nil {
+	}
+	if literal.True != nil {
 		return schema.ParamPrimitiveTypeBoolean, "true", nil
-	} else if literal.False != nil {
+	}
+	if literal.False != nil {
 		return schema.ParamPrimitiveTypeBoolean, "false", nil
 	}
 
 	return schema.ParamPrimitiveType{}, "", fmt.Errorf("empty literal value")
 }
 
-// convertParamTypeToJSON converts a string parameter type to a schema ParamPrimitiveType
-func convertParamTypeToJSON(paramType string) (schema.ParamPrimitiveType, error) {
-	switch paramType {
-	case "string":
-		return schema.ParamPrimitiveTypeString, nil
-	case "int":
-		return schema.ParamPrimitiveTypeInt, nil
-	case "float":
-		return schema.ParamPrimitiveTypeFloat, nil
-	case "boolean":
-		return schema.ParamPrimitiveTypeBoolean, nil
-	default:
-		return schema.ParamPrimitiveType{}, fmt.Errorf("invalid parameter type: %s", paramType)
+// convertProcToJSON converts an AST ProcDecl to a schema NodeProc
+func convertProcToJSON(procDecl *ast.ProcDecl) (*schema.NodeProc, error) {
+	procNode := &schema.NodeProc{
+		Kind: "proc",
+		Name: procDecl.Name,
 	}
+
+	// Add docstring if available
+	if procDecl.Docstring != nil {
+		docValue := procDecl.Docstring.Value
+		procNode.Doc = &docValue
+	}
+
+	// Process procedure children
+	for _, child := range procDecl.Children {
+		if child.Input != nil {
+			for _, fieldOrComment := range child.Input.Children {
+				if fieldOrComment.Field != nil {
+					fieldDef, err := convertFieldToJSON(fieldOrComment.Field)
+					if err != nil {
+						return nil, fmt.Errorf("error converting input field '%s': %w", fieldOrComment.Field.Name, err)
+					}
+					procNode.Input = append(procNode.Input, fieldDef)
+				}
+			}
+		}
+		if child.Output != nil {
+			for _, fieldOrComment := range child.Output.Children {
+				if fieldOrComment.Field != nil {
+					fieldDef, err := convertFieldToJSON(fieldOrComment.Field)
+					if err != nil {
+						return nil, fmt.Errorf("error converting output field '%s': %w", fieldOrComment.Field.Name, err)
+					}
+					procNode.Output = append(procNode.Output, fieldDef)
+				}
+			}
+		}
+		if child.Meta != nil {
+			for _, metaChild := range child.Meta.Children {
+				if metaChild.KV != nil {
+					metaValue, err := convertMetaValueToJSON(metaChild.KV.Value)
+					if err != nil {
+						return nil, fmt.Errorf("error converting meta value for key '%s': %w", metaChild.KV.Key, err)
+					}
+					procNode.Meta = append(procNode.Meta, schema.MetaKeyValue{
+						Key:   metaChild.KV.Key,
+						Value: metaValue,
+					})
+				}
+			}
+		}
+	}
+
+	return procNode, nil
+}
+
+// convertMetaValueToJSON converts an AST AnyLiteral to a schema MetaValue
+func convertMetaValueToJSON(literal ast.AnyLiteral) (schema.MetaValue, error) {
+	var metaValue schema.MetaValue
+
+	if literal.Str == nil && literal.Int == nil && literal.Float == nil && literal.True == nil && literal.False == nil {
+		return schema.MetaValue{}, fmt.Errorf("empty meta value")
+	}
+
+	if literal.Str != nil {
+		strValue := *literal.Str
+		metaValue.StringVal = &strValue
+	}
+	if literal.Int != nil {
+		var intValue int64
+		if _, err := fmt.Sscanf(*literal.Int, "%d", &intValue); err != nil {
+			return schema.MetaValue{}, fmt.Errorf("invalid integer value: %s", *literal.Int)
+		}
+		metaValue.IntVal = &intValue
+	}
+	if literal.Float != nil {
+		var floatValue float64
+		if _, err := fmt.Sscanf(*literal.Float, "%f", &floatValue); err != nil {
+			return schema.MetaValue{}, fmt.Errorf("invalid float value: %s", *literal.Float)
+		}
+		metaValue.FloatVal = &floatValue
+	}
+	if literal.True != nil {
+		boolValue := true
+		metaValue.BoolVal = &boolValue
+	}
+	if literal.False != nil {
+		boolValue := false
+		metaValue.BoolVal = &boolValue
+	}
+
+	return metaValue, nil
 }

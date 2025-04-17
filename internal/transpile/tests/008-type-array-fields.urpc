@@ -1,0 +1,8 @@
+version 1
+
+type Collection {
+  id: string
+  items: string[]
+  matrix: int[][]
+  cube: boolean[][][]
+}
