@@ -12,6 +12,7 @@ type allArgs struct {
 	Init      *cmdInitArgs      `arg:"subcommand:init" help:"Initialize a new URPC schema in the specified path"`
 	Fmt       *cmdFmtArgs       `arg:"subcommand:fmt" help:"Format the URPC schema in the specified path"`
 	Transpile *cmdTranspileArgs `arg:"subcommand:transpile" help:"Transpile a URPC schema to JSON and vice versa, the result will be printed to stdout"`
+	Generate  *cmdGenerateArgs  `arg:"subcommand:generate" help:"Generate code from the URPC schema"`
 	LSP       *cmdLSPArgs       `arg:"subcommand:lsp" help:"Start the LSP server"`
 }
 
@@ -50,5 +51,9 @@ func main() {
 
 	if args.Transpile != nil {
 		cmdTranspile(args.Transpile)
+	}
+
+	if args.Generate != nil {
+		cmdGenerate(args.Generate)
 	}
 }
