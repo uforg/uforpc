@@ -11,6 +11,7 @@ import (
 	"github.com/uforg/uforpc/internal/transpile"
 	"github.com/uforg/uforpc/internal/urpc/analyzer"
 	"github.com/uforg/uforpc/internal/urpc/docstore"
+	"github.com/uforg/uforpc/internal/urpc/typeflattener"
 	"github.com/uforg/uforpc/internal/util/filepathutil"
 )
 
@@ -45,11 +46,13 @@ func Run(configPath string) error {
 		return fmt.Errorf("invalid schema: %w", err)
 	}
 
+	flattenedSchema := typeflattener.Flatten(combinedSchema.Schema)
+
 	///////////////////////
 	// TRANSPILE TO JSON //
 	///////////////////////
 
-	jsonSchema, err := transpile.ToJSON(*combinedSchema.Schema)
+	jsonSchema, err := transpile.ToJSON(*flattenedSchema)
 	if err != nil {
 		return fmt.Errorf("failed to transpile schema to its JSON representation: %w", err)
 	}
