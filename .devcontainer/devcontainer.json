@@ -13,7 +13,8 @@
         "mutantdino.resourcemonitor",
         "Compile-TomaszKasperczyk.copy-to-llm",
         "donjayamanne.githistory",
-        "ryu1kn.partial-diff"
+        "ryu1kn.partial-diff",
+        "tamasfe.even-better-toml"
       ],
       "settings": {
         "urpc.enable": false,
