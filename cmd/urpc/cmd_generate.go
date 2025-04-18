@@ -8,14 +8,14 @@ import (
 )
 
 type cmdGenerateArgs struct {
-	ConfigPath string `arg:"positional" help:"The urpc.toml config file path (default: ./urpc.toml)"`
+	ConfigPath string `arg:"positional" help:"The config file path (default: ./uforpc.toml)"`
 }
 
 func cmdGenerate(args *cmdGenerateArgs) {
 	startTime := time.Now()
 
 	if args.ConfigPath == "" {
-		args.ConfigPath = "./urpc.toml"
+		args.ConfigPath = "./uforpc.toml"
 	}
 
 	if err := codegen.Run(args.ConfigPath); err != nil {
