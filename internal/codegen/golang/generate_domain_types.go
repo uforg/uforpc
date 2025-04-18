@@ -1,6 +1,8 @@
 package golang
 
 import (
+	"strings"
+
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/schema"
 )
@@ -14,9 +16,9 @@ func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 	g.Break()
 
 	for _, typeNode := range sch.GetTypeNodes() {
-		desc := "is a domain type defined in UFO RPC with no description."
+		desc := "is a domain type defined in UFO RPC with no documentation."
 		if typeNode.Doc != nil {
-			desc = *typeNode.Doc
+			desc = strings.TrimSpace(*typeNode.Doc)
 		}
 
 		g.Linef("/* %s %s */", typeNode.Name, desc)

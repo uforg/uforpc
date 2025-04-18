@@ -93,7 +93,7 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 		case "time.Time":
 			typeLiteral = "NullTime"
 		default:
-			typeLiteral = fmt.Sprintf("Null[%s]", typeLiteral)
+			typeLiteral = fmt.Sprintf("Null[%s]", strings.TrimSpace(typeLiteral))
 		}
 	}
 
