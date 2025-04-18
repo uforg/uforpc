@@ -23,22 +23,22 @@ func TestNullString(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name:     "valor normal",
+			name:     "normal value",
 			json:     `"hello"`,
 			expected: NullString{Value: "hello", Valid: true},
 		},
 		{
-			name:     "valor vacío",
+			name:     "empty value",
 			json:     `""`,
 			expected: NullString{Value: "", Valid: true},
 		},
 		{
-			name:     "valor null",
+			name:     "null value",
 			json:     `null`,
 			expected: NullString{Valid: false},
 		},
 		{
-			name:    "valor inválido",
+			name:    "invalid value",
 			json:    `123`,
 			wantErr: true,
 		},
@@ -69,32 +69,32 @@ func TestNullInt(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name:     "número positivo",
+			name:     "positive number",
 			json:     `42`,
 			expected: NullInt{Value: 42, Valid: true},
 		},
 		{
-			name:     "número negativo",
+			name:     "negative number",
 			json:     `-42`,
 			expected: NullInt{Value: -42, Valid: true},
 		},
 		{
-			name:     "cero",
+			name:     "zero",
 			json:     `0`,
 			expected: NullInt{Value: 0, Valid: true},
 		},
 		{
-			name:     "valor null",
+			name:     "null value",
 			json:     `null`,
 			expected: NullInt{Valid: false},
 		},
 		{
-			name:    "valor inválido string",
+			name:    "invalid string value",
 			json:    `"123"`,
 			wantErr: true,
 		},
 		{
-			name:    "valor inválido float",
+			name:    "invalid float value",
 			json:    `123.45`,
 			wantErr: true,
 		},
@@ -125,32 +125,32 @@ func TestNullFloat64(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name:     "número entero",
+			name:     "integer number",
 			json:     `42`,
 			expected: NullFloat64{Value: 42.0, Valid: true},
 		},
 		{
-			name:     "número decimal",
+			name:     "decimal number",
 			json:     `42.5`,
 			expected: NullFloat64{Value: 42.5, Valid: true},
 		},
 		{
-			name:     "número negativo",
+			name:     "negative number",
 			json:     `-42.5`,
 			expected: NullFloat64{Value: -42.5, Valid: true},
 		},
 		{
-			name:     "cero",
+			name:     "zero",
 			json:     `0`,
 			expected: NullFloat64{Value: 0, Valid: true},
 		},
 		{
-			name:     "valor null",
+			name:     "null value",
 			json:     `null`,
 			expected: NullFloat64{Valid: false},
 		},
 		{
-			name:    "valor inválido",
+			name:    "invalid value",
 			json:    `"123.45"`,
 			wantErr: true,
 		},
@@ -191,17 +191,17 @@ func TestNullBool(t *testing.T) {
 			expected: NullBool{Value: false, Valid: true},
 		},
 		{
-			name:     "valor null",
+			name:     "null value",
 			json:     `null`,
 			expected: NullBool{Valid: false},
 		},
 		{
-			name:    "valor inválido número",
+			name:    "invalid number value",
 			json:    `1`,
 			wantErr: true,
 		},
 		{
-			name:    "valor inválido string",
+			name:    "invalid string value",
 			json:    `"true"`,
 			wantErr: true,
 		},
@@ -278,7 +278,7 @@ func TestComplexStructure(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name: "todos los campos con valor",
+			name: "all fields with value",
 			json: `{
                 "text": "hello",
                 "number": 42,
@@ -295,7 +295,7 @@ func TestComplexStructure(t *testing.T) {
 			},
 		},
 		{
-			name: "todos los campos null",
+			name: "all fields null",
 			json: `{
                 "text": null,
                 "number": null,
@@ -312,7 +312,7 @@ func TestComplexStructure(t *testing.T) {
 			},
 		},
 		{
-			name: "algunos campos null",
+			name: "some fields null",
 			json: `{
                 "text": "hello",
                 "number": null,
@@ -329,7 +329,7 @@ func TestComplexStructure(t *testing.T) {
 			},
 		},
 		{
-			name: "campos faltantes",
+			name: "missing fields",
 			json: `{
                 "text": "hello",
                 "decimal": 42.5
@@ -343,7 +343,7 @@ func TestComplexStructure(t *testing.T) {
 			},
 		},
 		{
-			name: "json vacío",
+			name: "empty json",
 			json: `{}`,
 			expected: TestStructure{
 				Text:    NullString{Valid: false},
@@ -390,7 +390,7 @@ func TestMarshalJSON(t *testing.T) {
 		expected string
 	}{
 		{
-			name: "todos los campos con valor",
+			name: "all fields with value",
 			input: TestStructure{
 				Text:    NullString{Value: "hello", Valid: true},
 				Number:  NullInt{Value: 42, Valid: true},
@@ -401,7 +401,7 @@ func TestMarshalJSON(t *testing.T) {
 			expected: `{"text":"hello","number":42,"decimal":42.5,"flag":true,"generic":[1,2,3]}`,
 		},
 		{
-			name: "todos los campos null",
+			name: "all fields null",
 			input: TestStructure{
 				Text:    NullString{Valid: false},
 				Number:  NullInt{Valid: false},
@@ -412,7 +412,7 @@ func TestMarshalJSON(t *testing.T) {
 			expected: `{"text":null,"number":null,"decimal":null,"flag":null,"generic":null}`,
 		},
 		{
-			name: "mezcla de valores y null",
+			name: "mix of values and null",
 			input: TestStructure{
 				Text:    NullString{Value: "hello", Valid: true},
 				Number:  NullInt{Valid: false},
@@ -436,11 +436,11 @@ func TestMarshalJSON(t *testing.T) {
 				t.Errorf("got %v, want %v", string(got), tt.expected)
 			}
 
-			// Verificar que se puede deserializar de vuelta
+			// Verify that it can be deserialized back
 			var roundTrip TestStructure
 			err = json.Unmarshal(got, &roundTrip)
 			if err != nil {
-				t.Errorf("Unmarshal() error en roundtrip = %v", err)
+				t.Errorf("Unmarshal() error in roundtrip = %v", err)
 			}
 		})
 	}
