@@ -3,6 +3,7 @@ module github.com/uforg/uforpc
 go 1.24.1
 
 require (
+	github.com/BurntSushi/toml v1.5.0
 	github.com/alecthomas/participle/v2 v2.1.4
 	github.com/alexflint/go-arg v1.5.1
 	github.com/orsinium-labs/enum v1.4.0
