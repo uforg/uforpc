@@ -3,6 +3,7 @@ package pieces
 import (
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 // TestStructure includes all nullable types
@@ -217,6 +218,52 @@ func TestNullBool(t *testing.T) {
 			}
 
 			if err == nil && (got.Valid != tt.expected.Valid || got.Value != tt.expected.Value) {
+				t.Errorf("got %+v, want %+v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestNullTime(t *testing.T) {
+	tests := []struct {
+		name     string
+		json     string
+		expected NullTime
+		wantErr  bool
+	}{
+		{
+			name:     "valid time",
+			json:     `"2023-05-01T12:34:56Z"`,
+			expected: NullTime{Value: time.Date(2023, 5, 1, 12, 34, 56, 0, time.UTC), Valid: true},
+		},
+		{
+			name:     "null value",
+			json:     `null`,
+			expected: NullTime{Valid: false},
+		},
+		{
+			name:    "invalid time format",
+			json:    `"2023-05-01"`,
+			wantErr: true,
+		},
+		{
+			name:    "invalid type",
+			json:    `123`,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got NullTime
+			err := json.Unmarshal([]byte(tt.json), &got)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err == nil && (got.Valid != tt.expected.Valid || !got.Value.Equal(tt.expected.Value)) {
 				t.Errorf("got %+v, want %+v", got, tt.expected)
 			}
 		})

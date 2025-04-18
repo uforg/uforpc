@@ -1,6 +1,9 @@
 package pieces
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 /** START FROM HERE **/
 
@@ -18,14 +21,17 @@ type (
 	// NullString is a string that can be null in JSON
 	NullString = Null[string]
 
-	// NullBool is a bool that can be null in JSON
-	NullBool = Null[bool]
-
 	// NullInt is an int that can be null in JSON
 	NullInt = Null[int]
 
 	// NullFloat64 is a float64 that can be null in JSON
 	NullFloat64 = Null[float64]
+
+	// NullBool is a bool that can be null in JSON
+	NullBool = Null[bool]
+
+	// NullTime is a time.Time that can be null in JSON
+	NullTime = Null[time.Time]
 )
 
 // UnmarshalJSON implements json.Unmarshaler for Null[T]
