@@ -20,10 +20,10 @@ type Config struct {
 
 func (c Config) Validate() error {
 	if c.OutputDir == "" {
-		return fmt.Errorf("output_dir is required")
+		return fmt.Errorf(`"output_dir" is required`)
 	}
 	if c.PackageName == "" {
-		return fmt.Errorf("package_name is required")
+		return fmt.Errorf(`"package_name" is required`)
 	}
 	return nil
 }

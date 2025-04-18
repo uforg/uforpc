@@ -8,6 +8,7 @@ import (
 	"github.com/uforg/uforpc/internal/codegen/typescript"
 )
 
+// Config is the configuration for the code generator.
 type Config struct {
 	Version    int                `toml:"version"`
 	Schema     string             `toml:"schema"`
@@ -15,13 +16,32 @@ type Config struct {
 	Typescript *typescript.Config `toml:"typescript"`
 }
 
-func (c Config) Validate() error {
+func (c *Config) HasGolang() bool {
+	return c.Golang != nil
+}
+
+func (c *Config) HasTypescript() bool {
+	return c.Typescript != nil
+}
+
+func (c *Config) Unmarshal(data []byte) error {
+	if err := toml.Unmarshal(data, c); err != nil {
+		return fmt.Errorf("failed to unmarshal TOML config: %w", err)
+	}
+	return nil
+}
+
+func (c *Config) Validate() error {
+	if c.Version == 0 {
+		return fmt.Errorf(`"version" is required`)
+	}
+
 	if c.Version != 1 {
-		return fmt.Errorf("unsupported config version: %d", c.Version)
+		return fmt.Errorf("unsupported version: %d", c.Version)
 	}
 
 	if c.Schema == "" {
-		return fmt.Errorf("schema path is required")
+		return fmt.Errorf(`"schema" is required`)
 	}
 
 	if c.Golang != nil {
@@ -39,17 +59,15 @@ func (c Config) Validate() error {
 	return nil
 }
 
-// UnmarshalTOMLConfig unmarshals and validates a TOML config
-// string into a Config struct.
-func UnmarshalTOMLConfig(configStr string) (Config, error) {
-	var config Config
-	if err := toml.Unmarshal([]byte(configStr), &config); err != nil {
-		return config, fmt.Errorf("failed to unmarshal TOML config: %w", err)
+// UnmarshalAndValidate unmarshals and validates a TOML config
+func (c *Config) UnmarshalAndValidate(configBytes []byte) error {
+	if err := c.Unmarshal(configBytes); err != nil {
+		return err
 	}
 
-	if err := config.Validate(); err != nil {
-		return config, fmt.Errorf("invalid config: %w", err)
+	if err := c.Validate(); err != nil {
+		return err
 	}
 
-	return config, nil
+	return nil
 }
