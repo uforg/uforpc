@@ -26,20 +26,15 @@ func NewAnalyzer(fileProvider FileProvider) (*Analyzer, error) {
 //   - Semantic analysis phase: Performs semantic analysis on the combined schema.
 func (a *Analyzer) Analyze(entryPointFilePath string) (CombinedSchema, []Diagnostic, error) {
 	combinedSchema, resolverDiagnostics, _ := a.resolver.resolve(entryPointFilePath)
+	if len(resolverDiagnostics) > 0 {
+		return combinedSchema, resolverDiagnostics, resolverDiagnostics[0]
+	}
 
 	semanalyzer := newSemanalyzer(combinedSchema)
 	semanalyzerDiagnostics, _ := semanalyzer.analyze()
-
-	diagnostics := []Diagnostic{}
-	if len(resolverDiagnostics) > 0 {
-		diagnostics = append(diagnostics, resolverDiagnostics...)
-	}
 	if len(semanalyzerDiagnostics) > 0 {
-		diagnostics = append(diagnostics, semanalyzerDiagnostics...)
+		return combinedSchema, semanalyzerDiagnostics, semanalyzerDiagnostics[0]
 	}
 
-	if len(diagnostics) > 0 {
-		return combinedSchema, diagnostics, diagnostics[0]
-	}
 	return combinedSchema, nil, nil
 }
