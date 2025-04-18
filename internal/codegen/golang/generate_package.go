@@ -8,7 +8,7 @@ import (
 func generatePackage(_ schema.Schema, config Config) (string, error) {
 	g := genkit.NewGenKit().WithTabs()
 
-	g.Inline("// This file has been generated using UFO RPC. DO NOT EDIT.")
+	g.Line("// This file has been generated using UFO RPC. DO NOT EDIT.")
 	g.Line("// If you edit this file, it will be overwritten the next time it is generated.")
 	g.Break()
 
@@ -23,6 +23,7 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 		g.Line(`"io"`)
 		g.Line(`"slices"`)
 		g.Line(`"strings"`)
+		g.Line(`"time"`)
 	})
 	g.Line(")")
 	g.Break()

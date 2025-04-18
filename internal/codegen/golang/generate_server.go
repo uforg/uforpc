@@ -89,7 +89,8 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	for name := range sch.Procedures {
+	for _, procNode := range sch.GetProcNodes() {
+		name := procNode.Name
 		namePascal := strutil.ToPascalCase(name)
 
 		g.Linef("// Set%sHandler registers the handler for the %s procedure", namePascal, name)

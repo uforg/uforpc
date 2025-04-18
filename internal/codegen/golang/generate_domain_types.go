@@ -8,25 +8,24 @@ import (
 func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 	g := genkit.NewGenKit().WithTabs()
 
-	g.Inline("// -----------------------------------------------------------------------------")
+	g.Line("// -----------------------------------------------------------------------------")
 	g.Line("// Domain Types")
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Break()
 
-	for typeName, typeContent := range sch.Types {
-		desc := typeContent.Description
-		if desc == "" {
-			desc = "is a domain type defined in UFO RPC with no description."
+	for _, typeNode := range sch.GetTypeNodes() {
+		desc := "is a domain type defined in UFO RPC with no description."
+		if typeNode.Doc != nil {
+			desc = *typeNode.Doc
 		}
 
-		g.Linef("// %s %s", typeName, desc)
-		g.Linef("type %s struct {", typeName)
+		g.Linef("/* %s %s */", typeNode.Name, desc)
+		g.Linef("type %s struct {", typeNode.Name)
 
 		g.Block(func() {
-			for fieldName, fieldContent := range typeContent.Fields {
+			for _, fieldDef := range typeNode.Fields {
 				g.Line(generateCommonRenderField(generateCommonRenderFieldParams{
-					name:     fieldName,
-					field:    fieldContent,
+					field:    fieldDef,
 					typeOnly: false,
 					omitTag:  false,
 				}))
@@ -36,8 +35,8 @@ func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 		g.Line("}")
 		g.Break()
 
-		g.Linef("// Null%s is the nullable version of %s", typeName, typeName)
-		g.Linef("type Null%s = Null[%s]", typeName, typeName)
+		g.Linef("// Null%s is the nullable version of %s", typeNode.Name, typeNode.Name)
+		g.Linef("type Null%s = Null[%s]", typeNode.Name, typeNode.Name)
 		g.Break()
 	}
 

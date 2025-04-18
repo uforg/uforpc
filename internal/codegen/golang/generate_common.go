@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/schema"
@@ -9,10 +10,8 @@ import (
 )
 
 type generateCommonRenderFieldParams struct {
-	// The name of the field
-	name string
 	// The field to render
-	field schema.Field
+	field schema.FieldDefinition
 	// Whether to only return the type or the full field
 	typeOnly bool
 	// Whether to omit the JSON tags
@@ -21,13 +20,16 @@ type generateCommonRenderFieldParams struct {
 
 // generateCommonRenderField generates the code for a field
 func generateCommonRenderField(params generateCommonRenderFieldParams) string {
-	name := params.name
-	typeOnly := params.typeOnly
 	field := params.field
+	name := field.Name
+	typeOnly := params.typeOnly
 	omitTag := params.omitTag
 
+	isNamed := field.IsNamed()
+	isInline := field.IsInline()
+
 	// Protect against empty fields
-	if field.Type == "" {
+	if !isNamed && !isInline {
 		return ""
 	}
 
@@ -38,11 +40,13 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 	isBuiltInType := field.IsBuiltInType()
 
 	typeLiteral := "any"
-	if isCustomType {
-		typeLiteral = field.Type
+
+	if isNamed && isCustomType {
+		typeLiteral = *field.TypeName
 	}
-	if isBuiltInType {
-		switch field.Type {
+
+	if isNamed && isBuiltInType {
+		switch *field.TypeName {
 		case "string":
 			typeLiteral = "string"
 		case "int":
@@ -51,44 +55,43 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 			typeLiteral = "float64"
 		case "boolean":
 			typeLiteral = "bool"
-		case "object":
-			og := genkit.NewGenKit().WithTabs()
-			og.Inline("struct {")
-			og.Block(func() {
-				for fieldName, fieldContent := range field.Fields {
-					og.Line(generateCommonRenderField(generateCommonRenderFieldParams{
-						name:     fieldName,
-						field:    fieldContent,
-						typeOnly: false,
-						omitTag:  false,
-					}))
-				}
-			})
-			og.Line("}")
-			typeLiteral = og.String()
-		case "array":
-			if field.ArrayType != nil {
-				underlyingType := generateCommonRenderField(generateCommonRenderFieldParams{
-					name:     "",
-					field:    *field.ArrayType,
-					typeOnly: true,
-					omitTag:  true,
-				})
-				typeLiteral = fmt.Sprintf("[]%s", underlyingType)
-			}
+		case "datetime":
+			typeLiteral = "time.Time"
 		}
 	}
 
+	if isInline {
+		og := genkit.NewGenKit().WithTabs()
+		og.Inline("struct {")
+		og.Block(func() {
+			for _, fieldDef := range field.TypeInline.Fields {
+				og.Line(generateCommonRenderField(generateCommonRenderFieldParams{
+					field:    fieldDef,
+					typeOnly: false,
+					omitTag:  false,
+				}))
+			}
+		})
+		og.Line("}")
+		typeLiteral = og.String()
+	}
+
+	if field.Depth > 0 {
+		typeLiteral = strings.Repeat("[]", field.Depth) + typeLiteral
+	}
+
 	if isOptional {
-		switch field.Type {
+		switch typeLiteral {
 		case "string":
 			typeLiteral = "NullString"
 		case "int":
 			typeLiteral = "NullInt"
-		case "float":
+		case "float64":
 			typeLiteral = "NullFloat64"
-		case "boolean":
+		case "bool":
 			typeLiteral = "NullBool"
+		case "time.Time":
+			typeLiteral = "NullTime"
 		default:
 			typeLiteral = fmt.Sprintf("Null[%s]", typeLiteral)
 		}
@@ -98,33 +101,27 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 		return typeLiteral
 	}
 
-	description := ""
-	if field.Description != "" {
-		description = fmt.Sprintf("// %s\n", field.Description)
-	}
-
 	jsonTag := ""
 	if !omitTag {
 		jsonTag = fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
 	}
 
 	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
-	return description + result + jsonTag
+	return result + jsonTag
 }
 
-// generateCommonRenderStructFromFieldMap generates the code for a map of fields
-func generateCommonRenderStructFromFieldMap(fieldMap map[string]schema.Field) string {
-	if len(fieldMap) == 0 {
+// generateCommonRenderStructFromFieldSlice generates the code for a slice of fields
+func generateCommonRenderStructFromFieldSlice(fieldSlice []schema.FieldDefinition) string {
+	if len(fieldSlice) == 0 {
 		return "struct{}"
 	}
 
 	og := genkit.NewGenKit().WithTabs()
 	og.Inline("struct {")
 	og.Block(func() {
-		for fieldName, field := range fieldMap {
+		for _, fieldItem := range fieldSlice {
 			og.Line(generateCommonRenderField(generateCommonRenderFieldParams{
-				name:     fieldName,
-				field:    field,
+				field:    fieldItem,
 				typeOnly: false,
 				omitTag:  false,
 			}))

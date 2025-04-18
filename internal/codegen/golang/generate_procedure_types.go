@@ -16,18 +16,18 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Break()
 
-	for name, procedure := range sch.Procedures {
-		namePascal := strutil.ToPascalCase(name)
+	for _, procNode := range sch.GetProcNodes() {
+		namePascal := strutil.ToPascalCase(procNode.Name)
 		inputName := fmt.Sprintf("P%sInput", namePascal)
 		outputName := fmt.Sprintf("P%sOutput", namePascal)
 		responseName := fmt.Sprintf("P%sResponse", namePascal)
 
-		inputType := generateCommonRenderStructFromFieldMap(procedure.Input)
+		inputType := generateCommonRenderStructFromFieldSlice(procNode.Input)
 		if inputType == "" {
 			inputType = "struct{}"
 		}
 
-		outputType := generateCommonRenderStructFromFieldMap(procedure.Output)
+		outputType := generateCommonRenderStructFromFieldSlice(procNode.Output)
 		if outputType == "" {
 			outputType = "struct{}"
 		}
@@ -48,7 +48,9 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Line("// ProcedureTypes defines the interface for all procedure types.")
 	g.Line("type ProcedureTypes interface {")
 	g.Block(func() {
-		for name := range sch.Procedures {
+		for _, procNode := range sch.GetProcNodes() {
+			name := procNode.Name
+
 			inputName := fmt.Sprintf("P%sInput", strutil.ToPascalCase(name))
 			responseName := fmt.Sprintf("P%sResponse", strutil.ToPascalCase(name))
 
@@ -66,14 +68,14 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Line("// ProcedureNames is a struct that contains all procedure names in its literal string form.")
 	g.Line("var ProcedureNames = struct {")
 	g.Block(func() {
-		for name := range sch.Procedures {
-			g.Linef("%s ProcedureName", name)
+		for _, procNode := range sch.GetProcNodes() {
+			g.Linef("%s ProcedureName", procNode.Name)
 		}
 	})
 	g.Line("}{")
 	g.Block(func() {
-		for name := range sch.Procedures {
-			g.Linef("%s: \"%s\",", name, name)
+		for _, procNode := range sch.GetProcNodes() {
+			g.Linef("%s: \"%s\",", procNode.Name, procNode.Name)
 		}
 	})
 	g.Line("}")
@@ -82,8 +84,8 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Line("// ProcedureNamesList is a list of all procedure names.")
 	g.Line("var ProcedureNamesList = []ProcedureName{")
 	g.Block(func() {
-		for name := range sch.Procedures {
-			g.Linef("ProcedureNames.%s,", name)
+		for _, procNode := range sch.GetProcNodes() {
+			g.Linef("ProcedureNames.%s,", procNode.Name)
 		}
 	})
 	g.Line("}")
