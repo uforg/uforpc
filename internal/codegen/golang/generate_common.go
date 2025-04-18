@@ -62,7 +62,7 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 
 	if isInline {
 		og := genkit.NewGenKit().WithTabs()
-		og.Inline("struct {")
+		og.Line("struct {")
 		og.Block(func() {
 			for _, fieldDef := range field.TypeInline.Fields {
 				og.Line(generateCommonRenderField(generateCommonRenderFieldParams{
@@ -72,7 +72,7 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 				}))
 			}
 		})
-		og.Line("}")
+		og.Inline("}")
 		typeLiteral = og.String()
 	}
 
