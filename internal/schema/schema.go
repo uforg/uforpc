@@ -192,6 +192,9 @@ type NodeRule struct {
 	Name string `json:"name"`
 	// Doc is the associated documentation string (optional).
 	Doc *string `json:"doc,omitempty"`
+	// Deprecated indicates if the rule is deprecated and contains the message
+	// associated with the deprecation.
+	Deprecated *string `json:"deprecated,omitempty"`
 	// For indicates the primitive or custom type name this rule applies to.
 	For string `json:"for"`
 	// Param defines the parameter structure expected by this rule (null if none).
@@ -208,6 +211,9 @@ type NodeType struct {
 	Name string `json:"name"`
 	// Doc is the associated documentation string (optional).
 	Doc *string `json:"doc,omitempty"`
+	// Deprecated indicates if the type is deprecated and contains the message
+	// associated with the deprecation.
+	Deprecated *string `json:"deprecated,omitempty"`
 	// Fields is the ordered list of fields within the type.
 	Fields []FieldDefinition `json:"fields"`
 }
@@ -220,6 +226,9 @@ type NodeProc struct {
 	Name string `json:"name"`
 	// Doc is the associated documentation string (optional).
 	Doc *string `json:"doc,omitempty"`
+	// Deprecated indicates if the procedure is deprecated and contains the message
+	// associated with the deprecation.
+	Deprecated *string `json:"deprecated,omitempty"`
 	// Input is the ordered list of input fields for the procedure.
 	Input []FieldDefinition `json:"input"`
 	// Output is the ordered list of output fields for the procedure.

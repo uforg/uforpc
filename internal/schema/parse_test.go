@@ -616,3 +616,103 @@ func TestBasicMetaValue(t *testing.T) {
 		require.Equal(t, boolVal, *newMV.BoolVal)
 	})
 }
+
+func TestDeprecated(t *testing.T) {
+	t.Run("Without message", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "rule",
+					"name": "required",
+					"deprecated": "",
+					"for": "string"
+				},
+				{
+					"kind": "type",
+					"name": "User",
+					"deprecated": ""
+				},
+				{
+					"kind": "proc",
+					"name": "GetUser",
+					"deprecated": "",
+					"input": [],
+					"output": [],
+					"meta": []
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+
+		// Check rule node
+		ruleNode, ok := schema.Nodes[0].(*NodeRule)
+		require.True(t, ok, "Node should be a NodeRule")
+		require.NotNil(t, ruleNode.Deprecated)
+		require.Empty(t, *ruleNode.Deprecated)
+
+		// Check type node
+		typeNode, ok := schema.Nodes[1].(*NodeType)
+		require.True(t, ok, "Node should be a NodeType")
+		require.NotNil(t, typeNode.Deprecated)
+		require.Empty(t, *typeNode.Deprecated)
+
+		// Check proc node
+		procNode, ok := schema.Nodes[2].(*NodeProc)
+		require.True(t, ok, "Node should be a NodeProc")
+		require.NotNil(t, procNode.Deprecated)
+		require.Empty(t, *procNode.Deprecated)
+	})
+
+	t.Run("With message", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "rule",
+					"name": "required",
+					"deprecated": "Deprecation message",
+					"for": "string"
+				},
+				{
+					"kind": "type",
+					"name": "User",
+					"deprecated": "Deprecation message"
+				},
+				{
+					"kind": "proc",
+					"name": "GetUser",
+					"deprecated": "Deprecation message",
+					"input": [],
+					"output": [],
+					"meta": []
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+
+		// Check rule node
+		ruleNode, ok := schema.Nodes[0].(*NodeRule)
+		require.True(t, ok, "Node should be a NodeRule")
+		require.NotNil(t, ruleNode.Deprecated)
+		require.Equal(t, "Deprecation message", *ruleNode.Deprecated)
+
+		// Check type node
+		typeNode, ok := schema.Nodes[1].(*NodeType)
+		require.True(t, ok, "Node should be a NodeType")
+		require.NotNil(t, typeNode.Deprecated)
+		require.Equal(t, "Deprecation message", *typeNode.Deprecated)
+
+		// Check proc node
+		procNode, ok := schema.Nodes[2].(*NodeProc)
+		require.True(t, ok, "Node should be a NodeProc")
+		require.NotNil(t, procNode.Deprecated)
+		require.Equal(t, "Deprecation message", *procNode.Deprecated)
+	})
+}

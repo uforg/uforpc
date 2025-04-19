@@ -60,6 +60,10 @@
           "description": "Associated documentation string (optional).",
           "type": "string"
         },
+        "deprecated": {
+          "description": "Indicates if the rule is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.",
+          "type": "string"
+        },
         "for": {
           "description": "The primitive or custom type name this rule applies to.",
           "oneOf": [
@@ -120,6 +124,10 @@
           "description": "Associated documentation string (optional).",
           "type": "string"
         },
+        "deprecated": {
+          "description": "Indicates if the type is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.",
+          "type": "string"
+        },
         "fields": {
           "description": "Ordered list of fields within the type.",
           "type": "array",
@@ -146,6 +154,10 @@
         },
         "doc": {
           "description": "Associated documentation string (optional).",
+          "type": "string"
+        },
+        "deprecated": {
+          "description": "Indicates if the procedure is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.",
           "type": "string"
         },
         "input": {
