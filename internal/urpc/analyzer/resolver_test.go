@@ -532,7 +532,7 @@ func TestResolver(t *testing.T) {
 		require.Contains(t, combined.RuleDecls, "validBio")
 	})
 
-	t.Run("Circular imports", func(t *testing.T) {
+	t.Run("Circular imports allowed but resolved only once", func(t *testing.T) {
 		// Create a mock file provider with circular imports
 		provider := &mockFileProvider{
 			files: map[string]string{
@@ -579,20 +579,16 @@ func TestResolver(t *testing.T) {
 		require.NoError(t, err)
 
 		// Analyze the schema
-		combined, diagnostics, err := analyzer.Analyze("/main.urpc")
-		// Expect an error for circular imports
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "circular import detected")
+		combined, _, err := analyzer.Analyze("/main.urpc")
+		require.NoError(t, err)
 
-		// Verify that circular import diagnostics were generated
-		require.NotEmpty(t, diagnostics, "Expected circular import diagnostics")
-		require.Contains(t, diagnostics[0].Message, "circular import detected")
-
-		// Verify that the schema was still combined despite the circular imports
+		// Verify that the schema was combined despite the circular import
 		require.NotNil(t, combined.Schema)
 		require.Len(t, combined.TypeDecls, 2)
+		require.Len(t, combined.ProcDecls, 1)
 		require.Contains(t, combined.TypeDecls, "User")
 		require.Contains(t, combined.TypeDecls, "Profile")
+		require.Contains(t, combined.ProcDecls, "GetUser")
 	})
 
 	t.Run("Missing import file", func(t *testing.T) {
