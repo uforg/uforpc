@@ -212,6 +212,69 @@ func TestParserRuleDecl(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
+	t.Run("Deprecated rule", func(t *testing.T) {
+		input := `
+			deprecated rule @myRule {
+				for: string
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Rule: &ast.RuleDecl{
+						Deprecated: &ast.Deprecated{},
+						Name:       "myRule",
+						Children: []*ast.RuleDeclChild{
+							{
+								For: &ast.RuleDeclChildFor{
+									For: "string",
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Deprecated with message rule", func(t *testing.T) {
+		input := `
+			deprecated("Use newRule instead")
+			rule @myRule {
+				for: string
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Rule: &ast.RuleDecl{
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("Use newRule instead"),
+						},
+						Name: "myRule",
+						Children: []*ast.RuleDeclChild{
+							{
+								For: &ast.RuleDeclChildFor{
+									For: "string",
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
 	t.Run("Rule with array param", func(t *testing.T) {
 		input := `
 				rule @myRule {
@@ -251,6 +314,7 @@ func TestParserRuleDecl(t *testing.T) {
 	t.Run("Rule with all options", func(t *testing.T) {
 		input := `
 				""" My rule description """
+				deprecated("This rule is deprecated")
 				rule @myRule {
 					for: MyType
 					param: float[]
@@ -266,6 +330,9 @@ func TestParserRuleDecl(t *testing.T) {
 					Rule: &ast.RuleDecl{
 						Docstring: &ast.Docstring{
 							Value: " My rule description ",
+						},
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("This rule is deprecated"),
 						},
 						Name: "myRule",
 						Children: []*ast.RuleDeclChild{
@@ -364,6 +431,75 @@ func TestParserTypeDecl(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
+	t.Run("Deprecated type", func(t *testing.T) {
+		input := `
+			deprecated type MyType {
+				field: string
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Type: &ast.TypeDecl{
+						Deprecated: &ast.Deprecated{},
+						Name:       "MyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Field: &ast.Field{
+									Name: "field",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Deprecated with message type", func(t *testing.T) {
+		input := `
+			deprecated("Use newType instead")
+			type MyType {
+				field: string
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Type: &ast.TypeDecl{
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("Use newType instead"),
+						},
+						Name: "MyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Field: &ast.Field{
+									Name: "field",
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
 	t.Run("Type declaration with extends", func(t *testing.T) {
 		input := `
 			type MyType extends OtherType {
@@ -430,9 +566,10 @@ func TestParserTypeDecl(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
-	t.Run("Type declaration with extends and docstring", func(t *testing.T) {
+	t.Run("Type declaration with extends, docstring and deprecated", func(t *testing.T) {
 		input := `
 			""" My type description """
+			deprecated("This type is deprecated")
 			type MyType extends OtherType {
 				field: string
 			}
@@ -446,6 +583,9 @@ func TestParserTypeDecl(t *testing.T) {
 					Type: &ast.TypeDecl{
 						Docstring: &ast.Docstring{
 							Value: " My type description ",
+						},
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("This type is deprecated"),
 						},
 						Name:    "MyType",
 						Extends: []string{"OtherType"},
@@ -932,6 +1072,51 @@ func TestParserProcDecl(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
+	t.Run("Procedure with deprecated", func(t *testing.T) {
+		input := `
+			deprecated proc MyProc {}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Proc: &ast.ProcDecl{
+						Deprecated: &ast.Deprecated{},
+						Name:       "MyProc",
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Procedure with deprecated with message", func(t *testing.T) {
+		input := `
+			deprecated("Use newProc instead")
+			proc MyProc {}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Proc: &ast.ProcDecl{
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("Use newProc instead"),
+						},
+						Name: "MyProc",
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
 	t.Run("Procedure with input", func(t *testing.T) {
 		input := `
 			proc MyProc {
@@ -1062,6 +1247,7 @@ func TestParserProcDecl(t *testing.T) {
 	t.Run("Full procedure", func(t *testing.T) {
 		input := `
 			""" MyProc is a procedure that does something. """
+			deprecated("Use newProc instead")
 			proc MyProc {
 				input {
 					input1: string[][]
@@ -1087,6 +1273,9 @@ func TestParserProcDecl(t *testing.T) {
 					Proc: &ast.ProcDecl{
 						Docstring: &ast.Docstring{
 							Value: " MyProc is a procedure that does something. ",
+						},
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("Use newProc instead"),
 						},
 						Name: "MyProc",
 						Children: []*ast.ProcDeclChild{
@@ -2082,13 +2271,14 @@ func TestParserFullSchema(t *testing.T) {
 		This rule validates if a string matches a regular expression pattern.
 		Useful for emails, URLs, and other formatted strings.
 		"""
-		rule @regex {
+		deprecated rule @regex {
 			for: string
 			param: string
 			error: "Invalid format"
 		}
 
 		""" Validate "category" with custom logic """
+		deprecated("Deprecated")
 		rule @validateCategory {
 			for: Category
 			error: "Field \"category\" is not valid"
@@ -2106,7 +2296,7 @@ func TestParserFullSchema(t *testing.T) {
 			dummyField: int
 		}
 
-		type ThirdDummyType extends FirstDummyType, SecondDummyType {
+		deprecated type ThirdDummyType extends FirstDummyType, SecondDummyType {
 			dummyField: string
 		}
 
@@ -2114,6 +2304,7 @@ func TestParserFullSchema(t *testing.T) {
 		Category represents a product category in the system.
 		This type is used across the catalog module.
 		"""
+		deprecated("Deprecated")
 		type Category extends ThirdDummyType {
 			id: string
 				@uuid(error: "Must be a valid UUID")
@@ -2184,7 +2375,7 @@ func TestParserFullSchema(t *testing.T) {
 		GetCategory retrieves a category by its ID.
 		This is a basic read operation.
 		"""
-		proc GetCategory {
+		deprecated proc GetCategory {
 			input {
 				id: string
 					@uuid(error: "Category ID must be a valid UUID")
@@ -2208,6 +2399,7 @@ func TestParserFullSchema(t *testing.T) {
 		This procedure handles complex validation and returns
 		detailed success information.
 		"""
+		deprecated("Deprecated")
 		proc CreateProduct {
 			input {
 				product: Product
@@ -2307,7 +2499,8 @@ func TestParserFullSchema(t *testing.T) {
 					Docstring: &ast.Docstring{
 						Value: "\n\t\tThis rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.\n\t\t",
 					},
-					Name: "regex",
+					Deprecated: &ast.Deprecated{},
+					Name:       "regex",
 					Children: []*ast.RuleDeclChild{
 						{
 							For: &ast.RuleDeclChildFor{
@@ -2331,6 +2524,9 @@ func TestParserFullSchema(t *testing.T) {
 				Rule: &ast.RuleDecl{
 					Docstring: &ast.Docstring{
 						Value: " Validate \"category\" with custom logic ",
+					},
+					Deprecated: &ast.Deprecated{
+						Message: testutil.Pointer("Deprecated"),
 					},
 					Name: "validateCategory",
 					Children: []*ast.RuleDeclChild{
@@ -2406,7 +2602,8 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Type: &ast.TypeDecl{
-					Name: "ThirdDummyType",
+					Deprecated: &ast.Deprecated{},
+					Name:       "ThirdDummyType",
 					Extends: []string{
 						"FirstDummyType",
 						"SecondDummyType",
@@ -2429,6 +2626,9 @@ func TestParserFullSchema(t *testing.T) {
 				Type: &ast.TypeDecl{
 					Docstring: &ast.Docstring{
 						Value: "\n\t\tCategory represents a product category in the system.\n\t\tThis type is used across the catalog module.\n\t\t",
+					},
+					Deprecated: &ast.Deprecated{
+						Message: testutil.Pointer("Deprecated"),
 					},
 					Name: "Category",
 					Extends: []string{
@@ -2943,7 +3143,8 @@ func TestParserFullSchema(t *testing.T) {
 					Docstring: &ast.Docstring{
 						Value: "\n\t\tGetCategory retrieves a category by its ID.\n\t\tThis is a basic read operation.\n\t\t",
 					},
-					Name: "GetCategory",
+					Deprecated: &ast.Deprecated{},
+					Name:       "GetCategory",
 					Children: []*ast.ProcDeclChild{
 						{
 							Input: &ast.ProcDeclChildInput{
@@ -3034,6 +3235,9 @@ func TestParserFullSchema(t *testing.T) {
 				Proc: &ast.ProcDecl{
 					Docstring: &ast.Docstring{
 						Value: "\n\t\tCreateProduct adds a new product to the catalog.\n\t\tThis procedure handles complex validation and returns\n\t\tdetailed success information.\n\t\t",
+					},
+					Deprecated: &ast.Deprecated{
+						Message: testutil.Pointer("Deprecated"),
 					},
 					Name: "CreateProduct",
 					Children: []*ast.ProcDeclChild{

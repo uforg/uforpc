@@ -16,4 +16,5 @@ type Parser = participle.Parser[ast.Schema]
 var ParserInstance = participle.MustBuild[ast.Schema](
 	participle.Lexer(&lexer.ParticipleLexer{}),
 	participle.Elide("Newline", "Whitespace"),
+	participle.UseLookahead(4),
 )

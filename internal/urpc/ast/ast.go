@@ -170,9 +170,10 @@ type Import struct {
 // RuleDecl represents a custom validation rule declaration.
 type RuleDecl struct {
 	Positions
-	Docstring *Docstring       `parser:"(@@ (?! Newline Newline))?"`
-	Name      string           `parser:"Rule At @Ident"`
-	Children  []*RuleDeclChild `parser:"LBrace @@* RBrace"`
+	Docstring  *Docstring       `parser:"(@@ (?! Newline Newline))?"`
+	Deprecated *Deprecated      `parser:"(@@ (?= Rule))?"`
+	Name       string           `parser:"Rule At @Ident"`
+	Children   []*RuleDeclChild `parser:"LBrace @@* RBrace"`
 }
 
 // RuleDeclChild represents a child node within a RuleDecl block.
@@ -206,18 +207,20 @@ type RuleDeclChildError struct {
 // TypeDecl represents a custom type declaration.
 type TypeDecl struct {
 	Positions
-	Docstring *Docstring        `parser:"(@@ (?! Newline Newline))?"`
-	Name      string            `parser:"Type @Ident"`
-	Extends   []string          `parser:"(Extends @Ident (Comma @Ident)*)?"`
-	Children  []*FieldOrComment `parser:"LBrace @@* RBrace"`
+	Docstring  *Docstring        `parser:"(@@ (?! Newline Newline))?"`
+	Deprecated *Deprecated       `parser:"(@@ (?= Type))?"`
+	Name       string            `parser:"Type @Ident"`
+	Extends    []string          `parser:"(Extends @Ident (Comma @Ident)*)?"`
+	Children   []*FieldOrComment `parser:"LBrace @@* RBrace"`
 }
 
 // ProcDecl represents a procedure declaration.
 type ProcDecl struct {
 	Positions
-	Docstring *Docstring       `parser:"(@@ (?! Newline Newline))?"`
-	Name      string           `parser:"Proc @Ident"`
-	Children  []*ProcDeclChild `parser:"LBrace @@* RBrace"`
+	Docstring  *Docstring       `parser:"(@@ (?! Newline Newline))?"`
+	Deprecated *Deprecated      `parser:"(@@ (?= Proc))?"`
+	Name       string           `parser:"Proc @Ident"`
+	Children   []*ProcDeclChild `parser:"LBrace @@* RBrace"`
 }
 
 // ProcDeclChild represents a child node within a ProcDecl block (Comment, Input, Output, or Meta).
@@ -288,6 +291,12 @@ func (d Docstring) GetExternal() (string, bool) {
 	}
 
 	return trimmed, true
+}
+
+// Deprecated represents a deprecated declaration.
+type Deprecated struct {
+	Positions
+	Message *string `parser:"Deprecated (LParen @StringLiteral RParen)?"`
 }
 
 // AnyLiteral represents any of the built-in literal types.
