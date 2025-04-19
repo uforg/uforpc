@@ -635,4 +635,101 @@ func TestResolver(t *testing.T) {
 		require.Len(t, combined.ProcDecls, 1)
 		require.Contains(t, combined.ProcDecls, "GetUser")
 	})
+
+	t.Run("Schema with deduplication", func(t *testing.T) {
+		// Create a mock file provider with multiple files
+		provider := &mockFileProvider{
+			files: map[string]string{
+				"/main.urpc": `
+					version 1
+
+					import "/schema_users.urpc"
+					import "/schema_posts.urpc"
+				`,
+				"/schema_common.urpc": `
+					version 1
+
+					rule @uuid {
+						for: string
+						error: "Invalid UUID format"
+					}
+
+					rule @email {
+						for: string
+						error: "Invalid email format"
+					}
+
+					type WithId {
+						id: string
+							@uuid
+					}
+
+					proc Ping {
+						input {
+							id: string
+						}
+						output {
+							success: boolean
+						}
+					}
+				`,
+				"/schema_users.urpc": `
+					version 1
+
+					import "/schema_common.urpc"
+
+					type User extends WithId {
+						name: string
+						email: string
+							@minlen(6) // a@a.aa
+							@email
+						age: int
+							@min(18)
+						isActive: boolean
+						createdAt: datetime
+						updatedAt: datetime
+					}
+				`,
+				"/schema_posts.urpc": `
+					version 1
+
+					import "/schema_common.urpc"
+
+					type Post extends WithId {
+						title: string
+						content: string
+						authorId: string
+						createdAt: datetime
+						updatedAt: datetime
+					}
+				`,
+			},
+		}
+
+		// Create an analyzer with the mock provider
+		analyzer, err := NewAnalyzer(provider)
+		require.NoError(t, err)
+
+		// Analyze the schema
+		combined, diagnostics, err := analyzer.Analyze("/main.urpc")
+		require.NoError(t, err)
+		require.Empty(t, diagnostics)
+
+		// Verify the combined schema
+		require.NotNil(t, combined.Schema)
+		require.Len(t, combined.Schema.GetTypes(), 3)
+		require.Len(t, combined.Schema.GetProcs(), 1)
+		require.Len(t, combined.Schema.GetRules(), 2)
+
+		// Verify the declaration maps
+		require.Len(t, combined.TypeDecls, 3)
+		require.Len(t, combined.ProcDecls, 1)
+		require.Len(t, combined.RuleDecls, 2)
+		require.Contains(t, combined.RuleDecls, "uuid")
+		require.Contains(t, combined.RuleDecls, "email")
+		require.Contains(t, combined.TypeDecls, "WithId")
+		require.Contains(t, combined.TypeDecls, "User")
+		require.Contains(t, combined.TypeDecls, "Post")
+		require.Contains(t, combined.ProcDecls, "Ping")
+	})
 }

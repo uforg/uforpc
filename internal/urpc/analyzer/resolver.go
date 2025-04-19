@@ -211,6 +211,11 @@ func (r *resolver) resolveFile(parentImport *ast.Import, filePath string, ctx *r
 				continue
 			}
 
+			// If the import is already resolved, skip the resolution
+			if _, exists := ctx.visitedFiles[importPath]; exists {
+				continue
+			}
+
 			// Recursively resolve the imported file
 			importedSchema := r.resolveFile(child.Import, importPath, ctx)
 			if importedSchema == nil {
