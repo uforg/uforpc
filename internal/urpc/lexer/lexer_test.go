@@ -81,7 +81,7 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false for param extends string int float boolean import datetime"
+		input := "version rule type proc input output meta error true false for param extends string int float boolean import datetime deprecated"
 
 		tests := []token.Token{
 			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 1, LineEnd: 1, ColumnStart: 1, ColumnEnd: 7},
@@ -121,7 +121,9 @@ func TestLexer(t *testing.T) {
 			{Type: token.Import, Literal: "import", FileName: "test.urpc", LineStart: 1, ColumnStart: 102, LineEnd: 1, ColumnEnd: 107},
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 108, LineEnd: 1, ColumnEnd: 108},
 			{Type: token.Datetime, Literal: "datetime", FileName: "test.urpc", LineStart: 1, ColumnStart: 109, LineEnd: 1, ColumnEnd: 116},
-			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 117, LineEnd: 1, ColumnEnd: 117},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 117, LineEnd: 1, ColumnEnd: 117},
+			{Type: token.Deprecated, Literal: "deprecated", FileName: "test.urpc", LineStart: 1, ColumnStart: 118, LineEnd: 1, ColumnEnd: 127},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 128, LineEnd: 1, ColumnEnd: 128},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
@@ -544,6 +546,7 @@ func TestLexer(t *testing.T) {
 			version: 1
 
 			""" Product is a type that represents a product. """
+			deprecated("This type will be removed in v2.0")
 			type Product extends OtherType, AnotherType {
 				id: string
 					@uuid
@@ -587,6 +590,10 @@ func TestLexer(t *testing.T) {
 			{Type: token.Colon, Literal: ":"},
 			{Type: token.IntLiteral, Literal: "1"},
 			{Type: token.Docstring, Literal: " Product is a type that represents a product. "},
+			{Type: token.Deprecated, Literal: "deprecated"},
+			{Type: token.LParen, Literal: "("},
+			{Type: token.StringLiteral, Literal: "This type will be removed in v2.0"},
+			{Type: token.RParen, Literal: ")"},
 			{Type: token.Type, Literal: "type"},
 			{Type: token.Ident, Literal: "Product"},
 			{Type: token.Extends, Literal: "extends"},
