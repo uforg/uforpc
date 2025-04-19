@@ -1,11 +1,11 @@
 /* With docstring */          """
 This is a test proc.
-"""
+"""deprecated("Deprecated")
 proc 
 Test   {    
-                    }
+                    } deprecated
 
-// With input
+
 proc ProcWithInput {input{
   field1: string@uppercase
 }
@@ -49,10 +49,10 @@ output
 """
 This is a test proc.
 """
+deprecated("Deprecated")
 proc Test {}
 
-// With input
-proc ProcWithInput {
+deprecated proc ProcWithInput {
   input {
     field1: string
       @uppercase

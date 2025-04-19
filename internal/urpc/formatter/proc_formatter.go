@@ -6,6 +6,7 @@ import (
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
 type procFormatter struct {
@@ -89,6 +90,16 @@ func (f *procFormatter) format() *genkit.GenKit {
 	if f.procDecl.Docstring != nil {
 		f.g.Linef(`"""%s"""`, f.procDecl.Docstring.Value)
 	}
+
+	if f.procDecl.Deprecated != nil {
+		if f.procDecl.Deprecated.Message == nil {
+			f.g.Inline("deprecated ")
+		}
+		if f.procDecl.Deprecated.Message != nil {
+			f.g.Linef("deprecated(\"%s\")", strutil.EscapeQuotes(*f.procDecl.Deprecated.Message))
+		}
+	}
+
 	f.g.Inlinef(`proc %s `, f.procDecl.Name)
 
 	if len(f.procDecl.Children) < 1 {

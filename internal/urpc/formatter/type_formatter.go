@@ -5,6 +5,7 @@ import (
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
 type typeFormatter struct {
@@ -30,6 +31,16 @@ func (f *typeFormatter) format() *genkit.GenKit {
 	if f.typeDecl.Docstring != nil {
 		f.g.Linef(`"""%s"""`, f.typeDecl.Docstring.Value)
 	}
+
+	if f.typeDecl.Deprecated != nil {
+		if f.typeDecl.Deprecated.Message == nil {
+			f.g.Inline("deprecated ")
+		}
+		if f.typeDecl.Deprecated.Message != nil {
+			f.g.Linef("deprecated(\"%s\")", strutil.EscapeQuotes(*f.typeDecl.Deprecated.Message))
+		}
+	}
+
 	f.g.Inlinef(`type %s `, f.typeDecl.Name)
 
 	if len(f.typeDecl.Extends) > 0 {

@@ -2,12 +2,14 @@
 rule 
 @foo                          {
     
-            }
+            }deprecated
 
-rule @foo {for           : boolean}
+rule @foo {for           : boolean} deprecated( "Deprecated"
+)
 rule @foo {param : float}
-rule @foo {error  : "This is an \"error\" \\ message"}
+rule @foo {error  : "This is an \"error\" \\ message"} 
 
+"""Docstring"""deprecated
 rule @foo {
 for: string
 param: string
@@ -16,7 +18,7 @@ error: "This is an error message"
 
       """
   This is a range rule.
-"""
+""" deprecated("Deprecated")
 rule @rangeRule {
 for: int param: int[]
 error: "Value out of range" }
@@ -25,10 +27,11 @@ error: "Value out of range" }
 
 rule @foo {}
 
-rule @foo {
+deprecated rule @foo {
   for: boolean
 }
 
+deprecated("Deprecated")
 rule @foo {
   param: float
 }
@@ -37,7 +40,8 @@ rule @foo {
   error: "This is an \"error\" \\ message"
 }
 
-rule @foo {
+"""Docstring"""
+deprecated rule @foo {
   for: string
   param: string
   error: "This is an error message"
@@ -46,6 +50,7 @@ rule @foo {
 """
   This is a range rule.
 """
+deprecated("Deprecated")
 rule @rangeRule {
   for: int
   param: int[]

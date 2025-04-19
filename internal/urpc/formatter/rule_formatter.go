@@ -10,7 +10,7 @@ import (
 
 type ruleFormatter struct {
 	g                 *genkit.GenKit
-	rule              *ast.RuleDecl
+	ruleDecl          *ast.RuleDecl
 	maxIndex          int
 	currentIndex      int
 	currentIndexEOF   bool
@@ -33,7 +33,7 @@ func newRuleFormatter(rule *ast.RuleDecl) *ruleFormatter {
 
 	return &ruleFormatter{
 		g:                 genkit.NewGenKit().WithSpaces(2),
-		rule:              rule,
+		ruleDecl:          rule,
 		maxIndex:          maxIndex,
 		currentIndex:      currentIndex,
 		currentIndexEOF:   currentIndexEOF,
@@ -48,7 +48,7 @@ func (f *ruleFormatter) loadNextChild() {
 	currentIndexChild := ast.RuleDeclChild{}
 
 	if !currentIndexEOF {
-		currentIndexChild = *f.rule.Children[currentIndex]
+		currentIndexChild = *f.ruleDecl.Children[currentIndex]
 	}
 
 	f.currentIndex = currentIndex
@@ -69,7 +69,7 @@ func (f *ruleFormatter) peekChild(offset int) (ast.RuleDeclChild, ast.LineDiff, 
 	lineDiff := ast.LineDiff{}
 
 	if !peekIndexEOF {
-		peekIndexChild = *f.rule.Children[peekIndex]
+		peekIndexChild = *f.ruleDecl.Children[peekIndex]
 		lineDiff = ast.GetLineDiff(peekIndexChild, f.currentIndexChild)
 	}
 
@@ -109,10 +109,20 @@ func (f *ruleFormatter) LineAndCommentf(format string, args ...any) {
 //
 // Returns the formatted genkit.GenKit.
 func (f *ruleFormatter) format() *genkit.GenKit {
-	if f.rule.Docstring != nil {
-		f.g.Linef(`"""%s"""`, f.rule.Docstring.Value)
+	if f.ruleDecl.Docstring != nil {
+		f.g.Linef(`"""%s"""`, f.ruleDecl.Docstring.Value)
 	}
-	f.g.Inlinef(`rule @%s `, f.rule.Name)
+
+	if f.ruleDecl.Deprecated != nil {
+		if f.ruleDecl.Deprecated.Message == nil {
+			f.g.Inline("deprecated ")
+		}
+		if f.ruleDecl.Deprecated.Message != nil {
+			f.g.Linef("deprecated(\"%s\")", strutil.EscapeQuotes(*f.ruleDecl.Deprecated.Message))
+		}
+	}
+
+	f.g.Inlinef(`rule @%s `, f.ruleDecl.Name)
 
 	if f.currentIndexEOF {
 		f.g.Inline("{}")
@@ -121,7 +131,7 @@ func (f *ruleFormatter) format() *genkit.GenKit {
 
 	hasInlineComment := false
 	if f.currentIndexChild.Comment != nil {
-		lineDiff := ast.GetLineDiff(f.currentIndexChild, f.rule)
+		lineDiff := ast.GetLineDiff(f.currentIndexChild, f.ruleDecl)
 		if lineDiff.StartToStart == 0 {
 			hasInlineComment = true
 		}

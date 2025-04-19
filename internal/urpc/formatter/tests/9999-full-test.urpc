@@ -11,7 +11,7 @@ version 1
     """
     This rule validates if a string matches a regular expression pattern.
     Useful for emails, URLs, and other formatted strings.
-    """
+    """ deprecated
     rule @regex {
       for: string
       param: string
@@ -31,7 +31,7 @@ version 1
         @min("1900-01-01T00:00:00Z")
         @max("2100-01-01T00:00:00Z")
     }
-
+deprecated("Deprecated")
     type SecondDummyType {
       dummyField: int
     }
@@ -62,7 +62,7 @@ version 1
     Product represents a sellable item in the store.
     Products have complex validation rules and can be
     nested inside catalogs.
-    """
+    """deprecated
     type Product {
       id: string
         @uuid
@@ -113,7 +113,7 @@ version 1
     """
     GetCategory retrieves a category by its ID.
     This is a basic read operation.
-    """
+    """deprecated("Deprecated")
     proc GetCategory {
       input {
         id: string
@@ -219,7 +219,7 @@ import "bar.urpc"
     This rule validates if a string matches a regular expression pattern.
     Useful for emails, URLs, and other formatted strings.
     """
-rule @regex {
+deprecated rule @regex {
   for: string
   param: string
   error: "Invalid format"
@@ -239,6 +239,7 @@ type FirstDummyType {
     @max("2100-01-01T00:00:00Z")
 }
 
+deprecated("Deprecated")
 type SecondDummyType {
   dummyField: int
 }
@@ -270,7 +271,7 @@ type Category extends ThirdDummyType {
     Products have complex validation rules and can be
     nested inside catalogs.
     """
-type Product {
+deprecated type Product {
   id: string
     @uuid
   name: string
@@ -321,6 +322,7 @@ type Product {
     GetCategory retrieves a category by its ID.
     This is a basic read operation.
     """
+deprecated("Deprecated")
 proc GetCategory {
   input {
     id: string
