@@ -537,7 +537,77 @@ proc GetProduct {
 }
 ```
 
-## 9. Known Limitations
+## 9. Deprecation
+
+URPC provides a mechanism to mark rules, types, and procedures as deprecated,
+indicating they should no longer be used in new code and may be removed in
+future versions.
+
+### 9.1 Basic Deprecation
+
+To mark an element as deprecated without a specific message, use the
+`deprecated` keyword before the element definition:
+
+```urpc
+deprecated rule @myRule {
+  // rule definition
+}
+
+deprecated type MyType {
+  // type definition
+}
+
+deprecated proc MyProc {
+  // procedure definition
+}
+```
+
+### 9.2 Deprecation with Message
+
+To provide additional information about the deprecation, include a message in
+parentheses:
+
+```urpc
+deprecated("Use newRule instead")
+rule @myRule {
+  // rule definition
+}
+
+deprecated("Replaced by ImprovedType")
+type MyType {
+  // type definition
+}
+
+deprecated("This procedure will be removed in v2.0")
+proc MyProc {
+  // procedure definition
+}
+```
+
+### 9.3 Placement
+
+The `deprecated` keyword must be placed between any docstring and the element
+definition (rule, type, or proc):
+
+```urpc
+"""
+Documentation for MyType
+"""
+deprecated("Use NewType instead")
+type MyType {
+  // type definition
+}
+```
+
+### 9.4 Effects
+
+Deprecated elements will:
+
+- Be displayed with special styling in the playground to discourage their use
+- Generate warning comments in the output code to discourage their use
+- Not change their behavior in the generated code, it's just a warning
+
+## 10. Known Limitations
 
 1. Keywords can't be used as identifiers
 2. Custom validators require external implementation
