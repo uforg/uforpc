@@ -22,9 +22,9 @@ This specification is enforced by the official URPC formatter.
 _Example:_
 
 ```urpc
-type Example { 
-  field: string 
-    @rule 
+type Example {
+  field: string
+    @rule
 }
 ```
 
@@ -185,5 +185,56 @@ type User {
   name: string
     @minlen(3)
     @maxlen(50, error: "Name too long")
+}
+```
+
+## 9. Deprecation
+
+The `deprecated` keyword is used to mark rules, types, or procedures as
+deprecated.
+
+- Place the `deprecated` keyword on its own line immediately before the element
+  definition
+- If a docstring exists, place the `deprecated` keyword between the docstring
+  and the element definition
+- For deprecation with a message, use parentheses with the message in quotes
+
+### 9.1 Basic Deprecation
+
+_Example:_
+
+```urpc
+deprecated rule @myRule {
+  // rule definition
+}
+
+deprecated type MyType {
+  // type definition
+}
+
+"""
+Documentation for MyProc
+"""
+deprecated proc MyProc {
+  // procedure definition
+}
+```
+
+### 9.2 Deprecation with Message
+
+_Example:_
+
+```urpc
+deprecated("Use newRule instead")
+rule @myRule {
+  // rule definition
+}
+
+"""
+Documentation for MyType
+"""
+deprecated("Replaced by ImprovedType")
+type MyType {
+  // type definition
 }
 ```
