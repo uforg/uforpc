@@ -80,6 +80,16 @@ func convertRuleToJSON(rule *ast.RuleDecl) (*schema.NodeRule, error) {
 		ruleNode.Doc = &docValue
 	}
 
+	// Add deprecated if available
+	if rule.Deprecated != nil {
+		if rule.Deprecated.Message != nil {
+			ruleNode.Deprecated = rule.Deprecated.Message
+		} else {
+			empty := ""
+			ruleNode.Deprecated = &empty
+		}
+	}
+
 	// Process rule children
 	for _, child := range rule.Children {
 		if child.For != nil {
@@ -132,6 +142,16 @@ func convertTypeToJSON(typeDecl *ast.TypeDecl) (*schema.NodeType, error) {
 	if typeDecl.Docstring != nil {
 		docValue := typeDecl.Docstring.Value
 		typeNode.Doc = &docValue
+	}
+
+	// Add deprecated if available
+	if typeDecl.Deprecated != nil {
+		if typeDecl.Deprecated.Message != nil {
+			typeNode.Deprecated = typeDecl.Deprecated.Message
+		} else {
+			empty := ""
+			typeNode.Deprecated = &empty
+		}
 	}
 
 	// Process fields
@@ -290,6 +310,16 @@ func convertProcToJSON(procDecl *ast.ProcDecl) (*schema.NodeProc, error) {
 	if procDecl.Docstring != nil {
 		docValue := procDecl.Docstring.Value
 		procNode.Doc = &docValue
+	}
+
+	// Add deprecated if available
+	if procDecl.Deprecated != nil {
+		if procDecl.Deprecated.Message != nil {
+			procNode.Deprecated = procDecl.Deprecated.Message
+		} else {
+			empty := ""
+			procNode.Deprecated = &empty
+		}
 	}
 
 	// Process procedure children

@@ -79,6 +79,15 @@ func convertRuleToURPC(rule *schema.NodeRule) (*ast.RuleDecl, error) {
 		}
 	}
 
+	// Add deprecated if available
+	if rule.Deprecated != nil {
+		deprecated := &ast.Deprecated{}
+		if *rule.Deprecated != "" {
+			deprecated.Message = rule.Deprecated
+		}
+		ruleDecl.Deprecated = deprecated
+	}
+
 	// Add 'for' clause
 	if rule.For != "" {
 		ruleDecl.Children = append(ruleDecl.Children, &ast.RuleDeclChild{
@@ -142,6 +151,15 @@ func convertTypeToURPC(typeNode *schema.NodeType) (*ast.TypeDecl, error) {
 		typeDecl.Docstring = &ast.Docstring{
 			Value: *typeNode.Doc,
 		}
+	}
+
+	// Add deprecated if available
+	if typeNode.Deprecated != nil {
+		deprecated := &ast.Deprecated{}
+		if *typeNode.Deprecated != "" {
+			deprecated.Message = typeNode.Deprecated
+		}
+		typeDecl.Deprecated = deprecated
 	}
 
 	// Process fields
@@ -300,6 +318,15 @@ func convertProcToURPC(procNode *schema.NodeProc) (*ast.ProcDecl, error) {
 		procDecl.Docstring = &ast.Docstring{
 			Value: *procNode.Doc,
 		}
+	}
+
+	// Add deprecated if available
+	if procNode.Deprecated != nil {
+		deprecated := &ast.Deprecated{}
+		if *procNode.Deprecated != "" {
+			deprecated.Message = procNode.Deprecated
+		}
+		procDecl.Deprecated = deprecated
 	}
 
 	// Process input fields if any

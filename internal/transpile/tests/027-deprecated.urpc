@@ -1,0 +1,42 @@
+version 1
+
+deprecated rule @deprecatedRule {
+  for: string
+}
+
+deprecated("Deprecated")
+rule @deprecatedRuleWithMessage {
+  for: string
+}
+
+deprecated type DeprecatedType {
+  field1: string
+  field2: int
+}
+
+deprecated("Deprecated")
+type DeprecatedTypeWithMessage {
+  field1: string
+  field2: int
+}
+
+deprecated proc DeprecatedProc {
+  input {
+    param1: string
+  }
+  
+  output {
+    result: boolean
+  }
+}
+
+deprecated("Deprecated")
+proc DeprecatedProcWithMessage {
+  input {
+    param1: string
+  }
+  
+  output {
+    result: boolean
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "rule",
+      "name": "deprecatedRule",
+      "deprecated": "",
+      "for": "string"
+    },
+    {
+      "kind": "rule",
+      "name": "deprecatedRuleWithMessage",
+      "deprecated": "Deprecated",
+      "for": "string"
+    },
+    {
+      "kind": "type",
+      "name": "DeprecatedType",
+      "deprecated": "",
+      "fields": [
+        {
+          "name": "field1",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false
+        },
+        {
+          "name": "field2",
+          "typeName": "int",
+          "depth": 0,
+          "optional": false
+        }
+      ]
+    },
+    {
+      "kind": "type",
+      "name": "DeprecatedTypeWithMessage",
+      "deprecated": "Deprecated",
+      "fields": [
+        {
+          "name": "field1",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false
+        },
+        {
+          "name": "field2",
+          "typeName": "int",
+          "depth": 0,
+          "optional": false
+        }
+      ]
+    },
+    {
+      "kind": "proc",
+      "name": "DeprecatedProc",
+      "deprecated": "",
+      "input": [
+        {
+          "name": "param1",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false
+        }
+      ],
+      "output": [
+        {
+          "name": "result",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false
+        }
+      ]
+    },
+    {
+      "kind": "proc",
+      "name": "DeprecatedProcWithMessage",
+      "deprecated": "Deprecated",
+      "input": [
+        {
+          "name": "param1",
+          "typeName": "string",
+          "depth": 0,
+          "optional": false
+        }
+      ],
+      "output": [
+        {
+          "name": "result",
+          "typeName": "boolean",
+          "depth": 0,
+          "optional": false
+        }
+      ]
+    }
+  ]
+}
