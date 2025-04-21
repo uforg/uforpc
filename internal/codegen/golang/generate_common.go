@@ -204,7 +204,7 @@ func renderPreType(
 			if isRequired {
 				og.Linef("if !p.%s.Present {", fieldName)
 				og.Block(func() {
-					og.Linef("return errorMissingRequiredField(\"%s is required\")", fieldDef.Name)
+					og.Linef("return errorMissingRequiredField(\"field %s is required\")", fieldDef.Name)
 				})
 				og.Line("}")
 			}
@@ -214,7 +214,7 @@ func renderPreType(
 				og.Block(func() {
 					og.Linef("if err := p.%s.Value.validate(); err != nil {", fieldName)
 					og.Block(func() {
-						og.Linef("return errorMissingRequiredField(\"%s: \" + err.Error())", fieldDef.Name)
+						og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
 					})
 					og.Line("}")
 				})
@@ -243,7 +243,7 @@ func renderPreType(
 						og.Block(func() {
 							og.Linef("if err := item.validate(); err != nil {")
 							og.Block(func() {
-								og.Linef("return errorMissingRequiredField(\"%s: \" + err.Error())", fieldDef.Name)
+								og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
 							})
 							og.Line("}")
 						})
