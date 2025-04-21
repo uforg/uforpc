@@ -236,18 +236,17 @@ func renderPreType(
 								renderLevel(nextArrayDepth)
 							})
 							og.Line("}")
-							return
-						}
-
-						og.Linef("for _, item := range item%d {", arrayDepth)
-						og.Block(func() {
-							og.Linef("if err := item.validate(); err != nil {")
+						} else {
+							og.Linef("for _, item := range item%d {", arrayDepth)
 							og.Block(func() {
-								og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
+								og.Linef("if err := item.validate(); err != nil {")
+								og.Block(func() {
+									og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
+								})
+								og.Line("}")
 							})
 							og.Line("}")
-						})
-						og.Line("}")
+						}
 					}
 
 					renderLevel(arrayDepth)
@@ -259,6 +258,150 @@ func renderPreType(
 		}
 
 		og.Line("return nil")
+	})
+	og.Line("}")
+	og.Break()
+
+	// Render transform function
+	og.Linef("// transform transforms the pre%s type to the final %s type", name, name)
+	og.Linef("func (p *pre%s) transform() %s {", name, name)
+	og.Block(func() {
+		og.Line("// Transformations")
+		for _, fieldDef := range fields {
+			fieldName := strutil.ToPascalCase(fieldDef.Name)
+			isRequired := !fieldDef.Optional
+			isBuiltinType := fieldDef.IsBuiltInType()
+			isCustomType := fieldDef.IsCustomType()
+			isInline := fieldDef.IsInline()
+			isArray := fieldDef.Depth > 0
+			arrayDepth := fieldDef.Depth
+
+			// Process fields with builtin types
+			if isBuiltinType {
+				if isRequired {
+					og.Linef("%s := p.%s.Value", fieldName, fieldName)
+				} else {
+					og.Linef("%s := p.%s", fieldName, fieldName)
+				}
+				continue
+			}
+
+			// Process fields with custom types or inline fields (non-arrays)
+			if (isCustomType || isInline) && !isArray {
+				typeName := ""
+				if isCustomType {
+					typeName = *fieldDef.TypeName
+				}
+				if isInline {
+					typeName = name + fieldName
+				}
+
+				if isRequired {
+					og.Linef("%s := p.%s.Value.transform()", fieldName, fieldName)
+				} else {
+					og.Linef("%s := Optional[%s]{Present: p.%s.Present, Value: p.%s.Value.transform()}",
+						fieldName,
+						typeName,
+						fieldName,
+						fieldName,
+					)
+				}
+				continue
+			}
+
+			// Process fields with custom types or inline fields (arrays)
+			if (isCustomType || isInline) && isArray {
+				typeName := ""
+				if isCustomType {
+					typeName = *fieldDef.TypeName
+				}
+				if isInline {
+					typeName = name + fieldName
+				}
+
+				fieldNameTemp := "trans_" + fieldName
+				og.Linef(
+					"%s := make(%s%s, len(p.%s.Value))",
+					fieldNameTemp,
+					strings.Repeat("[]", arrayDepth),
+					typeName,
+					fieldName,
+				)
+
+				var renderArrayTransform func(depth int, srcIndices string, dstIndices string)
+				renderArrayTransform = func(depth int, srcIndices string, dstIndices string) {
+					if depth <= 0 {
+						return
+					}
+
+					currIndex := fmt.Sprintf("i%d", arrayDepth-depth+1)
+
+					if depth > 1 {
+						// Generate the loop for the current level
+						og.Linef("for %s := range p.%s.Value%s {", currIndex, fieldName, srcIndices)
+						og.Block(func() {
+							// Initialize next level array
+							og.Linef("%s%s[%s] = make(%s%s, len(p.%s.Value%s[%s]))",
+								fieldNameTemp,
+								dstIndices,
+								currIndex,
+								strings.Repeat("[]", depth-1),
+								typeName,
+								fieldName,
+								srcIndices,
+								currIndex)
+
+							// Recursion for the next level
+							newSrcIndices := srcIndices + "[" + currIndex + "]"
+							newDstIndices := dstIndices + "[" + currIndex + "]"
+							renderArrayTransform(depth-1, newSrcIndices, newDstIndices)
+						})
+						og.Line("}")
+					} else {
+						// At the deepest level
+						og.Linef("for %s := range p.%s.Value%s {", currIndex, fieldName, srcIndices)
+						og.Block(func() {
+							// Apply the transformation directly
+							og.Linef("%s%s[%s] = p.%s.Value%s[%s].transform()",
+								fieldNameTemp,
+								dstIndices,
+								currIndex,
+								fieldName,
+								srcIndices,
+								currIndex)
+						})
+						og.Line("}")
+					}
+				}
+
+				renderArrayTransform(arrayDepth, "", "")
+
+				if isRequired {
+					og.Linef("%s := %s", fieldName, fieldNameTemp)
+				} else {
+					og.Linef(
+						"%s := Optional[%s%s]{Present: p.%s.Present, Value: %s}",
+						fieldName,
+						strings.Repeat("[]", arrayDepth),
+						typeName,
+						fieldName,
+						fieldNameTemp,
+					)
+				}
+				continue
+			}
+		}
+
+		og.Break()
+		og.Line("// Assignments")
+		og.Linef("return %s{", name)
+		og.Block(func() {
+			for _, fieldDef := range fields {
+				name := strutil.ToPascalCase(fieldDef.Name)
+				og.Linef("%s: %s,", name, name)
+			}
+		})
+		og.Line("}")
 	})
 	og.Line("}")
 	og.Break()
