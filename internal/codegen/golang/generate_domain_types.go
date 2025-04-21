@@ -21,25 +21,25 @@ func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 			desc = strings.TrimSpace(*typeNode.Doc)
 		}
 
-		g.Linef("/* %s %s */", typeNode.Name, desc)
-		g.Linef("type %s struct {", typeNode.Name)
-
-		g.Block(func() {
-			for _, fieldDef := range typeNode.Fields {
-				g.Line(generateCommonRenderField(generateCommonRenderFieldParams{
-					field:    fieldDef,
-					typeOnly: false,
-					omitTag:  false,
-				}))
+		if typeNode.Deprecated != nil {
+			desc += "\n\nDeprecated: "
+			if *typeNode.Deprecated == "" {
+				desc += "This type is deprecated and should not be used in new code."
+			} else {
+				desc += *typeNode.Deprecated
 			}
-		})
+		}
 
-		g.Line("}")
+		g.Line(renderType(typeNode.Name, desc, typeNode.Fields))
 		g.Break()
 
-		g.Linef("// Null%s is the nullable version of %s", typeNode.Name, typeNode.Name)
-		g.Linef("type Null%s = Null[%s]", typeNode.Name, typeNode.Name)
+		g.Line(renderPreType(typeNode.Name, typeNode.Fields))
 		g.Break()
+
+		g.Linef("// %sOptional is the optional version of %s", typeNode.Name, typeNode.Name)
+		g.Linef("type %sOptional = Optional[%s]", typeNode.Name, typeNode.Name)
+		g.Break()
+
 	}
 
 	return g.String(), nil

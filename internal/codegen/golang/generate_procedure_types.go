@@ -18,29 +18,24 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 
 	for _, procNode := range sch.GetProcNodes() {
 		namePascal := strutil.ToPascalCase(procNode.Name)
-		inputName := fmt.Sprintf("P%sInput", namePascal)
-		outputName := fmt.Sprintf("P%sOutput", namePascal)
-		responseName := fmt.Sprintf("P%sResponse", namePascal)
+		inputName := fmt.Sprintf("%sInput", namePascal)
+		outputName := fmt.Sprintf("%sOutput", namePascal)
+		responseName := fmt.Sprintf("%sResponse", namePascal)
 
-		inputType := generateCommonRenderStructFromFieldSlice(procNode.Input)
-		if inputType == "" {
-			inputType = "struct{}"
-		}
+		inputDesc := fmt.Sprintf("%s represents the input parameters for the %s procedure.", inputName, namePascal)
+		outputDesc := fmt.Sprintf("%s represents the output parameters for the %s procedure.", outputName, namePascal)
+		responseDesc := fmt.Sprintf("%s represents the response for the %s procedure.", responseName, namePascal)
 
-		outputType := generateCommonRenderStructFromFieldSlice(procNode.Output)
-		if outputType == "" {
-			outputType = "struct{}"
-		}
-
-		g.Linef("// %s represents the input parameters for the %s procedure.", inputName, namePascal)
-		g.Linef("type %s = %s", inputName, inputType)
+		g.Line(renderType(inputName, inputDesc, procNode.Input))
 		g.Break()
 
-		g.Linef("// %s represents the output results for the %s procedure.", outputName, namePascal)
-		g.Linef("type %s = %s", outputName, outputType)
+		g.Line(renderPreType(inputName, procNode.Input))
 		g.Break()
 
-		g.Linef("// %s represents the response for the %s procedure.", responseName, namePascal)
+		g.Line(renderType(outputName, outputDesc, procNode.Output))
+		g.Break()
+
+		g.Linef("// %s", responseDesc)
 		g.Linef("type %s = Response[%s]", responseName, outputName)
 		g.Break()
 	}
@@ -51,8 +46,8 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		for _, procNode := range sch.GetProcNodes() {
 			name := procNode.Name
 
-			inputName := fmt.Sprintf("P%sInput", strutil.ToPascalCase(name))
-			responseName := fmt.Sprintf("P%sResponse", strutil.ToPascalCase(name))
+			inputName := fmt.Sprintf("%sInput", strutil.ToPascalCase(name))
+			responseName := fmt.Sprintf("%sResponse", strutil.ToPascalCase(name))
 
 			g.Linef("// %s implements the %s procedure.", name, name)
 			g.Linef("%s(input %s) %s", name, inputName, responseName)

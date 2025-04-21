@@ -10,6 +10,7 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 
 	g.Line("// This file has been generated using UFO RPC. DO NOT EDIT.")
 	g.Line("// If you edit this file, it will be overwritten the next time it is generated.")
+	g.Line("//nolint")
 	g.Break()
 
 	g.Linef("// Package %s contains the generated code for the UFO RPC schema", config.PackageName)
@@ -21,8 +22,6 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 		g.Line(`"encoding/json"`)
 		g.Line(`"fmt"`)
 		g.Line(`"io"`)
-		g.Line(`"slices"`)
-		g.Line(`"strings"`)
 		g.Line(`"time"`)
 	})
 	g.Line(")")

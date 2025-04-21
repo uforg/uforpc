@@ -9,22 +9,9 @@ import (
 	"github.com/uforg/uforpc/internal/util/strutil"
 )
 
-type generateCommonRenderFieldParams struct {
-	// The field to render
-	field schema.FieldDefinition
-	// Whether to only return the type or the full field
-	typeOnly bool
-	// Whether to omit the JSON tags
-	omitTag bool
-}
-
-// generateCommonRenderField generates the code for a field
-func generateCommonRenderField(params generateCommonRenderFieldParams) string {
-	field := params.field
+// renderField generates the code for a field
+func renderField(field schema.FieldDefinition) string {
 	name := field.Name
-	typeOnly := params.typeOnly
-	omitTag := params.omitTag
-
 	isNamed := field.IsNamed()
 	isInline := field.IsInline()
 
@@ -65,11 +52,7 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 		og.Line("struct {")
 		og.Block(func() {
 			for _, fieldDef := range field.TypeInline.Fields {
-				og.Line(generateCommonRenderField(generateCommonRenderFieldParams{
-					field:    fieldDef,
-					typeOnly: false,
-					omitTag:  false,
-				}))
+				og.Line(renderField(fieldDef))
 			}
 		})
 		og.Inline("}")
@@ -81,52 +64,175 @@ func generateCommonRenderField(params generateCommonRenderFieldParams) string {
 	}
 
 	if isOptional {
-		switch typeLiteral {
-		case "string":
-			typeLiteral = "NullString"
-		case "int":
-			typeLiteral = "NullInt"
-		case "float64":
-			typeLiteral = "NullFloat64"
-		case "bool":
-			typeLiteral = "NullBool"
-		case "time.Time":
-			typeLiteral = "NullTime"
-		default:
-			typeLiteral = fmt.Sprintf("Null[%s]", strings.TrimSpace(typeLiteral))
+		if isCustomType {
+			typeLiteral = *field.TypeName + "Optional"
+		} else {
+			switch typeLiteral {
+			case "string":
+				typeLiteral = "StringOptional"
+			case "int":
+				typeLiteral = "IntOptional"
+			case "float64":
+				typeLiteral = "Float64Optional"
+			case "bool":
+				typeLiteral = "BoolOptional"
+			case "time.Time":
+				typeLiteral = "TimeOptional"
+			default:
+				typeLiteral = fmt.Sprintf("Optional[%s]", strings.TrimSpace(typeLiteral))
+			}
 		}
 	}
 
-	if typeOnly {
-		return typeLiteral
-	}
-
-	jsonTag := ""
-	if !omitTag {
-		jsonTag = fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
-	}
-
+	jsonTag := fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
 	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
 	return result + jsonTag
 }
 
-// generateCommonRenderStructFromFieldSlice generates the code for a slice of fields
-func generateCommonRenderStructFromFieldSlice(fieldSlice []schema.FieldDefinition) string {
-	if len(fieldSlice) == 0 {
-		return "struct{}"
-	}
-
+// renderType renders a type definition with all its fields
+func renderType(name string, desc string, fields []schema.FieldDefinition) string {
 	og := genkit.NewGenKit().WithTabs()
-	og.Inline("struct {")
+	if desc != "" {
+		og.Linef("/* %s %s */", name, desc)
+	}
+	og.Linef("type %s struct {", name)
 	og.Block(func() {
-		for _, fieldItem := range fieldSlice {
-			og.Line(generateCommonRenderField(generateCommonRenderFieldParams{
-				field:    fieldItem,
-				typeOnly: false,
-				omitTag:  false,
-			}))
+		for _, fieldDef := range fields {
+			og.Line(renderField(fieldDef))
 		}
 	})
 	og.Line("}")
+
+	return og.String()
+}
+
+// renderPreField generates the code for a field in a pre type
+func renderPreField(field schema.FieldDefinition) string {
+	name := field.Name
+	isNamed := field.IsNamed()
+	isInline := field.IsInline()
+
+	// Protect against empty fields
+	if !isNamed && !isInline {
+		return ""
+	}
+
+	namePascal := strutil.ToPascalCase(name)
+	nameCamel := strutil.ToCamelCase(name)
+	isCustomType := field.IsCustomType()
+	isBuiltInType := field.IsBuiltInType()
+
+	typeLiteral := "any"
+
+	if isNamed && isCustomType {
+		typeLiteral = "pre" + *field.TypeName + "Optional"
+	}
+
+	if isNamed && isBuiltInType {
+		switch *field.TypeName {
+		case "string":
+			typeLiteral = "StringOptional"
+		case "int":
+			typeLiteral = "IntOptional"
+		case "float":
+			typeLiteral = "Float64Optional"
+		case "boolean":
+			typeLiteral = "BoolOptional"
+		case "datetime":
+			typeLiteral = "TimeOptional"
+		}
+	}
+
+	if isInline {
+		og := genkit.NewGenKit().WithTabs()
+		og.Line("struct {")
+		og.Block(func() {
+			for _, fieldDef := range field.TypeInline.Fields {
+				og.Line(renderPreField(fieldDef))
+			}
+		})
+		og.Inline("}")
+		typeLiteral = og.String()
+	}
+
+	if field.Depth > 0 {
+		typeLiteral = strings.Repeat("[]", field.Depth) + typeLiteral
+	}
+
+	jsonTag := fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
+	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
+	return result + jsonTag
+}
+
+// renderPreType renders a type definition with all its fields marked as optional
+// and helpers to validate the required fields and transform to the final type
+func renderPreType(name string, fields []schema.FieldDefinition) string {
+	og := genkit.NewGenKit().WithTabs()
+	og.Linef("// pre%s is the version of %s previous to the required field validation", name, name)
+	og.Linef("type pre%s struct {", name)
+	og.Block(func() {
+		for _, fieldDef := range fields {
+			og.Line(renderPreField(fieldDef))
+		}
+	})
+	og.Line("}")
+	og.Break()
+
+	// Pre optional
+	og.Linef("// pre%sOptional is the optional version of pre%s", name, name)
+	og.Linef("type pre%sOptional = Optional[pre%s]", name, name)
+	og.Break()
+
+	// Validate function
+	og.Linef("// validate validates the required fields of %s", name)
+	og.Linef("func (p *pre%s) validate() error {", name)
+	og.Block(func() {
+		og.Line("if p == nil {")
+		og.Block(func() {
+			og.Linef("return fmt.Errorf(\"pre%s is nil\")", name)
+		})
+		og.Line("}")
+		og.Break()
+
+		// Required fields
+		for _, fieldDef := range fields {
+			if fieldDef.Optional {
+				continue
+			}
+
+			fieldName := strutil.ToPascalCase(fieldDef.Name)
+			og.Linef("if !p.%s.Present {", fieldName)
+			og.Block(func() {
+				og.Linef("return fmt.Errorf(\"%s is required\")", fieldDef.Name)
+			})
+			og.Line("}")
+		}
+		og.Break()
+
+		// Deep validation for custom types
+		for _, fieldDef := range fields {
+			if !fieldDef.IsCustomType() {
+				continue
+			}
+
+			fieldName := strutil.ToPascalCase(fieldDef.Name)
+			og.Linef("if p.%s.Present {", fieldName)
+			og.Block(func() {
+				og.Linef("if err := p.%s.Value.validate(); err != nil {", fieldName)
+				og.Block(func() {
+					og.Linef("return fmt.Errorf(\"%s: %%w\", err)", fieldDef.Name)
+				})
+				og.Line("}")
+			})
+			og.Line("}")
+
+		}
+		og.Break()
+
+		og.Line("return nil")
+	})
+	og.Line("}")
+	og.Break()
+
 	return og.String()
 }

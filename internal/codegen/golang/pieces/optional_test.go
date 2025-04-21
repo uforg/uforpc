@@ -8,34 +8,34 @@ import (
 
 // TestStructure includes all nullable types
 type TestStructure struct {
-	Text    NullString  `json:"text,omitempty"`
-	Number  NullInt     `json:"number,omitempty"`
-	Decimal NullFloat64 `json:"decimal,omitempty"`
-	Flag    NullBool    `json:"flag,omitempty"`
-	Generic Null[[]int] `json:"generic,omitempty"`
+	Text    StringOptional  `json:"text,omitempty"`
+	Number  IntOptional     `json:"number,omitempty"`
+	Decimal Float64Optional `json:"decimal,omitempty"`
+	Flag    BoolOptional    `json:"flag,omitempty"`
+	Generic Optional[[]int] `json:"generic,omitempty"`
 }
 
-func TestNullString(t *testing.T) {
+func TestStringOptional(t *testing.T) {
 	tests := []struct {
 		name     string
 		json     string
-		expected NullString
+		expected StringOptional
 		wantErr  bool
 	}{
 		{
 			name:     "normal value",
 			json:     `"hello"`,
-			expected: NullString{Value: "hello", Valid: true},
+			expected: StringOptional{Value: "hello", Present: true},
 		},
 		{
 			name:     "empty value",
 			json:     `""`,
-			expected: NullString{Value: "", Valid: true},
+			expected: StringOptional{Value: "", Present: true},
 		},
 		{
 			name:     "null value",
 			json:     `null`,
-			expected: NullString{Valid: false},
+			expected: StringOptional{Present: false},
 		},
 		{
 			name:    "invalid value",
@@ -46,7 +46,7 @@ func TestNullString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got NullString
+			var got StringOptional
 			err := json.Unmarshal([]byte(tt.json), &got)
 
 			if (err != nil) != tt.wantErr {
@@ -54,39 +54,39 @@ func TestNullString(t *testing.T) {
 				return
 			}
 
-			if err == nil && (got.Valid != tt.expected.Valid || got.Value != tt.expected.Value) {
+			if err == nil && (got.Present != tt.expected.Present || got.Value != tt.expected.Value) {
 				t.Errorf("got %+v, want %+v", got, tt.expected)
 			}
 		})
 	}
 }
 
-func TestNullInt(t *testing.T) {
+func TestIntOptional(t *testing.T) {
 	tests := []struct {
 		name     string
 		json     string
-		expected NullInt
+		expected IntOptional
 		wantErr  bool
 	}{
 		{
 			name:     "positive number",
 			json:     `42`,
-			expected: NullInt{Value: 42, Valid: true},
+			expected: IntOptional{Value: 42, Present: true},
 		},
 		{
 			name:     "negative number",
 			json:     `-42`,
-			expected: NullInt{Value: -42, Valid: true},
+			expected: IntOptional{Value: -42, Present: true},
 		},
 		{
 			name:     "zero",
 			json:     `0`,
-			expected: NullInt{Value: 0, Valid: true},
+			expected: IntOptional{Value: 0, Present: true},
 		},
 		{
 			name:     "null value",
 			json:     `null`,
-			expected: NullInt{Valid: false},
+			expected: IntOptional{Present: false},
 		},
 		{
 			name:    "invalid string value",
@@ -102,7 +102,7 @@ func TestNullInt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got NullInt
+			var got IntOptional
 			err := json.Unmarshal([]byte(tt.json), &got)
 
 			if (err != nil) != tt.wantErr {
@@ -110,44 +110,44 @@ func TestNullInt(t *testing.T) {
 				return
 			}
 
-			if err == nil && (got.Valid != tt.expected.Valid || got.Value != tt.expected.Value) {
+			if err == nil && (got.Present != tt.expected.Present || got.Value != tt.expected.Value) {
 				t.Errorf("got %+v, want %+v", got, tt.expected)
 			}
 		})
 	}
 }
 
-func TestNullFloat64(t *testing.T) {
+func TestFloat64Optional(t *testing.T) {
 	tests := []struct {
 		name     string
 		json     string
-		expected NullFloat64
+		expected Float64Optional
 		wantErr  bool
 	}{
 		{
 			name:     "integer number",
 			json:     `42`,
-			expected: NullFloat64{Value: 42.0, Valid: true},
+			expected: Float64Optional{Value: 42.0, Present: true},
 		},
 		{
 			name:     "decimal number",
 			json:     `42.5`,
-			expected: NullFloat64{Value: 42.5, Valid: true},
+			expected: Float64Optional{Value: 42.5, Present: true},
 		},
 		{
 			name:     "negative number",
 			json:     `-42.5`,
-			expected: NullFloat64{Value: -42.5, Valid: true},
+			expected: Float64Optional{Value: -42.5, Present: true},
 		},
 		{
 			name:     "zero",
 			json:     `0`,
-			expected: NullFloat64{Value: 0, Valid: true},
+			expected: Float64Optional{Value: 0, Present: true},
 		},
 		{
 			name:     "null value",
 			json:     `null`,
-			expected: NullFloat64{Valid: false},
+			expected: Float64Optional{Present: false},
 		},
 		{
 			name:    "invalid value",
@@ -158,7 +158,7 @@ func TestNullFloat64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got NullFloat64
+			var got Float64Optional
 			err := json.Unmarshal([]byte(tt.json), &got)
 
 			if (err != nil) != tt.wantErr {
@@ -166,34 +166,34 @@ func TestNullFloat64(t *testing.T) {
 				return
 			}
 
-			if err == nil && (got.Valid != tt.expected.Valid || got.Value != tt.expected.Value) {
+			if err == nil && (got.Present != tt.expected.Present || got.Value != tt.expected.Value) {
 				t.Errorf("got %+v, want %+v", got, tt.expected)
 			}
 		})
 	}
 }
 
-func TestNullBool(t *testing.T) {
+func TestBoolOptional(t *testing.T) {
 	tests := []struct {
 		name     string
 		json     string
-		expected NullBool
+		expected BoolOptional
 		wantErr  bool
 	}{
 		{
 			name:     "true",
 			json:     `true`,
-			expected: NullBool{Value: true, Valid: true},
+			expected: BoolOptional{Value: true, Present: true},
 		},
 		{
 			name:     "false",
 			json:     `false`,
-			expected: NullBool{Value: false, Valid: true},
+			expected: BoolOptional{Value: false, Present: true},
 		},
 		{
 			name:     "null value",
 			json:     `null`,
-			expected: NullBool{Valid: false},
+			expected: BoolOptional{Present: false},
 		},
 		{
 			name:    "invalid number value",
@@ -209,7 +209,7 @@ func TestNullBool(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got NullBool
+			var got BoolOptional
 			err := json.Unmarshal([]byte(tt.json), &got)
 
 			if (err != nil) != tt.wantErr {
@@ -217,29 +217,29 @@ func TestNullBool(t *testing.T) {
 				return
 			}
 
-			if err == nil && (got.Valid != tt.expected.Valid || got.Value != tt.expected.Value) {
+			if err == nil && (got.Present != tt.expected.Present || got.Value != tt.expected.Value) {
 				t.Errorf("got %+v, want %+v", got, tt.expected)
 			}
 		})
 	}
 }
 
-func TestNullTime(t *testing.T) {
+func TestTimeOptional(t *testing.T) {
 	tests := []struct {
 		name     string
 		json     string
-		expected NullTime
+		expected TimeOptional
 		wantErr  bool
 	}{
 		{
 			name:     "valid time",
 			json:     `"2023-05-01T12:34:56Z"`,
-			expected: NullTime{Value: time.Date(2023, 5, 1, 12, 34, 56, 0, time.UTC), Valid: true},
+			expected: TimeOptional{Value: time.Date(2023, 5, 1, 12, 34, 56, 0, time.UTC), Present: true},
 		},
 		{
 			name:     "null value",
 			json:     `null`,
-			expected: NullTime{Valid: false},
+			expected: TimeOptional{Present: false},
 		},
 		{
 			name:    "invalid time format",
@@ -255,7 +255,7 @@ func TestNullTime(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got NullTime
+			var got TimeOptional
 			err := json.Unmarshal([]byte(tt.json), &got)
 
 			if (err != nil) != tt.wantErr {
@@ -263,7 +263,7 @@ func TestNullTime(t *testing.T) {
 				return
 			}
 
-			if err == nil && (got.Valid != tt.expected.Valid || !got.Value.Equal(tt.expected.Value)) {
+			if err == nil && (got.Present != tt.expected.Present || !got.Value.Equal(tt.expected.Value)) {
 				t.Errorf("got %+v, want %+v", got, tt.expected)
 			}
 		})
@@ -287,11 +287,11 @@ func TestComplexStructure(t *testing.T) {
                 "generic": [1,2,3]
             }`,
 			expected: TestStructure{
-				Text:    NullString{Value: "hello", Valid: true},
-				Number:  NullInt{Value: 42, Valid: true},
-				Decimal: NullFloat64{Value: 42.5, Valid: true},
-				Flag:    NullBool{Value: true, Valid: true},
-				Generic: Null[[]int]{Value: []int{1, 2, 3}, Valid: true},
+				Text:    StringOptional{Value: "hello", Present: true},
+				Number:  IntOptional{Value: 42, Present: true},
+				Decimal: Float64Optional{Value: 42.5, Present: true},
+				Flag:    BoolOptional{Value: true, Present: true},
+				Generic: Optional[[]int]{Value: []int{1, 2, 3}, Present: true},
 			},
 		},
 		{
@@ -304,11 +304,11 @@ func TestComplexStructure(t *testing.T) {
                 "generic": null
             }`,
 			expected: TestStructure{
-				Text:    NullString{Valid: false},
-				Number:  NullInt{Valid: false},
-				Decimal: NullFloat64{Valid: false},
-				Flag:    NullBool{Valid: false},
-				Generic: Null[[]int]{Valid: false},
+				Text:    StringOptional{Present: false},
+				Number:  IntOptional{Present: false},
+				Decimal: Float64Optional{Present: false},
+				Flag:    BoolOptional{Present: false},
+				Generic: Optional[[]int]{Present: false},
 			},
 		},
 		{
@@ -321,11 +321,11 @@ func TestComplexStructure(t *testing.T) {
                 "generic": [1,2,3]
             }`,
 			expected: TestStructure{
-				Text:    NullString{Value: "hello", Valid: true},
-				Number:  NullInt{Valid: false},
-				Decimal: NullFloat64{Value: 42.5, Valid: true},
-				Flag:    NullBool{Valid: false},
-				Generic: Null[[]int]{Value: []int{1, 2, 3}, Valid: true},
+				Text:    StringOptional{Value: "hello", Present: true},
+				Number:  IntOptional{Present: false},
+				Decimal: Float64Optional{Value: 42.5, Present: true},
+				Flag:    BoolOptional{Present: false},
+				Generic: Optional[[]int]{Value: []int{1, 2, 3}, Present: true},
 			},
 		},
 		{
@@ -335,22 +335,22 @@ func TestComplexStructure(t *testing.T) {
                 "decimal": 42.5
             }`,
 			expected: TestStructure{
-				Text:    NullString{Value: "hello", Valid: true},
-				Number:  NullInt{Valid: false},
-				Decimal: NullFloat64{Value: 42.5, Valid: true},
-				Flag:    NullBool{Valid: false},
-				Generic: Null[[]int]{Valid: false},
+				Text:    StringOptional{Value: "hello", Present: true},
+				Number:  IntOptional{Present: false},
+				Decimal: Float64Optional{Value: 42.5, Present: true},
+				Flag:    BoolOptional{Present: false},
+				Generic: Optional[[]int]{Present: false},
 			},
 		},
 		{
 			name: "empty json",
 			json: `{}`,
 			expected: TestStructure{
-				Text:    NullString{Valid: false},
-				Number:  NullInt{Valid: false},
-				Decimal: NullFloat64{Valid: false},
-				Flag:    NullBool{Valid: false},
-				Generic: Null[[]int]{Valid: false},
+				Text:    StringOptional{Present: false},
+				Number:  IntOptional{Present: false},
+				Decimal: Float64Optional{Present: false},
+				Flag:    BoolOptional{Present: false},
+				Generic: Optional[[]int]{Present: false},
 			},
 		},
 	}
@@ -366,16 +366,16 @@ func TestComplexStructure(t *testing.T) {
 			}
 
 			if err == nil {
-				if got.Text.Valid != tt.expected.Text.Valid || got.Text.Value != tt.expected.Text.Value {
+				if got.Text.Present != tt.expected.Text.Present || got.Text.Value != tt.expected.Text.Value {
 					t.Errorf("Text: got %+v, want %+v", got.Text, tt.expected.Text)
 				}
-				if got.Number.Valid != tt.expected.Number.Valid || got.Number.Value != tt.expected.Number.Value {
+				if got.Number.Present != tt.expected.Number.Present || got.Number.Value != tt.expected.Number.Value {
 					t.Errorf("Number: got %+v, want %+v", got.Number, tt.expected.Number)
 				}
-				if got.Decimal.Valid != tt.expected.Decimal.Valid || got.Decimal.Value != tt.expected.Decimal.Value {
+				if got.Decimal.Present != tt.expected.Decimal.Present || got.Decimal.Value != tt.expected.Decimal.Value {
 					t.Errorf("Decimal: got %+v, want %+v", got.Decimal, tt.expected.Decimal)
 				}
-				if got.Flag.Valid != tt.expected.Flag.Valid || got.Flag.Value != tt.expected.Flag.Value {
+				if got.Flag.Present != tt.expected.Flag.Present || got.Flag.Value != tt.expected.Flag.Value {
 					t.Errorf("Flag: got %+v, want %+v", got.Flag, tt.expected.Flag)
 				}
 			}
@@ -392,33 +392,33 @@ func TestMarshalJSON(t *testing.T) {
 		{
 			name: "all fields with value",
 			input: TestStructure{
-				Text:    NullString{Value: "hello", Valid: true},
-				Number:  NullInt{Value: 42, Valid: true},
-				Decimal: NullFloat64{Value: 42.5, Valid: true},
-				Flag:    NullBool{Value: true, Valid: true},
-				Generic: Null[[]int]{Value: []int{1, 2, 3}, Valid: true},
+				Text:    StringOptional{Value: "hello", Present: true},
+				Number:  IntOptional{Value: 42, Present: true},
+				Decimal: Float64Optional{Value: 42.5, Present: true},
+				Flag:    BoolOptional{Value: true, Present: true},
+				Generic: Optional[[]int]{Value: []int{1, 2, 3}, Present: true},
 			},
 			expected: `{"text":"hello","number":42,"decimal":42.5,"flag":true,"generic":[1,2,3]}`,
 		},
 		{
 			name: "all fields null",
 			input: TestStructure{
-				Text:    NullString{Valid: false},
-				Number:  NullInt{Valid: false},
-				Decimal: NullFloat64{Valid: false},
-				Flag:    NullBool{Valid: false},
-				Generic: Null[[]int]{Valid: false},
+				Text:    StringOptional{Present: false},
+				Number:  IntOptional{Present: false},
+				Decimal: Float64Optional{Present: false},
+				Flag:    BoolOptional{Present: false},
+				Generic: Optional[[]int]{Present: false},
 			},
 			expected: `{"text":null,"number":null,"decimal":null,"flag":null,"generic":null}`,
 		},
 		{
 			name: "mix of values and null",
 			input: TestStructure{
-				Text:    NullString{Value: "hello", Valid: true},
-				Number:  NullInt{Valid: false},
-				Decimal: NullFloat64{Value: 42.5, Valid: true},
-				Flag:    NullBool{Valid: false},
-				Generic: Null[[]int]{Value: []int{1, 2, 3}, Valid: true},
+				Text:    StringOptional{Value: "hello", Present: true},
+				Number:  IntOptional{Present: false},
+				Decimal: Float64Optional{Value: 42.5, Present: true},
+				Flag:    BoolOptional{Present: false},
+				Generic: Optional[[]int]{Value: []int{1, 2, 3}, Present: true},
 			},
 			expected: `{"text":"hello","number":null,"decimal":42.5,"flag":null,"generic":[1,2,3]}`,
 		},
