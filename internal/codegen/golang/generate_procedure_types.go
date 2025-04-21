@@ -26,13 +26,13 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		outputDesc := fmt.Sprintf("%s represents the output parameters for the %s procedure.", outputName, namePascal)
 		responseDesc := fmt.Sprintf("%s represents the response for the %s procedure.", responseName, namePascal)
 
-		g.Line(renderType(inputName, inputDesc, procNode.Input))
+		g.Line(renderType("", inputName, inputDesc, procNode.Input))
 		g.Break()
 
-		g.Line(renderPreType(inputName, procNode.Input))
+		g.Line(renderPreType("", inputName, procNode.Input))
 		g.Break()
 
-		g.Line(renderType(outputName, outputDesc, procNode.Output))
+		g.Line(renderType("", outputName, outputDesc, procNode.Output))
 		g.Break()
 
 		g.Linef("// %s", responseDesc)

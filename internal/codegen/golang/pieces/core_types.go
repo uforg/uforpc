@@ -149,3 +149,13 @@ func asError(err error) Error { //nolint:unused
 		}
 	}
 }
+
+// errorMissingRequiredField creates a new Error for the case
+// where a required field is missing in the input.
+func errorMissingRequiredField(message string) Error { //nolint:unused
+	return Error{
+		Category: "ValidationError",
+		Code:     "MISSING_REQUIRED_FIELD",
+		Message:  message,
+	}
+}

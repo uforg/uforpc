@@ -30,16 +30,11 @@ func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 			}
 		}
 
-		g.Line(renderType(typeNode.Name, desc, typeNode.Fields))
+		g.Line(renderType("", typeNode.Name, desc, typeNode.Fields))
 		g.Break()
 
-		g.Line(renderPreType(typeNode.Name, typeNode.Fields))
+		g.Line(renderPreType("", typeNode.Name, typeNode.Fields))
 		g.Break()
-
-		g.Linef("// %sOptional is the optional version of %s", typeNode.Name, typeNode.Name)
-		g.Linef("type %sOptional = Optional[%s]", typeNode.Name, typeNode.Name)
-		g.Break()
-
 	}
 
 	return g.String(), nil

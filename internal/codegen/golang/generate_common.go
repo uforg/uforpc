@@ -10,7 +10,7 @@ import (
 )
 
 // renderField generates the code for a field
-func renderField(field schema.FieldDefinition) string {
+func renderField(parentTypeName string, field schema.FieldDefinition) string {
 	name := field.Name
 	isNamed := field.IsNamed()
 	isInline := field.IsInline()
@@ -48,15 +48,7 @@ func renderField(field schema.FieldDefinition) string {
 	}
 
 	if isInline {
-		og := genkit.NewGenKit().WithTabs()
-		og.Line("struct {")
-		og.Block(func() {
-			for _, fieldDef := range field.TypeInline.Fields {
-				og.Line(renderField(fieldDef))
-			}
-		})
-		og.Inline("}")
-		typeLiteral = og.String()
+		typeLiteral = parentTypeName + namePascal
 	}
 
 	if field.Depth > 0 {
@@ -64,24 +56,7 @@ func renderField(field schema.FieldDefinition) string {
 	}
 
 	if isOptional {
-		if isCustomType {
-			typeLiteral = *field.TypeName + "Optional"
-		} else {
-			switch typeLiteral {
-			case "string":
-				typeLiteral = "StringOptional"
-			case "int":
-				typeLiteral = "IntOptional"
-			case "float64":
-				typeLiteral = "Float64Optional"
-			case "bool":
-				typeLiteral = "BoolOptional"
-			case "time.Time":
-				typeLiteral = "TimeOptional"
-			default:
-				typeLiteral = fmt.Sprintf("Optional[%s]", strings.TrimSpace(typeLiteral))
-			}
-		}
+		typeLiteral = fmt.Sprintf("Optional[%s]", typeLiteral)
 	}
 
 	jsonTag := fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
@@ -90,7 +65,14 @@ func renderField(field schema.FieldDefinition) string {
 }
 
 // renderType renders a type definition with all its fields
-func renderType(name string, desc string, fields []schema.FieldDefinition) string {
+func renderType(
+	parentName string,
+	name string,
+	desc string,
+	fields []schema.FieldDefinition,
+) string {
+	name = parentName + name
+
 	og := genkit.NewGenKit().WithTabs()
 	if desc != "" {
 		og.Linef("/* %s %s */", name, desc)
@@ -98,16 +80,26 @@ func renderType(name string, desc string, fields []schema.FieldDefinition) strin
 	og.Linef("type %s struct {", name)
 	og.Block(func() {
 		for _, fieldDef := range fields {
-			og.Line(renderField(fieldDef))
+			og.Line(renderField(name, fieldDef))
 		}
 	})
 	og.Line("}")
+	og.Break()
+
+	// Render children inline types
+	for _, fieldDef := range fields {
+		if !fieldDef.IsInline() {
+			continue
+		}
+
+		og.Line(renderType(name, strutil.ToPascalCase(fieldDef.Name), "", fieldDef.TypeInline.Fields))
+	}
 
 	return og.String()
 }
 
 // renderPreField generates the code for a field in a pre type
-func renderPreField(field schema.FieldDefinition) string {
+func renderPreField(parentTypeName string, field schema.FieldDefinition) string {
 	name := field.Name
 	isNamed := field.IsNamed()
 	isInline := field.IsInline()
@@ -125,39 +117,33 @@ func renderPreField(field schema.FieldDefinition) string {
 	typeLiteral := "any"
 
 	if isNamed && isCustomType {
-		typeLiteral = "pre" + *field.TypeName + "Optional"
+		typeLiteral = "pre" + *field.TypeName
 	}
 
 	if isNamed && isBuiltInType {
 		switch *field.TypeName {
 		case "string":
-			typeLiteral = "StringOptional"
+			typeLiteral = "string"
 		case "int":
-			typeLiteral = "IntOptional"
+			typeLiteral = "int"
 		case "float":
-			typeLiteral = "Float64Optional"
+			typeLiteral = "float64"
 		case "boolean":
-			typeLiteral = "BoolOptional"
+			typeLiteral = "bool"
 		case "datetime":
-			typeLiteral = "TimeOptional"
+			typeLiteral = "time.Time"
 		}
 	}
 
 	if isInline {
-		og := genkit.NewGenKit().WithTabs()
-		og.Line("struct {")
-		og.Block(func() {
-			for _, fieldDef := range field.TypeInline.Fields {
-				og.Line(renderPreField(fieldDef))
-			}
-		})
-		og.Inline("}")
-		typeLiteral = og.String()
+		typeLiteral = "pre" + parentTypeName + namePascal
 	}
 
 	if field.Depth > 0 {
 		typeLiteral = strings.Repeat("[]", field.Depth) + typeLiteral
 	}
+
+	typeLiteral = fmt.Sprintf("Optional[%s]", typeLiteral)
 
 	jsonTag := fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
 	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
@@ -166,68 +152,111 @@ func renderPreField(field schema.FieldDefinition) string {
 
 // renderPreType renders a type definition with all its fields marked as optional
 // and helpers to validate the required fields and transform to the final type
-func renderPreType(name string, fields []schema.FieldDefinition) string {
+func renderPreType(
+	parentName string,
+	name string,
+	fields []schema.FieldDefinition,
+) string {
+	name = parentName + name
+
 	og := genkit.NewGenKit().WithTabs()
 	og.Linef("// pre%s is the version of %s previous to the required field validation", name, name)
 	og.Linef("type pre%s struct {", name)
 	og.Block(func() {
 		for _, fieldDef := range fields {
-			og.Line(renderPreField(fieldDef))
+			og.Line(renderPreField(name, fieldDef))
 		}
 	})
 	og.Line("}")
 	og.Break()
 
-	// Pre optional
-	og.Linef("// pre%sOptional is the optional version of pre%s", name, name)
-	og.Linef("type pre%sOptional = Optional[pre%s]", name, name)
-	og.Break()
+	// Render children inline types
+	for _, fieldDef := range fields {
+		if !fieldDef.IsInline() {
+			continue
+		}
 
-	// Validate function
+		og.Line(renderPreType(name, strutil.ToPascalCase(fieldDef.Name), fieldDef.TypeInline.Fields))
+	}
+
+	// Render validate function
 	og.Linef("// validate validates the required fields of %s", name)
 	og.Linef("func (p *pre%s) validate() error {", name)
 	og.Block(func() {
 		og.Line("if p == nil {")
 		og.Block(func() {
-			og.Linef("return fmt.Errorf(\"pre%s is nil\")", name)
+			og.Linef("return errorMissingRequiredField(\"pre%s is nil\")", name)
 		})
 		og.Line("}")
 		og.Break()
 
 		// Required fields
 		for _, fieldDef := range fields {
-			if fieldDef.Optional {
-				continue
-			}
-
 			fieldName := strutil.ToPascalCase(fieldDef.Name)
-			og.Linef("if !p.%s.Present {", fieldName)
-			og.Block(func() {
-				og.Linef("return fmt.Errorf(\"%s is required\")", fieldDef.Name)
-			})
-			og.Line("}")
-		}
-		og.Break()
+			isRequired := !fieldDef.Optional
+			isCustomType := fieldDef.IsCustomType()
+			isInline := fieldDef.IsInline()
+			isArray := fieldDef.Depth > 0
+			arrayDepth := fieldDef.Depth
 
-		// Deep validation for custom types
-		for _, fieldDef := range fields {
-			if !fieldDef.IsCustomType() {
-				continue
-			}
+			og.Linef(`// Required validations for field "%s"`, fieldDef.Name)
 
-			fieldName := strutil.ToPascalCase(fieldDef.Name)
-			og.Linef("if p.%s.Present {", fieldName)
-			og.Block(func() {
-				og.Linef("if err := p.%s.Value.validate(); err != nil {", fieldName)
+			if isRequired {
+				og.Linef("if !p.%s.Present {", fieldName)
 				og.Block(func() {
-					og.Linef("return fmt.Errorf(\"%s: %%w\", err)", fieldDef.Name)
+					og.Linef("return errorMissingRequiredField(\"%s is required\")", fieldDef.Name)
 				})
 				og.Line("}")
-			})
-			og.Line("}")
+			}
 
+			if (isCustomType || isInline) && !isArray {
+				og.Linef("if p.%s.Present {", fieldName)
+				og.Block(func() {
+					og.Linef("if err := p.%s.Value.validate(); err != nil {", fieldName)
+					og.Block(func() {
+						og.Linef("return errorMissingRequiredField(\"%s: \" + err.Error())", fieldDef.Name)
+					})
+					og.Line("}")
+				})
+				og.Line("}")
+			}
+
+			if (isCustomType || isInline) && isArray {
+				og.Linef("if p.%s.Present {", fieldName)
+				og.Block(func() {
+					og.Linef("item%d := p.%s.Value", arrayDepth, fieldName)
+
+					var renderLevel func(arrayDepth int)
+					renderLevel = func(arrayDepth int) {
+						nextArrayDepth := arrayDepth - 1
+
+						if arrayDepth > 1 {
+							og.Linef("for _, item%d := range item%d {", nextArrayDepth, arrayDepth)
+							og.Block(func() {
+								renderLevel(nextArrayDepth)
+							})
+							og.Line("}")
+							return
+						}
+
+						og.Linef("for _, item := range item%d {", arrayDepth)
+						og.Block(func() {
+							og.Linef("if err := item.validate(); err != nil {")
+							og.Block(func() {
+								og.Linef("return errorMissingRequiredField(\"%s: \" + err.Error())", fieldDef.Name)
+							})
+							og.Line("}")
+						})
+						og.Line("}")
+					}
+
+					renderLevel(arrayDepth)
+				})
+				og.Line("}")
+			}
+
+			og.Break()
 		}
-		og.Break()
 
 		og.Line("return nil")
 	})
