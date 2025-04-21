@@ -2,7 +2,6 @@ package pieces
 
 import (
 	"encoding/json"
-	"time"
 )
 
 /** START FROM HERE **/
@@ -11,28 +10,11 @@ import (
 // Optional utility type
 // -----------------------------------------------------------------------------
 
-type (
-	// Optional represents a value that can be null or not present in JSON
-	Optional[T any] struct {
-		Present bool // Whether the value is present or not
-		Value   T    // The actual value
-	}
-
-	// StringOptional is a string that can be null or not present in JSON
-	StringOptional = Optional[string]
-
-	// IntOptional is an int that can be null or not present in JSON
-	IntOptional = Optional[int]
-
-	// Float64Optional is a float64 that can be null or not present in JSON
-	Float64Optional = Optional[float64]
-
-	// BoolOptional is a bool that can be null or not present in JSON
-	BoolOptional = Optional[bool]
-
-	// TimeOptional is a time.Time that can be null or not present in JSON
-	TimeOptional = Optional[time.Time]
-)
+// Optional represents a value that can be null or not present in JSON
+type Optional[T any] struct {
+	Present bool // Whether the value is present or not
+	Value   T    // The actual value
+}
 
 // UnmarshalJSON implements json.Unmarshaler for Optional[T]
 func (n *Optional[T]) UnmarshalJSON(data []byte) error {
