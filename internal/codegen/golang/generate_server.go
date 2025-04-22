@@ -96,26 +96,28 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Set%sHandler registers the handler for the %s procedure", namePascal, name)
 		g.Linef("func (s *Server[T]) Set%sHandler(", namePascal)
 		g.Block(func() {
-			g.Linef("handler func(context T, input P%sInput) (P%sOutput, error),", name, name)
+			g.Linef("handler func(context T, input %sInput) (%sOutput, error),", name, name)
 		})
 		g.Linef(") *Server[T] {")
 		g.Block(func() {
 			g.Linef("s.handlers[ProcedureNames.%s] = func(context T, input json.RawMessage) (any, error) {", namePascal)
 			g.Block(func() {
-				g.Line("var typedInput P" + namePascal + "Input")
-				g.Line("if err := json.Unmarshal(input, &typedInput); err != nil {")
+				g.Line("var preTypedInput pre" + namePascal + "Input")
+				g.Line("if err := json.Unmarshal(input, &preTypedInput); err != nil {")
 				g.Block(func() {
-					g.Line("return nil, &Error{")
-					g.Block(func() {
-						g.Line("Message: \"Invalid input for " + name + " procedure\",")
-						g.Line("Details: map[string]any{\"procedure\": \"" + name + "\", \"error\": err.Error()},")
-					})
-					g.Line("}")
+					g.Linef(`return nil, fmt.Errorf("failed to unmarshal %s input: %%w", err)`, namePascal)
 				})
 				g.Line("}")
 				g.Break()
-				g.Line("//TODO: Use rule validation utilities here")
+
+				g.Line("if err := preTypedInput.validate(); err != nil {")
+				g.Block(func() {
+					g.Line("return nil, err")
+				})
+				g.Line("}")
 				g.Break()
+
+				g.Line("typedInput := preTypedInput.transform()")
 				g.Line("return handler(context, typedInput)")
 			})
 			g.Line("}")
@@ -130,8 +132,8 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Block(func() {
 		g.Line("var jsonBody struct {")
 		g.Block(func() {
-			g.Line("Procedure ProcedureName		`json:\"procedure\"`")
-			g.Line("Input 		json.RawMessage	`json:\"input\"`")
+			g.Line("Proc	ProcedureName		`json:\"proc\"`")
+			g.Line("Input	json.RawMessage	`json:\"input\"`")
 		})
 		g.Line("}")
 		g.Line("if err := json.NewDecoder(request.RequestBody).Decode(&jsonBody); err != nil {")
@@ -151,15 +153,15 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 
 		g.Line("// Validate procedure name")
-		g.Line("if !slices.Contains(ProcedureNamesList, jsonBody.Procedure) {")
+		g.Line("if !slices.Contains(ProcedureNamesList, jsonBody.Proc) {")
 		g.Block(func() {
 			g.Line("response = Response[any]{")
 			g.Block(func() {
 				g.Line("Ok: false,")
 				g.Line("Error: Error{")
 				g.Block(func() {
-					g.Line("Message: string(jsonBody.Procedure) + \" procedure not found\",")
-					g.Line("Details: map[string]any{\"procedure\": jsonBody.Procedure},")
+					g.Line("Message: string(jsonBody.Proc) + \" procedure not found\",")
+					g.Line("Details: map[string]any{\"procedure\": jsonBody.Proc},")
 				})
 				g.Line("},")
 			})
@@ -169,15 +171,15 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 
 		g.Line("// Validate procedure implementation")
-		g.Line("if _, ok := s.handlers[jsonBody.Procedure]; response.Ok && !ok {")
+		g.Line("if _, ok := s.handlers[jsonBody.Proc]; response.Ok && !ok {")
 		g.Block(func() {
 			g.Line("response = Response[any]{")
 			g.Block(func() {
 				g.Line("Ok: false,")
 				g.Line("Error: Error{")
 				g.Block(func() {
-					g.Line("Message: string(jsonBody.Procedure) + \" procedure not implemented\",")
-					g.Line("Details: map[string]any{\"procedure\": jsonBody.Procedure},")
+					g.Line("Message: string(jsonBody.Proc) + \" procedure not implemented\",")
+					g.Line("Details: map[string]any{\"procedure\": jsonBody.Proc},")
 				})
 				g.Line("},")
 			})
@@ -212,7 +214,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// Run handler if no errors have occurred")
 		g.Line("if response.Ok {")
 		g.Block(func() {
-			g.Line("if output, err := s.handlers[jsonBody.Procedure](currentContext, jsonBody.Input); err != nil {")
+			g.Line("if output, err := s.handlers[jsonBody.Proc](currentContext, jsonBody.Input); err != nil {")
 			g.Block(func() {
 				g.Line("response = Response[any]{")
 				g.Block(func() {
