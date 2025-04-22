@@ -47,7 +47,7 @@
           "editor.defaultFormatter": "denoland.vscode-deno"
         },
         "[svelte]": {
-          "editor.defaultFormatter": "svelte.svelte-vscode"
+          "editor.defaultFormatter": "denoland.vscode-deno"
         },
         "svelte.enable-ts-plugin": true,
         "[go]": {
