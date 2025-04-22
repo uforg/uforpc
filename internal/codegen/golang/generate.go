@@ -2,11 +2,11 @@ package golang
 
 import (
 	"fmt"
-	"go/format"
 	"strings"
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/schema"
+	"golang.org/x/tools/imports"
 )
 
 // Generate takes a schema and a config and generates the Go code for the schema.
@@ -34,7 +34,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 	}
 
 	generatedCode := g.String()
-	formattedCode, err := format.Source([]byte(generatedCode))
+	formattedCode, err := imports.Process("", []byte(generatedCode), nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to format generated code: %w", err)
 	}
