@@ -29,8 +29,13 @@ COPY --from=golang /usr/local/go /usr/local/go
 
 # Install system dependencies
 RUN apt update && \
-    apt install -y wget curl zip unzip p7zip-full tzdata git && \
+    apt install -y wget curl zip unzip p7zip-full tzdata git npm && \
     rm -rf /var/lib/apt/lists/*
+
+# Install nodejs
+RUN npm install -g n@latest && \
+    n 22.14.0 && \
+    npm install -g npm@latest
 
 # Install downloadable binaries
 RUN set -e && \

@@ -14,11 +14,11 @@
         "Compile-TomaszKasperczyk.copy-to-llm",
         "donjayamanne.githistory",
         "ryu1kn.partial-diff",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
+        "svelte.svelte-vscode"
       ],
       "settings": {
         "urpc.enable": false,
-        "deno.enable": true,
         "editor.formatOnSave": true,
         "editor.foldingStrategy": "indentation",
         "files.eol": "\n",
@@ -45,6 +45,9 @@
         },
         "[yaml]": {
           "editor.defaultFormatter": "denoland.vscode-deno"
+        },
+        "[svelte]": {
+          "editor.defaultFormatter": "svelte.svelte-vscode"
         },
         "[go]": {
           "editor.defaultFormatter": "golang.go"
