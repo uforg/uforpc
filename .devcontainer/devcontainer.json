@@ -49,6 +49,7 @@
         "[svelte]": {
           "editor.defaultFormatter": "svelte.svelte-vscode"
         },
+        "svelte.enable-ts-plugin": true,
         "[go]": {
           "editor.defaultFormatter": "golang.go"
         },
