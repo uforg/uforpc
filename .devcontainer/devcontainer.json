@@ -15,7 +15,8 @@
         "donjayamanne.githistory",
         "ryu1kn.partial-diff",
         "tamasfe.even-better-toml",
-        "svelte.svelte-vscode"
+        "svelte.svelte-vscode",
+        "bradlc.vscode-tailwindcss"
       ],
       "settings": {
         "urpc.enable": false,
