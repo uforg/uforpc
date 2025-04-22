@@ -4,6 +4,7 @@
     "npm:@sveltejs/adapter-static@3.0.8": "3.0.8_@sveltejs+kit@2.16.0__@sveltejs+vite-plugin-svelte@5.0.0___svelte@5.0.0____acorn@8.14.1___vite@6.2.5__svelte@5.0.0___acorn@8.14.1__vite@6.2.5_@sveltejs+vite-plugin-svelte@5.0.0__svelte@5.0.0___acorn@8.14.1__vite@6.2.5_svelte@5.0.0__acorn@8.14.1_vite@6.2.5",
     "npm:@sveltejs/kit@2.16.0": "2.16.0_@sveltejs+vite-plugin-svelte@5.0.0__svelte@5.0.0___acorn@8.14.1__vite@6.2.5_svelte@5.0.0__acorn@8.14.1_vite@6.2.5",
     "npm:@sveltejs/vite-plugin-svelte@5.0.0": "5.0.0_svelte@5.0.0__acorn@8.14.1_vite@6.2.5",
+    "npm:@tailwindcss/typography@0.5.16": "0.5.16_tailwindcss@4.1.4",
     "npm:@tailwindcss/vite@4.1.4": "4.1.4_vite@6.2.5",
     "npm:daisyui@5.0.27": "5.0.27",
     "npm:svelte-check@4.0.0": "4.0.0_svelte@5.0.0__acorn@8.14.1_typescript@5.8.3",
@@ -408,6 +409,16 @@
         "@tailwindcss/oxide-win32-x64-msvc"
       ]
     },
+    "@tailwindcss/typography@0.5.16_tailwindcss@4.1.4": {
+      "integrity": "sha512-0wDLwCVF5V3x3b1SGXPCDcdsbDHMBe+lkFzBRaHeLvNi+nrrnZ1lA18u+OTWO8iSWU2GxUOCvlXtDuqftc1oiA==",
+      "dependencies": [
+        "lodash.castarray",
+        "lodash.isplainobject",
+        "lodash.merge",
+        "postcss-selector-parser",
+        "tailwindcss"
+      ]
+    },
     "@tailwindcss/vite@4.1.4_vite@6.2.5": {
       "integrity": "sha512-4UQeMrONbvrsXKXXp/uxmdEN5JIJ9RkH7YVzs6AMxC/KC1+Np7WZBaNIco7TEjlkthqxZbt8pU/ipD+hKjm80A==",
       "dependencies": [
@@ -475,6 +486,9 @@
     },
     "cookie@0.6.0": {
       "integrity": "sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw=="
+    },
+    "cssesc@3.0.0": {
+      "integrity": "sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg=="
     },
     "daisyui@5.0.27": {
       "integrity": "sha512-XrpqgfpGaZJvTPg9pS9Rq6xbYpmMnR0a7AKqyVPZceJzjAs5HH3rfkRkiuGin0+KC2Adnu+WLHU7UDxAtCMyAw=="
@@ -671,6 +685,15 @@
     "locate-character@3.0.0": {
       "integrity": "sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA=="
     },
+    "lodash.castarray@4.4.0": {
+      "integrity": "sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q=="
+    },
+    "lodash.isplainobject@4.0.6": {
+      "integrity": "sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA=="
+    },
+    "lodash.merge@4.6.2": {
+      "integrity": "sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ=="
+    },
     "magic-string@0.30.17": {
       "integrity": "sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==",
       "dependencies": [
@@ -697,6 +720,13 @@
     },
     "picomatch@2.3.1": {
       "integrity": "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="
+    },
+    "postcss-selector-parser@6.0.10": {
+      "integrity": "sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==",
+      "dependencies": [
+        "cssesc",
+        "util-deprecate"
+      ]
     },
     "postcss@8.5.3": {
       "integrity": "sha512-dle9A3yYxlBSrt8Fu+IpjGT8SY8hN0mlaA6GY8t0P5PjIOZemULz/E2Bnm/2dcUOena75OTNkHI76uZBNUUq3A==",
@@ -810,6 +840,9 @@
     "typescript@5.8.3": {
       "integrity": "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="
     },
+    "util-deprecate@1.0.2": {
+      "integrity": "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw=="
+    },
     "vite@5.4.18": {
       "integrity": "sha512-1oDcnEp3lVyHCuQ2YFelM4Alm2o91xNoMncRm1U7S+JdYfYOvbiGZ3/CxGttrOu2M/KcGz7cRC2DoNUA6urmMA==",
       "dependencies": [
@@ -850,6 +883,7 @@
         "npm:@sveltejs/adapter-static@3.0.8",
         "npm:@sveltejs/kit@2.16.0",
         "npm:@sveltejs/vite-plugin-svelte@5.0.0",
+        "npm:@tailwindcss/typography@0.5.16",
         "npm:@tailwindcss/vite@4.1.4",
         "npm:daisyui@5.0.27",
         "npm:svelte-check@4.0.0",
