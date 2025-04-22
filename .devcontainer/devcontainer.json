@@ -38,6 +38,7 @@
         "[css]": {
           "editor.defaultFormatter": "denoland.vscode-deno"
         },
+        "css.validate": false,
         "[html]": {
           "editor.defaultFormatter": "denoland.vscode-deno"
         },
