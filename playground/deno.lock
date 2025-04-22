@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "npm:@lucide/svelte@0.503.0": "0.503.0_svelte@5.0.0__acorn@8.14.1",
     "npm:@sveltejs/adapter-static@3.0.8": "3.0.8_@sveltejs+kit@2.16.0__@sveltejs+vite-plugin-svelte@5.0.0___svelte@5.0.0____acorn@8.14.1___vite@6.2.5__svelte@5.0.0___acorn@8.14.1__vite@6.2.5_@sveltejs+vite-plugin-svelte@5.0.0__svelte@5.0.0___acorn@8.14.1__vite@6.2.5_svelte@5.0.0__acorn@8.14.1_vite@6.2.5",
     "npm:@sveltejs/kit@2.16.0": "2.16.0_@sveltejs+vite-plugin-svelte@5.0.0__svelte@5.0.0___acorn@8.14.1__vite@6.2.5_svelte@5.0.0__acorn@8.14.1_vite@6.2.5",
     "npm:@sveltejs/vite-plugin-svelte@5.0.0": "5.0.0_svelte@5.0.0__acorn@8.14.1_vite@6.2.5",
@@ -206,6 +207,12 @@
       "dependencies": [
         "@jridgewell/resolve-uri",
         "@jridgewell/sourcemap-codec"
+      ]
+    },
+    "@lucide/svelte@0.503.0_svelte@5.0.0__acorn@8.14.1": {
+      "integrity": "sha512-Y7Q8pHnX2YG8Ef4a/VnYFN9tTAJS33MiS78vQtPiyp5iiWuBlTMoViMiRUxQb7U9Ro46RdJ0kpCADvvha3Z2rA==",
+      "dependencies": [
+        "svelte"
       ]
     },
     "@napi-rs/wasm-runtime@0.2.9": {
@@ -880,6 +887,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@lucide/svelte@0.503.0",
         "npm:@sveltejs/adapter-static@3.0.8",
         "npm:@sveltejs/kit@2.16.0",
         "npm:@sveltejs/vite-plugin-svelte@5.0.0",

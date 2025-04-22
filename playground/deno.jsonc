@@ -1,5 +1,8 @@
 // All packages and commands are in package.json
 
 {
-  "unstable": ["fmt-component"] // To allow deno to format svelte files
+  "unstable": ["fmt-component"], // To allow deno to format svelte files
+  "compilerOptions": {
+    "lib": ["dom", "esnext"]
+  }
 }

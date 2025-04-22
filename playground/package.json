@@ -13,6 +13,7 @@
     "copywasm": "cp ../dist/urpc.wasm ./static/urpc/urpc.wasm && cp ../dist/wasm_exec.js ./static/urpc/wasm_exec.js"
   },
   "devDependencies": {
+    "@lucide/svelte": "0.503.0",
     "@sveltejs/adapter-static": "3.0.8",
     "@sveltejs/kit": "2.16.0",
     "@sveltejs/vite-plugin-svelte": "5.0.0",
