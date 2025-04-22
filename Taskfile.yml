@@ -4,11 +4,23 @@ version: "3"
 
 tasks:
   build:
-    desc: Build all the binaries for all platforms
+    desc: Build and install the urpc binary in the PATH
     cmds:
+      # Build wasm version (required by the urpc non-wasm binary)
+      - GOOS=js GOARCH=wasm go build -o ./dist/urpc.wasm ./cmd/urpcwasm/.
+      - cp "/usr/local/go/lib/wasm/wasm_exec.js" ./dist/wasm_exec.js
+
+      # Build playground
+      - cd ./playground && deno task build && cd ..
+
       # Build and install as local binary
       - go install ./cmd/urpc/.
 
+  build:all:
+    desc: Same as build, but builds for all platforms in dist/
+    deps:
+      - build
+    cmds:
       # LINUX builds
       - GOOS=linux GOARCH=amd64 go build -o ./dist/urpc-linux-amd64 ./cmd/urpc/.
       - GOOS=linux GOARCH=arm64 go build -o ./dist/urpc-linux-arm64 ./cmd/urpc/.
