@@ -1,7 +1,24 @@
+//go:build js && wasm
+
 package main
 
-import "fmt"
+import (
+	"log"
+	"syscall/js"
+)
+
+var wrappers map[string]js.Func = map[string]js.Func{
+	"cmdFmt":       cmdFmtWrapper(),
+	"cmdTranspile": cmdTranspileWrapper(),
+}
 
 func main() {
-	fmt.Println("Hello from wasm")
+	log.Println("UFO RPC WASM: Initializing...")
+
+	for name, wrapper := range wrappers {
+		js.Global().Set(name, wrapper)
+	}
+
+	log.Println("UFO RPC WASM: Initialized")
+	<-make(chan any)
 }
