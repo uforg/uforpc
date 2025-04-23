@@ -7,7 +7,6 @@
 
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Palette } from "@lucide/svelte";
 
   interface Props {
     class?: string;
@@ -25,12 +24,14 @@
   });
 </script>
 
-<label class="select {className}">
-  <span class="label"><Palette class="size-5" /></span>
-  <select bind:value={currentTheme}>
+<div class="tooltip tooltip-bottom" data-tip="Theme">
+  <select
+    class="select select-ghost cursor-pointer font-semibold {className}"
+    bind:value={currentTheme}
+  >
     <option value="system">System 🖥️</option>
     <option value="corporate">Light ☀️</option>
     <option value="dark">Dark 🌑</option>
     <option value="dracula">Dracula 🧛</option>
   </select>
-</label>
+</div>
