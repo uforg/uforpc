@@ -6,12 +6,10 @@
 -->
 
 <script lang="ts">
+  import { Moon, MoonStar, Palette, Sun, SunMoon } from "@lucide/svelte";
   import { onMount } from "svelte";
 
-  interface Props {
-    class?: string;
-  }
-  let { class: className = "" }: Props = $props();
+  const themesArr = ["system", "corporate", "dark", "dracula"];
 
   let currentTheme = $state("");
   onMount(() => {
@@ -19,19 +17,56 @@
     currentTheme = theme || "system";
   });
 
-  $effect(() => {
+  function setTheme(theme: string) {
+    currentTheme = theme;
     (window as any).setTheme(currentTheme);
-  });
+    (document.activeElement as HTMLElement)?.blur();
+  }
 </script>
 
-<div class="tooltip tooltip-bottom" data-tip="Theme">
-  <select
-    class="select select-ghost cursor-pointer font-semibold {className}"
-    bind:value={currentTheme}
+{#snippet themeName(showIcon: boolean, tname: string)}
+  {#if showIcon && tname === "system"}
+    <SunMoon class="size-4" />
+  {/if}
+  {#if showIcon && tname === "corporate"}
+    <Sun class="size-4" />
+  {/if}
+  {#if showIcon && tname === "dark"}
+    <Moon class="size-4" />
+  {/if}
+  {#if showIcon && tname === "dracula"}
+    <MoonStar class="size-4" />
+  {/if}
+
+  {#if tname === "system"}
+    System
+  {/if}
+  {#if tname === "corporate"}
+    Light
+  {/if}
+  {#if tname === "dark"}
+    Dark
+  {/if}
+  {#if tname === "dracula"}
+    Dracula
+  {/if}
+{/snippet}
+
+<div class="dropdown dropdown-end">
+  <div tabindex="-1" role="button" class="btn btn-ghost">
+    <Palette class="size-4" />
+    {@render themeName(false, currentTheme)}
+  </div>
+  <ul
+    tabindex="-1"
+    class="dropdown-content menu bg-base-100 rounded-box z-1 w-[120px] p-2 shadow-md"
   >
-    <option value="system">System 🖥️</option>
-    <option value="corporate">Light ☀️</option>
-    <option value="dark">Dark 🌑</option>
-    <option value="dracula">Dracula 🧛</option>
-  </select>
+    {#each themesArr as themeItem}
+      <li>
+        <button onclick={() => setTheme(themeItem)}>
+          {@render themeName(true, themeItem)}
+        </button>
+      </li>
+    {/each}
+  </ul>
 </div>

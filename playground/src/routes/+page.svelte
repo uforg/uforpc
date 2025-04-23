@@ -22,11 +22,13 @@
 
   <div class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto">
     <header class="w-full p-4 flex justify-between items-center space-x-2">
-      <label class="input">
-        <Search />
+      <label
+        class="group input input-ghost not-has-[:focus]:w-[200px] transition-[width]"
+      >
+        <Search class="size-4 flex-none" />
         <input type="search" class="grow" placeholder="Search..." />
-        <kbd class="kbd kbd-sm">CTRL</kbd>
-        <kbd class="kbd kbd-sm">K</kbd>
+        <kbd class="kbd kbd-sm flex-none">CTRL</kbd>
+        <kbd class="kbd kbd-sm flex-none">K</kbd>
       </label>
 
       <div class="flex justify-end items-center space-x-2">
