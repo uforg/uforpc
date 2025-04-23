@@ -1,8 +1,15 @@
 import { transpileUrpcToJson } from "../lib/urpc.ts";
-import { Schema } from "../lib/urpcTypes.ts";
+import type { Schema } from "../lib/urpcTypes.ts";
 
-export let urpcSchema: string = $state(`version 1`);
-export let jsonSchema: Schema = $state({ version: 1, nodes: [] });
+interface Store {
+  urpcSchema: string;
+  jsonSchema: Schema;
+}
+
+export const store: Store = $state({
+  urpcSchema: `version 1`,
+  jsonSchema: { version: 1, nodes: [] },
+});
 
 /**
  * Fetches and loads an URPC schema from a specified URL.
@@ -22,7 +29,7 @@ export const loadUrpcSchemaFromUrl = async (url: string) => {
   }
 
   const sch = await response.text();
-  urpcSchema = sch;
+  store.urpcSchema = sch;
 };
 
 /**
@@ -34,7 +41,7 @@ export const loadUrpcSchemaFromUrl = async (url: string) => {
  * @param sch The URPC schema string to be loaded into the store.
  */
 export const loadUrpcSchemaFromString = (sch: string) => {
-  urpcSchema = sch;
+  store.urpcSchema = sch;
 };
 
 /**
@@ -44,7 +51,7 @@ export const loadUrpcSchemaFromString = (sch: string) => {
  * using the `transpileUrpcToJson` utility, and then updates the `jsonSchema` store with the result.
  */
 export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
-  jsonSchema = await transpileUrpcToJson(urpcSchema);
+  store.jsonSchema = await transpileUrpcToJson(store.urpcSchema);
 };
 
 /**

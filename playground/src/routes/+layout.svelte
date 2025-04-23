@@ -5,16 +5,18 @@
   import { fade } from "svelte/transition";
   import { Loader } from "@lucide/svelte";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
+  import { loadJsonSchemaFromUrpcSchemaUrl } from "./store.svelte";
 
-  let wasmInitialized = $state(false);
+  let initialized = $state(false);
   onMount(async () => {
     await initWasm();
     await waitUntilInitialized();
-    wasmInitialized = true;
+    await loadJsonSchemaFromUrpcSchemaUrl("./schema.urpc");
+    initialized = true;
   });
 </script>
 
-{#if !wasmInitialized}
+{#if !initialized}
   <main
     out:fade={{ duration: 200 }}
     class="flex flex-col fixed top-0 left-0 h-screen w-screen items-center justify-center"
@@ -26,7 +28,7 @@
   </main>
 {/if}
 
-{#if wasmInitialized}
+{#if initialized}
   <div transition:fade={{ duration: 200 }}>
     {@render children()}
   </div>
