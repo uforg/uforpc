@@ -7,6 +7,7 @@
 
 <script lang="ts">
   import { onMount } from "svelte";
+  import { Palette } from "@lucide/svelte";
 
   interface Props {
     class?: string;
@@ -25,7 +26,7 @@
 </script>
 
 <label class="select {className}">
-  <span class="label">Theme</span>
+  <span class="label"><Palette class="size-5" /></span>
   <select bind:value={currentTheme}>
     <option value="system">System 🖥️</option>
     <option value="corporate">Light ☀️</option>
