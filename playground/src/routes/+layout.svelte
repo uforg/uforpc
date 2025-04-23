@@ -21,7 +21,7 @@
   >
     <img src="/assets/logo-square.png" alt="UFO RPC Logo" class="size-[150px]">
     <h1 class="text-3xl font-bold mb-2">UFO RPC Playground</h1>
-    <h2 class="mb-6">Loading WASM binary...</h2>
+    <h2 class="mb-6">Loading WebAssembly binary...</h2>
     <Loader class="animate animate-spin size-10" />
   </main>
 {/if}
