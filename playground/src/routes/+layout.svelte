@@ -7,7 +7,6 @@
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
 
   let wasmInitialized = $state(false);
-
   onMount(async () => {
     await initWasm();
     await waitUntilInitialized();
@@ -28,10 +27,7 @@
 {/if}
 
 {#if wasmInitialized}
-  <main
-    transition:fade={{ duration: 200 }}
-    class="w-[100dvw] h-[100dvh]"
-  >
+  <div transition:fade={{ duration: 200 }}>
     {@render children()}
-  </main>
+  </div>
 {/if}
