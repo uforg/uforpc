@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import type { Schema } from "./urpc.d.ts";
+import type { Schema } from "./urpcTypes.ts";
 
 /**
  * Docs: https://go.dev/wiki/WebAssembly
