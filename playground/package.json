@@ -3,14 +3,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "deno task copywasm && vite dev",
-    "build": "deno task copywasm && vite build",
-    "preview": "deno task copywasm && vite preview",
+    "dev": "deno task copywasm && deno task genschema && vite dev",
+    "build": "deno task copywasm && deno task genschema && deno task check && vite build",
+    "preview": "deno task copywasm && deno task genschema && deno task check && vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "deno fmt .",
-    "copywasm": "cp ../dist/urpc.wasm ./static/urpc/urpc.wasm && cp ../dist/wasm_exec.js ./static/urpc/wasm_exec.js"
+    "copywasm": "cp ../dist/urpc.wasm ./static/urpc/urpc.wasm && cp ../dist/wasm_exec.js ./static/urpc/wasm_exec.js",
+    "genschema": "json2ts ../internal/schema/schema.json > ./src/lib/urpc.d.ts"
   },
   "devDependencies": {
     "@lucide/svelte": "0.503.0",
@@ -20,6 +20,7 @@
     "@tailwindcss/typography": "0.5.16",
     "@tailwindcss/vite": "4.1.4",
     "daisyui": "5.0.27",
+    "json-schema-to-typescript": "15.0.4",
     "svelte": "5.28.2",
     "svelte-check": "4.1.6",
     "tailwindcss": "4.1.4",

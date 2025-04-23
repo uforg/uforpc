@@ -1,5 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
+import { Schema } from "./urpc.d.ts";
+
 /**
  * Docs: https://go.dev/wiki/WebAssembly
  */
@@ -93,4 +95,21 @@ async function cmdTranspile(sourceExt: string, input: string): Promise<string> {
   return (window as any).cmdTranspile(sourceExt, input);
 }
 
-export { cmdFmt, cmdTranspile, initWasm, isInitialized, waitUntilInitialized };
+/**
+ * Transpile an URPC schema to JSON
+ *
+ * @param input The URPC schema to transpile
+ * @returns The transpiled JSON schema as a typed JSON object
+ */
+async function transpileUrpcToJson(input: string): Promise<Schema> {
+  return JSON.parse(await cmdTranspile("urpc", input));
+}
+
+export {
+  cmdFmt,
+  cmdTranspile,
+  initWasm,
+  isInitialized,
+  transpileUrpcToJson,
+  waitUntilInitialized,
+};
