@@ -1,3 +1,11 @@
+import type { Action } from "svelte/action";
+
+type ClickOutsideAction = Action<
+  HTMLElement,
+  undefined,
+  { onclickoutside: (e: CustomEvent) => void }
+>;
+
 /**
  * This action adds a clickoutside event to the node
  *
@@ -5,7 +13,7 @@
  *
  * @param node The node to add the event to
  */
-export function clickOutside(node: HTMLElement) {
+export const clickOutside: ClickOutsideAction = (node: HTMLElement) => {
   function handleClick(e: MouseEvent) {
     if (!e.target) return;
     if (!node.contains(e.target as Node)) {
@@ -20,4 +28,4 @@ export function clickOutside(node: HTMLElement) {
       document.removeEventListener("click", handleClick);
     };
   });
-}
+};
