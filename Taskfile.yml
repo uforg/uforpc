@@ -35,7 +35,9 @@ tasks:
 
   test:
     desc: Test all code on this repo
-    cmd: go test ./...
+    cmds:
+      - go test ./...
+      - cd ./playground && deno install && deno task test
 
   lint:
     desc: Lint all code on this repo
