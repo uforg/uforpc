@@ -17,7 +17,8 @@
         "tamasfe.even-better-toml",
         "svelte.svelte-vscode",
         "bradlc.vscode-tailwindcss",
-        "Chanzhaoyu.svelte-5-snippets"
+        "Chanzhaoyu.svelte-5-snippets",
+        "vitest.explorer"
       ],
       "settings": {
         "urpc.enable": false,
