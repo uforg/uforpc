@@ -1,9 +1,9 @@
 # To make sure we have the deno and golang binaries
-FROM denoland/deno:debian-2.2.3 AS deno
-FROM golang:1.24.1-bookworm AS golang
+FROM denoland/deno:debian-2.2.11 AS deno
+FROM golang:1.24.2-bookworm AS golang
 
 # Set the base image
-FROM debian:12.9
+FROM debian:12.10
 
 # Declare ARG to make it available in the RUN commands
 ARG TARGETPLATFORM
@@ -29,36 +29,31 @@ COPY --from=golang /usr/local/go /usr/local/go
 
 # Install system dependencies
 RUN apt update && \
-    apt install -y wget curl zip unzip p7zip-full tzdata git npm && \
+    apt install -y wget curl zip unzip p7zip-full tzdata git && \
     rm -rf /var/lib/apt/lists/*
-
-# Install nodejs
-RUN npm install -g n@latest && \
-    n 22.14.0 && \
-    npm install -g npm@latest
 
 # Install downloadable binaries
 RUN set -e && \
   if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
     echo "Downloading arm64 binaries" && \
     # Install task
-    wget --no-verbose https://github.com/go-task/task/releases/download/v3.41.0/task_linux_arm64.tar.gz && \
+    wget --no-verbose https://github.com/go-task/task/releases/download/v3.43.2/task_linux_arm64.tar.gz && \
     tar -xzf task_linux_arm64.tar.gz && \
     mv ./task /usr/local/dl/bin/task && \
     # Install golangci-lint
-    wget --no-verbose https://github.com/golangci/golangci-lint/releases/download/v1.64.6/golangci-lint-1.64.6-linux-arm64.tar.gz && \
-    tar -xzf golangci-lint-1.64.6-linux-arm64.tar.gz && \
-    mv ./golangci-lint-1.64.6-linux-arm64/golangci-lint /usr/local/dl/bin/golangci-lint; \
+    wget --no-verbose https://github.com/golangci/golangci-lint/releases/download/v2.1.5/golangci-lint-2.1.5-linux-arm64.tar.gz && \
+    tar -xzf golangci-lint-2.1.5-linux-arm64.tar.gz && \
+    mv ./golangci-lint-2.1.5-linux-arm64/golangci-lint /usr/local/dl/bin/golangci-lint; \
   else \
     echo "Downloading amd64 binaries" && \
     # Install task
-    wget --no-verbose https://github.com/go-task/task/releases/download/v3.41.0/task_linux_amd64.tar.gz && \
+    wget --no-verbose https://github.com/go-task/task/releases/download/v3.43.2/task_linux_amd64.tar.gz && \
     tar -xzf task_linux_amd64.tar.gz && \
     mv ./task /usr/local/dl/bin/task && \
     # Install golangci-lint
-    wget --no-verbose https://github.com/golangci/golangci-lint/releases/download/v1.64.6/golangci-lint-1.64.6-linux-amd64.tar.gz && \
-    tar -xzf golangci-lint-1.64.6-linux-amd64.tar.gz && \
-    mv ./golangci-lint-1.64.6-linux-amd64/golangci-lint /usr/local/dl/bin/golangci-lint; \
+    wget --no-verbose https://github.com/golangci/golangci-lint/releases/download/v2.1.5/golangci-lint-2.1.5-linux-amd64.tar.gz && \
+    tar -xzf golangci-lint-2.1.5-linux-amd64.tar.gz && \
+    mv ./golangci-lint-2.1.5-linux-amd64/golangci-lint /usr/local/dl/bin/golangci-lint; \
   fi && \
   # Make binaries executable
   chmod +x /usr/local/dl/bin/*
