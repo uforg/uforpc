@@ -1,6 +1,5 @@
 <script lang="ts">
-  import ThemeSelect from "$lib/components/ThemeSelect.svelte";
-  import { BookOpenText, Github, Search } from "@lucide/svelte";
+  import Header from "./components/Header.svelte";
 </script>
 
 <div class="w-[100dvw] h-[100dvh] flex justify-start">
@@ -21,39 +20,7 @@
   </aside>
 
   <div class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto">
-    <header class="w-full p-4 flex justify-between items-center space-x-2">
-      <label
-        class="group input input-ghost not-has-[:focus]:w-[200px] transition-[width]"
-      >
-        <Search class="size-4 flex-none" />
-        <input type="search" class="grow" placeholder="Search..." />
-        <kbd class="kbd kbd-sm flex-none">CTRL</kbd>
-        <kbd class="kbd kbd-sm flex-none">K</kbd>
-      </label>
-
-      <div class="flex justify-end items-center space-x-2">
-        <a
-          href="https://github.com/uforg/uforpc"
-          target="_blank"
-          class="btn btn-ghost"
-        >
-          <Github class="size-4" />
-          <span>Star on GitHub</span>
-          <img
-            alt="GitHub Repo stars"
-            src="https://img.shields.io/github/stars/uforg/uforpc?style=plastic&label=%20"
-          />
-        </a>
-        <a
-          href="https://uforpc.uforg.dev"
-          target="_blank"
-          class="btn btn-ghost"
-        >
-          <BookOpenText class="size-4" /> Docs
-        </a>
-        <ThemeSelect />
-      </div>
-    </header>
+    <Header />
     <main class="w-full p-4">
       <h1>Home</h1>
     </main>
