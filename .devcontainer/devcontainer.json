@@ -16,7 +16,8 @@
         "ryu1kn.partial-diff",
         "tamasfe.even-better-toml",
         "svelte.svelte-vscode",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "Chanzhaoyu.svelte-5-snippets"
       ],
       "settings": {
         "urpc.enable": false,
