@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	_ "embed"
-
 	"github.com/stretchr/testify/require"
 	"github.com/uforg/uforpc/internal/util/strutil"
 )

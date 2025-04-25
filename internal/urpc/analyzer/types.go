@@ -36,7 +36,7 @@ type Diagnostic struct {
 
 // String implements fmt.Stringer interface.
 func (d Diagnostic) String() string {
-	return fmt.Sprintf("%s: %s", d.Positions.Pos.String(), d.Message)
+	return fmt.Sprintf("%s: %s", d.Pos.String(), d.Message)
 }
 
 // Error implements error interface.

@@ -145,11 +145,7 @@ func (f *ruleFormatter) format() *genkit.GenKit {
 
 	f.g.Indent()
 
-	for {
-		if f.currentIndexEOF {
-			break
-		}
-
+	for !f.currentIndexEOF {
 		if f.currentIndexChild.Comment != nil {
 			f.formatComment()
 		}

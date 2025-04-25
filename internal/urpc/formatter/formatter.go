@@ -104,11 +104,7 @@ func (f *schemaFormatter) peekChild(offset int) (ast.SchemaChild, ast.LineDiff, 
 //
 // Returns the formatted genkit.GenKit.
 func (f *schemaFormatter) format() *genkit.GenKit {
-	for {
-		if f.currentIndexEOF {
-			break
-		}
-
+	for !f.currentIndexEOF {
 		switch f.currentIndexChild.Kind() {
 		case ast.SchemaChildKindComment:
 			f.formatComment()

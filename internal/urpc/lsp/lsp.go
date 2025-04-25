@@ -96,7 +96,7 @@ func (l *LSP) handleMessage(rawBytes []byte) (bool, error) {
 	}
 
 	var response any = nil
-	var shouldExit bool = false
+	var shouldExit bool
 
 	switch messageMethod {
 	// Lifecycle operations

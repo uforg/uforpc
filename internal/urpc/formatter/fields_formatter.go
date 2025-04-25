@@ -132,11 +132,7 @@ func (f *fieldsFormatter) format() *genkit.GenKit {
 	}
 
 	f.g.Block(func() {
-		for {
-			if f.currentIndexEOF {
-				break
-			}
-
+		for !f.currentIndexEOF {
 			if f.currentIndexChild.Comment != nil {
 				f.formatComment()
 			}
@@ -317,11 +313,7 @@ func (f *fieldRulesFormatter) format() *genkit.GenKit {
 	}
 
 	f.g.Block(func() {
-		for {
-			if f.currentIndexEOF {
-				break
-			}
-
+		for !f.currentIndexEOF {
 			if f.currentIndexChild.Comment != nil {
 				f.formatComment()
 			}
