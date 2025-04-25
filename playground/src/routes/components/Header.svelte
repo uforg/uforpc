@@ -4,7 +4,7 @@
   import Search from "./Search.svelte";
 </script>
 
-<header class="w-full p-4 flex justify-between items-center space-x-2">
+<header class="w-full p-4 flex justify-between items-center space-x-2 h-[72px] sticky top-0">
   <div class="flex-grow">
     <Search />
   </div>
