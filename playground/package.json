@@ -9,7 +9,7 @@
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "format": "deno fmt .",
-    "test": "vitest run",
+    "test": "deno test",
     "copywasm": "cp ../dist/urpc.wasm ./static/urpc/urpc.wasm && cp ../dist/wasm_exec.js ./static/urpc/wasm_exec.js",
     "genschema": "json2ts ../internal/schema/schema.json > ./src/lib/urpcTypes.ts"
   },
@@ -26,7 +26,6 @@
     "svelte-check": "4.1.6",
     "tailwindcss": "4.1.4",
     "typescript": "5.8.3",
-    "vite": "6.2.5",
-    "vitest": "3.1.2"
+    "vite": "6.2.5"
   }
 }
