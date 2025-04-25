@@ -4,7 +4,7 @@
   import {
     loadJsonSchemaFromUrpcSchemaString,
     store,
-  } from "../store.svelte";
+  } from "$lib/store.svelte";
   import Editor from "$lib/components/Editor.svelte";
 
   let dialog: HTMLDialogElement | null = null;

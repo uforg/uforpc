@@ -5,7 +5,7 @@
   import { fade } from "svelte/transition";
   import { Loader } from "@lucide/svelte";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
-  import { loadJsonSchemaFromUrpcSchemaUrl } from "./store.svelte";
+  import { loadJsonSchemaFromUrpcSchemaUrl } from "$lib/store.svelte";
 
   let initialized = $state(false);
   onMount(async () => {
