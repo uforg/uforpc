@@ -1,5 +1,5 @@
 # To make sure we have the deno and golang binaries
-FROM denoland/deno:debian-2.2.11 AS deno
+FROM denoland/deno:debian-2.2.12 AS deno
 FROM golang:1.24.2-bookworm AS golang
 
 # Set the base image
