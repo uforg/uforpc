@@ -53,7 +53,12 @@
 {/snippet}
 
 <div class="dropdown dropdown-end">
-  <div tabindex="-1" role="button" class="btn btn-ghost">
+  <div
+    tabindex="-1"
+    role="button"
+    class="btn btn-ghost tooltip tooltip-left"
+    data-tip="Theme"
+  >
     <Palette class="size-4" />
     {@render themeName(false, currentTheme)}
   </div>
