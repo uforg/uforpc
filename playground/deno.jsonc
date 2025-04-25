@@ -1,12 +1,12 @@
-// All packages and commands are in package.json
+// All npm packages and commands are in package.json
 
 {
-  "unstable": ["fmt-component"], // To allow deno to format svelte files
-  "compilerOptions": {
-    "lib": ["dom", "esnext"]
-  },
   "imports": {
     "@std/assert": "jsr:@std/assert@1.0.13"
   },
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "unstable": ["fmt-component"], // To allow deno to format svelte files
+  "compilerOptions": {
+    "lib": ["deno.ns", "dom", "esnext"]
+  }
 }
