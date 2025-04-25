@@ -17,11 +17,11 @@
         "tamasfe.even-better-toml",
         "svelte.svelte-vscode",
         "bradlc.vscode-tailwindcss",
-        "Chanzhaoyu.svelte-5-snippets",
-        "vitest.explorer"
+        "Chanzhaoyu.svelte-5-snippets"
       ],
       "settings": {
         "urpc.enable": false,
+        "deno.enablePaths": ["./playground"],
         "editor.formatOnSave": true,
         "editor.foldingStrategy": "indentation",
         "files.eol": "\n",
