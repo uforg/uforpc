@@ -8,5 +8,11 @@
   "unstable": ["fmt-component"], // To allow deno to format svelte files
   "compilerOptions": {
     "lib": ["deno.ns", "dom", "esnext"]
+  },
+  "fmt": {
+    "exclude": [
+      "./src/lib/urpcTypes.ts",
+      "./static/urpc/wasm_exec.js"
+    ]
   }
 }
