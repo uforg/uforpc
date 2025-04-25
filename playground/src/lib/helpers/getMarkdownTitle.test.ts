@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "@std/assert";
 import { getMarkdownTitle } from "./getMarkdownTitle.ts";
 
 Deno.test("should return 'Untitled: first line' if no title is found", () => {
