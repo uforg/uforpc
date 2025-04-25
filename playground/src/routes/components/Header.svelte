@@ -1,12 +1,12 @@
 <script lang="ts">
-  import ThemeSelect from "$lib/components/ThemeSelect.svelte";
   import { BookOpenText, Github } from "@lucide/svelte";
-  import Search from "./Search.svelte";
+  import HeaderSearch from "./HeaderSearch.svelte";
+  import HeaderThemeSelect from "./HeaderThemeSelect.svelte";
 </script>
 
 <header class="w-full p-4 flex justify-between items-center space-x-2 h-[72px] sticky top-0">
   <div class="flex-grow">
-    <Search />
+    <HeaderSearch />
   </div>
   <div class="flex justify-end items-center space-x-2">
     <a
@@ -28,6 +28,6 @@
     >
       <BookOpenText class="size-4" /> Docs
     </a>
-    <ThemeSelect />
+    <HeaderThemeSelect />
   </div>
 </header>
