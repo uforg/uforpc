@@ -18,6 +18,7 @@
     "npm:monaco-editor@0.52.2": "0.52.2",
     "npm:shiki@3.3.0": "3.3.0",
     "npm:svelte-check@4.1.6": "4.1.6_svelte@5.28.2__acorn@8.14.1_typescript@5.8.3",
+    "npm:svelte-sonner@0.3.28": "0.3.28_svelte@5.28.2__acorn@8.14.1",
     "npm:svelte@5.28.2": "5.28.2_acorn@8.14.1",
     "npm:tailwindcss@4.1.4": "4.1.4",
     "npm:typescript@5.8.3": "5.8.3",
@@ -1239,6 +1240,12 @@
         "typescript"
       ]
     },
+    "svelte-sonner@0.3.28_svelte@5.28.2__acorn@8.14.1": {
+      "integrity": "sha512-K3AmlySeFifF/cKgsYNv5uXqMVNln0NBAacOYgmkQStLa/UoU0LhfAACU6Gr+YYC8bOCHdVmFNoKuDbMEsppJg==",
+      "dependencies": [
+        "svelte"
+      ]
+    },
     "svelte@5.28.2_acorn@8.14.1": {
       "integrity": "sha512-FbWBxgWOpQfhKvoGJv/TFwzqb4EhJbwCD17dB0tEpQiw1XyUEKZJtgm4nA4xq3LLsMo7hu5UY/BOFmroAxKTMg==",
       "dependencies": [
@@ -1408,6 +1415,7 @@
         "npm:monaco-editor@0.52.2",
         "npm:shiki@3.3.0",
         "npm:svelte-check@4.1.6",
+        "npm:svelte-sonner@0.3.28",
         "npm:svelte@5.28.2",
         "npm:tailwindcss@4.1.4",
         "npm:typescript@5.8.3",

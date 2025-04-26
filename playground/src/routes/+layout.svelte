@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import { Loader } from "@lucide/svelte";
+  import { Toaster } from "svelte-sonner";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
   import {
     loadJsonSchemaFromUrpcSchemaUrl,
@@ -40,3 +41,5 @@
     {@render children()}
   </div>
 {/if}
+
+<Toaster richColors closeButton duration={5000} />

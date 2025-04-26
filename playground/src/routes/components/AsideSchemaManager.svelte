@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { Save, ScrollText, WandSparkles, X } from "@lucide/svelte";
+  import { toast } from "svelte-sonner";
   import {
     loadJsonSchemaFromUrpcSchemaString,
     store,
@@ -18,12 +19,15 @@
   });
 
   const saveSchema = async () => {
+    await formatSchema();
+
     try {
-      await formatSchema();
       await loadJsonSchemaFromUrpcSchemaString(modifiedSchema);
       closeDialog();
-    } catch (error) {
-      alert(error);
+    } catch (error: unknown) {
+      toast.error("Failed to save schema", {
+        description: `${error}`,
+      });
       console.error(error);
     }
   };
@@ -31,8 +35,10 @@
   const formatSchema = async () => {
     try {
       modifiedSchema = await cmdFmt(modifiedSchema);
-    } catch (error) {
-      alert(error);
+    } catch (error: unknown) {
+      toast.error("Failed to format schema", {
+        description: `${error}`,
+      });
       console.error(error);
     }
   };
