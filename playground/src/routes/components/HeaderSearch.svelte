@@ -31,7 +31,7 @@
 </script>
 
 <button
-  class="input input-ghost focus:outline-none"
+  class="input input-ghost focus:outline-none ps-0"
   onclick={openModal}
 >
   <Search class="size-4" />
