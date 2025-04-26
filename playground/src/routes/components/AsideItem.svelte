@@ -5,6 +5,7 @@
     ArrowLeftRight,
     BookOpenText,
     Scale,
+    TriangleAlert,
     Type,
   } from "@lucide/svelte";
 
@@ -42,9 +43,8 @@
   });
 
   let isDeprecated = $derived.by(() => {
-    if (node.kind === "rule") return node.deprecated;
-    if (node.kind === "type") return node.deprecated;
-    if (node.kind === "proc") return node.deprecated;
+    if (node.kind === "doc") return false;
+    if (typeof node.deprecated === "string") return true;
     return false;
   });
 </script>
@@ -55,12 +55,14 @@
   class={[
     "btn btn-ghost btn-block justify-start space-x-2",
     {
+      "tooltip tooltip-top": isDeprecated,
       "hover:bg-blue-500/20": node.kind === "doc",
       "hover:bg-yellow-500/20": node.kind === "rule",
       "hover:bg-purple-500/20": node.kind === "type",
       "hover:bg-green-500/20": node.kind === "proc",
     },
   ]}
+  data-tip={isDeprecated ? "Deprecated" : ""}
 >
   {#if node.kind === "doc"}
     <BookOpenText class="flex-none size-4" />
@@ -85,4 +87,8 @@
   >
     {name}
   </span>
+
+  {#if isDeprecated}
+    <TriangleAlert class="flex-none size-4 text-warning" />
+  {/if}
 </a>
