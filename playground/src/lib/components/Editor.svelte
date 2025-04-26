@@ -3,11 +3,18 @@
   import loader from "@monaco-editor/loader";
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
   import { createHighlighter } from "shiki";
+  import type { BundledTheme } from "shiki";
   import { shikiToMonaco } from "@shikijs/monaco";
+  import { store } from "$lib/store.svelte";
+
+  const lightTheme: BundledTheme = "github-light";
+  const darkTheme: BundledTheme = "github-dark";
+  const draculaTheme: BundledTheme = "dracula";
 
   let { value = $bindable(), ...others }: { [key: string]: any } = $props();
   let editorContainer: HTMLElement;
-  let editor: Monaco.editor.IStandaloneCodeEditor;
+  let monaco: typeof Monaco | null = $state(null);
+  let editor: Monaco.editor.IStandaloneCodeEditor | null = $state(null);
 
   onMount(async () => {
     const urpcSyntaxUrl =
@@ -18,10 +25,10 @@
 
     const highlighter = await createHighlighter({
       langs: [urpcSyntaxJson],
-      themes: ["dracula", "andromeeda", "github-light"],
+      themes: [lightTheme, darkTheme, draculaTheme],
     });
 
-    const monaco = await loader.init();
+    monaco = await loader.init();
     monaco.languages.register({ id: "urpc" });
     shikiToMonaco(highlighter, monaco);
 
@@ -30,23 +37,40 @@
       {
         value: value,
         language: "urpc",
-        theme: "dracula",
       },
     );
 
     editor.onDidChangeModelContent(() => {
-      value = editor.getValue();
+      value = editor?.getValue();
     });
   });
 
+  // Effect that manages the editor's value
   $effect(() => {
-    // Variable reassign to let svelte know that the value has changed
-    // IDK why it's needed, but without it, the editor doesn't update
-    let newValue = value;
-
     if (!editor) return;
-    if (newValue === editor.getValue()) return;
-    editor?.setValue(newValue);
+    if (value === editor.getValue()) return;
+    editor.setValue(value);
+  });
+
+  // Effect that manages the editor's theme
+  $effect(() => {
+    if (!monaco) return;
+
+    let defaultTheme: BundledTheme = lightTheme;
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      defaultTheme = darkTheme;
+    } else {
+      defaultTheme = lightTheme;
+    }
+
+    const themeMap: Record<string, BundledTheme> = {
+      system: defaultTheme,
+      light: lightTheme,
+      dark: darkTheme,
+      dracula: draculaTheme,
+    };
+
+    monaco.editor.setTheme(themeMap[store.theme]);
   });
 </script>
 
