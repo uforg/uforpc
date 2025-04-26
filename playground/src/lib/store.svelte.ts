@@ -4,39 +4,65 @@ import type { Schema } from "../lib/urpcTypes.ts";
 export type Theme = "system" | "light" | "dark";
 
 export interface Store {
+  loaded: boolean;
   theme: Theme;
+  endpoint: string;
+  headers: Record<string, string>;
   urpcSchema: string;
   jsonSchema: Schema;
 }
 
 export const store: Store = $state({
+  loaded: false,
   theme: "system",
+  endpoint: "",
+  headers: {},
   urpcSchema: `version 1`,
   jsonSchema: { version: 1, nodes: [] },
 });
 
+$effect.root(() => {
+  $effect(() => {
+    if (!store.loaded) return;
+    saveStore();
+  });
+});
+
 /**
- * Loads the theme from the browser's local storage and sets it in the store.
+ * Loads the store from the browser's local storage.
  *
  * Should be called only once at the start of the app.
- *
- * Read more at /static/theme-helper.js
  */
-export const loadTheme = () => {
+export const loadStore = () => {
+  // Read more at /static/theme-helper.js
   // deno-lint-ignore no-explicit-any
   const theme = (globalThis as any).getTheme();
   store.theme = theme || "system";
+
+  const endpoint = localStorage.getItem("endpoint");
+  if (endpoint) {
+    store.endpoint = endpoint;
+  }
+
+  const headers = localStorage.getItem("headers");
+  if (headers) {
+    store.headers = JSON.parse(headers);
+  }
+
+  store.loaded = true;
 };
 
 /**
- * Sets the theme in the store and updates it in the browser's local storage.
+ * Saves the store to the browser's local storage.
  *
- * Read more at /static/theme-helper.js
+ * Should be called when the store is updated.
  */
-export const setTheme = (theme: Theme) => {
+export const saveStore = () => {
+  // Read more at /static/theme-helper.js
   // deno-lint-ignore no-explicit-any
-  (globalThis as any).setTheme(theme);
-  store.theme = theme;
+  (globalThis as any).setTheme(store.theme);
+  localStorage.setItem("endpoint", store.endpoint);
+  localStorage.setItem("headers", JSON.stringify(store.headers));
 };
 
 /**

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { setTheme, store } from "$lib/store.svelte";
+  import { store } from "$lib/store.svelte";
   import type { Theme } from "$lib/store.svelte";
   import { Moon, Palette, Sun, SunMoon } from "@lucide/svelte";
 
   const themesArr: Theme[] = ["system", "light", "dark"];
 
-  function setThemeAndBlur(theme: Theme) {
-    setTheme(theme);
+  function setTheme(theme: Theme) {
+    store.theme = theme;
     (document.activeElement as HTMLElement)?.blur();
   }
 </script>
@@ -49,7 +49,7 @@
   >
     {#each themesArr as themeItem}
       <li>
-        <button onclick={() => setThemeAndBlur(themeItem)}>
+        <button onclick={() => setTheme(themeItem)}>
           {@render themeName(true, themeItem)}
         </button>
       </li>

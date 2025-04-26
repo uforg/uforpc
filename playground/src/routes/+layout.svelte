@@ -8,11 +8,11 @@
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
   import {
     loadJsonSchemaFromUrpcSchemaUrl,
-    loadTheme,
+    loadStore,
   } from "$lib/store.svelte";
 
-  // Initialize the theme
-  onMount(() => loadTheme());
+  // Initialize the store
+  onMount(() => loadStore());
 
   // Initialize the WebAssembly binary
   let initialized = $state(false);
