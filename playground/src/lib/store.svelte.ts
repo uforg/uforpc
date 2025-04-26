@@ -1,15 +1,43 @@
 import { transpileUrpcToJson } from "../lib/urpc.ts";
 import type { Schema } from "../lib/urpcTypes.ts";
 
-interface Store {
+export type Theme = "system" | "corporate" | "dark" | "dracula";
+
+export interface Store {
+  theme: Theme;
   urpcSchema: string;
   jsonSchema: Schema;
 }
 
 export const store: Store = $state({
+  theme: "system",
   urpcSchema: `version 1`,
   jsonSchema: { version: 1, nodes: [] },
 });
+
+/**
+ * Loads the theme from the browser's local storage and sets it in the store.
+ *
+ * Should be called only once at the start of the app.
+ *
+ * Read more at /static/theme-helper.js
+ */
+export const loadTheme = () => {
+  // deno-lint-ignore no-explicit-any
+  const theme = (globalThis as any).getTheme();
+  store.theme = theme || "system";
+};
+
+/**
+ * Sets the theme in the store and updates it in the browser's local storage.
+ *
+ * Read more at /static/theme-helper.js
+ */
+export const setTheme = (theme: Theme) => {
+  // deno-lint-ignore no-explicit-any
+  (globalThis as any).setTheme(theme);
+  store.theme = theme;
+};
 
 /**
  * Fetches and loads an URPC schema from a specified URL.

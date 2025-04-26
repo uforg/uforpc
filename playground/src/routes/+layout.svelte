@@ -5,8 +5,15 @@
   import { fade } from "svelte/transition";
   import { Loader } from "@lucide/svelte";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
-  import { loadJsonSchemaFromUrpcSchemaUrl } from "$lib/store.svelte";
+  import {
+    loadJsonSchemaFromUrpcSchemaUrl,
+    loadTheme,
+  } from "$lib/store.svelte";
 
+  // Initialize the theme
+  onMount(() => loadTheme());
+
+  // Initialize the WebAssembly binary
   let initialized = $state(false);
   onMount(async () => {
     await initWasm();

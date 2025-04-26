@@ -1,30 +1,17 @@
-<!--
-  This uses the following helper to handle theme changes and is loaded
-  in the head of the document to prevent any flash of unstyled content.
-
-  /static/theme-helper.js
--->
-
 <script lang="ts">
+  import { setTheme, store } from "$lib/store.svelte";
+  import type { Theme } from "$lib/store.svelte";
   import { Moon, MoonStar, Palette, Sun, SunMoon } from "@lucide/svelte";
-  import { onMount } from "svelte";
 
-  const themesArr = ["system", "corporate", "dark", "dracula"];
+  const themesArr: Theme[] = ["system", "corporate", "dark", "dracula"];
 
-  let currentTheme = $state("");
-  onMount(() => {
-    const theme = (window as any).getTheme();
-    currentTheme = theme || "system";
-  });
-
-  function setTheme(theme: string) {
-    currentTheme = theme;
-    (window as any).setTheme(currentTheme);
+  function setThemeAndBlur(theme: Theme) {
+    setTheme(theme);
     (document.activeElement as HTMLElement)?.blur();
   }
 </script>
 
-{#snippet themeName(showIcon: boolean, tname: string)}
+{#snippet themeName(showIcon: boolean, tname: Theme)}
   {#if showIcon && tname === "system"}
     <SunMoon class="size-4" />
   {/if}
@@ -60,7 +47,7 @@
     data-tip="Theme"
   >
     <Palette class="size-4" />
-    {@render themeName(false, currentTheme)}
+    {@render themeName(false, store.theme)}
   </div>
   <ul
     tabindex="-1"
@@ -68,7 +55,7 @@
   >
     {#each themesArr as themeItem}
       <li>
-        <button onclick={() => setTheme(themeItem)}>
+        <button onclick={() => setThemeAndBlur(themeItem)}>
           {@render themeName(true, themeItem)}
         </button>
       </li>
