@@ -36,6 +36,9 @@
       {
         value: value,
         language: "urpc",
+        tabSize: 2,
+        insertSpaces: true,
+        padding: { top: 30, bottom: 30 },
       },
     );
 
