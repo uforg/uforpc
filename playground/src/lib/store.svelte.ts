@@ -1,13 +1,19 @@
-import { transpileUrpcToJson } from "../lib/urpc.ts";
-import type { Schema } from "../lib/urpcTypes.ts";
+import { getCurrentHost } from "./helpers/getCurrentHost.ts";
+import { transpileUrpcToJson } from "./urpc.ts";
+import type { Schema } from "./urpcTypes.ts";
 
 export type Theme = "system" | "light" | "dark";
+
+export interface Header {
+  key: string;
+  value: string;
+}
 
 export interface Store {
   loaded: boolean;
   theme: Theme;
   endpoint: string;
-  headers: Record<string, string>;
+  headers: Header[];
   urpcSchema: string;
   jsonSchema: Schema;
 }
@@ -15,8 +21,8 @@ export interface Store {
 export const store: Store = $state({
   loaded: false,
   theme: "system",
-  endpoint: "",
-  headers: {},
+  endpoint: `${getCurrentHost()}/api/v1/urpc`,
+  headers: [],
   urpcSchema: `version 1`,
   jsonSchema: { version: 1, nodes: [] },
 });
@@ -63,6 +69,21 @@ export const saveStore = () => {
   (globalThis as any).setTheme(store.theme);
   localStorage.setItem("endpoint", store.endpoint);
   localStorage.setItem("headers", JSON.stringify(store.headers));
+};
+
+/**
+ * Converts the headers array to a record for use in fetch requests
+ *
+ * @returns A record of header key-value pairs
+ */
+export const getHeadersRecord = (): Record<string, string> => {
+  const record: Record<string, string> = {};
+  store.headers.forEach((header) => {
+    if (header.key.trim()) {
+      record[header.key] = header.value;
+    }
+  });
+  return record;
 };
 
 /**
