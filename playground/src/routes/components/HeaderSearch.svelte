@@ -31,7 +31,7 @@
 </script>
 
 <button
-  class="input input-ghost focus:outline-none ps-0"
+  class="flex justify-start items-center space-x-2 cursor-text text-sm"
   onclick={openModal}
 >
   <Search class="size-4" />
