@@ -9,6 +9,7 @@
     class?: ClassValue;
     backdropClass?: ClassValue;
     backdropClose?: boolean;
+    escapeClose?: boolean;
   }
 
   let {
@@ -17,9 +18,22 @@
     class: className,
     backdropClass: backdropClassName,
     backdropClose = true,
+    escapeClose = true,
   }: Props = $props();
 
   const closeModal = () => (isOpen = false);
+
+  const handleEscapeKey = (event: KeyboardEvent) => {
+    if (event.key === "Escape") closeModal();
+  };
+  $effect(() => {
+    if (escapeClose) {
+      document.addEventListener("keydown", handleEscapeKey);
+      return () => {
+        document.removeEventListener("keydown", handleEscapeKey);
+      };
+    }
+  });
 </script>
 
 {#if isOpen}
