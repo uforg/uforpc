@@ -1,7 +1,7 @@
 import { transpileUrpcToJson } from "../lib/urpc.ts";
 import type { Schema } from "../lib/urpcTypes.ts";
 
-export type Theme = "system" | "corporate" | "dark" | "dracula";
+export type Theme = "system" | "light" | "dark";
 
 export interface Store {
   theme: Theme;

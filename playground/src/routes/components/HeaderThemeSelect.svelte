@@ -1,9 +1,9 @@
 <script lang="ts">
   import { setTheme, store } from "$lib/store.svelte";
   import type { Theme } from "$lib/store.svelte";
-  import { Moon, MoonStar, Palette, Sun, SunMoon } from "@lucide/svelte";
+  import { Moon, Palette, Sun, SunMoon } from "@lucide/svelte";
 
-  const themesArr: Theme[] = ["system", "corporate", "dark", "dracula"];
+  const themesArr: Theme[] = ["system", "light", "dark"];
 
   function setThemeAndBlur(theme: Theme) {
     setTheme(theme);
@@ -15,27 +15,21 @@
   {#if showIcon && tname === "system"}
     <SunMoon class="size-4" />
   {/if}
-  {#if showIcon && tname === "corporate"}
+  {#if showIcon && tname === "light"}
     <Sun class="size-4" />
   {/if}
   {#if showIcon && tname === "dark"}
     <Moon class="size-4" />
   {/if}
-  {#if showIcon && tname === "dracula"}
-    <MoonStar class="size-4" />
-  {/if}
 
   {#if tname === "system"}
     System
   {/if}
-  {#if tname === "corporate"}
+  {#if tname === "light"}
     Light
   {/if}
   {#if tname === "dark"}
     Dark
-  {/if}
-  {#if tname === "dracula"}
-    Dracula
   {/if}
 {/snippet}
 

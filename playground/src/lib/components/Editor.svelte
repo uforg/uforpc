@@ -9,7 +9,6 @@
 
   const lightTheme: BundledTheme = "github-light";
   const darkTheme: BundledTheme = "github-dark";
-  const draculaTheme: BundledTheme = "dracula";
 
   let { value = $bindable(), ...others }: { [key: string]: any } = $props();
   let editorContainer: HTMLElement;
@@ -25,7 +24,7 @@
 
     const highlighter = await createHighlighter({
       langs: [urpcSyntaxJson],
-      themes: [lightTheme, darkTheme, draculaTheme],
+      themes: [lightTheme, darkTheme],
     });
 
     monaco = await loader.init();
@@ -67,7 +66,6 @@
       system: defaultTheme,
       light: lightTheme,
       dark: darkTheme,
-      dracula: draculaTheme,
     };
 
     monaco.editor.setTheme(themeMap[store.theme]);
