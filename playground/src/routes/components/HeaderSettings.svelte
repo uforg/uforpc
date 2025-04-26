@@ -1,22 +1,16 @@
 <script lang="ts">
-  import { Search, X } from "@lucide/svelte";
+  import { Settings, X } from "@lucide/svelte";
   import Modal from "$lib/components/Modal.svelte";
 
   const isMac = /mac/.test(navigator.userAgent.toLowerCase());
   const ctrl = isMac ? "⌘" : "CTRL";
 
-  let input: HTMLInputElement | null = null;
   let isOpen = $state(false);
-  const openModal = () => {
-    isOpen = true;
-    setTimeout(() => {
-      input?.focus();
-    }, 100);
-  };
+  const openModal = () => (isOpen = true);
   const closeModal = () => (isOpen = false);
 
   const onKeydown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === ",") {
       e.preventDefault();
       openModal();
     }
@@ -34,21 +28,18 @@
   class="btn btn-ghost flex justify-start items-center space-x-2 text-sm"
   onclick={openModal}
 >
-  <Search class="size-4" />
-  <span>Search...</span>
+  <Settings class="size-4" />
+  <span>Settings</span>
   <span class="ml-4">
     <kbd class="kbd kbd-sm">{ctrl}</kbd>
-    <kbd class="kbd kbd-sm">K</kbd>
+    <kbd class="kbd kbd-sm">,</kbd>
   </span>
 </button>
 
 <Modal bind:isOpen>
-  <div class="flex justify-start items-center space-x-2">
-    <label class="input flex-grow">
-      <Search class="size-4" />
-      <input bind:this={input} type="search" placeholder="Search..." />
-    </label>
-    <button class="btn btn-square" onclick={closeModal}>
+  <div class="w-full flex justify-between items-center">
+    <h3 class="text-xl font-bold">Settings</h3>
+    <button class="btn btn-circle btn-ghost" onclick={closeModal}>
       <X class="size-4" />
     </button>
   </div>

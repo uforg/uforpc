@@ -1,6 +1,7 @@
 <script lang="ts">
   import { BookOpenText, Github } from "@lucide/svelte";
   import HeaderSearch from "./HeaderSearch.svelte";
+  import HeaderSettings from "./HeaderSettings.svelte";
   import HeaderThemeSelect from "./HeaderThemeSelect.svelte";
 
   interface Props {
@@ -19,8 +20,9 @@
     },
   ]}
 >
-  <div class="flex-grow">
+  <div class="flex justify-start items-center space-x-2">
     <HeaderSearch />
+    <HeaderSettings />
   </div>
   <div class="flex justify-end items-center space-x-2">
     <a
