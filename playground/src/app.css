@@ -4,3 +4,7 @@
   themes: light --default, dark --prefersdark;
   logs: false;
 }
+
+* {
+  scrollbar-width: thin;
+}
