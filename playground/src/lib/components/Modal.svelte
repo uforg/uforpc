@@ -57,6 +57,7 @@
         class={mergeClasses(
           "absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
           "bg-base-100 rounded-box p-4 w-[90dvw] max-w-lg max-h-[90dvh] shadow-xl",
+          "overflow-x-hidden overflow-y-auto",
           className,
         )}
       >
