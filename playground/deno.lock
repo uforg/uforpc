@@ -12,6 +12,7 @@
     "npm:@tailwindcss/typography@0.5.16": "0.5.16_tailwindcss@4.1.4",
     "npm:@tailwindcss/vite@4.1.4": "4.1.4_vite@6.2.5_@types+node@22.12.0",
     "npm:@types/node@*": "22.12.0",
+    "npm:clsx@2.1.1": "2.1.1",
     "npm:clsx@^2.1.1": "2.1.1",
     "npm:daisyui@5.0.27": "5.0.27",
     "npm:http-server@latest": "14.1.1",
@@ -19,6 +20,7 @@
     "npm:monaco-editor@0.52.2": "0.52.2",
     "npm:shiki@3.3.0": "3.3.0",
     "npm:svelte-check@4.1.6": "4.1.6_svelte@5.28.2__acorn@8.14.1_typescript@5.8.3",
+    "npm:svelte-portal@^2.2.1": "2.2.1",
     "npm:svelte-sonner@0.3.28": "0.3.28_svelte@5.28.2__acorn@8.14.1",
     "npm:svelte@5.28.2": "5.28.2_acorn@8.14.1",
     "npm:tailwind-merge@3.2.0": "3.2.0",
@@ -1242,6 +1244,9 @@
         "typescript"
       ]
     },
+    "svelte-portal@2.2.1": {
+      "integrity": "sha512-uF7is5sM4aq5iN7QF/67XLnTUvQCf2iiG/B1BHTqLwYVY1dsVmTeXZ/LeEyU6dLjApOQdbEG9lkqHzxiQtOLEQ=="
+    },
     "svelte-sonner@0.3.28_svelte@5.28.2__acorn@8.14.1": {
       "integrity": "sha512-K3AmlySeFifF/cKgsYNv5uXqMVNln0NBAacOYgmkQStLa/UoU0LhfAACU6Gr+YYC8bOCHdVmFNoKuDbMEsppJg==",
       "dependencies": [
@@ -1415,12 +1420,13 @@
         "npm:@sveltejs/vite-plugin-svelte@5.0.3",
         "npm:@tailwindcss/typography@0.5.16",
         "npm:@tailwindcss/vite@4.1.4",
-        "npm:clsx@^2.1.1",
+        "npm:clsx@2.1.1",
         "npm:daisyui@5.0.27",
         "npm:json-schema-to-typescript@15.0.4",
         "npm:monaco-editor@0.52.2",
         "npm:shiki@3.3.0",
         "npm:svelte-check@4.1.6",
+        "npm:svelte-portal@^2.2.1",
         "npm:svelte-sonner@0.3.28",
         "npm:svelte@5.28.2",
         "npm:tailwind-merge@3.2.0",
