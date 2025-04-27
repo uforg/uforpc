@@ -79,7 +79,7 @@
 
   <span
     class={[
-      "overflow-hidden overflow-ellipsis",
+      "whitespace-nowrap overflow-hidden overflow-ellipsis",
       {
         "line-through": isDeprecated,
       },
