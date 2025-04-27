@@ -1,6 +1,13 @@
 <script lang="ts">
-  import { Link, Plus, Settings, Trash, X } from "@lucide/svelte";
-  import { store } from "$lib/store.svelte";
+  import {
+    Link,
+    Plus,
+    RefreshCcw,
+    Settings,
+    Trash,
+    X,
+  } from "@lucide/svelte";
+  import { loadDefaultConfig, store } from "$lib/store.svelte";
   import Modal from "$lib/components/Modal.svelte";
 
   const isMac = /mac/.test(navigator.userAgent.toLowerCase());
@@ -75,6 +82,7 @@
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">Headers</legend>
+      <p class="label mb-1">Headers to send with requests to the endpoint.</p>
 
       {#each store.headers as header, index}
         <div class="flex gap-2 mb-2">
@@ -106,7 +114,13 @@
         <Plus class="size-4 mr-1" />
         Add Header
       </button>
-      <p class="label mt-2">Headers to send with requests to the endpoint.</p>
     </fieldset>
+
+    <div class="flex justify-end">
+      <button class="btn btn-ghost" onclick={loadDefaultConfig}>
+        <RefreshCcw class="size-4 mr-1" />
+        Reset default settings
+      </button>
+    </div>
   </div>
 </Modal>

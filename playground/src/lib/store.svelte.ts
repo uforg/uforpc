@@ -21,7 +21,7 @@ export interface Store {
 export const store: Store = $state({
   loaded: false,
   theme: "system",
-  endpoint: `${getCurrentHost()}/api/v1/urpc`,
+  endpoint: "",
   headers: [],
   urpcSchema: `version 1`,
   jsonSchema: { version: 1, nodes: [] },
@@ -39,7 +39,10 @@ $effect.root(() => {
  *
  * Should be called only once at the start of the app.
  */
-export const loadStore = () => {
+export const loadStore = async () => {
+  // Prioritize the config stored in the browser's local storage
+  await loadDefaultConfig();
+
   // Read more at /static/theme-helper.js
   // deno-lint-ignore no-explicit-any
   const theme = (globalThis as any).getTheme();
@@ -84,6 +87,28 @@ export const getHeadersRecord = (): Record<string, string> => {
     }
   });
   return record;
+};
+
+/**
+ * Loads the default configuration from the static/config.json file.
+ */
+export const loadDefaultConfig = async () => {
+  const response = await fetch("./config.json");
+  if (!response.ok) {
+    console.error("Failed to fetch default config");
+    return;
+  }
+  const config = await response.json();
+
+  if (typeof config.endpoint === "string" && config.endpoint.trim() !== "") {
+    store.endpoint = config.endpoint;
+  } else {
+    store.endpoint = `${getCurrentHost()}/api/v1/urpc`;
+  }
+
+  if (Array.isArray(config.headers)) {
+    store.headers = config.headers;
+  }
 };
 
 /**
