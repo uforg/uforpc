@@ -58,7 +58,7 @@
   {href}
   {title}
   class={[
-    "btn btn-ghost btn-block justify-start space-x-2",
+    "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
     {
       "tooltip tooltip-top": isDeprecated,
       "hover:bg-blue-500/20": node.kind === "doc",
