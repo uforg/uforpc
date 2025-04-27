@@ -17,6 +17,7 @@
     "npm:daisyui@5.0.27": "5.0.27",
     "npm:http-server@latest": "14.1.1",
     "npm:json-schema-to-typescript@15.0.4": "15.0.4",
+    "npm:marked@15.0.11": "15.0.11",
     "npm:monaco-editor@0.52.2": "0.52.2",
     "npm:shiki@3.3.0": "3.3.0",
     "npm:svelte-check@4.1.6": "4.1.6_svelte@5.28.2__acorn@8.14.1_typescript@5.8.3",
@@ -968,6 +969,9 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
+    "marked@15.0.11": {
+      "integrity": "sha512-1BEXAU2euRCG3xwgLVT1y0xbJEld1XOrmRJpUwRCcy7rxhSCwMrmEu9LXoPhHSCJG41V7YcQ2mjKRr5BA3ITIA=="
+    },
     "math-intrinsics@1.1.0": {
       "integrity": "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g=="
     },
@@ -1423,6 +1427,7 @@
         "npm:clsx@2.1.1",
         "npm:daisyui@5.0.27",
         "npm:json-schema-to-typescript@15.0.4",
+        "npm:marked@15.0.11",
         "npm:monaco-editor@0.52.2",
         "npm:shiki@3.3.0",
         "npm:svelte-check@4.1.6",

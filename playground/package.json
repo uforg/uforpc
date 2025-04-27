@@ -25,6 +25,7 @@
     "clsx": "2.1.1",
     "daisyui": "5.0.27",
     "json-schema-to-typescript": "15.0.4",
+    "marked": "15.0.11",
     "monaco-editor": "0.52.2",
     "shiki": "3.3.0",
     "svelte": "5.28.2",
