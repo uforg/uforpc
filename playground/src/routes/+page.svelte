@@ -2,6 +2,7 @@
   import { isscrolledAction } from "$lib/actions/isScrolled.svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";
+  import Main from "./components/Main.svelte";
 
   let isScrolled = $state(false);
 </script>
@@ -11,11 +12,9 @@
   <div
     use:isscrolledAction
     onisscrolled={(e) => (isScrolled = e.detail)}
-    class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto"
+    class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]"
   >
     <Header {isScrolled} />
-    <main class="w-full p-4">
-      <h1>Home</h1>
-    </main>
+    <Main />
   </div>
 </div>
