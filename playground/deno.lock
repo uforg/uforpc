@@ -18,6 +18,7 @@
     "npm:http-server@latest": "14.1.1",
     "npm:json-schema-to-typescript@15.0.4": "15.0.4",
     "npm:marked@15.0.11": "15.0.11",
+    "npm:minisearch@7.1.2": "7.1.2",
     "npm:monaco-editor@0.52.2": "0.52.2",
     "npm:shiki@3.3.0": "3.3.0",
     "npm:svelte-check@4.1.6": "4.1.6_svelte@5.28.2__acorn@8.14.1_typescript@5.8.3",
@@ -1019,6 +1020,9 @@
     "minimist@1.2.8": {
       "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA=="
     },
+    "minisearch@7.1.2": {
+      "integrity": "sha512-R1Pd9eF+MD5JYDDSPAp/q1ougKglm14uEkPMvQ/05RGmx6G9wvmLTrTI/Q5iPNJLYqNdsDQ7qTGIcNWR+FrHmA=="
+    },
     "monaco-editor@0.52.2": {
       "integrity": "sha512-GEQWEZmfkOGLdd3XK8ryrfWz3AIP8YymVXiPHEdewrUq7mh0qrKrfHLNCXcbB6sTnMLnOZ3ztSiKcciFUkIJwQ=="
     },
@@ -1428,6 +1432,7 @@
         "npm:daisyui@5.0.27",
         "npm:json-schema-to-typescript@15.0.4",
         "npm:marked@15.0.11",
+        "npm:minisearch@7.1.2",
         "npm:monaco-editor@0.52.2",
         "npm:shiki@3.3.0",
         "npm:svelte-check@4.1.6",
