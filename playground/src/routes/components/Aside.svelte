@@ -27,7 +27,7 @@
   use:isscrolledAction
   onisscrolled={(e) => (isScrolled = e.detail)}
   class={[
-    "flex-none w-full max-w-[280px] h-[100dvh] overflow-x-hidden overflow-y-auto",
+    "flex-none w-full max-w-[280px] h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]",
   ]}
 >
   <a
