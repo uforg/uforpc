@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import {
     ArrowLeftRight,
     BookOpenText,
@@ -8,6 +9,7 @@
     Type,
   } from "@lucide/svelte";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
+  import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import type { store } from "$lib/store.svelte";
   import H2 from "$lib/components/H2.svelte";
 
@@ -42,29 +44,34 @@
     if (node.deprecated !== "") return node.deprecated;
     return `This ${node.kind} is deprecated and it's use is not recommended.`;
   });
+
+  let documentation = $state("");
+  onMount(async () => {
+    if (node.kind === "doc") {
+      documentation = await markdownToHtml(node.content);
+    }
+  });
 </script>
 
-<section {id} class="space-y-2">
+<section {id} class="space-y-4">
   <a href={`#${id}`} class="block">
-    <H2 class="flex justify-start items-center space-x-4 group">
+    <H2 class="flex justify-start items-center group text-4xl font-extrabold">
       {#if node.kind === "doc"}
-        <BookOpenText class="size-6 flex-none group-hover:hidden" />
+        <BookOpenText class="size-8 mr-4 flex-none group-hover:hidden" />
       {/if}
       {#if node.kind === "rule"}
-        <Scale class="size-6 flex-none group-hover:hidden" />
+        <Scale class="size-8 mr-4 flex-none group-hover:hidden" />
       {/if}
       {#if node.kind === "type"}
-        <Type class="size-6 flex-none group-hover:hidden" />
+        <Type class="size-8 mr-4 flex-none group-hover:hidden" />
       {/if}
       {#if node.kind === "proc"}
-        <ArrowLeftRight class="size-6 flex-none group-hover:hidden" />
+        <ArrowLeftRight class="size-8 mr-4 flex-none group-hover:hidden" />
       {/if}
 
-      <Hash class="size-6 flex-none hidden group-hover:inline" />
+      <Hash class="size-8 mr-4 flex-none hidden group-hover:block" />
 
-      <span>
-        {name}
-      </span>
+      {name}
     </H2>
   </a>
 
@@ -72,6 +79,12 @@
     <div role="alert" class="alert alert-warning">
       <TriangleAlert class="size-4" />
       <span>Deprecated: {deprecatedMessage}</span>
+    </div>
+  {/if}
+
+  {#if documentation !== ""}
+    <div class="prose max-w-none">
+      {@html documentation}
     </div>
   {/if}
 </section>
