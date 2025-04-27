@@ -146,37 +146,28 @@ export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
  * Indexes the search items for the current URPC JSON schema.
  */
 const indexSearchItems = () => {
-  const searchItems: SearchItem[] = [];
-  let id = 1;
-  for (const node of store.jsonSchema.nodes) {
+  const searchItems = store.jsonSchema.nodes.map((node, index) => {
+    let name = "";
+    let doc = "";
+
     if (node.kind === "doc") {
-      const name = getMarkdownTitle(node.content);
-      const slug = slugify("doc-" + name);
-
-      searchItems.push({
-        id,
-        kind: "doc",
-        name,
-        slug,
-        doc: node.content,
-      });
+      name = getMarkdownTitle(node.content);
+      doc = node.content;
+    } else {
+      name = node.name;
+      doc = node.doc ?? "";
     }
 
-    if (node.kind === "rule" || node.kind === "type" || node.kind === "proc") {
-      const name = node.name;
-      const slug = slugify(name);
+    const item: SearchItem = {
+      id: index,
+      kind: node.kind,
+      name,
+      doc,
+      slug: slugify(`${node.kind}-${name}`),
+    };
 
-      searchItems.push({
-        id,
-        kind: node.kind,
-        name,
-        slug,
-        doc: node.doc ?? "",
-      });
-    }
-
-    id++;
-  }
+    return item;
+  });
 
   miniSearch.removeAll();
   miniSearch.addAll(searchItems);
