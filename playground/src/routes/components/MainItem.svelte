@@ -69,38 +69,42 @@
   });
 </script>
 
-<section {id} class="space-y-4">
+<section {id} class="space-y-6 group">
   <a href={`#${id}`} class="block">
-    <H2 class="flex justify-start items-center group text-4xl font-extrabold">
+    <H2
+      class="flex justify-start items-center group/h2 text-4xl font-extrabold"
+    >
       {#if node.kind === "doc"}
-        <BookOpenText class="size-8 mr-4 flex-none group-hover:hidden" />
+        <BookOpenText class="size-8 mr-4 flex-none group-hover/h2:hidden" />
       {/if}
       {#if node.kind === "rule"}
-        <Scale class="size-8 mr-4 flex-none group-hover:hidden" />
+        <Scale class="size-8 mr-4 flex-none group-hover/h2:hidden" />
       {/if}
       {#if node.kind === "type"}
-        <Type class="size-8 mr-4 flex-none group-hover:hidden" />
+        <Type class="size-8 mr-4 flex-none group-hover/h2:hidden" />
       {/if}
       {#if node.kind === "proc"}
-        <ArrowLeftRight class="size-8 mr-4 flex-none group-hover:hidden" />
+        <ArrowLeftRight class="size-8 mr-4 flex-none group-hover/h2:hidden" />
       {/if}
 
-      <Hash class="size-8 mr-4 flex-none hidden group-hover:block" />
+      <Hash class="size-8 mr-4 flex-none hidden group-hover/h2:block" />
 
       {name}
     </H2>
   </a>
 
-  {#if deprecatedMessage !== ""}
-    <div role="alert" class="alert alert-warning">
-      <TriangleAlert class="size-4" />
-      <span>Deprecated: {deprecatedMessage}</span>
-    </div>
-  {/if}
+  <div class="space-y-6 ml-4 pl-4 border-l border-base-content/20 group-hover:border-base-content/50">
+    {#if deprecatedMessage !== ""}
+      <div role="alert" class="alert alert-warning">
+        <TriangleAlert class="size-4" />
+        <span>Deprecated: {deprecatedMessage}</span>
+      </div>
+    {/if}
 
-  {#if documentation !== ""}
-    <div class="prose max-w-none">
-      {@html documentation}
-    </div>
-  {/if}
+    {#if documentation !== ""}
+      <div class="prose max-w-none">
+        {@html documentation}
+      </div>
+    {/if}
+  </div>
 </section>
