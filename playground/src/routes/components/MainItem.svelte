@@ -11,9 +11,9 @@
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
+  import { slugify } from "$lib/helpers/slugify";
   import type { store } from "$lib/store.svelte";
   import H2 from "$lib/components/H2.svelte";
-
   interface Props {
     node: typeof store.jsonSchema.nodes[number];
   }
@@ -32,10 +32,10 @@
   });
 
   let id = $derived.by(() => {
-    if (node.kind === "rule") return `rule-${name}`;
-    if (node.kind === "type") return `type-${name}`;
-    if (node.kind === "proc") return `proc-${name}`;
-    if (node.kind === "doc") return `doc-${name}`;
+    if (node.kind === "rule") return slugify(`rule-${name}`);
+    if (node.kind === "type") return slugify(`type-${name}`);
+    if (node.kind === "proc") return slugify(`proc-${name}`);
+    if (node.kind === "doc") return slugify(`doc-${name}`);
     return "#";
   });
 
