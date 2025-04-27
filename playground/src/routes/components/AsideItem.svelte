@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from "$app/stores";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import type { store } from "$lib/store.svelte";
   import {
@@ -51,6 +52,10 @@
     if (typeof node.deprecated === "string") return true;
     return false;
   });
+
+  let isActive = $derived.by(() => {
+    return $page.url.hash === href;
+  });
 </script>
 
 <a
@@ -65,6 +70,10 @@
       "hover:bg-yellow-500/20": node.kind === "rule",
       "hover:bg-purple-500/20": node.kind === "type",
       "hover:bg-green-500/20": node.kind === "proc",
+      "bg-blue-500/20": isActive && node.kind === "doc",
+      "bg-yellow-500/20": isActive && node.kind === "rule",
+      "bg-purple-500/20": isActive && node.kind === "type",
+      "bg-green-500/20": isActive && node.kind === "proc",
     },
   ]}
   data-tip={isDeprecated ? "Deprecated" : ""}
