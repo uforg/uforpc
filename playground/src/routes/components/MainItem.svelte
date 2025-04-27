@@ -47,25 +47,27 @@
   });
 
   let documentation = $state("");
-  onMount(async () => {
-    if (node.kind === "doc") {
-      documentation = await markdownToHtml(
-        deleteMarkdownHeadings(node.content),
-      );
-    }
-    if (
-      (
-        node.kind === "rule" ||
-        node.kind === "type" ||
-        node.kind === "proc"
-      ) &&
-      typeof node.doc === "string" &&
-      node.doc != ""
-    ) {
-      documentation = await markdownToHtml(
-        deleteMarkdownHeadings(node.doc),
-      );
-    }
+  $effect(() => {
+    (async () => {
+      if (node.kind === "doc") {
+        documentation = await markdownToHtml(
+          deleteMarkdownHeadings(node.content),
+        );
+      }
+      if (
+        (
+          node.kind === "rule" ||
+          node.kind === "type" ||
+          node.kind === "proc"
+        ) &&
+        typeof node.doc === "string" &&
+        node.doc != ""
+      ) {
+        documentation = await markdownToHtml(
+          deleteMarkdownHeadings(node.doc),
+        );
+      }
+    })();
   });
 </script>
 
