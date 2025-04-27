@@ -8,7 +8,10 @@
   let isScrolled = $state(false);
 
   // if has hash anchor navigate to it
-  onMount(() => {
+  onMount(async () => {
+    // wait 500ms to ensure the content is rendered
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     if (window.location.hash) {
       const element = document.getElementById(
         window.location.hash.slice(1),
