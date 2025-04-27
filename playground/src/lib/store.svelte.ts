@@ -1,6 +1,26 @@
+import MiniSearch from "minisearch";
 import { getCurrentHost } from "./helpers/getCurrentHost.ts";
 import { transpileUrpcToJson } from "./urpc.ts";
 import type { Schema } from "./urpcTypes.ts";
+import { getMarkdownTitle } from "./helpers/getMarkdownTitle.ts";
+import { slugify } from "./helpers/slugify.ts";
+
+type SearchItem = {
+  id: number;
+  kind: "rule" | "type" | "proc" | "doc";
+  name: string;
+  slug: string;
+  doc: string;
+};
+
+export const miniSearch = new MiniSearch({
+  fields: ["kind", "name", "doc"],
+  storeFields: ["kind", "name", "slug", "doc"],
+  searchOptions: {
+    boost: { title: 2 },
+    fuzzy: 0.2,
+  },
+});
 
 export type Theme = "system" | "light" | "dark";
 
@@ -112,6 +132,57 @@ export const loadDefaultConfig = async () => {
 };
 
 /**
+ * Transpiles the current URPC schema to JSON format and updates the `jsonSchema` store.
+ *
+ * This asynchronous function takes the current value of `urpcSchema`, transpiles it to JSON
+ * using the `transpileUrpcToJson` utility, and then updates the `jsonSchema` store with the result.
+ */
+export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
+  store.jsonSchema = await transpileUrpcToJson(store.urpcSchema);
+  indexSearchItems();
+};
+
+/**
+ * Indexes the search items for the current URPC JSON schema.
+ */
+const indexSearchItems = () => {
+  const searchItems: SearchItem[] = [];
+  let id = 1;
+  for (const node of store.jsonSchema.nodes) {
+    if (node.kind === "doc") {
+      const name = getMarkdownTitle(node.content);
+      const slug = slugify("doc-" + name);
+
+      searchItems.push({
+        id,
+        kind: "doc",
+        name,
+        slug,
+        doc: node.content,
+      });
+    }
+
+    if (node.kind === "rule" || node.kind === "type" || node.kind === "proc") {
+      const name = node.name;
+      const slug = slugify(name);
+
+      searchItems.push({
+        id,
+        kind: node.kind,
+        name,
+        slug,
+        doc: node.doc ?? "",
+      });
+    }
+
+    id++;
+  }
+
+  miniSearch.removeAll();
+  miniSearch.addAll(searchItems);
+};
+
+/**
  * Fetches and loads an URPC schema from a specified URL.
  *
  * This function attempts to retrieve a schema from the given URL and, if successful,
@@ -142,16 +213,6 @@ export const loadUrpcSchemaFromUrl = async (url: string) => {
  */
 export const loadUrpcSchemaFromString = (sch: string) => {
   store.urpcSchema = sch;
-};
-
-/**
- * Transpiles the current URPC schema to JSON format and updates the `jsonSchema` store.
- *
- * This asynchronous function takes the current value of `urpcSchema`, transpiles it to JSON
- * using the `transpileUrpcToJson` utility, and then updates the `jsonSchema` store with the result.
- */
-export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
-  store.jsonSchema = await transpileUrpcToJson(store.urpcSchema);
 };
 
 /**
