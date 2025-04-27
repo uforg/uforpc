@@ -29,7 +29,7 @@
     <img src="/assets/logo.png" alt="UFO RPC Logo" class="h-full">
     <h1 class="font-bold">UFO RPC Playground</h1>
   </a>
-  <nav class="p-4 space-y-2">
+  <nav class="p-4">
     <AsideSchemaManager />
     {#each store.jsonSchema.nodes as node}
       <AsideItem {node} />
