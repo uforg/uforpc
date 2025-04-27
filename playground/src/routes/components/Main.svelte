@@ -8,7 +8,7 @@
   });
 </script>
 
-<main class="w-full p-4 space-y-12">
+<main class="w-full p-4 space-y-[80px]">
   {#if isEmpty}
     <div class="mt-[200px] flex flex-col justify-center items-center gap-4">
       <ScrollText class="size-[100px]" />
