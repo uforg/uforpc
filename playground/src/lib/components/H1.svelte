@@ -13,7 +13,7 @@
 
 <h1
   class={mergeClasses(
-    "text-3xl font-bold",
+    "text-4xl font-bold",
     className,
   )}
   {...rest}
