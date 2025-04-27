@@ -1,10 +1,26 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { store } from "$lib/store.svelte";
   import { isscrolledAction } from "$lib/actions/isScrolled.svelte";
   import AsideSchemaManager from "./AsideSchemaManager.svelte";
   import AsideItem from "./AsideItem.svelte";
 
   let isScrolled = $state(false);
+
+  // if has hash anchor navigate to it
+  onMount(async () => {
+    // wait 500ms to ensure the content is rendered
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    if (window.location.hash) {
+      const element = document.getElementById(
+        "navlink-" + window.location.hash.slice(1),
+      );
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  });
 </script>
 
 <aside

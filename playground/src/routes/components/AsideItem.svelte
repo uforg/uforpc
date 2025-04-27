@@ -34,13 +34,17 @@
     return "Unknown";
   });
 
-  let href = $derived.by(() => {
-    if (node.kind === "rule") return `#rule-${name}`;
-    if (node.kind === "type") return `#type-${name}`;
-    if (node.kind === "proc") return `#proc-${name}`;
-    if (node.kind === "doc") return `#doc-${name}`;
-    return "#";
+  let contentId = $derived.by(() => {
+    if (node.kind === "rule") return `rule-${name}`;
+    if (node.kind === "type") return `type-${name}`;
+    if (node.kind === "proc") return `proc-${name}`;
+    if (node.kind === "doc") return `doc-${name}`;
+    return "";
   });
+
+  let id = $derived(`navlink-${contentId}`);
+
+  let href = $derived(`#${contentId}`);
 
   let isDeprecated = $derived.by(() => {
     if (node.kind === "doc") return false;
@@ -50,6 +54,7 @@
 </script>
 
 <a
+  {id}
   {href}
   {title}
   class={[
