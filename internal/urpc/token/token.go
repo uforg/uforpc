@@ -126,29 +126,29 @@ var TokenTypes = []TokenType{
 }
 
 // delimiters is a map of delimiters to their corresponding token types.
-var delimiters = map[string]TokenType{
-	"\n": Newline,
-	":":  Colon,
-	",":  Comma,
-	"(":  LParen,
-	")":  RParen,
-	"{":  LBrace,
-	"}":  RBrace,
-	"[":  LBracket,
-	"]":  RBracket,
-	"@":  At,
-	"?":  Question,
+var delimiters = map[rune]TokenType{
+	'\n': Newline,
+	':':  Colon,
+	',':  Comma,
+	'(':  LParen,
+	')':  RParen,
+	'{':  LBrace,
+	'}':  RBrace,
+	'[':  LBracket,
+	']':  RBracket,
+	'@':  At,
+	'?':  Question,
 }
 
 // IsDelimiter returns true if the character is a delimiter.
-func IsDelimiter(ch byte) bool {
-	_, ok := delimiters[string(ch)]
+func IsDelimiter(ch rune) bool {
+	_, ok := delimiters[ch]
 	return ok
 }
 
 // GetDelimiterTokenType returns the token type for the given delimiter.
-func GetDelimiterTokenType(ch byte) TokenType {
-	return delimiters[string(ch)]
+func GetDelimiterTokenType(ch rune) TokenType {
+	return delimiters[ch]
 }
 
 // keywords is a map of keywords to their corresponding token types.
