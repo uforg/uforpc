@@ -9,11 +9,11 @@ type Lexer struct {
 	CurrentLine   int
 	CurrentColumn int
 
-	input             string
+	input             []rune
 	maxIndex          int
 	currentIndex      int
 	currentIndexIsEOF bool
-	currentChar       byte
+	currentChar       rune
 }
 
 // NewLexer creates a new Lexer and initializes it with the given file
@@ -24,8 +24,8 @@ func NewLexer(fileName, input string) *Lexer {
 	l.FileName = fileName
 	l.CurrentLine = 1
 	l.CurrentColumn = 1
-	l.input = input
-	l.maxIndex = len(input) - 1
+	l.input = []rune(input)
+	l.maxIndex = len(l.input) - 1
 
 	l.currentIndex = 0
 	if l.maxIndex <= 0 {
@@ -36,7 +36,7 @@ func NewLexer(fileName, input string) *Lexer {
 	if l.currentIndexIsEOF {
 		l.currentChar = 0
 	} else {
-		l.currentChar = input[l.currentIndex]
+		l.currentChar = l.input[l.currentIndex]
 	}
 
 	return l
@@ -68,7 +68,7 @@ func (l *Lexer) readNextChar() {
 // peekChar peeks the character at the next index + depth without moving the current index.
 //
 // Returns the character and a boolean indicating if the EOF was reached.
-func (l *Lexer) peekChar(depth int) (byte, bool) {
+func (l *Lexer) peekChar(depth int) (rune, bool) {
 	indexToPeek := l.currentIndex + depth
 	if indexToPeek > l.maxIndex {
 		return 0, true

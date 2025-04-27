@@ -1,23 +1,23 @@
 package lexer
 
 // isLetter returns true if the character is a letter.
-func isLetter(ch byte) bool {
+func isLetter(ch rune) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z'
 }
 
 // isNumber returns true if the character is a number.
-func isNumber(ch byte) bool {
+func isNumber(ch rune) bool {
 	return '0' <= ch && ch <= '9'
 }
 
 // isWhitespace returns true if the character is a whitespace. Line breaks
 // are not considered whitespace.
-func isWhitespace(ch byte) bool {
+func isWhitespace(ch rune) bool {
 	return ch == ' ' || ch == '\t' || ch == '\r'
 }
 
 // isNewline returns true if the character is a newline.
-func isNewline(ch byte) bool {
+func isNewline(ch rune) bool {
 	return ch == '\n'
 }
 
