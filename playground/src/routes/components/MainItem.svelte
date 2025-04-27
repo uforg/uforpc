@@ -9,6 +9,7 @@
     Type,
   } from "@lucide/svelte";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
+  import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import type { store } from "$lib/store.svelte";
   import H2 from "$lib/components/H2.svelte";
@@ -48,7 +49,9 @@
   let documentation = $state("");
   onMount(async () => {
     if (node.kind === "doc") {
-      documentation = await markdownToHtml(node.content);
+      documentation = await markdownToHtml(
+        deleteMarkdownHeadings(node.content),
+      );
     }
     if (
       (
@@ -59,7 +62,9 @@
       typeof node.doc === "string" &&
       node.doc != ""
     ) {
-      documentation = await markdownToHtml(node.doc);
+      documentation = await markdownToHtml(
+        deleteMarkdownHeadings(node.doc),
+      );
     }
   });
 </script>
