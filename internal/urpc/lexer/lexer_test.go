@@ -538,6 +538,46 @@ func TestLexer(t *testing.T) {
 		require.Equal(t, tests, tokens)
 	})
 
+	t.Run("TestLexerUTF8", func(t *testing.T) {
+		input := `
+			// áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにちは안녕하세요Привет👍
+
+			/* áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにちは안녕하세요Привет👍 */
+
+			""" áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにちは안녕하세요Привет👍 """
+
+			"áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにちは안녕하세요Привет👍"
+		`
+
+		tests := []token.Token{
+			{Type: token.Comment, Literal: " áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにちは안녕하세요Привет👍"},
+			{Type: token.CommentBlock, Literal: " áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにち는안녕하세요Привет👍 "},
+			{Type: token.Docstring, Literal: " áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにち는안녕하세요Привет👍 "},
+			{Type: token.StringLiteral, Literal: "áéíóúàèìòùäëïöüâêîôûåæœçðñµßøœ你好こんにち는안녕하세요Привет👍"},
+		}
+
+		lex := NewLexer("test.urpc", input)
+		tokens := lex.ReadTokens()
+
+		// This test does not test newline and whitespace tokens to avoid verbosity
+		// They're already tested in previous tests
+
+		testableTokens := []token.Token{}
+		for _, tok := range tokens {
+			if tok.Type == token.Newline || tok.Type == token.Whitespace {
+				continue
+			}
+			testableTokens = append(testableTokens, tok)
+		}
+
+		for i, test := range tests {
+			tok := testableTokens[i]
+
+			require.Equal(t, test.Type, tok.Type, "test %d", i)
+			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
+		}
+	})
+
 	t.Run("TestLexerURPC", func(t *testing.T) {
 		input := `
 			// This test evaluates the lexer with a full URPC file.
