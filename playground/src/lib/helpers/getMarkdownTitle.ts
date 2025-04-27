@@ -1,9 +1,9 @@
 /**
- * Get the title of a markdown document, which is the first #-header
+ * Get the title of a markdown document, which is the first level-1 heading (#-heading)
  *
- * If no #-header is found, the title is "Untitled ${first-line}"
+ * If no level-1 heading is found, the title is "Untitled ${first-line}"
  *
- * If multiple #-headers are found, the first one is used
+ * If multiple level-1 headings are found, the first one is used
  *
  * @param markdown
  */
@@ -13,23 +13,13 @@ export function getMarkdownTitle(markdown: string): string {
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
 
-  // First look for level-1 headers (starts with single #)
-  const titleLevel1 = lines.find((line) =>
-    line.startsWith("# ") || line === "#"
-  );
+  // Look for level-1 headings - starts with single # followed by a character that is not #
+  const titleLevel1 = lines.find((line) => /^#([^#]|$)/.test(line));
 
   if (titleLevel1) {
-    return titleLevel1.slice(1).trim();
+    return titleLevel1.replace(/^#\s*/, "").trim();
   }
 
-  // If no level-1 header found, look for any header (starts with any number of #)
-  const anyHeader = lines.find((line) => /^#{2,}\s/.test(line));
-
-  if (anyHeader) {
-    // Remove all # symbols from the beginning and trim
-    return anyHeader.replace(/^#+/, "").trim();
-  }
-
-  // If no header at all, return "Untitled: first line"
+  // If no level-1 heading found, return "Untitled: first line"
   return `Untitled: ${lines[0]}`;
 }

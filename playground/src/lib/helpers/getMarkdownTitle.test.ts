@@ -25,8 +25,26 @@ Deno.test("should not return nested headers if a level-1 header exists", () => {
   assertEquals(result, "Main Title");
 });
 
-Deno.test("should return first nested header if no level-1 header exists", () => {
+Deno.test("should return 'Untitled: first line' if only non-level-1 headers exist", () => {
   const markdown = "Some text\n### Nested Title\nMore text";
   const result = getMarkdownTitle(markdown);
-  assertEquals(result, "Nested Title");
+  assertEquals(result, "Untitled: Some text");
+});
+
+Deno.test("should return only the first level-1 header when multiple exist", () => {
+  const markdown = "Text\n# First Title\nContent\n# Second Title\nMore content";
+  const result = getMarkdownTitle(markdown);
+  assertEquals(result, "First Title");
+});
+
+Deno.test("should support level-1 headings without space after #", () => {
+  const markdown = "Some text\n#auth\nMore text";
+  const result = getMarkdownTitle(markdown);
+  assertEquals(result, "auth");
+});
+
+Deno.test("should correctly distinguish between level-1 and other level headings", () => {
+  const markdown = "Some text\n###not-level-1\n#actual-level-1\nMore text";
+  const result = getMarkdownTitle(markdown);
+  assertEquals(result, "actual-level-1");
 });
