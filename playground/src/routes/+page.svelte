@@ -15,7 +15,6 @@
   $effect(() => {
     if (activeSection) {
       store.activeSection = activeSection;
-      // history.replaceState(null, "", `#${activeSection}`);
       goto(`#${activeSection}`, { noScroll: true });
     }
   });
