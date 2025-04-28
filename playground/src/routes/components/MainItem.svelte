@@ -14,7 +14,7 @@
   import { store } from "$lib/store.svelte";
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
   import H2 from "$lib/components/H2.svelte";
-  import UrpcCode from "$lib/components/UrpcCode.svelte";
+  import Code from "$lib/components/Code.svelte";
 
   interface Props {
     node: typeof store.jsonSchema.nodes[number];
@@ -121,7 +121,7 @@
     {/if}
 
     {#if urpcSchema !== ""}
-      <UrpcCode code={urpcSchema} />
+      <Code lang="urpc" code={urpcSchema} />
     {/if}
   </div>
 </section>
