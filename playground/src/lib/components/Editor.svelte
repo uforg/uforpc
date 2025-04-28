@@ -2,13 +2,9 @@
   import { onMount } from "svelte";
   import loader from "@monaco-editor/loader";
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
-  import { createHighlighter } from "shiki";
-  import type { BundledTheme } from "shiki";
   import { shikiToMonaco } from "@shikijs/monaco";
   import { store } from "$lib/store.svelte";
-
-  const lightTheme: BundledTheme = "github-light";
-  const darkTheme: BundledTheme = "github-dark";
+  import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
 
   let { value = $bindable(), ...others }: { [key: string]: any } = $props();
   let editorContainer: HTMLElement;
@@ -16,16 +12,7 @@
   let editor: Monaco.editor.IStandaloneCodeEditor | null = $state(null);
 
   onMount(async () => {
-    const urpcSyntaxUrl =
-      "https://cdn.jsdelivr.net/gh/uforg/uforpc-vscode/syntaxes/urpc.tmLanguage.json";
-    const urpcSyntax = await fetch(urpcSyntaxUrl);
-    const urpcSyntaxJson = await urpcSyntax.json();
-    urpcSyntaxJson.name = "urpc";
-
-    const highlighter = await createHighlighter({
-      langs: [urpcSyntaxJson],
-      themes: [lightTheme, darkTheme],
-    });
+    const highlighter = await getHighlighter();
 
     monaco = await loader.init();
     monaco.languages.register({ id: "urpc" });
@@ -58,14 +45,14 @@
   $effect(() => {
     if (!monaco) return;
 
-    let defaultTheme: BundledTheme = lightTheme;
+    let defaultTheme = lightTheme;
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       defaultTheme = darkTheme;
     } else {
       defaultTheme = lightTheme;
     }
 
-    const themeMap: Record<string, BundledTheme> = {
+    const themeMap = {
       system: defaultTheme,
       light: lightTheme,
       dark: darkTheme,
