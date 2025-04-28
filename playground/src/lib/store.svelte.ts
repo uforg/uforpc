@@ -4,6 +4,7 @@ import { transpileUrpcToJson } from "./urpc.ts";
 import type { Schema } from "./urpcTypes.ts";
 import { getMarkdownTitle } from "./helpers/getMarkdownTitle.ts";
 import { slugify } from "./helpers/slugify.ts";
+import { markdownToText } from "./helpers/markdownToText.ts";
 
 type SearchItem = {
   id: number;
@@ -139,35 +140,39 @@ export const loadDefaultConfig = async () => {
  */
 export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
   store.jsonSchema = await transpileUrpcToJson(store.urpcSchema);
-  indexSearchItems();
+  await indexSearchItems();
 };
 
 /**
  * Indexes the search items for the current URPC JSON schema.
  */
-const indexSearchItems = () => {
-  const searchItems = store.jsonSchema.nodes.map((node, index) => {
-    let name = "";
-    let doc = "";
+const indexSearchItems = async () => {
+  const searchItems = await Promise.all(
+    store.jsonSchema.nodes.map(async (node, index) => {
+      let name = "";
+      let doc = "";
 
-    if (node.kind === "doc") {
-      name = getMarkdownTitle(node.content);
-      doc = node.content;
-    } else {
-      name = node.name;
-      doc = node.doc ?? "";
-    }
+      if (node.kind === "doc") {
+        name = getMarkdownTitle(node.content);
+        doc = node.content;
+      } else {
+        name = node.name;
+        doc = node.doc ?? "";
+      }
 
-    const item: SearchItem = {
-      id: index,
-      kind: node.kind,
-      name,
-      doc,
-      slug: slugify(`${node.kind}-${name}`),
-    };
+      const item: SearchItem = {
+        id: index,
+        kind: node.kind,
+        name,
+        doc,
+        slug: slugify(`${node.kind}-${name}`),
+      };
 
-    return item;
-  });
+      item.doc = await markdownToText(item.doc);
+
+      return item;
+    }),
+  );
 
   miniSearch.removeAll();
   miniSearch.addAll(searchItems);
