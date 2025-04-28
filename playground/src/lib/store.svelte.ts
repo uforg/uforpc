@@ -20,6 +20,7 @@ export const miniSearch = new MiniSearch({
   searchOptions: {
     boost: { title: 2 },
     fuzzy: 0.2,
+    prefix: true,
   },
 });
 
