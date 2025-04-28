@@ -22,6 +22,21 @@ export const miniSearch = new MiniSearch({
     fuzzy: 0.2,
     prefix: true,
   },
+  tokenize: (text: string, _?: string): string[] => {
+    const tokens: string[] = [];
+
+    // First split by spaces
+    const spaceTokens = text.split(" ");
+    tokens.push(...spaceTokens);
+
+    // Then split each space token by uppercase letters
+    for (const token of spaceTokens) {
+      const upperCaseTokens = token.split(/(?=[A-Z])/);
+      tokens.push(...upperCaseTokens);
+    }
+
+    return tokens;
+  },
 });
 
 export type Theme = "system" | "light" | "dark";
