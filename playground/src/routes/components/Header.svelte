@@ -13,7 +13,7 @@
 
 <header
   class={[
-    "w-full p-4 flex justify-between items-center space-x-2 h-[72px] sticky top-0",
+    "w-full p-4 flex justify-between items-center space-x-2 h-[72px] sticky top-0 z-30",
     "bg-base-100/90 backdrop-blur-sm",
     {
       "shadow-xs": isScrolled,
