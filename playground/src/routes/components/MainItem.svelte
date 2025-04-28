@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import {
     ArrowLeftRight,
     BookOpenText,
@@ -12,8 +11,10 @@
   import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import { slugify } from "$lib/helpers/slugify";
-  import type { store } from "$lib/store.svelte";
+  import { store } from "$lib/store.svelte";
   import H2 from "$lib/components/H2.svelte";
+  import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
+
   interface Props {
     node: typeof store.jsonSchema.nodes[number];
   }
@@ -69,6 +70,17 @@
       }
     })();
   });
+
+  let urpcSchema = $state("");
+  $effect(() => {
+    if (node.kind === "doc") return;
+    const extracted = extractNodeFromSchema(
+      store.urpcSchema,
+      node.kind,
+      name,
+    );
+    if (extracted) urpcSchema = extracted;
+  });
 </script>
 
 <section {id}>
@@ -95,15 +107,21 @@
 
   <div class="pl-12 mt-1">
     {#if deprecatedMessage !== ""}
-      <div role="alert" class="alert alert-warning mt-6 mb-4">
+      <div role="alert" class="alert alert-warning mt-4">
         <TriangleAlert class="size-4" />
         <span>Deprecated: {deprecatedMessage}</span>
       </div>
     {/if}
 
     {#if documentation !== ""}
-      <div class="prose prose-headings:mb-0 prose-headings:mt-0 max-w-none">
+      <div class="prose prose-headings:mb-0 prose-headings:mt-0 max-w-none mt-2">
         {@html documentation}
+      </div>
+    {/if}
+
+    {#if urpcSchema !== ""}
+      <div class="prose prose-headings:mb-0 prose-headings:mt-0 max-w-none mt-2">
+        <pre><code>{urpcSchema}</code></pre>
       </div>
     {/if}
   </div>
