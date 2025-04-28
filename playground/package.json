@@ -16,6 +16,7 @@
   "devDependencies": {
     "@lucide/svelte": "0.503.0",
     "@monaco-editor/loader": "1.5.0",
+    "@shikijs/colorized-brackets": "3.3.0",
     "@shikijs/monaco": "3.3.0",
     "@sveltejs/adapter-static": "3.0.8",
     "@sveltejs/kit": "2.20.7",

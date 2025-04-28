@@ -2,6 +2,7 @@
   import { toast } from "svelte-sonner";
   import { Copy } from "@lucide/svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
+  import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { store } from "$lib/store.svelte";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
@@ -26,6 +27,7 @@
       urpcSchemaHighlighted = highlighter.codeToHtml(codeToHighlight, {
         lang: lang,
         theme: theme,
+        transformers: [transformerColorizedBrackets()],
       });
     })();
   });

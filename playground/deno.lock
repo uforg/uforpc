@@ -5,6 +5,7 @@
     "jsr:@std/internal@^1.0.6": "1.0.6",
     "npm:@lucide/svelte@0.503.0": "0.503.0_svelte@5.28.2__acorn@8.14.1",
     "npm:@monaco-editor/loader@1.5.0": "1.5.0",
+    "npm:@shikijs/colorized-brackets@3.3.0": "3.3.0",
     "npm:@shikijs/monaco@3.3.0": "3.3.0",
     "npm:@sveltejs/adapter-static@3.0.8": "3.0.8_@sveltejs+kit@2.20.7__@sveltejs+vite-plugin-svelte@5.0.3___svelte@5.28.2____acorn@8.14.1___vite@6.2.5__svelte@5.28.2___acorn@8.14.1__vite@6.2.5_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.28.2___acorn@8.14.1__vite@6.2.5_svelte@5.28.2__acorn@8.14.1_vite@6.2.5_@types+node@22.12.0",
     "npm:@sveltejs/kit@2.20.7": "2.20.7_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.28.2___acorn@8.14.1__vite@6.2.5_svelte@5.28.2__acorn@8.14.1_vite@6.2.5_@types+node@22.12.0",
@@ -260,6 +261,12 @@
     },
     "@rollup/rollup-win32-x64-msvc@4.40.0": {
       "integrity": "sha512-lpPE1cLfP5oPzVjKMx10pgBmKELQnFJXHgvtHCtuJWOv8MxqdEIMNtgHgBFf7Ea2/7EuVwa9fodWUfXAlXZLZQ=="
+    },
+    "@shikijs/colorized-brackets@3.3.0": {
+      "integrity": "sha512-/Rw0tnuoSPs75qDTvAQrYG34+qlV/hewIwXD0BGmsRcqVT6Y0DcvUGfQEdunowytcKnn/YabFqwj3wgVig4RmA==",
+      "dependencies": [
+        "shiki"
+      ]
     },
     "@shikijs/core@3.3.0": {
       "integrity": "sha512-CovkFL2WVaHk6PCrwv6ctlmD4SS1qtIfN8yEyDXDYWh4ONvomdM9MaFw20qHuqJOcb8/xrkqoWQRJ//X10phOQ==",
@@ -1422,6 +1429,7 @@
       "dependencies": [
         "npm:@lucide/svelte@0.503.0",
         "npm:@monaco-editor/loader@1.5.0",
+        "npm:@shikijs/colorized-brackets@3.3.0",
         "npm:@shikijs/monaco@3.3.0",
         "npm:@sveltejs/adapter-static@3.0.8",
         "npm:@sveltejs/kit@2.20.7",
