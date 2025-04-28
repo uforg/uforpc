@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
   import { isscrolledAction } from "$lib/actions/isScrolled.svelte.ts";
   import { activesectionAction } from "$lib/actions/activeSection.svelte.ts";
   import { store } from "$lib/store.svelte";
@@ -14,7 +15,8 @@
   $effect(() => {
     if (activeSection) {
       store.activeSection = activeSection;
-      history.replaceState(null, "", `#${activeSection}`);
+      // history.replaceState(null, "", `#${activeSection}`);
+      goto(`#${activeSection}`, { noScroll: true });
     }
   });
 

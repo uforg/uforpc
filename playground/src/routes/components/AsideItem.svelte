@@ -53,7 +53,7 @@
     return false;
   });
 
-  const changeActiveSection = (contentId: string) => {
+  const navigate = (contentId: string) => {
     store.activeSection = contentId;
   };
 
@@ -66,7 +66,7 @@
   {id}
   {href}
   {title}
-  onclick={() => changeActiveSection(contentId)}
+  onclick={() => navigate(contentId)}
   class={[
     "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
     {
