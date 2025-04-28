@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { store } from "$lib/store.svelte";
+  import { toast } from "svelte-sonner";
+  import { Copy } from "@lucide/svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
+  import { store } from "$lib/store.svelte";
 
   interface Props {
     code: string;
@@ -24,10 +26,31 @@
       });
     })();
   });
+
+  async function copyToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Text copied to clipboard", { duration: 1500 });
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+      toast.error("Failed to copy text", {
+        description: `Error: ${err}`,
+      });
+    }
+  }
 </script>
 
 {#if urpcSchemaHighlighted !== ""}
-  <div>
+  <div class="relative z-10 group">
+    <button
+      class="btn absolute top-2 right-2 hidden group-hover:block"
+      onclick={() => copyToClipboard(code)}
+    >
+      <span class="flex justify-center items-center space-x-2">
+        <span>Copy</span>
+        <Copy class="size-4" />
+      </span>
+    </button>
     {@html urpcSchemaHighlighted}
   </div>
 {/if}
