@@ -1,25 +1,32 @@
 <script lang="ts">
-  import { isscrolledAction } from "$lib/actions/isScrolled.svelte";
+  import { isscrolledAction } from "$lib/actions/isScrolled.svelte.ts";
+  import { activesectionAction } from "$lib/actions/activeSection.svelte.ts";
   import { onMount } from "svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";
   import Main from "./components/Main.svelte";
 
   let isScrolled = $state(false);
+  let activeSection = $state("");
 
-  // if has hash anchor navigate to it
-  onMount(async () => {
-    // wait 500ms to ensure the content is rendered
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    if (window.location.hash) {
-      const element = document.getElementById(
-        window.location.hash.slice(1),
-      );
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
+  // Update URL hash when active section changes
+  $effect(() => {
+    if (activeSection) {
+      globalThis.history.replaceState(null, "", `#${activeSection}`);
     }
+  });
+
+  // Scroll to hash on initial load
+  onMount(() => {
+    setTimeout(() => {
+      const hash = globalThis.location.hash.slice(1);
+      if (hash) {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }, 500);
   });
 </script>
 
@@ -27,10 +34,14 @@
   <Aside />
   <div
     use:isscrolledAction
+    use:activesectionAction
     onisscrolled={(e) => (isScrolled = e.detail)}
+    onactivesection={(e) => (activeSection = e.detail)}
     class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]"
   >
     <Header {isScrolled} />
     <Main />
+
+    <div class="h-[calc(100dvh-100px)]"></div>
   </div>
 </div>

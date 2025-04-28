@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
   import type { store } from "$lib/store.svelte";
@@ -55,7 +55,7 @@
   });
 
   let isActive = $derived.by(() => {
-    return $page.url.hash === href;
+    return page.url.hash === href;
   });
 </script>
 
