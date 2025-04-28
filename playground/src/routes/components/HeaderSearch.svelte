@@ -1,6 +1,16 @@
 <script lang="ts">
-  import { Search, X } from "@lucide/svelte";
+  import {
+    ArrowLeftRight,
+    BookOpenText,
+    FileX,
+    Scale,
+    Search,
+    Type,
+    X,
+  } from "@lucide/svelte";
+  import { miniSearch } from "$lib/store.svelte";
   import Modal from "$lib/components/Modal.svelte";
+  import H2 from "$lib/components/H2.svelte";
 
   const isMac = /mac/.test(navigator.userAgent.toLowerCase());
   const ctrl = isMac ? "⌘" : "CTRL";
@@ -28,6 +38,9 @@
       window.removeEventListener("keydown", onKeydown);
     };
   });
+
+  let searchQuery = $state("");
+  let searchResults = $derived(miniSearch.search(searchQuery));
 </script>
 
 <button
@@ -46,16 +59,49 @@
   <div class="flex justify-start items-center space-x-2">
     <label class="input flex-grow">
       <Search class="size-4" />
-      <input bind:this={input} type="search" placeholder="Search..." />
+      <input
+        bind:this={input}
+        bind:value={searchQuery}
+        type="search"
+        placeholder="Search..."
+      />
     </label>
     <button class="btn btn-square" onclick={closeModal}>
       <X class="size-4" />
     </button>
   </div>
 
-  <ul class="list mt-4">
-    <li class="list-row">Test 1</li>
-    <li class="list-row">Test 2</li>
-    <li class="list-row">Test 3</li>
-  </ul>
+  {#if searchResults.length === 0}
+    <div class="my-8 flex flex-col space-y-2 justify-center items-center text-center">
+      <FileX class="size-12" />
+      <H2>No results found</H2>
+    </div>
+  {/if}
+
+  {#if searchResults.length > 0}
+    <ul class="list mt-4">
+      {#each searchResults as result}
+        <li class="list-row hover:bg-base-200">
+          <a href={`#${result.slug}`} onclick={closeModal}>
+            <span class="flex justify-start items-center text-lg font-bold">
+              {#if result.kind === "doc"}
+                <BookOpenText class="flex-none size-4 mr-2" />
+              {/if}
+              {#if result.kind === "rule"}
+                <Scale class="flex-none size-4 mr-2" />
+              {/if}
+              {#if result.kind === "type"}
+                <Type class="flex-none size-4 mr-2" />
+              {/if}
+              {#if result.kind === "proc"}
+                <ArrowLeftRight class="flex-none size-4 mr-2" />
+              {/if}
+              {result.name}
+            </span>
+            <p class="text-sm truncate">{result.doc}</p>
+          </a>
+        </li>
+      {/each}
+    </ul>
+  {/if}
 </Modal>
