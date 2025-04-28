@@ -1,19 +1,30 @@
 <script lang="ts">
   import { toast } from "svelte-sonner";
-  import { Copy } from "@lucide/svelte";
+  import { ChevronDown, ChevronRight, Copy } from "@lucide/svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { store } from "$lib/store.svelte";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
+  import { fade } from "svelte/transition";
 
   interface Props {
     code: string;
     lang: "urpc";
     class?: ClassValue;
+    collapsible?: boolean;
+    isOpen?: boolean;
+    title?: string;
   }
 
-  const { code, lang, class: className }: Props = $props();
+  let {
+    code,
+    lang,
+    class: className,
+    collapsible = false,
+    isOpen = $bindable(true),
+    title = "Code",
+  }: Props = $props();
 
   let urpcSchemaHighlighted = $state("");
   $effect(() => {
@@ -43,20 +54,57 @@
       });
     }
   }
+
+  function toggleCollapse() {
+    isOpen = !isOpen;
+  }
 </script>
 
 {#if urpcSchemaHighlighted !== ""}
-  <div class={mergeClasses("relative z-10 group", className)}>
-    <button
-      class="btn absolute top-2 right-2 hidden group-hover:block"
-      onclick={() => copyToClipboard(code)}
-    >
-      <span class="flex justify-center items-center space-x-2">
-        <span>Copy</span>
-        <Copy class="size-4" />
-      </span>
-    </button>
-    {@html urpcSchemaHighlighted}
+  <div
+    class={mergeClasses(
+      "group rounded-box shadow-sm bg-base-200 border border-base-300",
+      className,
+    )}
+  >
+    {#if collapsible}
+      <button
+        class={[
+          "btn btn-ghost btn-block justify-start px-5 py-6",
+          {
+            "rounded-b-none": isOpen,
+          },
+        ]}
+        onclick={toggleCollapse}
+      >
+        {#if isOpen}
+          <ChevronDown class="size-5 mr-2" />
+        {:else}
+          <ChevronRight class="size-5 mr-2" />
+        {/if}
+        {#if title}
+          {title}
+        {/if}
+      </button>
+    {/if}
+
+    {#if !collapsible || isOpen}
+      <div
+        class="relative z-10 p-4 border-t border-base-300"
+        transition:fade={{ duration: 150 }}
+      >
+        <button
+          class="btn absolute top-4 right-4 hidden group-hover:block"
+          onclick={() => copyToClipboard(code)}
+        >
+          <span class="flex justify-center items-center space-x-2">
+            <span>Copy</span>
+            <Copy class="size-4" />
+          </span>
+        </button>
+        {@html urpcSchemaHighlighted}
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -66,7 +114,7 @@
 
   div {
     :global(pre) {
-      @apply p-4 rounded-box shadow-md border border-base-200 bg-base-200!;
+      @apply bg-base-200!;
       @apply overflow-x-auto;
     }
 

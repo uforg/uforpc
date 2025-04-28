@@ -121,7 +121,13 @@
     {/if}
 
     {#if urpcSchema !== ""}
-      <Code lang="urpc" code={urpcSchema} />
+      <Code
+        lang="urpc"
+        code={urpcSchema}
+        collapsible
+        title={`Schema for ${name}`}
+        isOpen={false}
+      />
     {/if}
   </div>
 </section>
