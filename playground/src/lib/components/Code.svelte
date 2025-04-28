@@ -71,6 +71,7 @@
       <button
         class={[
           "btn btn-ghost btn-block justify-start px-5 py-6",
+          "border-none hover:border-none rounded-t-box",
           {
             "rounded-b-none": isOpen,
           },
