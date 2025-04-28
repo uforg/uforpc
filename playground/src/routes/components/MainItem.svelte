@@ -12,8 +12,9 @@
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import { slugify } from "$lib/helpers/slugify";
   import { store } from "$lib/store.svelte";
-  import H2 from "$lib/components/H2.svelte";
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
+  import H2 from "$lib/components/H2.svelte";
+  import UrpcCode from "$lib/components/UrpcCode.svelte";
 
   interface Props {
     node: typeof store.jsonSchema.nodes[number];
@@ -120,9 +121,7 @@
     {/if}
 
     {#if urpcSchema !== ""}
-      <div class="prose prose-headings:mb-0 prose-headings:mt-0 max-w-none mt-2">
-        <pre><code>{urpcSchema}</code></pre>
-      </div>
+      <UrpcCode code={urpcSchema} />
     {/if}
   </div>
 </section>
