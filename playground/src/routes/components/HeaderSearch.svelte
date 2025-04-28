@@ -9,7 +9,10 @@
     X,
   } from "@lucide/svelte";
   import { miniSearch } from "$lib/store.svelte";
-  import { markSearchHints } from "$lib/helpers/markSearchHints";
+  import {
+    markSearchHints,
+    truncateWithMark,
+  } from "$lib/helpers/markSearchHints";
   import Modal from "$lib/components/Modal.svelte";
   import H2 from "$lib/components/H2.svelte";
 
@@ -100,9 +103,8 @@
               {@html markSearchHints(result, result.name)}
             </span>
             <p class="text-sm truncate">
-              {@html markSearchHints(result, result.doc)}
+              {@html truncateWithMark(result, result.doc)}
             </p>
-            <pre>{JSON.stringify(result, null, 2)}</pre>
           </a>
         </li>
       {/each}
