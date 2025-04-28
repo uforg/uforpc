@@ -122,6 +122,7 @@
 
     {#if urpcSchema !== ""}
       <Code
+        class="mt-4"
         lang="urpc"
         code={urpcSchema}
         collapsible
