@@ -115,7 +115,7 @@
     {/if}
 
     {#if documentation !== ""}
-      <div class="prose prose-headings:mb-0 prose-headings:mt-0 max-w-none mt-2">
+      <div class="prose prose-headings:mt-0 max-w-none mt-2">
         {@html documentation}
       </div>
     {/if}
