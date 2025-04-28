@@ -48,6 +48,7 @@ export interface Header {
 
 export interface Store {
   loaded: boolean;
+  activeSection: string;
   theme: Theme;
   endpoint: string;
   headers: Header[];
@@ -57,6 +58,7 @@ export interface Store {
 
 export const store: Store = $state({
   loaded: false,
+  activeSection: "",
   theme: "system",
   endpoint: "",
   headers: [],

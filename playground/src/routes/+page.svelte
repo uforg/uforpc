@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { isscrolledAction } from "$lib/actions/isScrolled.svelte.ts";
   import { activesectionAction } from "$lib/actions/activeSection.svelte.ts";
-  import { onMount } from "svelte";
+  import { store } from "$lib/store.svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";
   import Main from "./components/Main.svelte";
@@ -12,7 +13,8 @@
   // Update URL hash when active section changes
   $effect(() => {
     if (activeSection) {
-      globalThis.history.replaceState(null, "", `#${activeSection}`);
+      store.activeSection = activeSection;
+      history.replaceState(null, "", `#${activeSection}`);
     }
   });
 

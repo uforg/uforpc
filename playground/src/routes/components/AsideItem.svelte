@@ -1,8 +1,4 @@
 <script lang="ts">
-  import { page } from "$app/state";
-  import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
-  import { slugify } from "$lib/helpers/slugify";
-  import type { store } from "$lib/store.svelte";
   import {
     ArrowLeftRight,
     BookOpenText,
@@ -10,6 +6,9 @@
     TriangleAlert,
     Type,
   } from "@lucide/svelte";
+  import { store } from "$lib/store.svelte";
+  import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
+  import { slugify } from "$lib/helpers/slugify";
 
   interface Props {
     node: typeof store.jsonSchema.nodes[number];
@@ -54,8 +53,12 @@
     return false;
   });
 
+  const changeActiveSection = (contentId: string) => {
+    store.activeSection = contentId;
+  };
+
   let isActive = $derived.by(() => {
-    return page.url.hash === href;
+    return store.activeSection === contentId;
   });
 </script>
 
@@ -63,6 +66,7 @@
   {id}
   {href}
   {title}
+  onclick={() => changeActiveSection(contentId)}
   class={[
     "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
     {
