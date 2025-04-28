@@ -3,13 +3,16 @@
   import { Copy } from "@lucide/svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
   import { store } from "$lib/store.svelte";
+  import { mergeClasses } from "$lib/helpers/mergeClasses";
+  import type { ClassValue } from "$lib/helpers/mergeClasses";
 
   interface Props {
     code: string;
-    lang: string;
+    lang: "urpc";
+    class?: ClassValue;
   }
 
-  const { code, lang }: Props = $props();
+  const { code, lang, class: className }: Props = $props();
 
   let urpcSchemaHighlighted = $state("");
   $effect(() => {
@@ -41,7 +44,7 @@
 </script>
 
 {#if urpcSchemaHighlighted !== ""}
-  <div class="relative z-10 group">
+  <div class={mergeClasses("relative z-10 group", className)}>
     <button
       class="btn absolute top-2 right-2 hidden group-hover:block"
       onclick={() => copyToClipboard(code)}
@@ -61,7 +64,7 @@
 
   div {
     :global(pre) {
-      @apply p-4 rounded-box shadow-md border border-base-200 bg-base-100;
+      @apply p-4 rounded-box shadow-md border border-base-200 bg-base-200!;
       @apply overflow-x-auto;
     }
 
