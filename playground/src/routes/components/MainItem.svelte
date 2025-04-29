@@ -127,7 +127,7 @@
         code={urpcSchema}
         collapsible
         title={`Schema for ${name}`}
-        isOpen={false}
+        isOpen={node.kind === "rule" || node.kind === "type"}
       />
     {/if}
   </div>
