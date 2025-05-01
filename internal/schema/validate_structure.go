@@ -99,14 +99,18 @@ func validateRuleTypeReferences(sch Schema) error {
 	}
 
 	for _, rule := range ruleNodes {
+		if rule.For == nil {
+			return fmt.Errorf("rule '%s' has no 'for' clause", rule.Name)
+		}
+
 		// If the rule is for a custom type (starts with uppercase letter)
-		if len(rule.For) > 0 && rule.For[0] >= 'A' && rule.For[0] <= 'Z' {
-			if !definedTypes[rule.For] {
-				return fmt.Errorf("rule '%s' references undefined type: %s", rule.Name, rule.For)
+		if len(rule.For.Type) > 0 && rule.For.Type[0] >= 'A' && rule.For.Type[0] <= 'Z' {
+			if !definedTypes[rule.For.Type] {
+				return fmt.Errorf("rule '%s' references undefined type: %s", rule.Name, rule.For.Type)
 			}
-		} else if !primitiveTypes[rule.For] {
+		} else if !primitiveTypes[rule.For.Type] {
 			// If it's not a custom type, it must be a valid primitive type
-			return fmt.Errorf("rule '%s' references invalid primitive type: %s", rule.Name, rule.For)
+			return fmt.Errorf("rule '%s' references invalid primitive type: %s", rule.Name, rule.For.Type)
 		}
 	}
 

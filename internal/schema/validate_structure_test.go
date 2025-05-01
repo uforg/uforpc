@@ -34,7 +34,10 @@ func TestValidateStructure(t *testing.T) {
 				{
 					"kind": "rule",
 					"name": "required",
-					"for": "string"
+					"for": {
+						"type": "string",
+						"isArray": false
+					}
 				},
 				{
 					"kind": "type",
@@ -43,7 +46,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -56,7 +59,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -65,7 +68,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "user",
 							"typeName": "User",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -90,12 +93,18 @@ func TestValidateStructure(t *testing.T) {
 				{
 					"kind": "rule",
 					"name": "required",
-					"for": "string"
+					"for": {
+						"type": "string",
+						"isArray": false
+					}
 				},
 				{
 					"kind": "rule",
 					"name": "required",
-					"for": "int"
+					"for": {
+						"type": "int",
+						"isArray": false
+					}
 				}
 			]
 		}`
@@ -142,7 +151,10 @@ func TestValidateStructure(t *testing.T) {
 				{
 					"kind": "rule",
 					"name": "validateUser",
-					"for": "User"
+					"for": {
+						"type": "User",
+						"isArray": false
+					}
 				}
 			]
 		}`
@@ -163,7 +175,10 @@ func TestValidateStructure(t *testing.T) {
 				{
 					"kind": "rule",
 					"name": "validateUser",
-					"for": "invalid"
+					"for": {
+						"type": "invalid",
+						"isArray": false
+					}
 				}
 			]
 		}`
@@ -188,7 +203,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "address",
 							"typeName": "Address",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -217,7 +232,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "invalid",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -250,13 +265,13 @@ func TestValidateStructure(t *testing.T) {
 									{
 										"name": "city",
 										"typeName": "City",
-										"depth": 0,
+										"isArray": false,
 										"optional": false,
 										"rules": []
 									}
 								]
 							},
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -285,7 +300,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "filter",
 							"typeName": "UserFilter",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -317,7 +332,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "user",
 							"typeName": "User",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -347,7 +362,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "address",
 							"typeName": "Address",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -360,7 +375,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "user",
 							"typeName": "User",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -389,7 +404,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "address",
 							"typeName": "Address",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -402,7 +417,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "user",
 							"typeName": "User",
-							"depth": 0,
+							"isArray": false,
 							"optional": true,
 							"rules": []
 						}
@@ -430,7 +445,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "department",
 							"typeName": "Department",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -443,7 +458,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "company",
 							"typeName": "Company",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -492,19 +507,19 @@ func TestValidateStructure(t *testing.T) {
 												{
 													"name": "user",
 													"typeName": "User",
-													"depth": 0,
+													"isArray": false,
 													"optional": false,
 													"rules": []
 												}
 											]
 										},
-										"depth": 0,
+										"isArray": false,
 										"optional": false,
 										"rules": []
 									}
 								]
 							},
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -541,19 +556,19 @@ func TestValidateStructure(t *testing.T) {
 												{
 													"name": "user",
 													"typeName": "User",
-													"depth": 0,
+													"isArray": false,
 													"optional": true,
 													"rules": []
 												}
 											]
 										},
-										"depth": 0,
+										"isArray": false,
 										"optional": false,
 										"rules": []
 									}
 								]
 							},
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -589,19 +604,19 @@ func TestValidateStructure(t *testing.T) {
 												{
 													"name": "user",
 													"typeName": "User",
-													"depth": 0,
+													"isArray": false,
 													"optional": false,
 													"rules": []
 												}
 											]
 										},
-										"depth": 0,
+										"isArray": false,
 										"optional": true,
 										"rules": []
 									}
 								]
 							},
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -629,7 +644,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": [
 								{
@@ -668,7 +683,7 @@ func TestValidateStructure(t *testing.T) {
 									{
 										"name": "city",
 										"typeName": "string",
-										"depth": 0,
+										"isArray": false,
 										"optional": false,
 										"rules": [
 											{
@@ -680,7 +695,7 @@ func TestValidateStructure(t *testing.T) {
 									}
 								]
 							},
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -709,7 +724,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": [
 								{
@@ -747,7 +762,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "success",
 							"typeName": "boolean",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": [
 								{
@@ -779,7 +794,10 @@ func TestValidateStructure(t *testing.T) {
 				{
 					"kind": "rule",
 					"name": "uuid",
-					"for": "string"
+						"for": {
+							"type": "string",
+							"isArray": false
+						}
 				},
 				{
 					"kind": "type",
@@ -788,7 +806,7 @@ func TestValidateStructure(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": [
 								{

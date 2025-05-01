@@ -210,7 +210,10 @@ func TestNodeKind(t *testing.T) {
 		node := NodeRule{
 			Kind: "rule",
 			Name: "required",
-			For:  "string",
+			For: &ForDefinition{
+				Type:    "string",
+				IsArray: false,
+			},
 		}
 		require.Equal(t, "rule", node.NodeKind())
 	})
@@ -276,7 +279,10 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 				{
 					"kind": "rule",
 					"name": "required",
-					"for": "string",
+					"for": {
+						"type": "string",
+						"isArray": false
+					},
 					"doc": "Required field rule",
 					"error": "Field is required"
 				}
@@ -293,7 +299,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.True(t, ok, "Node should be a NodeRule")
 		require.Equal(t, "rule", ruleNode.Kind)
 		require.Equal(t, "required", ruleNode.Name)
-		require.Equal(t, "string", ruleNode.For)
+		require.Equal(t, "string", ruleNode.For.Type)
 		require.NotNil(t, ruleNode.Doc)
 		require.Equal(t, "Required field rule", *ruleNode.Doc)
 		require.NotNil(t, ruleNode.Error)
@@ -312,14 +318,14 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						},
 						{
 							"name": "name",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": true,
 							"optional": false,
 							"rules": []
 						}
@@ -347,14 +353,14 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.Equal(t, "id", typeNode.Fields[0].Name)
 		require.NotNil(t, typeNode.Fields[0].TypeName)
 		require.Equal(t, "string", *typeNode.Fields[0].TypeName)
-		require.Equal(t, 0, typeNode.Fields[0].Depth)
+		require.False(t, typeNode.Fields[0].IsArray)
 		require.False(t, typeNode.Fields[0].Optional)
 		require.Empty(t, typeNode.Fields[0].Rules)
 
 		require.Equal(t, "name", typeNode.Fields[1].Name)
 		require.NotNil(t, typeNode.Fields[1].TypeName)
 		require.Equal(t, "string", *typeNode.Fields[1].TypeName)
-		require.Equal(t, 0, typeNode.Fields[1].Depth)
+		require.True(t, typeNode.Fields[1].IsArray)
 		require.False(t, typeNode.Fields[1].Optional)
 		require.Empty(t, typeNode.Fields[1].Rules)
 	})
@@ -371,7 +377,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 						{
 							"name": "id",
 							"typeName": "string",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -380,7 +386,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 						{
 							"name": "user",
 							"typeName": "User",
-							"depth": 0,
+							"isArray": false,
 							"optional": false,
 							"rules": []
 						}
@@ -460,7 +466,10 @@ func TestGetNodeMethods(t *testing.T) {
 			{
 				"kind": "rule",
 				"name": "required",
-				"for": "string"
+				"for": {
+					"type": "string",
+					"isArray": false
+				}
 			},
 			{
 				"kind": "type",
@@ -469,7 +478,7 @@ func TestGetNodeMethods(t *testing.T) {
 					{
 						"name": "id",
 						"typeName": "string",
-						"depth": 0,
+						"isArray": false,
 						"optional": false,
 						"rules": []
 					}
@@ -482,7 +491,7 @@ func TestGetNodeMethods(t *testing.T) {
 					{
 						"name": "id",
 						"typeName": "string",
-						"depth": 0,
+						"isArray": false,
 						"optional": false,
 						"rules": []
 					}
@@ -491,7 +500,7 @@ func TestGetNodeMethods(t *testing.T) {
 					{
 						"name": "user",
 						"typeName": "User",
-						"depth": 0,
+						"isArray": false,
 						"optional": false,
 						"rules": []
 					}
@@ -626,7 +635,10 @@ func TestDeprecated(t *testing.T) {
 					"kind": "rule",
 					"name": "required",
 					"deprecated": "",
-					"for": "string"
+					"for": {
+						"type": "string",
+						"isArray": false
+					}
 				},
 				{
 					"kind": "type",
@@ -675,7 +687,10 @@ func TestDeprecated(t *testing.T) {
 					"kind": "rule",
 					"name": "required",
 					"deprecated": "Deprecation message",
-					"for": "string"
+					"for": {
+						"type": "string",
+						"isArray": false
+					}
 				},
 				{
 					"kind": "type",

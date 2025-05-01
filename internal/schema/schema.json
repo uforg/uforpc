@@ -66,14 +66,7 @@
         },
         "for": {
           "description": "The primitive or custom type name this rule applies to.",
-          "oneOf": [
-            { "$ref": "#/$defs/PrimitiveTypeEnum" },
-            {
-              "type": "string",
-              "description": "Custom type name",
-              "pattern": "^[A-Z][a-zA-Z0-9]*$"
-            }
-          ]
+          "$ref": "#/$defs/forDefinition"
         },
         "paramDef": {
           "description": "Definition of the parameter this rule expects (null if none).",
@@ -85,6 +78,31 @@
         }
       },
       "required": ["kind", "name", "for"],
+      "additionalProperties": false
+    },
+
+    "forDefinition": {
+      "title": "For Definition",
+      "description": "Describes the type and structure expected for a rule's for clause.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The primitive or custom type name this rule applies to.",
+          "oneOf": [
+            { "$ref": "#/$defs/PrimitiveTypeEnum" },
+            {
+              "type": "string",
+              "description": "Custom type name",
+              "pattern": "^[A-Z][a-zA-Z0-9]*$"
+            }
+          ]
+        },
+        "isArray": {
+          "description": "Indicates if the for clause is expected to be an array of the specified type.",
+          "type": "boolean"
+        }
+      },
+      "required": ["type", "isArray"],
       "additionalProperties": false
     },
 
@@ -227,10 +245,9 @@
           "description": "Definition of the inline object type (used if the type is not named).",
           "$ref": "#/$defs/inlineTypeDefinition"
         },
-        "depth": {
-          "description": "Array dimensions (0 for scalar, 1 for T[], 2 for T[][], etc.).",
-          "type": "integer",
-          "minimum": 0
+        "isArray": {
+          "description": "Indicates if the field is an array.",
+          "type": "boolean"
         },
         "optional": {
           "description": "Indicates if the field is optional.",
@@ -242,7 +259,7 @@
           "items": { "$ref": "#/$defs/appliedRule" }
         }
       },
-      "required": ["name", "depth", "optional"],
+      "required": ["name", "isArray", "optional"],
       "additionalProperties": false
     },
 

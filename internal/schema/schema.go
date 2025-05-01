@@ -196,7 +196,7 @@ type NodeRule struct {
 	// associated with the deprecation.
 	Deprecated *string `json:"deprecated,omitempty"`
 	// For indicates the primitive or custom type name this rule applies to.
-	For string `json:"for"`
+	For *ForDefinition `json:"for"`
 	// Param defines the parameter structure expected by this rule (null if none).
 	Param *ParamDefinition `json:"paramDef,omitempty"` // Pointer handles null
 	// Error is the default error message for the rule (optional).
@@ -310,6 +310,12 @@ func (mv MetaValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nil)
 }
 
+// ForDefinition describes the type and structure expected for a rule's for clause.
+type ForDefinition struct {
+	Type    string `json:"type"`
+	IsArray bool   `json:"isArray"`
+}
+
 // ParamDefinition describes the parameter structure expected by a rule.
 type ParamDefinition struct {
 	Type    ParamPrimitiveType `json:"type"`
@@ -323,8 +329,8 @@ type FieldDefinition struct {
 	TypeName *string `json:"typeName,omitempty"`
 	// TypeInline holds the definition if the type is inline. Mutually exclusive with TypeName.
 	TypeInline *InlineTypeDefinition `json:"typeInline,omitempty"`
-	// Depth indicates array dimensions (0 for scalar, 1 for T[], etc.).
-	Depth int `json:"depth"`
+	// IsArray indicates if the field is an array.
+	IsArray bool `json:"isArray"`
 	// Optional indicates if the field is optional.
 	Optional bool `json:"optional"`
 	// Rules is the list of validation rules applied to this field.
