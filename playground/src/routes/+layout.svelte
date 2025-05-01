@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import { Loader } from "@lucide/svelte";
-  import { Toaster } from "svelte-sonner";
+  import { toast, Toaster } from "svelte-sonner";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
   import {
     loadJsonSchemaFromUrpcSchemaUrl,
@@ -17,9 +17,29 @@
   // Initialize the WebAssembly binary
   let initialized = $state(false);
   onMount(async () => {
-    await initWasm();
-    await waitUntilInitialized();
-    await loadJsonSchemaFromUrpcSchemaUrl("./schema.urpc");
+    const handleError = (error: unknown) => {
+      console.error(error);
+      toast.error("Failed to initialize the Playground", {
+        description:
+          `Please try again or contact the developers if the problem persists. Error: ${error}`,
+        duration: 15000,
+      });
+    };
+
+    try {
+      await initWasm();
+      await waitUntilInitialized();
+    } catch (error) {
+      handleError(error);
+      return;
+    }
+
+    try {
+      await loadJsonSchemaFromUrpcSchemaUrl("./schema.urpc");
+    } catch (error) {
+      handleError(error);
+    }
+
     initialized = true;
   });
 </script>
