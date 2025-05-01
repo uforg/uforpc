@@ -15,6 +15,7 @@
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
   import H2 from "$lib/components/H2.svelte";
   import Code from "$lib/components/Code.svelte";
+  import QueryProc from "$lib/components/QueryProc/QueryProc.svelte";
 
   interface Props {
     node: typeof store.jsonSchema.nodes[number];
@@ -129,6 +130,10 @@
         title={`Schema for ${name}`}
         isOpen={node.kind === "rule" || node.kind === "type"}
       />
+    {/if}
+
+    {#if node.kind === "proc"}
+      <QueryProc class="mt-4" proc={node} />
     {/if}
   </div>
 </section>
