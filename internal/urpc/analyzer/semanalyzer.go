@@ -526,7 +526,7 @@ func (a *semanalyzer) validateCustomRuleReferences() {
 			var forType string
 			for _, child := range rule.Children {
 				if child.For != nil {
-					forType = child.For.For
+					forType = child.For.Type
 					break
 				}
 			}
@@ -584,7 +584,7 @@ func (a *semanalyzer) validateCustomRuleReferences() {
 						var forType string
 						for _, ruleChild := range customRule.Children {
 							if ruleChild.For != nil {
-								forType = ruleChild.For.For
+								forType = ruleChild.For.Type
 								break
 							}
 						}

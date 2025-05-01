@@ -159,7 +159,7 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For: "string",
+									Type: "string",
 								},
 							},
 						},
@@ -200,7 +200,7 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For: "string",
+									Type: "string",
 								},
 							},
 						},
@@ -230,7 +230,7 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For: "string",
+									Type: "string",
 								},
 							},
 						},
@@ -263,7 +263,7 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For: "string",
+									Type: "string",
 								},
 							},
 						},
@@ -293,7 +293,7 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For: "string",
+									Type: "string",
 								},
 							},
 							{
@@ -328,7 +328,7 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For:     "MyType",
+									Type:    "MyType",
 									IsArray: true,
 								},
 							},
@@ -368,7 +368,7 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For:     "MyType",
+									Type:    "MyType",
 									IsArray: true,
 								},
 							},
@@ -1359,7 +1359,7 @@ func TestParserComments(t *testing.T) {
 						Name: "myRule",
 						Children: []*ast.RuleDeclChild{
 							{
-								For: &ast.RuleDeclChildFor{For: "string"},
+								For: &ast.RuleDeclChildFor{Type: "string"},
 							},
 						},
 					},
@@ -1421,7 +1421,7 @@ func TestParserComments(t *testing.T) {
 								Comment: &ast.Comment{Simple: testutil.Pointer(" Before for")},
 							},
 							{
-								For: &ast.RuleDeclChildFor{For: "string"},
+								For: &ast.RuleDeclChildFor{Type: "string"},
 							},
 							{
 								Comment: &ast.Comment{Block: testutil.Pointer(" Between for and param ")},
@@ -1923,7 +1923,7 @@ func TestParserComments(t *testing.T) {
 						Name: "myRule",
 						Children: []*ast.RuleDeclChild{
 							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule start")}}, // Comment inside the block
-							{For: &ast.RuleDeclChildFor{For: "string"}},
+							{For: &ast.RuleDeclChildFor{Type: "string"}},
 							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on for")}},
 							{Param: &ast.RuleDeclChildParam{Param: "int"}},
 							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on param")}},
@@ -2468,7 +2468,7 @@ func TestParserFullSchema(t *testing.T) {
 					Children: []*ast.RuleDeclChild{
 						{
 							For: &ast.RuleDeclChildFor{
-								For: "string",
+								Type: "string",
 							},
 						},
 						{
@@ -2496,7 +2496,7 @@ func TestParserFullSchema(t *testing.T) {
 					Children: []*ast.RuleDeclChild{
 						{
 							For: &ast.RuleDeclChildFor{
-								For: "Category",
+								Type: "Category",
 							},
 						},
 						{
@@ -3630,7 +3630,7 @@ func TestParserFullSchema(t *testing.T) {
 					Children: []*ast.RuleDeclChild{
 						{
 							For: &ast.RuleDeclChildFor{
-								For: "int",
+								Type: "int",
 							},
 						},
 						{

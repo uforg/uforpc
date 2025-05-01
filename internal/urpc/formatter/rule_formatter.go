@@ -196,9 +196,9 @@ func (f *ruleFormatter) formatComment() {
 
 func (f *ruleFormatter) formatFor() {
 	if f.currentIndexChild.For.IsArray {
-		f.LineAndCommentf("for: %s[]", f.currentIndexChild.For.For)
+		f.LineAndCommentf("for: %s[]", f.currentIndexChild.For.Type)
 	} else {
-		f.LineAndCommentf("for: %s", f.currentIndexChild.For.For)
+		f.LineAndCommentf("for: %s", f.currentIndexChild.For.Type)
 	}
 }
 

@@ -188,7 +188,7 @@ type RuleDeclChild struct {
 // RuleDeclChildFor represents the "for" clause within a RuleDecl block.
 type RuleDeclChildFor struct {
 	Positions
-	For     string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
+	Type    string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
 	IsArray bool   `parser:"@(LBracket RBracket)?"`
 }
 
