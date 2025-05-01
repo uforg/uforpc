@@ -1,41 +1,41 @@
 // deno-lint-ignore-file no-explicit-any
 
 import { assertEquals } from "@std/assert";
-import { modifyObjectWithPath } from "./modifyObjectWithPath.ts";
+import { setAtPath } from "./setAtPath.ts";
 
-Deno.test("modifyObjectWithPath - modifies a simple property", () => {
+Deno.test("setAtPath - modifies a simple property", () => {
   const original = { name: "John", age: 30 };
-  const result = modifyObjectWithPath(original, "name", "Jane");
+  const result = setAtPath(original, "name", "Jane");
   assertEquals(result, { name: "Jane", age: 30 });
   // Original should remain unchanged
   assertEquals(original, { name: "John", age: 30 });
 });
 
-Deno.test("modifyObjectWithPath - creates nested property if it doesn't exist", () => {
+Deno.test("setAtPath - creates nested property if it doesn't exist", () => {
   const original: any = { user: { name: "John" } };
-  const result = modifyObjectWithPath(original, "user.age", 25);
+  const result = setAtPath(original, "user.age", 25);
   assertEquals(result, { user: { name: "John", age: 25 } });
 });
 
-Deno.test("modifyObjectWithPath - modifies nested property", () => {
+Deno.test("setAtPath - modifies nested property", () => {
   const original = { user: { name: "John", details: { age: 30 } } };
-  const result = modifyObjectWithPath(original, "user.details.age", 31);
+  const result = setAtPath(original, "user.details.age", 31);
   assertEquals(result, { user: { name: "John", details: { age: 31 } } });
 });
 
-Deno.test("modifyObjectWithPath - modifies array element", () => {
+Deno.test("setAtPath - modifies array element", () => {
   const original = { users: ["John", "Jane", "Bob"] };
-  const result = modifyObjectWithPath(original, "users.1", "Sarah");
+  const result = setAtPath(original, "users.1", "Sarah");
   assertEquals(result, { users: ["John", "Sarah", "Bob"] });
 });
 
-Deno.test("modifyObjectWithPath - modifies property in array of objects", () => {
+Deno.test("setAtPath - modifies property in array of objects", () => {
   const original = { users: [{ name: "John" }, { name: "Jane" }] };
-  const result = modifyObjectWithPath(original, "users.0.name", "Robert");
+  const result = setAtPath(original, "users.0.name", "Robert");
   assertEquals(result, { users: [{ name: "Robert" }, { name: "Jane" }] });
 });
 
-Deno.test("modifyObjectWithPath - handles deeply nested array properties", () => {
+Deno.test("setAtPath - handles deeply nested array properties", () => {
   const original = {
     departments: [
       {
@@ -46,7 +46,7 @@ Deno.test("modifyObjectWithPath - handles deeply nested array properties", () =>
       },
     ],
   };
-  const result = modifyObjectWithPath(
+  const result = setAtPath(
     original,
     "departments.0.teams.0.members.1",
     "Charlie",
@@ -63,51 +63,51 @@ Deno.test("modifyObjectWithPath - handles deeply nested array properties", () =>
   });
 });
 
-Deno.test("modifyObjectWithPath - adds property to empty object", () => {
+Deno.test("setAtPath - adds property to empty object", () => {
   const original = {};
-  const result = modifyObjectWithPath(original, "newProp", "value");
+  const result = setAtPath(original, "newProp", "value");
   assertEquals(result, { newProp: "value" });
 });
 
-Deno.test("modifyObjectWithPath - creates full path with nested objects", () => {
+Deno.test("setAtPath - creates full path with nested objects", () => {
   const original = {};
-  const result = modifyObjectWithPath(original, "a.b.c", "value");
+  const result = setAtPath(original, "a.b.c", "value");
   assertEquals(result, { a: { b: { c: "value" } } });
 });
 
-Deno.test("modifyObjectWithPath - creates arrays when numeric keys are used", () => {
+Deno.test("setAtPath - creates arrays when numeric keys are used", () => {
   const original = {};
-  const result = modifyObjectWithPath(original, "items.0", "first");
+  const result = setAtPath(original, "items.0", "first");
   assertEquals(result, { items: { "0": "first" } });
 });
 
-Deno.test("modifyObjectWithPath - handles null values", () => {
+Deno.test("setAtPath - handles null values", () => {
   const original: any = { user: null };
-  const result = modifyObjectWithPath(original, "user.name", "John");
+  const result = setAtPath(original, "user.name", "John");
   assertEquals(result, { user: { name: "John" } });
 });
 
-Deno.test("modifyObjectWithPath - overwrites primitive with object", () => {
+Deno.test("setAtPath - overwrites primitive with object", () => {
   const original: any = { count: 5 };
-  const result = modifyObjectWithPath(original, "count.value", 10);
+  const result = setAtPath(original, "count.value", 10);
   assertEquals(result, { count: { value: 10 } });
 });
 
-Deno.test("modifyObjectWithPath - handles empty string path", () => {
+Deno.test("setAtPath - handles empty string path", () => {
   const original: any = { name: "John" };
-  const result = modifyObjectWithPath(original, "", { replaced: true });
+  const result = setAtPath(original, "", { replaced: true });
   assertEquals(result, { "": { replaced: true }, name: "John" });
 });
 
-Deno.test("modifyObjectWithPath - sets falsy values correctly", () => {
+Deno.test("setAtPath - sets falsy values correctly", () => {
   const original = { active: true, count: 1 };
-  const result1 = modifyObjectWithPath(original, "active", false);
-  const result2 = modifyObjectWithPath(original, "count", 0);
+  const result1 = setAtPath(original, "active", false);
+  const result2 = setAtPath(original, "count", 0);
   assertEquals(result1, { active: false, count: 1 });
   assertEquals(result2, { active: true, count: 0 });
 });
 
-Deno.test("modifyObjectWithPath - preserves object type", () => {
+Deno.test("setAtPath - preserves object type", () => {
   class User {
     name: string;
     age: number;
@@ -118,18 +118,18 @@ Deno.test("modifyObjectWithPath - preserves object type", () => {
   }
 
   const original = new User("John", 30);
-  const result = modifyObjectWithPath(original, "age", 31);
+  const result = setAtPath(original, "age", 31);
   assertEquals(result.age, 31);
   assertEquals(result.name, "John");
 });
 
-Deno.test("modifyObjectWithPath - works with array at root", () => {
+Deno.test("setAtPath - works with array at root", () => {
   const original = [1, 2, 3];
-  const result = modifyObjectWithPath(original, "1", 42);
+  const result = setAtPath(original, "1", 42);
   assertEquals(result, [1, 42, 3]);
 });
 
-Deno.test("modifyObjectWithPath - preserves everything else in complex objects", () => {
+Deno.test("setAtPath - preserves everything else in complex objects", () => {
   const original = {
     user: {
       name: "John",
@@ -145,7 +145,7 @@ Deno.test("modifyObjectWithPath - preserves everything else in complex objects",
     },
   };
 
-  const result = modifyObjectWithPath(original, "user.address.city", "Boston");
+  const result = setAtPath(original, "user.address.city", "Boston");
 
   assertEquals(result.user.name, "John");
   assertEquals(result.user.address.city, "Boston");
@@ -155,10 +155,10 @@ Deno.test("modifyObjectWithPath - preserves everything else in complex objects",
   assertEquals(result.settings.notifications, true);
 });
 
-Deno.test("modifyObjectWithPath - Sets null and undefined values correctly", () => {
+Deno.test("setAtPath - Sets null and undefined values correctly", () => {
   const original: any = { name: "John", age: 30 };
-  let result = modifyObjectWithPath(original, "name", null);
-  result = modifyObjectWithPath(result, "age", undefined);
+  let result = setAtPath(original, "name", null);
+  result = setAtPath(result, "age", undefined);
 
   assertEquals(result, { name: null, age: undefined });
   assertEquals(original, { name: "John", age: 30 });

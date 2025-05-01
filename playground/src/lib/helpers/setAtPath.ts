@@ -9,7 +9,7 @@
  * @param value - The value to set at the specified path.
  * @returns A new JSON object with the updated value.
  */
-export function modifyObjectWithPath<T extends object>(
+export function setAtPath<T extends object>(
   originalJson: T,
   path: string,
   value: any,
