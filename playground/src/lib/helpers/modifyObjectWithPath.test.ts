@@ -154,3 +154,12 @@ Deno.test("modifyObjectWithPath - preserves everything else in complex objects",
   assertEquals(result.settings.theme, "dark");
   assertEquals(result.settings.notifications, true);
 });
+
+Deno.test("modifyObjectWithPath - Sets null and undefined values correctly", () => {
+  const original: any = { name: "John", age: 30 };
+  let result = modifyObjectWithPath(original, "name", null);
+  result = modifyObjectWithPath(result, "age", undefined);
+
+  assertEquals(result, { name: null, age: undefined });
+  assertEquals(original, { name: "John", age: 30 });
+});
