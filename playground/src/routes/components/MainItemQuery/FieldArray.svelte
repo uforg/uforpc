@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
-  import QueryProcFieldNamed from "./QueryProcFieldNamed.svelte";
-  import QueryProcFieldInline from "./QueryProcFieldInline.svelte";
+  import QueryProcFieldNamed from "./FieldNamed.svelte";
+  import QueryProcFieldInline from "./FieldInline.svelte";
 
   interface Props {
     field: FieldDefinition;

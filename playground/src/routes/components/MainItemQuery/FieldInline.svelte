@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
-  import QueryProcFieldNamed from "./QueryProcFieldNamed.svelte";
-  import QueryProcFieldInline from "./QueryProcFieldInline.svelte";
+  import FieldNamed from "./FieldNamed.svelte";
+  import FieldInline from "./FieldInline.svelte";
 
   interface Props {
     fields: FieldDefinition[];
@@ -17,7 +17,7 @@
   let mounted = $state(false);
   onMount(() => {
     for (const field of fields) {
-      if (field.depth == 0 && field.typeInline) {
+      if (!field.isArray && field.typeInline) {
         (value as any)[field.name] = {};
       }
     }
@@ -27,17 +27,17 @@
 
 {#if mounted}
   {#each fields as field}
-    {#if field.depth == 0 && field.typeName}
-      <QueryProcFieldNamed
+    {#if !field.isArray && field.typeName}
+      <FieldNamed
         {field}
         bind:value={(value as any)[field.name]}
       />
     {/if}
 
-    {#if field.depth == 0 && field.typeInline}
+    {#if !field.isArray && field.typeInline}
       <fieldset class="fieldset border border-base-300 rounded-box w-full p-4 space-y-2">
         <legend class="fieldset-legend">{field.name}</legend>
-        <QueryProcFieldInline
+        <FieldInline
           fields={field.typeInline.fields}
           bind:value={(value as any)[field.name]}
         />
