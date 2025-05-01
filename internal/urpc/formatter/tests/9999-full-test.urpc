@@ -36,7 +36,7 @@ deprecated("Deprecated")
       dummyField: int
     }
 
-    type ThirdDummyType extends FirstDummyType, SecondDummyType {
+    type ThirdDummyType {
       dummyField: string
     }
 
@@ -44,7 +44,7 @@ deprecated("Deprecated")
     Category represents a product category in the system.
     This type is used across the catalog module.
     """
-    type Category extends ThirdDummyType {
+    type Category {
       id: string
         @uuid(error: "Must be a valid UUID")
         @minlen(36)
@@ -244,7 +244,7 @@ type SecondDummyType {
   dummyField: int
 }
 
-type ThirdDummyType extends FirstDummyType, SecondDummyType {
+type ThirdDummyType {
   dummyField: string
 }
 
@@ -252,7 +252,7 @@ type ThirdDummyType extends FirstDummyType, SecondDummyType {
     Category represents a product category in the system.
     This type is used across the catalog module.
     """
-type Category extends ThirdDummyType {
+type Category {
   id: string
     @uuid(error: "Must be a valid UUID")
     @minlen(36)

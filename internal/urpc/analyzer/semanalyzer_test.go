@@ -341,25 +341,6 @@ func TestSemanalyzer_NonExistentTypeReference(t *testing.T) {
 	require.Contains(t, errors[0].Message, "is not declared")
 }
 
-func TestSemanalyzer_InvalidTypeExtends(t *testing.T) {
-	input := `
-		version 1
-
-		type UserExtended extends NonExistentType {
-		  email: string
-		}
-	`
-	combinedSchema, err := parseToCombinedSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "type \"UserExtended\" extends non-declared type \"NonExistentType\"")
-}
-
 func TestSemanalyzer_ValidArrayWithRules(t *testing.T) {
 	input := `
 		version 1
@@ -425,56 +406,6 @@ func TestSemanalyzer_BuiltInRuleValidation(t *testing.T) {
 		  tags: string[]
 		    @minlen(1)
 		    @maxlen(10)
-		}
-	`
-	combinedSchema, err := parseToCombinedSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_ValidTypeExtends(t *testing.T) {
-	input := `
-		version 1
-
-		type BaseUser {
-		  id: string
-		  username: string
-		}
-
-		type ExtendedUser extends BaseUser {
-		  email: string
-		  age: int
-		}
-	`
-	combinedSchema, err := parseToCombinedSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_MultipleTypeExtends(t *testing.T) {
-	input := `
-		version 1
-
-		type Base1 {
-		  field1: string
-		}
-
-		type Base2 {
-		  field2: int
-		}
-
-		type Combined extends Base1, Base2 {
-		  field3: boolean
 		}
 	`
 	combinedSchema, err := parseToCombinedSchema(input)
@@ -612,12 +543,12 @@ func TestSemanalyzer_InvalidRuleInInlineObject(t *testing.T) {
 	require.Contains(t, errors[0].Message, "is not declared")
 }
 
-func TestSemanalyzer_ValidArrayOfArrays(t *testing.T) {
+func TestSemanalyzer_ValidArray(t *testing.T) {
 	input := `
 		version 1
 
 		type Matrix {
-		  data: int[][]
+		  data: int[]
 		    @minlen(1)
 		}
 	`
@@ -770,89 +701,6 @@ func TestSemanalyzer_OptionalFields(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_RecursiveTypeExtension(t *testing.T) {
-	input := `
-			version 1
-
-			// Direct recursive extension
-			type User extends User {
-			  id: string
-			}
-		`
-	combinedSchema, err := parseToCombinedSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.NotEmpty(t, errors)
-
-	// Check that at least one error contains the expected message
-	found := false
-	for _, diag := range errors {
-		if strings.Contains(diag.Message, "recursive type extension detected") {
-			found = true
-			break
-		}
-	}
-	require.True(t, found, "Expected to find an error about recursive type extension")
-}
-
-func TestSemanalyzer_IndirectRecursiveTypeExtension(t *testing.T) {
-	input := `
-			version 1
-
-			// Indirect recursive extension: A extends B, B extends C, C extends A
-			type A extends B {
-			  id: string
-			}
-
-			type B extends C {
-			  name: string
-			}
-
-			type C extends A {
-			  age: int
-			}
-		`
-	combinedSchema, err := parseToCombinedSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.NotEmpty(t, errors)
-	require.Contains(t, errors[0].Message, "recursive type extension detected")
-}
-
-func TestSemanalyzer_DuplicateFieldsInTypeExtension(t *testing.T) {
-	input := `
-			version 1
-
-			type BaseUser {
-			  id: string
-			  email: string
-			}
-
-			// Duplicate field 'email' from BaseUser
-			type User extends BaseUser {
-			  name: string
-			  email: string  // This is a duplicate
-			}
-		`
-	combinedSchema, err := parseToCombinedSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "is already defined in extended type")
 }
 
 func TestSemanalyzer_CircularTypeDependency(t *testing.T) {
@@ -1114,7 +962,8 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		    @regex("^[a-zA-Z0-9_]+$", error: "Username can only contain letters, numbers, and underscores")
 		}
 
-		type User extends BaseUser {
+		type User {
+			user: BaseUser
 		  email: string
 		    @contains("@")
 		    @minlen(5)

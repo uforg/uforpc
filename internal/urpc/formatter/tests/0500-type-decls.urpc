@@ -3,30 +3,30 @@ Foo {
   
                       }deprecated
 
-type Bar extends Foo 
+type Bar 
 {}                  /* This
 is a comment */
 
-type Baz extends Foo, Bar
+type Baz
 {} // This is a comment
 
  """
 This is a test
 """ deprecated("Deprecated")
-type Qux extends Foo, Bar, Baz
+type Qux
 {}
 
 // >>>>
 
 type Foo {}
 
-deprecated type Bar extends Foo {} /* This
+deprecated type Bar {} /* This
 is a comment */
 
-type Baz extends Foo, Bar {} // This is a comment
+type Baz {} // This is a comment
 
 """
 This is a test
 """
 deprecated("Deprecated")
-type Qux extends Foo, Bar, Baz {}
+type Qux {}

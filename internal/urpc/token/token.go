@@ -57,7 +57,6 @@ const (
 	Deprecated TokenType = "Deprecated"
 	Rule       TokenType = "Rule"
 	Type       TokenType = "Type"
-	Extends    TokenType = "Extends"
 	Proc       TokenType = "Proc"
 	Input      TokenType = "Input"
 	Output     TokenType = "Output"
@@ -110,7 +109,6 @@ var TokenTypes = []TokenType{
 	Deprecated,
 	Rule,
 	Type,
-	Extends,
 	Proc,
 	Input,
 	Output,
@@ -158,7 +156,6 @@ var keywords = map[string]TokenType{
 	"deprecated": Deprecated,
 	"rule":       Rule,
 	"type":       Type,
-	"extends":    Extends,
 	"proc":       Proc,
 	"input":      Input,
 	"output":     Output,

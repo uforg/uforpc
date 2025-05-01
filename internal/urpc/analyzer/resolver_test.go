@@ -674,7 +674,8 @@ func TestResolver(t *testing.T) {
 
 					import "/schema_common.urpc"
 
-					type User extends WithId {
+					type User {
+						id: WithId
 						name: string
 						email: string
 							@minlen(6) // a@a.aa
@@ -691,7 +692,8 @@ func TestResolver(t *testing.T) {
 
 					import "/schema_common.urpc"
 
-					type Post extends WithId {
+					type Post {
+						id: WithId
 						title: string
 						content: string
 						authorId: string

@@ -205,7 +205,7 @@ func (f *fieldsFormatter) formatField() {
 		typeLiteral = strings.TrimSpace(nestedFormatter.format().String())
 	}
 
-	for range f.currentIndexChild.Field.Type.Depth {
+	if f.currentIndexChild.Field.Type.IsArray {
 		typeLiteral = typeLiteral + "[]"
 	}
 

@@ -188,7 +188,8 @@ type RuleDeclChild struct {
 // RuleDeclChildFor represents the "for" clause within a RuleDecl block.
 type RuleDeclChildFor struct {
 	Positions
-	For string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
+	For     string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
+	IsArray bool   `parser:"@(LBracket RBracket)?"`
 }
 
 // RuleDeclChildParam represents the "param" clause within a RuleDecl block.
@@ -210,7 +211,6 @@ type TypeDecl struct {
 	Docstring  *Docstring        `parser:"(@@ (?! Newline Newline))?"`
 	Deprecated *Deprecated       `parser:"(@@ (?= Type))?"`
 	Name       string            `parser:"Type @Ident"`
-	Extends    []string          `parser:"(Extends @Ident (Comma @Ident)*)?"`
 	Children   []*FieldOrComment `parser:"LBrace @@* RBrace"`
 }
 
@@ -358,23 +358,8 @@ type FieldChild struct {
 // FieldType represents the type of a field.
 type FieldType struct {
 	Positions
-	Base  *FieldTypeBase `parser:"@@"`
-	Depth FieldTypeDepth `parser:"@((LBracket RBracket)*)"`
-}
-
-// FieldTypeDepth represents the depth of an array type.
-type FieldTypeDepth int
-
-// Capture implements the participle Capture interface.
-func (a *FieldTypeDepth) Capture(values []string) error {
-	count := 0
-	for i := range len(values) {
-		if values[i] == "[" && values[i+1] == "]" {
-			count++
-		}
-	}
-	*a = FieldTypeDepth(count)
-	return nil
+	Base    *FieldTypeBase `parser:"@@"`
+	IsArray bool           `parser:"@(LBracket RBracket)?"`
 }
 
 // FieldTypeBase represents the base type of a field (primitive, named, or inline object).

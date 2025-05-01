@@ -11,7 +11,7 @@ rule @foo {error  : "This is an \"error\" \\ message"}
 
 """Docstring"""deprecated
 rule @foo {
-for: string
+for: string[]
 param: string
 error: "This is an error message"
 }
@@ -42,7 +42,7 @@ rule @foo {
 
 """Docstring"""
 deprecated rule @foo {
-  for: string
+  for: string[]
   param: string
   error: "This is an error message"
 }

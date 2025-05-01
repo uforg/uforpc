@@ -43,11 +43,6 @@ func (f *typeFormatter) format() *genkit.GenKit {
 
 	f.g.Inlinef(`type %s `, f.typeDecl.Name)
 
-	if len(f.typeDecl.Extends) > 0 {
-		joinedExtends := strings.Join(f.typeDecl.Extends, ", ")
-		f.g.Inlinef(`extends %s `, joinedExtends)
-	}
-
 	fieldsFormatter := newFieldsFormatter(f.typeDecl, f.typeDecl.Children)
 	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
 

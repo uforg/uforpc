@@ -1,11 +1,13 @@
 type Foo {  field1: string [] field2: { // This is a comment
     subField1: datetime[]
-      subField2: {      subSubField1: string[]
-      [][][ ][][][ ]
+      subField2: {      subSubField1: string
+      [ 
+
+      ]
       } [ ]subField3:datetime
   }[]
 
-  field3: int[ ]    []  field4: {}
+  field3: int[ ]     field4: {}
 
 
   field5: {
@@ -21,12 +23,12 @@ type Foo {
   field2: { // This is a comment
     subField1: datetime[]
     subField2: {
-      subSubField1: string[][][][][][][]
+      subSubField1: string[]
     }[]
     subField3: datetime
   }[]
 
-  field3: int[][]
+  field3: int[]
   field4: {}
 
   field5: {

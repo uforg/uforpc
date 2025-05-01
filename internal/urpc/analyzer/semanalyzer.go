@@ -42,7 +42,6 @@ func (a *semanalyzer) analyze() ([]Diagnostic, error) {
 	a.validateProcNames()
 	a.validateCustomTypeReferences()
 	a.validateCustomRuleReferences()
-	a.validateTypeExtendRecursion()
 	a.validateTypeFieldUniqueness()
 	a.validateTypeCircularDependencies()
 	a.validateRuleStructure()
@@ -178,30 +177,6 @@ func (a *semanalyzer) validateCustomTypeReferences() {
 
 	// Check type declarations
 	for _, typeDecl := range a.combinedSchema.Schema.GetTypes() {
-		// Check extends clauses
-		for _, extendTypeName := range typeDecl.Extends {
-			if !isValidType(extendTypeName) {
-				a.diagnostics = append(a.diagnostics, Diagnostic{
-					Positions: Positions{
-						Pos:    typeDecl.Pos,
-						EndPos: typeDecl.EndPos,
-					},
-					Message: fmt.Sprintf("type \"%s\" extends non-declared type \"%s\"", typeDecl.Name, extendTypeName),
-				})
-			}
-
-			// Cannot reference itself
-			if extendTypeName == typeDecl.Name {
-				a.diagnostics = append(a.diagnostics, Diagnostic{
-					Positions: Positions{
-						Pos:    typeDecl.Pos,
-						EndPos: typeDecl.EndPos,
-					},
-					Message: fmt.Sprintf("type \"%s\" cannot extend itself", typeDecl.Name),
-				})
-			}
-		}
-
 		// Check fields
 		typeFields := extractFields(typeDecl.Children)
 		checkFieldTypeReferences(typeFields, fmt.Sprintf("at type \"%s\"", typeDecl.Name))
@@ -236,55 +211,6 @@ func extractFields(fieldOrComments []*ast.FieldOrComment) []*ast.Field {
 	return fields
 }
 
-// validateTypeExtendRecursion validates that type extensions are not recursive.
-func (a *semanalyzer) validateTypeExtendRecursion() {
-	// For each type, check if it extends itself directly or indirectly
-	for _, typeDecl := range a.combinedSchema.Schema.GetTypes() {
-		visited := make(map[string]bool)
-		visited[typeDecl.Name] = true
-
-		for _, extendTypeName := range typeDecl.Extends {
-			a.checkTypeExtendRecursion(typeDecl, extendTypeName, visited)
-		}
-	}
-}
-
-// checkTypeExtendRecursion recursively checks if a type extension creates a cycle.
-func (a *semanalyzer) checkTypeExtendRecursion(originalType *ast.TypeDecl, currentExtendName string, visited map[string]bool) {
-	// If we've already visited this type in this path, we have a cycle
-	if visited[currentExtendName] {
-		a.diagnostics = append(a.diagnostics, Diagnostic{
-			Positions: Positions{
-				Pos:    originalType.Pos,
-				EndPos: originalType.EndPos,
-			},
-			Message: fmt.Sprintf(
-				"recursive type extension detected: type \"%s\" extends \"%s\" which creates a cycle",
-				originalType.Name, currentExtendName,
-			),
-		})
-		return
-	}
-
-	// Mark this type as visited in the current path
-	visited[currentExtendName] = true
-
-	// Get the extended type
-	extendedType, exists := a.combinedSchema.TypeDecls[currentExtendName]
-	if !exists {
-		// Skip if the extended type doesn't exist (this is caught by another validation)
-		return
-	}
-
-	// Check all extensions of the extended type
-	for _, nextExtendName := range extendedType.Extends {
-		a.checkTypeExtendRecursion(originalType, nextExtendName, visited)
-	}
-
-	// Remove this type from the visited set when backtracking
-	visited[currentExtendName] = false
-}
-
 // validateTypeFieldUniqueness validates that fields in a type (including extended types) are unique.
 func (a *semanalyzer) validateTypeFieldUniqueness() {
 	for _, typeDecl := range a.combinedSchema.Schema.GetTypes() {
@@ -294,38 +220,21 @@ func (a *semanalyzer) validateTypeFieldUniqueness() {
 		// First collect fields from the type itself
 		fields := extractFields(typeDecl.Children)
 		for _, field := range fields {
-			allFields[field.Name] = Positions{
-				Pos:    field.Pos,
-				EndPos: field.EndPos,
-			}
-		}
-
-		// Then collect fields from all extended types
-		for _, extendTypeName := range typeDecl.Extends {
-			extendedType, exists := a.combinedSchema.TypeDecls[extendTypeName]
-			if !exists {
-				// Skip if the extended type doesn't exist (this is caught by another validation)
-				continue
-			}
-
-			extendedFields := extractFields(extendedType.Children)
-			for _, extendedField := range extendedFields {
-				// Check if this field already exists
-				if existingPos, exists := allFields[extendedField.Name]; exists {
-					a.diagnostics = append(a.diagnostics, Diagnostic{
-						Positions: Positions{
-							Pos:    typeDecl.Pos,
-							EndPos: typeDecl.EndPos,
-						},
-						Message: fmt.Sprintf("field \"%s\" in type \"%s\" is already defined in extended type \"%s\" at %s",
-							extendedField.Name, typeDecl.Name, extendTypeName, existingPos.Pos.String()),
-					})
-				} else {
-					// Add the field to the map
-					allFields[extendedField.Name] = Positions{
-						Pos:    extendedField.Pos,
-						EndPos: extendedField.EndPos,
-					}
+			// Check if this field already exists
+			if existingPos, exists := allFields[field.Name]; exists {
+				a.diagnostics = append(a.diagnostics, Diagnostic{
+					Positions: Positions{
+						Pos:    typeDecl.Pos,
+						EndPos: typeDecl.EndPos,
+					},
+					Message: fmt.Sprintf("field \"%s\" in type \"%s\" is already defined at %s",
+						field.Name, typeDecl.Name, existingPos.Pos.String()),
+				})
+			} else {
+				// Add the field to the map
+				allFields[field.Name] = Positions{
+					Pos:    field.Pos,
+					EndPos: field.EndPos,
 				}
 			}
 		}
@@ -588,7 +497,7 @@ func (a *semanalyzer) validateCustomRuleReferences() {
 
 	getFieldBaseType := func(field *ast.Field) (string, bool) {
 		var baseType string
-		isArray := field.Type.Depth > 0
+		isArray := field.Type.IsArray
 
 		if field.Type.Base.Named != nil {
 			baseType = *field.Type.Base.Named

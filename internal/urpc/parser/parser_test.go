@@ -311,12 +311,42 @@ func TestParserRuleDecl(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
+	t.Run("Rule with array for", func(t *testing.T) {
+		input := `
+				rule @myRule {
+					for: MyType[]
+				}
+			`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Rule: &ast.RuleDecl{
+						Name: "myRule",
+						Children: []*ast.RuleDeclChild{
+							{
+								For: &ast.RuleDeclChildFor{
+									For:     "MyType",
+									IsArray: true,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
 	t.Run("Rule with all options", func(t *testing.T) {
 		input := `
 				""" My rule description """
 				deprecated("This rule is deprecated")
 				rule @myRule {
-					for: MyType
+					for: MyType[]
 					param: float[]
 					error: "My error message"
 				}
@@ -338,7 +368,8 @@ func TestParserRuleDecl(t *testing.T) {
 						Children: []*ast.RuleDeclChild{
 							{
 								For: &ast.RuleDeclChildFor{
-									For: "MyType",
+									For:     "MyType",
+									IsArray: true,
 								},
 							},
 							{
@@ -500,77 +531,11 @@ func TestParserTypeDecl(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
-	t.Run("Type declaration with extends", func(t *testing.T) {
-		input := `
-			type MyType extends OtherType {
-				field: string
-			}
-		`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Type: &ast.TypeDecl{
-						Name:    "MyType",
-						Extends: []string{"OtherType"},
-						Children: []*ast.FieldOrComment{
-							{
-								Field: &ast.Field{
-									Name: "field",
-									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Type declaration with multiple extends", func(t *testing.T) {
-		input := `
-			type MyType extends OtherType, AnotherType, YetAnotherType {
-				field: string
-			}
-		`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Type: &ast.TypeDecl{
-						Name:    "MyType",
-						Extends: []string{"OtherType", "AnotherType", "YetAnotherType"},
-						Children: []*ast.FieldOrComment{
-							{
-								Field: &ast.Field{
-									Name: "field",
-									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Type declaration with extends, docstring and deprecated", func(t *testing.T) {
+	t.Run("Type declaration with docstring and deprecated", func(t *testing.T) {
 		input := `
 			""" My type description """
 			deprecated("This type is deprecated")
-			type MyType extends OtherType {
+			type MyType {
 				field: string
 			}
 		`
@@ -587,8 +552,7 @@ func TestParserTypeDecl(t *testing.T) {
 						Deprecated: &ast.Deprecated{
 							Message: testutil.Pointer("This type is deprecated"),
 						},
-						Name:    "MyType",
-						Extends: []string{"OtherType"},
+						Name: "MyType",
 						Children: []*ast.FieldOrComment{
 							{
 								Field: &ast.Field{
@@ -800,12 +764,12 @@ func TestParserField(t *testing.T) {
 				field2: {
 					subfield: string
 				}
-				field3: int[][]
+				field3: int[]
 				field4?: {
 					subfield: {
-						subsubfield: datetime[][][]
-					}[][]
-				}[][][][][][][]
+						subsubfield: datetime[]
+					}[]
+				}[]
 			}
 		`
 		parsed, err := ParserInstance.ParseString("schema.urpc", input)
@@ -821,7 +785,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field1",
 									Type: ast.FieldType{
-										Depth: 1,
+										IsArray: true,
 										Base: &ast.FieldTypeBase{
 											Named: testutil.Pointer("string"),
 										},
@@ -853,7 +817,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field3",
 									Type: ast.FieldType{
-										Depth: 2,
+										IsArray: true,
 										Base: &ast.FieldTypeBase{
 											Named: testutil.Pointer("int"),
 										},
@@ -865,7 +829,7 @@ func TestParserField(t *testing.T) {
 									Name:     "field4",
 									Optional: true,
 									Type: ast.FieldType{
-										Depth: 7,
+										IsArray: true,
 										Base: &ast.FieldTypeBase{
 											Object: &ast.FieldTypeObject{
 												Children: []*ast.FieldOrComment{
@@ -873,7 +837,7 @@ func TestParserField(t *testing.T) {
 														Field: &ast.Field{
 															Name: "subfield",
 															Type: ast.FieldType{
-																Depth: 2,
+																IsArray: true,
 																Base: &ast.FieldTypeBase{
 																	Object: &ast.FieldTypeObject{
 																		Children: []*ast.FieldOrComment{
@@ -881,7 +845,7 @@ func TestParserField(t *testing.T) {
 																				Field: &ast.Field{
 																					Name: "subsubfield",
 																					Type: ast.FieldType{
-																						Depth: 3,
+																						IsArray: true,
 																						Base: &ast.FieldTypeBase{
 																							Named: testutil.Pointer("datetime"),
 																						},
@@ -1250,7 +1214,7 @@ func TestParserProcDecl(t *testing.T) {
 			deprecated("Use newProc instead")
 			proc MyProc {
 				input {
-					input1: string[][]
+					input1: string[]
 				}
 				output {
 					output1?: int
@@ -1286,8 +1250,8 @@ func TestParserProcDecl(t *testing.T) {
 											Field: &ast.Field{
 												Name: "input1",
 												Type: ast.FieldType{
-													Depth: 2,
-													Base:  &ast.FieldTypeBase{Named: testutil.Pointer("string")},
+													IsArray: true,
+													Base:    &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 												},
 											},
 										},
@@ -2296,7 +2260,7 @@ func TestParserFullSchema(t *testing.T) {
 			dummyField: int
 		}
 
-		deprecated type ThirdDummyType extends FirstDummyType, SecondDummyType {
+		deprecated type ThirdDummyType {
 			dummyField: string
 		}
 
@@ -2305,7 +2269,7 @@ func TestParserFullSchema(t *testing.T) {
 		This type is used across the catalog module.
 		"""
 		deprecated("Deprecated")
-		type Category extends ThirdDummyType {
+		type Category {
 			id: string
 				@uuid(error: "Must be a valid UUID")
 				@minlen(36)
@@ -2604,10 +2568,6 @@ func TestParserFullSchema(t *testing.T) {
 				Type: &ast.TypeDecl{
 					Deprecated: &ast.Deprecated{},
 					Name:       "ThirdDummyType",
-					Extends: []string{
-						"FirstDummyType",
-						"SecondDummyType",
-					},
 					Children: []*ast.FieldOrComment{
 						{
 							Field: &ast.Field{
@@ -2631,9 +2591,6 @@ func TestParserFullSchema(t *testing.T) {
 						Message: testutil.Pointer("Deprecated"),
 					},
 					Name: "Category",
-					Extends: []string{
-						"ThirdDummyType",
-					},
 					Children: []*ast.FieldOrComment{
 						{
 							Field: &ast.Field{
@@ -2873,7 +2830,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name:     "tags",
 								Optional: true,
 								Type: ast.FieldType{
-									Depth: 1,
+									IsArray: true,
 									Base: &ast.FieldTypeBase{
 										Named: testutil.Pointer("string"),
 									},
@@ -2986,7 +2943,7 @@ func TestParserFullSchema(t *testing.T) {
 													Field: &ast.Field{
 														Name: "colors",
 														Type: ast.FieldType{
-															Depth: 1,
+															IsArray: true,
 															Base: &ast.FieldTypeBase{
 																Named: testutil.Pointer("string"),
 															},
@@ -3015,7 +2972,7 @@ func TestParserFullSchema(t *testing.T) {
 														Name:     "attributes",
 														Optional: true,
 														Type: ast.FieldType{
-															Depth: 1,
+															IsArray: true,
 															Base: &ast.FieldTypeBase{
 																Object: &ast.FieldTypeObject{
 																	Children: []*ast.FieldOrComment{
@@ -3055,7 +3012,7 @@ func TestParserFullSchema(t *testing.T) {
 							Field: &ast.Field{
 								Name: "variations",
 								Type: ast.FieldType{
-									Depth: 1,
+									IsArray: true,
 									Base: &ast.FieldTypeBase{
 										Object: &ast.FieldTypeObject{
 											Children: []*ast.FieldOrComment{
@@ -3094,7 +3051,7 @@ func TestParserFullSchema(t *testing.T) {
 													Field: &ast.Field{
 														Name: "attributes",
 														Type: ast.FieldType{
-															Depth: 1,
+															IsArray: true,
 															Base: &ast.FieldTypeBase{
 																Object: &ast.FieldTypeObject{
 																	Children: []*ast.FieldOrComment{
@@ -3308,7 +3265,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name:     "tags",
 																	Optional: true,
 																	Type: ast.FieldType{
-																		Depth: 1,
+																		IsArray: true,
 																		Base: &ast.FieldTypeBase{
 																			Named: testutil.Pointer("string"),
 																		},
@@ -3344,7 +3301,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name:     "customRules",
 																	Optional: true,
 																	Type: ast.FieldType{
-																		Depth: 1,
+																		IsArray: true,
 																		Base: &ast.FieldTypeBase{
 																			Object: &ast.FieldTypeObject{
 																				Children: []*ast.FieldOrComment{
@@ -3446,7 +3403,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name:     "errors",
 											Optional: true,
 											Type: ast.FieldType{
-												Depth: 1,
+												IsArray: true,
 												Base: &ast.FieldTypeBase{
 													Object: &ast.FieldTypeObject{
 														Children: []*ast.FieldOrComment{
@@ -3508,7 +3465,7 @@ func TestParserFullSchema(t *testing.T) {
 																Field: &ast.Field{
 																	Name: "processingSteps",
 																	Type: ast.FieldType{
-																		Depth: 1,
+																		IsArray: true,
 																		Base: &ast.FieldTypeBase{
 																			Object: &ast.FieldTypeObject{
 																				Children: []*ast.FieldOrComment{

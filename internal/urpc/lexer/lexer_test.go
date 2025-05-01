@@ -81,7 +81,7 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false for param extends string int float boolean import datetime deprecated"
+		input := "version rule type proc input output meta error true false for param string int float boolean import datetime deprecated"
 
 		tests := []token.Token{
 			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 1, LineEnd: 1, ColumnStart: 1, ColumnEnd: 7},
@@ -108,22 +108,20 @@ func TestLexer(t *testing.T) {
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 62, LineEnd: 1, ColumnEnd: 62},
 			{Type: token.Param, Literal: "param", FileName: "test.urpc", LineStart: 1, ColumnStart: 63, LineEnd: 1, ColumnEnd: 67},
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 68, LineEnd: 1, ColumnEnd: 68},
-			{Type: token.Extends, Literal: "extends", FileName: "test.urpc", LineStart: 1, ColumnStart: 69, LineEnd: 1, ColumnEnd: 75},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 76, LineEnd: 1, ColumnEnd: 76},
-			{Type: token.String, Literal: "string", FileName: "test.urpc", LineStart: 1, ColumnStart: 77, LineEnd: 1, ColumnEnd: 82},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 83, LineEnd: 1, ColumnEnd: 83},
-			{Type: token.Int, Literal: "int", FileName: "test.urpc", LineStart: 1, ColumnStart: 84, LineEnd: 1, ColumnEnd: 86},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 87, LineEnd: 1, ColumnEnd: 87},
-			{Type: token.Float, Literal: "float", FileName: "test.urpc", LineStart: 1, ColumnStart: 88, LineEnd: 1, ColumnEnd: 92},
+			{Type: token.String, Literal: "string", FileName: "test.urpc", LineStart: 1, ColumnStart: 69, LineEnd: 1, ColumnEnd: 74},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 75, LineEnd: 1, ColumnEnd: 75},
+			{Type: token.Int, Literal: "int", FileName: "test.urpc", LineStart: 1, ColumnStart: 76, LineEnd: 1, ColumnEnd: 78},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 79, LineEnd: 1, ColumnEnd: 79},
+			{Type: token.Float, Literal: "float", FileName: "test.urpc", LineStart: 1, ColumnStart: 80, LineEnd: 1, ColumnEnd: 84},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 85, LineEnd: 1, ColumnEnd: 85},
+			{Type: token.Boolean, Literal: "boolean", FileName: "test.urpc", LineStart: 1, ColumnStart: 86, LineEnd: 1, ColumnEnd: 92},
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 93, LineEnd: 1, ColumnEnd: 93},
-			{Type: token.Boolean, Literal: "boolean", FileName: "test.urpc", LineStart: 1, ColumnStart: 94, LineEnd: 1, ColumnEnd: 100},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 101, LineEnd: 1, ColumnEnd: 101},
-			{Type: token.Import, Literal: "import", FileName: "test.urpc", LineStart: 1, ColumnStart: 102, LineEnd: 1, ColumnEnd: 107},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 108, LineEnd: 1, ColumnEnd: 108},
-			{Type: token.Datetime, Literal: "datetime", FileName: "test.urpc", LineStart: 1, ColumnStart: 109, LineEnd: 1, ColumnEnd: 116},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 117, LineEnd: 1, ColumnEnd: 117},
-			{Type: token.Deprecated, Literal: "deprecated", FileName: "test.urpc", LineStart: 1, ColumnStart: 118, LineEnd: 1, ColumnEnd: 127},
-			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 128, LineEnd: 1, ColumnEnd: 128},
+			{Type: token.Import, Literal: "import", FileName: "test.urpc", LineStart: 1, ColumnStart: 94, LineEnd: 1, ColumnEnd: 99},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 100, LineEnd: 1, ColumnEnd: 100},
+			{Type: token.Datetime, Literal: "datetime", FileName: "test.urpc", LineStart: 1, ColumnStart: 101, LineEnd: 1, ColumnEnd: 108},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 109, LineEnd: 1, ColumnEnd: 109},
+			{Type: token.Deprecated, Literal: "deprecated", FileName: "test.urpc", LineStart: 1, ColumnStart: 110, LineEnd: 1, ColumnEnd: 119},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 120, LineEnd: 1, ColumnEnd: 120},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
@@ -587,7 +585,7 @@ func TestLexer(t *testing.T) {
 
 			""" Product is a type that represents a product. """
 			deprecated("This type will be removed in v2.0")
-			type Product extends OtherType, AnotherType {
+			type Product {
 				id: string
 					@uuid
 					@minLen(36)
@@ -636,10 +634,6 @@ func TestLexer(t *testing.T) {
 			{Type: token.RParen, Literal: ")"},
 			{Type: token.Type, Literal: "type"},
 			{Type: token.Ident, Literal: "Product"},
-			{Type: token.Extends, Literal: "extends"},
-			{Type: token.Ident, Literal: "OtherType"},
-			{Type: token.Comma, Literal: ","},
-			{Type: token.Ident, Literal: "AnotherType"},
 			{Type: token.LBrace, Literal: "{"},
 			{Type: token.Ident, Literal: "id"},
 			{Type: token.Colon, Literal: ":"},
