@@ -8,7 +8,10 @@
     {
       "kind": "rule",
       "name": "minLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -18,7 +21,10 @@
     {
       "kind": "rule",
       "name": "maxLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -28,7 +34,10 @@
     {
       "kind": "rule",
       "name": "slug",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "string",
         "isArray": false
@@ -38,7 +47,10 @@
     {
       "kind": "rule",
       "name": "tags",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -53,7 +65,7 @@
         {
           "name": "id",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -77,7 +89,7 @@
         {
           "name": "title",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -101,7 +113,7 @@
         {
           "name": "slug",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -117,7 +129,7 @@
         {
           "name": "content",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -133,7 +145,7 @@
         {
           "name": "publishedAt",
           "typeName": "datetime",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
@@ -143,30 +155,30 @@
               {
                 "name": "id",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "name",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "email",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               }
             ]
           },
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "tags",
           "typeName": "string",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "rules": [
             {
@@ -182,7 +194,7 @@
         {
           "name": "isPublished",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]
@@ -195,7 +207,7 @@
         {
           "name": "title",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -219,7 +231,7 @@
         {
           "name": "content",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -235,7 +247,7 @@
         {
           "name": "tags",
           "typeName": "string",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "rules": [
             {
@@ -253,13 +265,13 @@
         {
           "name": "post",
           "typeName": "BlogPost",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "success",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],
@@ -282,7 +294,7 @@
         {
           "name": "idOrSlug",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],
@@ -290,13 +302,13 @@
         {
           "name": "post",
           "typeName": "BlogPost",
-          "depth": 0,
+          "isArray": false,
           "optional": true
         },
         {
           "name": "found",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]

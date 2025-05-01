@@ -4,7 +4,10 @@
     {
       "kind": "rule",
       "name": "minLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -18,7 +21,7 @@
         {
           "name": "name",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string",
           "rules": [
             {

@@ -8,49 +8,49 @@
         {
           "name": "query",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string"
         },
         {
           "name": "page",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "int"
         },
         {
           "name": "pageSize",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "int"
         },
         {
           "name": "filters",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeInline": {
             "fields": [
               {
                 "name": "category",
                 "optional": true,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               },
               {
                 "name": "minPrice",
                 "optional": true,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "float"
               },
               {
                 "name": "maxPrice",
                 "optional": true,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "float"
               },
               {
                 "name": "inStock",
                 "optional": true,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "boolean"
               }
             ]
@@ -59,19 +59,19 @@
         {
           "name": "sort",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeInline": {
             "fields": [
               {
                 "name": "field",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               },
               {
                 "name": "direction",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               }
             ]
@@ -82,104 +82,103 @@
         {
           "name": "results",
           "optional": false,
-          "depth": 0,
+          "isArray": true,
           "typeInline": {
             "fields": [
               {
                 "name": "id",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               },
               {
                 "name": "title",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               },
               {
                 "name": "description",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               },
               {
                 "name": "price",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "float"
               },
               {
                 "name": "rating",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "float"
               },
               {
                 "name": "images",
                 "optional": false,
-                "typeName": "string",
-                "depth": 1
+                "isArray": true,
+                "typeName": "string"
               },
               {
                 "name": "specs",
                 "optional": false,
+                "isArray": true,
                 "typeInline": {
                   "fields": [
                     {
                       "name": "key",
                       "optional": false,
-                      "depth": 0,
+                      "isArray": false,
                       "typeName": "string"
                     },
                     {
                       "name": "value",
                       "optional": false,
-                      "depth": 0,
+                      "isArray": false,
                       "typeName": "string"
                     }
                   ]
-                },
-                "depth": 1
+                }
               }
             ]
-          },
-          "depth": 1
+          }
         },
         {
           "name": "pagination",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeInline": {
             "fields": [
               {
                 "name": "currentPage",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "int"
               },
               {
                 "name": "totalPages",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "int"
               },
               {
                 "name": "totalResults",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "int"
               },
               {
                 "name": "hasNextPage",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "boolean"
               },
               {
                 "name": "hasPreviousPage",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "boolean"
               }
             ]
@@ -188,40 +187,38 @@
         {
           "name": "facets",
           "optional": false,
-          "depth": 0,
+          "isArray": true,
           "typeInline": {
             "fields": [
               {
                 "name": "name",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               },
               {
                 "name": "values",
                 "optional": false,
-                "depth": 0,
+                "isArray": true,
                 "typeInline": {
                   "fields": [
                     {
                       "name": "value",
                       "optional": false,
-                      "depth": 0,
+                      "isArray": false,
                       "typeName": "string"
                     },
                     {
                       "name": "count",
                       "optional": false,
-                      "depth": 0,
+                      "isArray": false,
                       "typeName": "int"
                     }
                   ]
-                },
-                "depth": 1
+                }
               }
             ]
-          },
-          "depth": 1
+          }
         }
       ]
     }

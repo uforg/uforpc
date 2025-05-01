@@ -4,7 +4,10 @@
     {
       "kind": "rule",
       "name": "enum",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": true
+      },
       "paramDef": {
         "type": "string",
         "isArray": true

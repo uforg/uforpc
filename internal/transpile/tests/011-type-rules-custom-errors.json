@@ -4,7 +4,10 @@
     {
       "kind": "rule",
       "name": "minLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -14,7 +17,10 @@
     {
       "kind": "rule",
       "name": "maxLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -24,7 +30,10 @@
     {
       "kind": "rule",
       "name": "regex",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "string",
         "isArray": false
@@ -38,7 +47,7 @@
         {
           "name": "username",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -64,7 +73,7 @@
         {
           "name": "password",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {

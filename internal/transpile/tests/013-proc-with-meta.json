@@ -8,19 +8,19 @@
         {
           "name": "username",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "email",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "password",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],
@@ -28,13 +28,13 @@
         {
           "name": "userId",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "success",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],

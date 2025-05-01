@@ -4,7 +4,10 @@
     {
       "kind": "rule",
       "name": "complexRegex",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "string",
         "isArray": false
@@ -18,7 +21,7 @@
         {
           "name": "username",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string",
           "rules": [
             {
@@ -34,7 +37,7 @@
         {
           "name": "email",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string",
           "rules": [
             {
@@ -50,7 +53,7 @@
         {
           "name": "phone",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string",
           "rules": [
             {
@@ -66,7 +69,7 @@
         {
           "name": "zipCode",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string",
           "rules": [
             {

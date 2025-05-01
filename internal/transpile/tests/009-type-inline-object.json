@@ -8,7 +8,7 @@
         {
           "name": "id",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
@@ -18,24 +18,24 @@
               {
                 "name": "id",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "name",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "email",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               }
             ]
           },
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
@@ -45,24 +45,24 @@
               {
                 "name": "productId",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "quantity",
                 "typeName": "int",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "price",
                 "typeName": "float",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               }
             ]
           },
-          "depth": 1,
+          "isArray": true,
           "optional": false
         }
       ]

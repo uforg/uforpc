@@ -5,7 +5,10 @@
       "kind": "rule",
       "name": "regex",
       "doc": "Validates that a string matches a regular expression pattern",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "string",
         "isArray": false

@@ -9,7 +9,7 @@
           "name": "simpleArray",
           "optional": false,
           "typeName": "string",
-          "depth": 1
+          "isArray": true
         },
         {
           "name": "objectArray",
@@ -19,57 +19,56 @@
               {
                 "name": "id",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "int"
               },
               {
                 "name": "name",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "string"
               }
             ]
           },
-          "depth": 1
+          "isArray": true
         },
         {
           "name": "nestedArrays",
           "optional": false,
           "typeName": "string",
-          "depth": 2
+          "isArray": true
         },
         {
           "name": "complexArray",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeInline": {
             "fields": [
               {
                 "name": "items",
                 "optional": false,
-                "depth": 0,
+                "isArray": true,
                 "typeInline": {
                   "fields": [
                     {
                       "name": "id",
                       "optional": false,
-                      "depth": 0,
+                      "isArray": false,
                       "typeName": "int"
                     },
                     {
                       "name": "value",
                       "optional": false,
-                      "depth": 0,
+                      "isArray": false,
                       "typeName": "string"
                     }
                   ]
-                },
-                "depth": 1
+                }
               },
               {
                 "name": "count",
                 "optional": false,
-                "depth": 0,
+                "isArray": false,
                 "typeName": "int"
               }
             ]

@@ -4,7 +4,10 @@
     {
       "kind": "rule",
       "name": "minLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -14,7 +17,10 @@
     {
       "kind": "rule",
       "name": "maxLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -24,7 +30,10 @@
     {
       "kind": "rule",
       "name": "regex",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "string",
         "isArray": false
@@ -34,7 +43,10 @@
     {
       "kind": "rule",
       "name": "min",
-      "for": "int",
+      "for": {
+        "type": "int",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -44,7 +56,10 @@
     {
       "kind": "rule",
       "name": "max",
-      "for": "int",
+      "for": {
+        "type": "int",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -54,19 +69,28 @@
     {
       "kind": "rule",
       "name": "positive",
-      "for": "int",
+      "for": {
+        "type": "int",
+        "isArray": false
+      },
       "error": "Value must be positive"
     },
     {
       "kind": "rule",
       "name": "email",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "error": "Invalid email format"
     },
     {
       "kind": "rule",
       "name": "url",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "error": "Invalid URL format"
     },
     {
@@ -75,7 +99,7 @@
       "fields": [
         {
           "name": "username",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -108,7 +132,7 @@
         },
         {
           "name": "email",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -128,7 +152,7 @@
         },
         {
           "name": "password",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -161,7 +185,7 @@
         },
         {
           "name": "age",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "int",
           "rules": [
@@ -186,7 +210,7 @@
         },
         {
           "name": "score",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "int",
           "rules": [
@@ -206,7 +230,7 @@
         },
         {
           "name": "website",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [

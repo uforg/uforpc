@@ -13,11 +13,11 @@ type AllPrimitives {
   booleanArrayValue: boolean[]
   datetimeArrayValue: datetime[]
 
-  stringArrayArrayValue: string[][]
-  intArrayArrayValue: int[][]
-  floatArrayArrayValue: float[][]
-  booleanArrayArrayValue: boolean[][]
-  datetimeArrayArrayValue: datetime[][]
+  stringArrayArrayValue: string[]
+  intArrayArrayValue: int[]
+  floatArrayArrayValue: float[]
+  booleanArrayArrayValue: boolean[]
+  datetimeArrayArrayValue: datetime[]
 
   optionalString?: string
   optionalInt?: int

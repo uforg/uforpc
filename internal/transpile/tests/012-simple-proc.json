@@ -8,7 +8,7 @@
         {
           "name": "userId",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],
@@ -20,30 +20,30 @@
               {
                 "name": "id",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "name",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               },
               {
                 "name": "email",
                 "typeName": "string",
-                "depth": 0,
+                "isArray": false,
                 "optional": false
               }
             ]
           },
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "success",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]

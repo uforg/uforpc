@@ -24,7 +24,7 @@ deprecated proc DeprecatedProc {
   input {
     param1: string
   }
-  
+
   output {
     result: boolean
   }
@@ -35,7 +35,7 @@ proc DeprecatedProcWithMessage {
   input {
     param1: string
   }
-  
+
   output {
     result: boolean
   }

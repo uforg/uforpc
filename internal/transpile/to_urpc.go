@@ -89,10 +89,11 @@ func convertRuleToURPC(rule *schema.NodeRule) (*ast.RuleDecl, error) {
 	}
 
 	// Add 'for' clause
-	if rule.For != "" {
+	if rule.For != nil {
 		ruleDecl.Children = append(ruleDecl.Children, &ast.RuleDeclChild{
 			For: &ast.RuleDeclChildFor{
-				For: rule.For,
+				Type:    rule.For.Type,
+				IsArray: rule.For.IsArray,
 			},
 		})
 	}
@@ -186,8 +187,8 @@ func convertFieldToURPC(fieldDef schema.FieldDefinition) (*ast.Field, error) {
 
 	// Process field type
 	fieldType := ast.FieldType{
-		Depth: ast.FieldTypeDepth(fieldDef.Depth),
-		Base:  &ast.FieldTypeBase{},
+		IsArray: fieldDef.IsArray,
+		Base:    &ast.FieldTypeBase{},
 	}
 
 	if fieldDef.IsNamed() {

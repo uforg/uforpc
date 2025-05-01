@@ -8,7 +8,7 @@
         {
           "name": "id",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string"
         }
       ],
@@ -16,13 +16,13 @@
         {
           "name": "success",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "boolean"
         },
         {
           "name": "message",
           "optional": false,
-          "depth": 0,
+          "isArray": false,
           "typeName": "string"
         }
       ],

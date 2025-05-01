@@ -9,19 +9,19 @@
         {
           "name": "username",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "password",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "rememberMe",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],
@@ -29,19 +29,19 @@
         {
           "name": "token",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "expiresAt",
           "typeName": "datetime",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "success",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]

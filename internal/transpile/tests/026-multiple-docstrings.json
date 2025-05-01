@@ -12,7 +12,10 @@
     {
       "kind": "rule",
       "name": "required",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "error": "This field is required"
     },
     {
@@ -22,19 +25,19 @@
       "fields": [
         {
           "name": "id",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "name",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "description",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         }
@@ -47,19 +50,19 @@
       "fields": [
         {
           "name": "id",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "name",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "permissions",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "typeName": "string"
         }
@@ -72,13 +75,13 @@
       "fields": [
         {
           "name": "id",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "username",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -89,7 +92,7 @@
         },
         {
           "name": "email",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -100,19 +103,19 @@
         },
         {
           "name": "roles",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "typeName": "Role"
         },
         {
           "name": "createdAt",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "updatedAt",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         }
@@ -125,13 +128,13 @@
       "fields": [
         {
           "name": "id",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "title",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -142,43 +145,43 @@
         },
         {
           "name": "body",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "contentType",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "ContentType"
         },
         {
           "name": "author",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "User"
         },
         {
           "name": "tags",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "published",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "boolean"
         },
         {
           "name": "createdAt",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "updatedAt",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         }
@@ -191,7 +194,7 @@
       "input": [
         {
           "name": "title",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -202,13 +205,13 @@
         },
         {
           "name": "body",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "contentTypeId",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string",
           "rules": [
@@ -219,13 +222,13 @@
         },
         {
           "name": "tags",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "publish",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "boolean"
         }
@@ -233,19 +236,19 @@
       "output": [
         {
           "name": "content",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "Content"
         },
         {
           "name": "success",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "boolean"
         },
         {
           "name": "message",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         }

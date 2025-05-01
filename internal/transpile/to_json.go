@@ -93,7 +93,10 @@ func convertRuleToJSON(rule *ast.RuleDecl) (*schema.NodeRule, error) {
 	// Process rule children
 	for _, child := range rule.Children {
 		if child.For != nil {
-			ruleNode.For = child.For.For
+			ruleNode.For = &schema.ForDefinition{
+				Type:    child.For.Type,
+				IsArray: child.For.IsArray,
+			}
 		}
 		if child.Param != nil {
 			paramType, err := convertParamTypeToJSON(child.Param.Param)
@@ -173,7 +176,7 @@ func convertFieldToJSON(field *ast.Field) (schema.FieldDefinition, error) {
 	fieldDef := schema.FieldDefinition{
 		Name:     field.Name,
 		Optional: field.Optional,
-		Depth:    int(field.Type.Depth),
+		IsArray:  field.Type.IsArray,
 	}
 
 	// Process field type

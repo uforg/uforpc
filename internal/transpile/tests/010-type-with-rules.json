@@ -4,7 +4,10 @@
     {
       "kind": "rule",
       "name": "minLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -14,7 +17,10 @@
     {
       "kind": "rule",
       "name": "maxLength",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -24,7 +30,10 @@
     {
       "kind": "rule",
       "name": "regex",
-      "for": "string",
+      "for": {
+        "type": "string",
+        "isArray": false
+      },
       "paramDef": {
         "type": "string",
         "isArray": false
@@ -34,7 +43,10 @@
     {
       "kind": "rule",
       "name": "min",
-      "for": "int",
+      "for": {
+        "type": "int",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -44,7 +56,10 @@
     {
       "kind": "rule",
       "name": "max",
-      "for": "int",
+      "for": {
+        "type": "int",
+        "isArray": false
+      },
       "paramDef": {
         "type": "int",
         "isArray": false
@@ -58,7 +73,7 @@
         {
           "name": "id",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -82,7 +97,7 @@
         {
           "name": "username",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -114,7 +129,7 @@
         {
           "name": "email",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -130,7 +145,7 @@
         {
           "name": "age",
           "typeName": "int",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {
@@ -154,7 +169,7 @@
         {
           "name": "score",
           "typeName": "float",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "rules": [
             {

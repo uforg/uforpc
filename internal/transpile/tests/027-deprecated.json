@@ -5,13 +5,19 @@
       "kind": "rule",
       "name": "deprecatedRule",
       "deprecated": "",
-      "for": "string"
+      "for": {
+        "type": "string",
+        "isArray": false
+      }
     },
     {
       "kind": "rule",
       "name": "deprecatedRuleWithMessage",
       "deprecated": "Deprecated",
-      "for": "string"
+      "for": {
+        "type": "string",
+        "isArray": false
+      }
     },
     {
       "kind": "type",
@@ -21,13 +27,13 @@
         {
           "name": "field1",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "field2",
           "typeName": "int",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]
@@ -40,13 +46,13 @@
         {
           "name": "field1",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         },
         {
           "name": "field2",
           "typeName": "int",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]
@@ -59,7 +65,7 @@
         {
           "name": "param1",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],
@@ -67,7 +73,7 @@
         {
           "name": "result",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]
@@ -80,7 +86,7 @@
         {
           "name": "param1",
           "typeName": "string",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ],
@@ -88,7 +94,7 @@
         {
           "name": "result",
           "typeName": "boolean",
-          "depth": 0,
+          "isArray": false,
           "optional": false
         }
       ]

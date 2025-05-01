@@ -6,7 +6,7 @@ type ArrayOfObjects {
     id: int
     name: string
   }[]
-  nestedArrays: string[][]
+  nestedArrays: string[]
   complexArray: {
     items: {
       id: int

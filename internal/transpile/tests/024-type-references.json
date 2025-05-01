@@ -7,31 +7,31 @@
       "fields": [
         {
           "name": "street",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "city",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "state",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "zipCode",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "country",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         }
@@ -43,19 +43,19 @@
       "fields": [
         {
           "name": "email",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "phone",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "address",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "Address"
         }
@@ -67,25 +67,25 @@
       "fields": [
         {
           "name": "name",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "industry",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "founded",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "int"
         },
         {
           "name": "contact",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "Contact"
         }
@@ -97,61 +97,61 @@
       "fields": [
         {
           "name": "id",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "firstName",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "lastName",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "position",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "department",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "string"
         },
         {
           "name": "contact",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "Contact"
         },
         {
           "name": "company",
-          "depth": 0,
+          "isArray": false,
           "optional": false,
           "typeName": "Company"
         },
         {
           "name": "colleagues",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "typeName": "Employee"
         },
         {
           "name": "manager",
-          "depth": 0,
+          "isArray": false,
           "optional": true,
           "typeName": "Employee"
         },
         {
           "name": "directReports",
-          "depth": 1,
+          "isArray": true,
           "optional": false,
           "typeName": "Employee"
         }
