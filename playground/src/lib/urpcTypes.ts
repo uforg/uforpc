@@ -59,15 +59,25 @@ export interface RuleDefinitionNode {
    * Indicates if the rule is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.
    */
   deprecated?: string;
-  /**
-   * The primitive or custom type name this rule applies to.
-   */
-  for: PrimitiveTypeEnum | string;
+  for: ForDefinition;
   paramDef?: ParameterDefinition;
   /**
    * Default error message for the rule (optional).
    */
   error?: string;
+}
+/**
+ * The primitive or custom type name this rule applies to.
+ */
+export interface ForDefinition {
+  /**
+   * The primitive or custom type name this rule applies to.
+   */
+  type: PrimitiveTypeEnum | string;
+  /**
+   * Indicates if the for clause is expected to be an array of the specified type.
+   */
+  isArray: boolean;
 }
 /**
  * Definition of the parameter this rule expects (null if none).
@@ -121,9 +131,9 @@ export interface FieldDefinition {
   typeName?: string;
   typeInline?: InlineTypeDefinition;
   /**
-   * Array dimensions (0 for scalar, 1 for T[], 2 for T[][], etc.).
+   * Indicates if the field is an array.
    */
-  depth: number;
+  isArray: boolean;
   /**
    * Indicates if the field is optional.
    */
