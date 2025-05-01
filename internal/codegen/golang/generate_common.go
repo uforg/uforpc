@@ -222,14 +222,18 @@ func renderPreType(
 			if (isCustomType || isInline) && isArray {
 				og.Linef("if p.%s.Present {", fieldName)
 
-				og.Linef("for _, item := range p.%s.Value {", fieldName)
 				og.Block(func() {
-					og.Linef("if err := item.validate(); err != nil {")
+					og.Linef("for _, item := range p.%s.Value {", fieldName)
 					og.Block(func() {
-						og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
+						og.Linef("if err := item.validate(); err != nil {")
+						og.Block(func() {
+							og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
+						})
+						og.Line("}")
 					})
 					og.Line("}")
 				})
+
 				og.Line("}")
 			}
 
