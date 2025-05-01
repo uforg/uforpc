@@ -2,7 +2,6 @@ package golang
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/uforg/uforpc/internal/genkit"
 	"github.com/uforg/uforpc/internal/schema"
@@ -51,8 +50,8 @@ func renderField(parentTypeName string, field schema.FieldDefinition) string {
 		typeLiteral = parentTypeName + namePascal
 	}
 
-	if field.Depth > 0 {
-		typeLiteral = strings.Repeat("[]", field.Depth) + typeLiteral
+	if field.IsArray {
+		typeLiteral = fmt.Sprintf("[]%s", typeLiteral)
 	}
 
 	if isOptional {
@@ -139,8 +138,8 @@ func renderPreField(parentTypeName string, field schema.FieldDefinition) string 
 		typeLiteral = "pre" + parentTypeName + namePascal
 	}
 
-	if field.Depth > 0 {
-		typeLiteral = strings.Repeat("[]", field.Depth) + typeLiteral
+	if field.IsArray {
+		typeLiteral = fmt.Sprintf("[]%s", typeLiteral)
 	}
 
 	typeLiteral = fmt.Sprintf("Optional[%s]", typeLiteral)
@@ -196,8 +195,7 @@ func renderPreType(
 			isRequired := !fieldDef.Optional
 			isCustomType := fieldDef.IsCustomType()
 			isInline := fieldDef.IsInline()
-			isArray := fieldDef.Depth > 0
-			arrayDepth := fieldDef.Depth
+			isArray := fieldDef.IsArray
 
 			og.Linef(`// Required validations for field "%s"`, fieldDef.Name)
 
@@ -223,33 +221,14 @@ func renderPreType(
 
 			if (isCustomType || isInline) && isArray {
 				og.Linef("if p.%s.Present {", fieldName)
+
+				og.Linef("for _, item := range p.%s.Value {", fieldName)
 				og.Block(func() {
-					og.Linef("item%d := p.%s.Value", arrayDepth, fieldName)
-
-					var renderLevel func(arrayDepth int)
-					renderLevel = func(arrayDepth int) {
-						nextArrayDepth := arrayDepth - 1
-
-						if arrayDepth > 1 {
-							og.Linef("for _, item%d := range item%d {", nextArrayDepth, arrayDepth)
-							og.Block(func() {
-								renderLevel(nextArrayDepth)
-							})
-							og.Line("}")
-						} else {
-							og.Linef("for _, item := range item%d {", arrayDepth)
-							og.Block(func() {
-								og.Linef("if err := item.validate(); err != nil {")
-								og.Block(func() {
-									og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
-								})
-								og.Line("}")
-							})
-							og.Line("}")
-						}
-					}
-
-					renderLevel(arrayDepth)
+					og.Linef("if err := item.validate(); err != nil {")
+					og.Block(func() {
+						og.Linef("return errorMissingRequiredField(\"field %s: \" + err.Error())", fieldDef.Name)
+					})
+					og.Line("}")
 				})
 				og.Line("}")
 			}
@@ -273,8 +252,7 @@ func renderPreType(
 			isBuiltinType := fieldDef.IsBuiltInType()
 			isCustomType := fieldDef.IsCustomType()
 			isInline := fieldDef.IsInline()
-			isArray := fieldDef.Depth > 0
-			arrayDepth := fieldDef.Depth
+			isArray := fieldDef.IsArray
 
 			// Process fields with builtin types
 			if isBuiltinType {
@@ -321,68 +299,24 @@ func renderPreType(
 
 				fieldNameTemp := "trans_" + fieldName
 				og.Linef(
-					"%s := make(%s%s, len(p.%s.Value))",
+					"%s := make([]%s, len(p.%s.Value))",
 					fieldNameTemp,
-					strings.Repeat("[]", arrayDepth),
 					typeName,
 					fieldName,
 				)
 
-				var renderArrayTransform func(depth int, srcIndices string, dstIndices string)
-				renderArrayTransform = func(depth int, srcIndices string, dstIndices string) {
-					if depth <= 0 {
-						return
-					}
-
-					currIndex := fmt.Sprintf("i%d", arrayDepth-depth+1)
-
-					if depth > 1 {
-						// Generate the loop for the current level
-						og.Linef("for %s := range p.%s.Value%s {", currIndex, fieldName, srcIndices)
-						og.Block(func() {
-							// Initialize next level array
-							og.Linef("%s%s[%s] = make(%s%s, len(p.%s.Value%s[%s]))",
-								fieldNameTemp,
-								dstIndices,
-								currIndex,
-								strings.Repeat("[]", depth-1),
-								typeName,
-								fieldName,
-								srcIndices,
-								currIndex)
-
-							// Recursion for the next level
-							newSrcIndices := srcIndices + "[" + currIndex + "]"
-							newDstIndices := dstIndices + "[" + currIndex + "]"
-							renderArrayTransform(depth-1, newSrcIndices, newDstIndices)
-						})
-						og.Line("}")
-					} else {
-						// At the deepest level
-						og.Linef("for %s := range p.%s.Value%s {", currIndex, fieldName, srcIndices)
-						og.Block(func() {
-							// Apply the transformation directly
-							og.Linef("%s%s[%s] = p.%s.Value%s[%s].transform()",
-								fieldNameTemp,
-								dstIndices,
-								currIndex,
-								fieldName,
-								srcIndices,
-								currIndex)
-						})
-						og.Line("}")
-					}
-				}
-
-				renderArrayTransform(arrayDepth, "", "")
+				og.Linef("for index, preItem := range p.%s.Value {", fieldName)
+				og.Block(func() {
+					og.Linef("%s[index] = preItem.transform()", fieldNameTemp)
+				})
+				og.Line("}")
 
 				if isRequired {
 					og.Linef("%s := %s", fieldName, fieldNameTemp)
 				} else {
 					og.Linef(
-						"%s := Optional[%s%s]{Present: p.%s.Present, Value: %s}",
+						"%s := Optional[[]%s]{Present: p.%s.Present, Value: %s}",
 						fieldName,
-						strings.Repeat("[]", arrayDepth),
 						typeName,
 						fieldName,
 						fieldNameTemp,
