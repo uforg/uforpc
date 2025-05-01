@@ -3,6 +3,10 @@
 version: "3"
 
 tasks:
+  install:
+    desc: Install the urpc binary in the local PATH
+    cmd: go install ./cmd/urpc/.
+
   build:
     desc: Build and install the urpc binary in the PATH
     cmds:
