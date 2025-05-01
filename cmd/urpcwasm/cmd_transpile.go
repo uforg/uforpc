@@ -10,10 +10,8 @@ import (
 
 	"github.com/uforg/uforpc/internal/schema"
 	"github.com/uforg/uforpc/internal/transpile"
-	"github.com/uforg/uforpc/internal/urpc/cleaner"
 	"github.com/uforg/uforpc/internal/urpc/formatter"
 	"github.com/uforg/uforpc/internal/urpc/parser"
-	"github.com/uforg/uforpc/internal/urpc/typeflattener"
 )
 
 func cmdTranspileWrapper() js.Func {
@@ -58,9 +56,6 @@ func cmdTranspile(originalExtension string, input string) (string, error) {
 			return "", fmt.Errorf("failed to transpile JSON to URPC: %s", err)
 		}
 
-		urpc = *typeflattener.Flatten(&urpc)
-		urpc = *cleaner.Clean(&urpc)
-
 		formatted := formatter.FormatSchema(&urpc)
 		return formatted, nil
 	}
@@ -70,9 +65,6 @@ func cmdTranspile(originalExtension string, input string) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("failed to parse URPC schema: %s", err)
 		}
-
-		parsed = typeflattener.Flatten(parsed)
-		parsed = cleaner.Clean(parsed)
 
 		jsonSch, err := transpile.ToJSON(*parsed)
 		if err != nil {
