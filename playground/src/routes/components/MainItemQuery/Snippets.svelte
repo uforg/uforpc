@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fade, slide } from "svelte/transition";
   import H3 from "$lib/components/H3.svelte";
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
 
@@ -56,6 +57,8 @@
         "p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20",
         "overflow-x-auto",
       ]}
+      in:fade={{ duration: 100 }}
+      out:slide={{ duration: 100, axis: "x" }}
     >
       <pre>{JSON.stringify(value, null, 2)}</pre>
     </div>
