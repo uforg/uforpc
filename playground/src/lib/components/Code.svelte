@@ -1,12 +1,17 @@
 <script lang="ts">
+  import { slide } from "svelte/transition";
   import { toast } from "svelte-sonner";
-  import { ChevronDown, ChevronRight, Copy } from "@lucide/svelte";
+  import {
+    ChevronDown,
+    ChevronRight,
+    Copy,
+    ScrollText,
+  } from "@lucide/svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { store } from "$lib/store.svelte";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
-  import { fade } from "svelte/transition";
 
   interface Props {
     code: string;
@@ -63,25 +68,26 @@
 {#if urpcSchemaHighlighted !== ""}
   <div
     class={mergeClasses(
-      "group rounded-box shadow-sm bg-base-200 border border-base-content/20",
+      "group",
       className,
     )}
   >
     {#if collapsible}
       <button
         class={[
-          "btn btn-ghost btn-block justify-start px-5 py-6",
-          "border-none hover:border-none rounded-t-box",
+          "btn w-full justify-start border-base-content/20",
+          "rounded-box group/btn",
           {
             "rounded-b-none": isOpen,
           },
         ]}
         onclick={toggleCollapse}
       >
+        <ScrollText class="size-4 mr-2 block group-hover/btn:hidden" />
         {#if isOpen}
-          <ChevronDown class="size-5 mr-2" />
+          <ChevronDown class="size-4 mr-2 hidden group-hover/btn:block" />
         {:else}
-          <ChevronRight class="size-5 mr-2" />
+          <ChevronRight class="size-4 mr-2 hidden group-hover/btn:block" />
         {/if}
         {#if title}
           {title}
@@ -91,8 +97,11 @@
 
     {#if !collapsible || isOpen}
       <div
-        class="relative z-10 p-4 border-t border-base-content/20"
-        transition:fade={{ duration: 150 }}
+        class={[
+          "relative z-10 p-4 pt-2 rounded-box rounded-t-none",
+          "bg-base-200 border border-t-0 border-base-content/20",
+        ]}
+        transition:slide={{ duration: 100 }}
       >
         <button
           class="btn absolute top-4 right-4 hidden group-hover:block"
