@@ -32,7 +32,7 @@
   }
 </script>
 
-<fieldset class="fieldset border border-base-300 rounded-box w-full p-4 space-y-2">
+<fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
   <legend class="fieldset-legend">{field.name}</legend>
 
   {#if indexesLen == 0}
@@ -52,7 +52,7 @@
     {/if}
 
     {#if field.typeInline}
-      <fieldset class="fieldset border border-base-300 rounded-box w-full p-4 space-y-2">
+      <fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
         <legend class="fieldset-legend">
           {`${field.name}[${index}]`}
         </legend>

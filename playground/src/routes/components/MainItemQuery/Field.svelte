@@ -31,7 +31,7 @@
   {/if}
 
   {#if !field.isArray && field.typeInline}
-    <fieldset class="fieldset border border-base-300 rounded-box w-full p-4 space-y-2">
+    <fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
       <legend class="fieldset-legend">{field.label ?? field.name}</legend>
       <FieldInline
         fields={field.typeInline.fields}

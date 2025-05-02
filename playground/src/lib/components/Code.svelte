@@ -63,7 +63,7 @@
 {#if urpcSchemaHighlighted !== ""}
   <div
     class={mergeClasses(
-      "group rounded-box shadow-sm bg-base-200 border border-base-300",
+      "group rounded-box shadow-sm bg-base-200 border border-base-content/20",
       className,
     )}
   >
@@ -91,7 +91,7 @@
 
     {#if !collapsible || isOpen}
       <div
-        class="relative z-10 p-4 border-t border-base-300"
+        class="relative z-10 p-4 border-t border-base-content/20"
         transition:fade={{ duration: 150 }}
       >
         <button
