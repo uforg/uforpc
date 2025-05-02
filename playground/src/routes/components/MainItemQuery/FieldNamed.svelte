@@ -1,14 +1,18 @@
 <script lang="ts">
   import type { FieldDefinition } from "$lib/urpcTypes";
+  import { setAtPath } from "$lib/helpers/setAtPath";
+  import { untrack } from "svelte";
 
   interface Props {
     field: FieldDefinition;
-    value?: string | number | boolean | undefined;
+    parentPath: string;
+    value: any;
   }
 
   let {
     field,
-    value = $bindable(),
+    parentPath,
+    value: globalValue = $bindable(),
   }: Props = $props();
 
   export const validate = () => {
@@ -16,7 +20,19 @@
     return isValid;
   };
 
+  let path = $derived(`${parentPath}.${field.name}`);
   let isTouched = $state(false);
+  let value = $state();
+
+  // Listen to changes and update the global value
+  // Use untrack to avoid infinite loop
+  // https://svelte.dev/docs/svelte/svelte#untrack
+  $effect(() => {
+    let val = value;
+    untrack(() => {
+      globalValue = setAtPath(globalValue, path, val);
+    });
+  });
 
   let isValid = $derived.by(() => {
     if (!field.typeName) return true;
