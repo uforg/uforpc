@@ -1,17 +1,17 @@
 <script lang="ts">
-  import type { FieldDefinition } from "$lib/urpcTypes";
+  import type { FieldDefinitionWithLabel } from "./types";
   import { setAtPath } from "$lib/helpers/setAtPath";
   import { untrack } from "svelte";
 
   interface Props {
-    field: FieldDefinition;
-    parentPath: string;
+    field: FieldDefinitionWithLabel;
+    path: string;
     value: any;
   }
 
   let {
     field,
-    parentPath,
+    path,
     value: globalValue = $bindable(),
   }: Props = $props();
 
@@ -20,7 +20,6 @@
     return isValid;
   };
 
-  let path = $derived(`${parentPath}.${field.name}`);
   let isTouched = $state(false);
   let value = $state();
 
@@ -98,7 +97,7 @@
       "text-error": isTouched && !isValid,
     }}
   >
-    {field.name}
+    {field.label ?? field.name}
     {#if !field.optional}
       <span class="text-error">*</span>
     {/if}
@@ -113,7 +112,7 @@
         "input w-full": true,
         "input-error placeholder:text-error": isTouched && !isValid,
       }}
-      placeholder={`Enter "${field.name}" here...`}
+      placeholder={`Enter "${field.label ?? field.name}" here...`}
       onblur={() => (isTouched = true)}
     />
   {/if}
@@ -136,7 +135,7 @@
 
   {#if isTouched && !isValid}
     <p class="block label text-xs text-error">
-      {field.name} is required
+      {field.label ?? field.name} is required
     </p>
   {/if}
 </label>

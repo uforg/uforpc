@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { FieldDefinition } from "$lib/urpcTypes";
+  import type { FieldDefinitionWithLabel } from "./types";
   import Field from "./Field.svelte";
 
   interface Props {
-    fields: FieldDefinition[];
-    parentPath: string;
+    fields: FieldDefinitionWithLabel[];
+    path: string;
     value: any;
   }
 
   let {
     fields,
-    parentPath,
+    path,
     value = $bindable(),
   }: Props = $props();
 </script>
@@ -18,7 +18,7 @@
 {#each fields as field}
   <Field
     fields={field}
-    {parentPath}
+    path={`${path}.${field.name}`}
     bind:value
   />
 {/each}
