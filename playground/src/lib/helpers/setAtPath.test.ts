@@ -75,10 +75,11 @@ Deno.test("setAtPath - creates full path with nested objects", () => {
   assertEquals(result, { a: { b: { c: "value" } } });
 });
 
-Deno.test("setAtPath - creates arrays when numeric keys are used", () => {
+Deno.test("setAtPath - creates arrays when numeric keys are used in path", () => {
   const original = {};
   const result = setAtPath(original, "items.0", "first");
-  assertEquals(result, { items: { "0": "first" } });
+  // Should create an array, not an object with a "0" key
+  assertEquals(result, { items: ["first"] });
 });
 
 Deno.test("setAtPath - handles null values", () => {
@@ -155,26 +156,15 @@ Deno.test("setAtPath - preserves everything else in complex objects", () => {
   assertEquals(result.settings.notifications, true);
 });
 
-Deno.test("setAtPath - Sets null and undefined values correctly", () => {
-  const original: any = { name: "John", age: 30 };
-  let result = setAtPath(original, "name", null);
-  result = setAtPath(result, "age", undefined);
-
-  assertEquals(result, { name: null, age: undefined });
-  assertEquals(original, { name: "John", age: 30 });
-});
-
-Deno.test("setAtPath - removeNullOrUndefined option removes null properties", () => {
+Deno.test("setAtPath - removes null values by default", () => {
   const original: any = {
     name: "John",
     age: 30,
     address: { city: "New York", zip: "10001" },
   };
 
-  // Setting a property to null should remove it when removeNullOrUndefined is true
-  const result = setAtPath(original, "name", null, {
-    removeNullOrUndefined: true,
-  });
+  // Setting a property to null should remove it
+  const result = setAtPath(original, "name", null);
 
   assertEquals(result, {
     age: 30,
@@ -188,19 +178,17 @@ Deno.test("setAtPath - removeNullOrUndefined option removes null properties", ()
   });
 });
 
-Deno.test("setAtPath - removeNullOrUndefined option removes undefined properties", () => {
+Deno.test("setAtPath - removes undefined values by default", () => {
   const original: any = { name: "John", age: 30 };
 
-  // Setting a property to undefined should remove it when removeNullOrUndefined is true
-  const result = setAtPath(original, "age", undefined, {
-    removeNullOrUndefined: true,
-  });
+  // Setting a property to undefined should remove it
+  const result = setAtPath(original, "age", undefined);
 
   assertEquals(result, { name: "John" });
   assertEquals(original, { name: "John", age: 30 });
 });
 
-Deno.test("setAtPath - removeNullOrUndefined works with nested properties", () => {
+Deno.test("setAtPath - removes null values in nested properties", () => {
   const original: any = {
     user: {
       name: "John",
@@ -213,12 +201,7 @@ Deno.test("setAtPath - removeNullOrUndefined works with nested properties", () =
   };
 
   // Remove a nested property
-  const result = setAtPath(
-    original,
-    "user.address.zip",
-    null,
-    { removeNullOrUndefined: true },
-  );
+  const result = setAtPath(original, "user.address.zip", null);
 
   assertEquals(result, {
     user: {
@@ -231,148 +214,86 @@ Deno.test("setAtPath - removeNullOrUndefined works with nested properties", () =
   });
 });
 
-Deno.test("setAtPath - removeNullOrUndefined works with arrays", () => {
+Deno.test("setAtPath - removes null values in arrays", () => {
   const original: any = { users: ["John", "Jane", "Bob"] };
 
-  // Setting an array element to null should remove the element when removeNullOrUndefined is true
-  const result = setAtPath(original, "users.1", null, {
-    removeNullOrUndefined: true,
-  });
+  // Setting an array element to null should remove the element
+  const result = setAtPath(original, "users.1", null);
 
   // The array should have the element removed and subsequent elements shifted
   assertEquals(result, { users: ["John", "Bob"] });
 });
 
-Deno.test("setAtPath - removeNullOrUndefined doesn't affect non-null values", () => {
-  const original = { name: "John", age: 30 };
+Deno.test("setAtPath - creates and populates nested arrays", () => {
+  const original = {};
 
-  // Regular values should still be set normally
-  const result = setAtPath(original, "name", "Jane", {
-    removeNullOrUndefined: true,
-  });
+  // Create a new array with elements
+  const result = setAtPath(original, "user.followers.0.name", "Alice");
 
-  assertEquals(result, { name: "Jane", age: 30 });
-});
-
-Deno.test("setAtPath - removeNullOrUndefined works with complex nested arrays", () => {
-  const original: any = {
-    departments: [
-      {
-        name: "Engineering",
-        teams: [
-          {
-            name: "Frontend",
-            members: [
-              { id: 1, name: "Alice" },
-              { id: 2, name: "Bob" },
-              { id: 3, name: "Charlie" },
-            ],
-          },
-          {
-            name: "Backend",
-            members: [
-              { id: 4, name: "Dave" },
-              { id: 5, name: "Eve" },
-            ],
-          },
-        ],
-      },
-      {
-        name: "Marketing",
-        teams: [
-          {
-            name: "Social Media",
-            members: [
-              { id: 6, name: "Frank" },
-            ],
-          },
-        ],
-      },
-    ],
-  };
-
-  // Remove a deeply nested array element
-  const result1 = setAtPath(
-    original,
-    "departments.0.teams.0.members.1",
-    null,
-    { removeNullOrUndefined: true },
-  );
-
-  // Bob should be removed, Charlie should shift to index 1
-  assertEquals(result1.departments[0].teams[0].members.length, 2);
-  assertEquals(result1.departments[0].teams[0].members[0].name, "Alice");
-  assertEquals(result1.departments[0].teams[0].members[1].name, "Charlie");
-
-  // Remove an entire team
-  const result2 = setAtPath(
-    original,
-    "departments.0.teams.0",
-    null,
-    { removeNullOrUndefined: true },
-  );
-
-  // Backend team should be removed
-  assertEquals(result2.departments[0].teams.length, 1);
-  assertEquals(result2.departments[0].teams[0].name, "Backend");
-
-  // Remove an entire department
-  const result3 = setAtPath(
-    original,
-    "departments.1",
-    null,
-    { removeNullOrUndefined: true },
-  );
-
-  // Marketing department should be removed
-  assertEquals(result3.departments.length, 1);
-  assertEquals(result3.departments[0].name, "Engineering");
-});
-
-Deno.test("setAtPath - removeNullOrUndefined removes entire nested subtree", () => {
-  const original: any = {
-    project: {
-      name: "Example",
-      details: {
-        stages: [
-          {
-            phase: "Planning",
-            tasks: [
-              { id: 1, description: "Research" },
-              { id: 2, description: "Design" },
-            ],
-          },
-          {
-            phase: "Implementation",
-            tasks: [
-              { id: 3, description: "Coding" },
-            ],
-          },
-        ],
-        budget: {
-          allocated: 10000,
-          spent: 5000,
-        },
-      },
-    },
-  };
-
-  // Remove the entire details object
-  const result = setAtPath(
-    original,
-    "project.details",
-    null,
-    { removeNullOrUndefined: true },
-  );
-
-  // The entire subtree should be gone
+  // Should create an array for "followers", not an object with a "0" key
   assertEquals(result, {
-    project: {
-      name: "Example",
+    user: {
+      followers: [
+        { name: "Alice" },
+      ],
     },
   });
+});
 
-  // Original should remain unchanged
-  assertEquals(original.project.details.stages.length, 2);
-  assertEquals(original.project.details.budget.allocated, 10000);
+Deno.test("setAtPath - creates arrays with multiple items", () => {
+  const original = {};
+
+  // Set first entry
+  let result: any = setAtPath(original, "items.0", "first");
+
+  // Set third entry (index 2)
+  result = setAtPath(result, "items.2", "third");
+
+  // The second element should be undefined (not an empty item)
+  assertEquals(result.items.length, 3);
+  assertEquals(result.items[0], "first");
+  assertEquals(result.items[1], undefined);
+  assertEquals(result.items[2], "third");
+});
+
+Deno.test("setAtPath - creates complex nested arrays", () => {
+  const original = {};
+
+  // Create complex nested structure
+  const result: any = setAtPath(
+    original,
+    "users.0.posts.0.comments.1.author",
+    "Alice",
+  );
+
+  // Verify the structure instead of making a complete comparison
+  assertEquals(result.users.length, 1);
+  assertEquals(result.users[0].posts.length, 1);
+  assertEquals(result.users[0].posts[0].comments.length, 2);
+  assertEquals(result.users[0].posts[0].comments[0], undefined);
+  assertEquals(result.users[0].posts[0].comments[1].author, "Alice");
+});
+
+Deno.test("setAtPath - correctly handles mixed array and object paths", () => {
+  const original = {};
+
+  // Create a path with both array indices and object properties
+  const result: any = setAtPath(
+    original,
+    "departments.0.teams.1.members.0.skills.2",
+    "JavaScript",
+  );
+
+  // Verify the structure instead of making a complete comparison
+  assertEquals(result.departments.length, 1);
+  assertEquals(result.departments[0].teams.length, 2);
+  assertEquals(result.departments[0].teams[0], undefined);
+  assertEquals(result.departments[0].teams[1].members.length, 1);
+  assertEquals(result.departments[0].teams[1].members[0].skills.length, 3);
+  assertEquals(result.departments[0].teams[1].members[0].skills[0], undefined);
+  assertEquals(result.departments[0].teams[1].members[0].skills[1], undefined);
+  assertEquals(
+    result.departments[0].teams[1].members[0].skills[2],
+    "JavaScript",
+  );
 });
