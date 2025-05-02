@@ -46,7 +46,7 @@
       </button>
       {#if isOpen}
         <div
-          class="p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20 space-y-2"
+          class="p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20 space-y-2 fieldset"
           transition:slide={{ duration: 100 }}
         >
           <H2>Input</H2>
