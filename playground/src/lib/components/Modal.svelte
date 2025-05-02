@@ -41,7 +41,7 @@
   <Portal target="body">
     <div
       class="z-40 w-screen h-screen fixed top-0 left-0"
-      transition:fade={{ duration: 200 }}
+      transition:fade={{ duration: 100 }}
     >
       <button
         class={mergeClasses(
