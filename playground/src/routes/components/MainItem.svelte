@@ -133,7 +133,9 @@
     {/if}
 
     {#if node.kind === "proc"}
-      <MainItemQuery class="mt-4" proc={node} />
+      <div class="mt-4">
+        <MainItemQuery proc={node} />
+      </div>
     {/if}
   </div>
 </section>
