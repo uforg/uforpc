@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { fade, slide } from "svelte/transition";
-  import H3 from "$lib/components/H3.svelte";
+  import { slide } from "svelte/transition";
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
 
   interface Props {
@@ -16,7 +15,6 @@
   class={[
     {
       "w-[400px] max-w-[400px]": isOpen,
-      "flex-none": !isOpen,
     },
   ]}
 >
@@ -26,7 +24,7 @@
       "tooltip tooltip-left",
       {
         "px-4 justify-start rounded-b-none": isOpen,
-        "px-2 btn-square": !isOpen,
+        "px-3": !isOpen,
       },
     ]}
     data-tip={isOpen ? "Hide code snippets" : "Show code snippets"}
@@ -37,17 +35,16 @@
         "mr-2": isOpen,
       }}
     >
-      <Code class="size-6 group-hover:hidden" />
-
+      <Code class="size-4 group-hover:hidden" />
       {#if isOpen}
-        <ChevronRight class="size-6 hidden group-hover:block" />
+        <ChevronRight class="size-4 hidden group-hover:block" />
       {:else}
-        <ChevronLeft class="size-6 hidden group-hover:block" />
+        <ChevronLeft class="size-4 hidden group-hover:block" />
       {/if}
     </span>
 
     {#if isOpen}
-      <H3>Code snippets</H3>
+      <span>Code snippets</span>
     {/if}
   </button>
 
@@ -57,8 +54,7 @@
         "p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20",
         "overflow-x-auto",
       ]}
-      in:fade={{ duration: 100 }}
-      out:slide={{ duration: 100, axis: "x" }}
+      transition:slide={{ duration: 100, axis: "x" }}
     >
       <pre>{JSON.stringify(value, null, 2)}</pre>
     </div>
