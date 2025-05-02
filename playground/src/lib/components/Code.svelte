@@ -108,8 +108,8 @@
           onclick={() => copyToClipboard(code)}
         >
           <span class="flex justify-center items-center space-x-2">
-            <span>Copy</span>
             <Copy class="size-4" />
+            <span>Copy</span>
           </span>
         </button>
         {@html urpcSchemaHighlighted}
