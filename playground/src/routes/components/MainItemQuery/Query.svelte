@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fade } from "svelte/transition";
+  import { slide } from "svelte/transition";
   import { ChevronDown, ChevronRight, ChevronUp } from "@lucide/svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
   import H2 from "$lib/components/H2.svelte";
@@ -40,7 +40,7 @@
       {#if isOpen}
         <div
           class="p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20 space-y-2"
-          transition:fade={{ duration: 100 }}
+          transition:slide={{ duration: 100 }}
         >
           <H2>Input</H2>
           <Field fields={proc.input} path="root" bind:value />
