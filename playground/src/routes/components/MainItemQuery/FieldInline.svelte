@@ -18,7 +18,7 @@
 {#each fields as field}
   <Field
     fields={field}
-    path={`${path}.${field.name}`}
+    {path}
     bind:value
   />
 {/each}

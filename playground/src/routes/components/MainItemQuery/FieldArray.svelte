@@ -27,11 +27,7 @@
 
   function removeItem() {
     if (indexes.length <= 0) return;
-
-    value = setAtPath(value, `${path}.${lastIndex}`, null, {
-      removeNullOrUndefined: true,
-    });
-
+    value = setAtPath(value, `${path}.${lastIndex}`, null);
     indexes.pop();
   }
 </script>
