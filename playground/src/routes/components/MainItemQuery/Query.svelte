@@ -1,6 +1,11 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
-  import { ChevronDown, ChevronRight, ChevronUp } from "@lucide/svelte";
+  import {
+    ChevronDown,
+    ChevronRight,
+    ChevronUp,
+    Zap,
+  } from "@lucide/svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
   import H2 from "$lib/components/H2.svelte";
   import Field from "./Field.svelte";
@@ -23,17 +28,19 @@
       <button
         class={[
           "btn justify-start border-base-content/20 rounded-box w-full",
+          "group/btn",
           {
             "rounded-b-none": isOpen,
           },
         ]}
         onclick={toggleIsOpen}
       >
+        <Zap class="size-4 block group-hover/btn:hidden" />
         {#if isOpen}
-          <ChevronDown class="size-5" />
+          <ChevronDown class="size-4 hidden group-hover/btn:block" />
         {/if}
         {#if !isOpen}
-          <ChevronRight class="size-5" />
+          <ChevronRight class="size-4 hidden group-hover/btn:block" />
         {/if}
         <span class="ml-2">Try it out</span>
       </button>
