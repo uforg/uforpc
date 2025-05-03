@@ -14,7 +14,7 @@
 <div
   class={[
     {
-      "w-[400px] max-w-[400px]": isOpen,
+      "w-[40%]": isOpen,
     },
   ]}
 >
