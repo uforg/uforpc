@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { dimensionschangeAction, uiStore } from "$lib/uistore.svelte";
+  import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
   import { store } from "$lib/store.svelte";
   import AsideSchemaManager from "./AsideSchemaManager.svelte";
   import AsideItem from "./AsideItem.svelte";

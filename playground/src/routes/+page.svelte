@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { activesectionAction } from "$lib/actions/activeSection.svelte.ts";
   import { store } from "$lib/store.svelte";
-  import { dimensionschangeAction, uiStore } from "$lib/uistore.svelte";
+  import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";
   import Main from "./components/Main.svelte";

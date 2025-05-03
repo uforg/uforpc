@@ -106,6 +106,12 @@ export const uiStore = $state<UiStore>({
 // Helper functions //
 //////////////////////
 
+/**
+ * Finds all scrollable ancestor elements of a given HTML element
+ *
+ * @param {HTMLElement} el - The HTML element to find scrollable ancestors for
+ * @returns {(Window | HTMLElement)[]} An array of scrollable ancestors, including the window
+ */
 function getScrollableAncestors(el: HTMLElement): (Window | HTMLElement)[] {
   const hosts: (Window | HTMLElement)[] = [window];
   let parent = el.parentElement;
@@ -125,6 +131,16 @@ function getScrollableAncestors(el: HTMLElement): (Window | HTMLElement)[] {
   return hosts;
 }
 
+/**
+ * Svelte action that tracks and reports element dimensions and position changes
+ *
+ * This action monitors an element's size, position, scroll state, and style properties,
+ * dispatching a custom event whenever these dimensions change due to resizing, scrolling,
+ * or other layout changes.
+ *
+ * @param {HTMLElement} node - The HTML element to track
+ * @returns {object} Action lifecycle methods
+ */
 export const dimensionschangeAction: Action<
   HTMLElement,
   undefined,
