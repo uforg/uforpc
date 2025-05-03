@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { setAtPath } from "$lib/helpers/setAtPath";
-  import type { FieldDefinitionWithLabel } from "./types";
   import { PackageOpen, Plus, Trash } from "@lucide/svelte";
+  import { setAtPath } from "$lib/helpers/setAtPath";
+  import type { FieldDefinition } from "$lib/urpcTypes";
+  import Label from "./Label.svelte";
   import FieldNamed from "./FieldNamed.svelte";
   import FieldInline from "./FieldInline.svelte";
 
   interface Props {
-    field: FieldDefinitionWithLabel;
+    field: FieldDefinition;
     path: string;
     value: any;
   }
@@ -33,7 +34,9 @@
 </script>
 
 <fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
-  <legend class="fieldset-legend">{field.name}</legend>
+  <legend class="fieldset-legend">
+    <Label optional={field.optional} label={path} />
+  </legend>
 
   {#if indexesLen == 0}
     <PackageOpen class="size-6 mx-auto" />
@@ -45,7 +48,7 @@
   {#each indexes as index}
     {#if field.typeName}
       <FieldNamed
-        field={{ ...field, label: `${field.name}[${index}]` }}
+        {field}
         path={`${path}.${index}`}
         bind:value
       />
@@ -54,7 +57,7 @@
     {#if field.typeInline}
       <fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
         <legend class="fieldset-legend">
-          {`${field.name}[${index}]`}
+          <Label optional={field.optional} label={`${path}.${index}`} />
         </legend>
         <FieldInline
           fields={field.typeInline.fields}

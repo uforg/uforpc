@@ -1,11 +1,6 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
-  import {
-    ChevronDown,
-    ChevronRight,
-    ChevronUp,
-    Zap,
-  } from "@lucide/svelte";
+  import { ChevronDown, ChevronRight, Zap } from "@lucide/svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
   import H2 from "$lib/components/H2.svelte";
   import Field from "./Field.svelte";

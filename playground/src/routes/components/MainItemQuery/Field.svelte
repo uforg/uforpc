@@ -1,12 +1,13 @@
 <script lang="ts">
+  import type { FieldDefinition } from "$lib/urpcTypes";
   import { store } from "$lib/store.svelte";
-  import type { FieldDefinitionWithLabel } from "./types";
   import FieldNamed from "./FieldNamed.svelte";
   import FieldInline from "./FieldInline.svelte";
   import FieldArray from "./FieldArray.svelte";
+  import Label from "./Label.svelte";
 
   interface Props {
-    fields: FieldDefinitionWithLabel | FieldDefinitionWithLabel[];
+    fields: FieldDefinition | FieldDefinition[];
     path: string;
     value: any;
   }
@@ -19,7 +20,7 @@
 
   function getCustomTypeFields(
     typeName: string,
-  ): FieldDefinitionWithLabel[] {
+  ): FieldDefinition[] {
     for (const node of store.jsonSchema.nodes) {
       if (node.kind !== "type") continue;
       if (node.name !== typeName) continue;
@@ -30,7 +31,7 @@
     return [];
   }
 
-  const primitiveTypes = ["string", "int", "float", "bool", "datetime"];
+  const primitiveTypes = ["string", "int", "float", "boolean", "datetime"];
 
   let fieldsArray = $derived.by(() => {
     let arr = Array.isArray(fieldOrFields)
@@ -42,7 +43,7 @@
       if (!field.typeName) return field;
       if (primitiveTypes.includes(field.typeName)) return field;
 
-      const newField: FieldDefinitionWithLabel = {
+      const newField: FieldDefinition = {
         ...field,
         typeName: undefined,
         typeInline: {
@@ -68,7 +69,12 @@
 
   {#if !field.isArray && field.typeInline}
     <fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
-      <legend class="fieldset-legend">{field.label ?? field.name}</legend>
+      <legend class="fieldset-legend">
+        <Label
+          label={`${path}.${field.name}`}
+          optional={field.optional}
+        />
+      </legend>
       <FieldInline
         fields={field.typeInline.fields}
         path={`${path}.${field.name}`}

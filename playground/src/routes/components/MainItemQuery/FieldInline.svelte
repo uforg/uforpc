@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { FieldDefinitionWithLabel } from "./types";
+  import type { FieldDefinition } from "$lib/urpcTypes";
   import Field from "./Field.svelte";
 
   interface Props {
-    fields: FieldDefinitionWithLabel[];
+    fields: FieldDefinition[];
     path: string;
     value: any;
   }

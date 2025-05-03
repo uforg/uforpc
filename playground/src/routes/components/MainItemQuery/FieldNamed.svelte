@@ -1,10 +1,12 @@
 <script lang="ts">
-  import type { FieldDefinitionWithLabel } from "./types";
-  import { setAtPath } from "$lib/helpers/setAtPath";
   import { untrack } from "svelte";
+  import type { FieldDefinition } from "$lib/urpcTypes";
+  import { setAtPath } from "$lib/helpers/setAtPath";
+  import { prettyLabel } from "./prettyLabel";
+  import Label from "./Label.svelte";
 
   interface Props {
-    field: FieldDefinitionWithLabel;
+    field: FieldDefinition;
     path: string;
     value: any;
   }
@@ -88,6 +90,8 @@
       return 1;
     }
   });
+
+  let label = $derived(prettyLabel(path));
 </script>
 
 <label class="block space-y-1 w-full">
@@ -97,10 +101,7 @@
       "text-error": isTouched && !isValid,
     }}
   >
-    {field.label ?? field.name}
-    {#if !field.optional}
-      <span class="text-error">*</span>
-    {/if}
+    <Label optional={field.optional} {label} />
   </span>
 
   {#if inputType !== "checkbox"}
@@ -112,7 +113,7 @@
         "input w-full": true,
         "input-error placeholder:text-error": isTouched && !isValid,
       }}
-      placeholder={`Enter "${field.label ?? field.name}" here...`}
+      placeholder={`Enter ${label} here...`}
       onblur={() => (isTouched = true)}
     />
   {/if}
@@ -129,13 +130,9 @@
     />
   {/if}
 
-  {#if field.optional}
-    <p class="block label text-xs">Optional</p>
-  {/if}
-
   {#if isTouched && !isValid}
     <p class="block label text-xs text-error">
-      {field.label ?? field.name} is required
+      {label} is required
     </p>
   {/if}
 </label>
