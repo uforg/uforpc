@@ -5,6 +5,7 @@
   import FieldInline from "./FieldInline.svelte";
   import FieldArray from "./FieldArray.svelte";
   import Label from "./Label.svelte";
+  import Fieldset from "./Fieldset.svelte";
 
   interface Props {
     fields: FieldDefinition | FieldDefinition[];
@@ -68,7 +69,7 @@
   {/if}
 
   {#if !field.isArray && field.typeInline}
-    <fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
+    <Fieldset>
       <legend class="fieldset-legend">
         <Label
           label={`${path}.${field.name}`}
@@ -80,7 +81,7 @@
         path={`${path}.${field.name}`}
         bind:value
       />
-    </fieldset>
+    </Fieldset>
   {/if}
 
   {#if field.isArray}

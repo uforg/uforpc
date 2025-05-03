@@ -5,6 +5,7 @@
   import Label from "./Label.svelte";
   import FieldNamed from "./FieldNamed.svelte";
   import FieldInline from "./FieldInline.svelte";
+  import Fieldset from "./Fieldset.svelte";
 
   interface Props {
     field: FieldDefinition;
@@ -33,7 +34,7 @@
   }
 </script>
 
-<fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
+<Fieldset>
   <legend class="fieldset-legend">
     <Label optional={field.optional} label={path} />
   </legend>
@@ -55,7 +56,7 @@
     {/if}
 
     {#if field.typeInline}
-      <fieldset class="fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2">
+      <Fieldset>
         <legend class="fieldset-legend">
           <Label optional={field.optional} label={`${path}.${index}`} />
         </legend>
@@ -64,7 +65,7 @@
           path={`${path}.${index}`}
           bind:value
         />
-      </fieldset>
+      </Fieldset>
     {/if}
   {/each}
 
@@ -81,4 +82,4 @@
       Add item to {field.name}
     </button>
   </div>
-</fieldset>
+</Fieldset>
