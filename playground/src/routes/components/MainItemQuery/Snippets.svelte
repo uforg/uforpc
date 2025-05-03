@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { slide } from "svelte/transition";
+  import { fade, slide } from "svelte/transition";
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
 
   interface Props {
@@ -54,7 +54,8 @@
         "p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20",
         "overflow-x-auto",
       ]}
-      transition:slide={{ duration: 100, axis: "x" }}
+      in:fade={{ duration: 100 }}
+      out:slide={{ duration: 100, axis: "x" }}
     >
       <pre>{JSON.stringify(value, null, 2)}</pre>
     </div>
