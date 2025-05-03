@@ -1,22 +1,19 @@
 <script lang="ts">
   import { BookOpenText, Github } from "@lucide/svelte";
+  import { dimensionschangeAction, uiStore } from "$lib/uistore.svelte";
   import HeaderSearch from "./HeaderSearch.svelte";
   import HeaderSettings from "./HeaderSettings.svelte";
   import HeaderThemeSelect from "./HeaderThemeSelect.svelte";
-
-  interface Props {
-    isScrolled: boolean;
-  }
-
-  const { isScrolled }: Props = $props();
 </script>
 
 <header
+  use:dimensionschangeAction
+  ondimensionschange={(e) => uiStore.header = e.detail}
   class={[
     "w-full p-4 flex justify-between items-center space-x-2 h-[72px] sticky top-0 z-30",
     "bg-base-100/90 backdrop-blur-sm",
     {
-      "shadow-xs": isScrolled,
+      "shadow-xs": uiStore.contentWrapper.scroll.isTopScrolled,
     },
   ]}
 >

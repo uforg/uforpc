@@ -1,14 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { isscrolledAction } from "$lib/actions/isScrolled.svelte.ts";
   import { activesectionAction } from "$lib/actions/activeSection.svelte.ts";
   import { store } from "$lib/store.svelte";
+  import { dimensionschangeAction, uiStore } from "$lib/uistore.svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";
   import Main from "./components/Main.svelte";
 
-  let isScrolled = $state(false);
   let activeSection = $state("");
 
   // Update URL hash when active section changes
@@ -33,16 +32,20 @@
   });
 </script>
 
-<div class="w-[100dvw] h-[100dvh] flex justify-start">
+<div
+  use:dimensionschangeAction
+  ondimensionschange={(e) => uiStore.app = e.detail}
+  class="w-[100dvw] h-[100dvh] flex justify-start"
+>
   <Aside />
   <div
-    use:isscrolledAction
     use:activesectionAction
-    onisscrolled={(e) => (isScrolled = e.detail)}
+    use:dimensionschangeAction
     onactivesection={(e) => (activeSection = e.detail)}
+    ondimensionschange={(e) => uiStore.contentWrapper = e.detail}
     class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]"
   >
-    <Header {isScrolled} />
+    <Header />
     <Main />
 
     <div class="h-[calc(100dvh-100px)]"></div>

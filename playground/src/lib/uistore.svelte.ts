@@ -1,0 +1,266 @@
+import type { Action } from "svelte/action";
+
+export interface UiStoreDimensions {
+  size: {
+    clientWidth: number;
+    clientHeight: number;
+    offsetWidth: number;
+    offsetHeight: number;
+  };
+  scroll: {
+    left: number;
+    top: number;
+    isTopScrolled: boolean;
+    isLeftScrolled: boolean;
+  };
+  parentOffset: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  viewportOffset: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  style: {
+    width: number;
+    height: number;
+    marginTop: number;
+    marginRight: number;
+    marginBottom: number;
+    marginLeft: number;
+    paddingTop: number;
+    paddingRight: number;
+    paddingBottom: number;
+    paddingLeft: number;
+    borderTop: number;
+    borderRight: number;
+    borderBottom: number;
+    borderLeft: number;
+  };
+}
+
+const defaultUiStoreDimensions: UiStoreDimensions = {
+  size: {
+    clientWidth: 0,
+    clientHeight: 0,
+    offsetWidth: 0,
+    offsetHeight: 0,
+  },
+  scroll: {
+    left: 0,
+    top: 0,
+    isTopScrolled: false,
+    isLeftScrolled: false,
+  },
+  parentOffset: {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  viewportOffset: {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  style: {
+    width: 0,
+    height: 0,
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    marginLeft: 0,
+    paddingTop: 0,
+    paddingRight: 0,
+    paddingBottom: 0,
+    paddingLeft: 0,
+    borderTop: 0,
+    borderRight: 0,
+    borderBottom: 0,
+    borderLeft: 0,
+  },
+};
+
+export interface UiStore {
+  app: UiStoreDimensions;
+  aside: UiStoreDimensions;
+  contentWrapper: UiStoreDimensions;
+  header: UiStoreDimensions;
+  main: UiStoreDimensions;
+}
+
+export const uiStore = $state<UiStore>({
+  app: { ...defaultUiStoreDimensions },
+  aside: { ...defaultUiStoreDimensions },
+  contentWrapper: { ...defaultUiStoreDimensions },
+  header: { ...defaultUiStoreDimensions },
+  main: { ...defaultUiStoreDimensions },
+});
+
+//////////////////////
+// Helper functions //
+//////////////////////
+
+function getScrollableAncestors(el: HTMLElement): (Window | HTMLElement)[] {
+  const hosts: (Window | HTMLElement)[] = [window];
+  let parent = el.parentElement;
+
+  while (parent) {
+    const style = getComputedStyle(parent);
+    const overflowY = style.overflowY;
+    const overflowX = style.overflowX;
+    const canScrollY = (overflowY === "auto" || overflowY === "scroll") &&
+      parent.scrollHeight > parent.clientHeight;
+    const canScrollX = (overflowX === "auto" || overflowX === "scroll") &&
+      parent.scrollWidth > parent.clientWidth;
+    if (canScrollY || canScrollX) hosts.push(parent);
+    parent = parent.parentElement;
+  }
+
+  return hosts;
+}
+
+export const dimensionschangeAction: Action<
+  HTMLElement,
+  undefined,
+  { ondimensionschange: (e: CustomEvent<UiStoreDimensions>) => void }
+> = (node) => {
+  let scrollHosts: (Window | HTMLElement)[] = [];
+  let ticking = false;
+
+  const dispatchEvent = () => {
+    const nodeRect = node.getBoundingClientRect();
+
+    const clientWidth = node.clientWidth;
+    const clientHeight = node.clientHeight;
+    const offsetWidth = node.offsetWidth;
+    const offsetHeight = node.offsetHeight;
+
+    const scrollLeft = node.scrollLeft;
+    const scrollTop = node.scrollTop;
+
+    let parentOffset = { top: 0, left: 0, bottom: 0, right: 0 };
+    const parent = node.parentElement;
+    if (parent) {
+      const parentRect = parent.getBoundingClientRect();
+      parentOffset = {
+        top: nodeRect.top - parentRect.top,
+        left: nodeRect.left - parentRect.left,
+        bottom: parentRect.bottom - nodeRect.bottom,
+        right: parentRect.right - nodeRect.right,
+      };
+    }
+
+    const viewportOffset = {
+      top: nodeRect.top,
+      left: nodeRect.left,
+      bottom: globalThis.innerHeight - nodeRect.bottom,
+      right: globalThis.innerWidth - nodeRect.right,
+    };
+
+    const style = globalThis.getComputedStyle(node);
+    const width = parseFloat(style.width);
+    const height = parseFloat(style.height);
+    const marginTop = parseFloat(style.marginTop);
+    const marginRight = parseFloat(style.marginRight);
+    const marginBottom = parseFloat(style.marginBottom);
+    const marginLeft = parseFloat(style.marginLeft);
+    const paddingTop = parseFloat(style.paddingTop);
+    const paddingRight = parseFloat(style.paddingRight);
+    const paddingBottom = parseFloat(style.paddingBottom);
+    const paddingLeft = parseFloat(style.paddingLeft);
+    const borderTop = parseFloat(style.borderTopWidth);
+    const borderRight = parseFloat(style.borderRightWidth);
+    const borderBottom = parseFloat(style.borderBottomWidth);
+    const borderLeft = parseFloat(style.borderLeftWidth);
+
+    node.dispatchEvent(
+      new CustomEvent<UiStoreDimensions>("dimensionschange", {
+        detail: {
+          size: {
+            clientWidth,
+            clientHeight,
+            offsetWidth,
+            offsetHeight,
+          },
+          scroll: {
+            left: scrollLeft,
+            top: scrollTop,
+            isTopScrolled: scrollTop > 0,
+            isLeftScrolled: scrollLeft > 0,
+          },
+          parentOffset,
+          viewportOffset,
+          style: {
+            width,
+            height,
+            marginTop,
+            marginRight,
+            marginBottom,
+            marginLeft,
+            paddingTop,
+            paddingRight,
+            paddingBottom,
+            paddingLeft,
+            borderTop,
+            borderRight,
+            borderBottom,
+            borderLeft,
+          },
+        },
+      }),
+    );
+  };
+
+  function throttledDispatchEvent() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => {
+        dispatchEvent();
+        ticking = false;
+      });
+    }
+  }
+
+  const observer = new ResizeObserver((entries) => {
+    if (entries.length !== 1) return;
+    throttledDispatchEvent();
+  });
+
+  function attachScrollListeners() {
+    scrollHosts = getScrollableAncestors(node);
+    scrollHosts.forEach((host) =>
+      host.addEventListener("scroll", throttledDispatchEvent, { passive: true })
+    );
+
+    node.addEventListener("scroll", throttledDispatchEvent);
+  }
+
+  function detachScrollListeners() {
+    scrollHosts.forEach((host) =>
+      host.removeEventListener("scroll", throttledDispatchEvent)
+    );
+    scrollHosts = [];
+
+    node.removeEventListener("scroll", throttledDispatchEvent);
+  }
+
+  $effect(() => {
+    throttledDispatchEvent();
+
+    observer.observe(node);
+    globalThis.addEventListener("resize", throttledDispatchEvent);
+    attachScrollListeners();
+
+    return () => {
+      observer.disconnect();
+      globalThis.removeEventListener("resize", throttledDispatchEvent);
+      detachScrollListeners();
+    };
+  });
+};

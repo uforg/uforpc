@@ -1,11 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { dimensionschangeAction, uiStore } from "$lib/uistore.svelte";
   import { store } from "$lib/store.svelte";
-  import { isscrolledAction } from "$lib/actions/isScrolled.svelte";
   import AsideSchemaManager from "./AsideSchemaManager.svelte";
   import AsideItem from "./AsideItem.svelte";
-
-  let isScrolled = $state(false);
 
   // if has hash anchor navigate to it
   onMount(async () => {
@@ -24,8 +22,8 @@
 </script>
 
 <aside
-  use:isscrolledAction
-  onisscrolled={(e) => (isScrolled = e.detail)}
+  use:dimensionschangeAction
+  ondimensionschange={(e) => uiStore.aside = e.detail}
   class={[
     "flex-none w-full max-w-[280px] h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]",
   ]}
@@ -36,7 +34,7 @@
       "h-[72px] w-full sticky top-0 p-4 z-10",
       "bg-base-100/90 backdrop-blur-sm",
       {
-        "shadow-xs": isScrolled,
+        "shadow-xs": uiStore.aside.scroll.isTopScrolled,
       },
     ]}
     href="https://uforpc.uforg.dev"

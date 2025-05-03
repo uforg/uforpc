@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ScrollText } from "@lucide/svelte";
   import { store } from "$lib/store.svelte";
+  import { dimensionschangeAction, uiStore } from "$lib/uistore.svelte";
   import MainItem from "./MainItem.svelte";
 
   let isEmpty = $derived.by(() => {
@@ -8,7 +9,11 @@
   });
 </script>
 
-<main class="w-full p-4 space-y-[80px]">
+<main
+  class="w-full p-4 space-y-[80px]"
+  use:dimensionschangeAction
+  ondimensionschange={(e) => uiStore.main = e.detail}
+>
   {#if isEmpty}
     <div class="mt-[200px] flex flex-col justify-center items-center gap-4">
       <ScrollText class="size-[100px]" />
