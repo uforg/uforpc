@@ -107,8 +107,11 @@
     {#if !collapsible || isOpen}
       <div
         class={[
-          "relative z-10 p-4 pt-2 rounded-box rounded-t-none",
-          "bg-base-200 border border-t-0 border-base-content/20",
+          "relative z-10 p-4 pt-2 rounded-box",
+          "bg-base-200 border border-base-content/20",
+          {
+            "border-t-0 rounded-t-none": collapsible,
+          },
         ]}
         transition:slide={{ duration: 100 }}
       >
