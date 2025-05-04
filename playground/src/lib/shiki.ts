@@ -14,8 +14,8 @@ export const getOrFallbackLanguage = (lang: string) => {
   return "text"; // https://shiki.matsu.io/languages#plain-text
 };
 
-const lightTheme: BundledTheme = "github-light";
-const darkTheme: BundledTheme = "github-dark";
+export const lightTheme: BundledTheme = "github-light";
+export const darkTheme: BundledTheme = "github-dark";
 let highlighterInstance: Highlighter | null = null;
 let highlighterPromise: Promise<Highlighter> | null = null;
 
@@ -57,4 +57,14 @@ export const getHighlighter = async (): Promise<Highlighter> => {
   return highlighterPromise;
 };
 
-export { darkTheme, lightTheme };
+/**
+ * Preloads the Shiki highlighter during application startup.
+ *
+ * This function is intended to be called during the app's splash screen
+ * to prevent lag when syntax highlighting is first needed. Since loading
+ * the highlighter and all language definitions is resource-intensive,
+ * initializing it early improves the user experience once the app is running.
+ */
+export const initializeShiki = async () => {
+  await getHighlighter();
+};

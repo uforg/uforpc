@@ -6,6 +6,7 @@
   import { Loader } from "@lucide/svelte";
   import { toast, Toaster } from "svelte-sonner";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
+  import { initializeShiki } from "$lib/shiki";
   import { loadUiStore } from "$lib/uiStore.svelte";
   import {
     loadJsonSchemaFromUrpcSchemaUrl,
@@ -20,6 +21,7 @@
 
   // Initialize the WebAssembly binary
   let initialized = $state(false);
+  let message = $state("Starting playground");
   onMount(async () => {
     const handleError = (error: unknown) => {
       console.error(error);
@@ -30,6 +32,15 @@
       });
     };
 
+    message = "Loading code highlighter";
+    try {
+      await initializeShiki();
+    } catch (error) {
+      handleError(error);
+      return;
+    }
+
+    message = "Loading URPC WebAssembly binary";
     try {
       await initWasm();
       await waitUntilInitialized();
@@ -38,6 +49,7 @@
       return;
     }
 
+    message = "Loading URPC Schema";
     try {
       await loadJsonSchemaFromUrpcSchemaUrl("./schema.urpc");
     } catch (error) {
@@ -55,7 +67,7 @@
   >
     <img src="/assets/logo-square.png" alt="UFO RPC Logo" class="size-[150px]">
     <h1 class="text-3xl font-bold mb-2">UFO RPC Playground</h1>
-    <h2 class="mb-6">Loading WebAssembly binary...</h2>
+    <h2 class="mb-6">{message}...</h2>
     <Loader class="animate animate-spin size-10" />
   </main>
 {/if}
