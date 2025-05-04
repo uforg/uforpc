@@ -37,7 +37,7 @@ export const activesectionAction: Action<
   };
 
   // Debounce scroll events
-  let timeout: number;
+  let timeout: ReturnType<typeof setTimeout>;
   const debouncedScroll = () => {
     clearTimeout(timeout);
     timeout = setTimeout(handleScroll, 100);
