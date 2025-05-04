@@ -2,13 +2,16 @@
   import { fade, slide } from "svelte/transition";
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
   import { uiStore, type UiStoreDimensions } from "$lib/uiStore.svelte";
+  import { store } from "$lib/store.svelte";
+  import SnippetsCode from "./SnippetsCode.svelte";
 
   interface Props {
     value: any;
+    procName: string;
     parentDimensions: UiStoreDimensions | undefined;
   }
 
-  const { value, parentDimensions }: Props = $props();
+  const { value, procName, parentDimensions }: Props = $props();
 
   let height = $state(0);
   let isOpen = $state(true);
@@ -43,6 +46,22 @@
     }
 
     return marginTop;
+  });
+
+  let curl = $derived.by(() => {
+    const payload = {
+      proc: procName,
+      input: value.root ?? {},
+    };
+
+    let payloadStr = JSON.stringify(payload, null, 2);
+    payloadStr = payloadStr.replace(/'/g, "'\\''");
+
+    let c = `curl -X POST ${store.endpoint} \\\n`;
+    c += `-H "Content-Type: application/json" \\\n`;
+    c += `-d '${payloadStr}'`;
+
+    return c;
   });
 </script>
 
@@ -82,7 +101,7 @@
     </span>
 
     {#if isOpen}
-      <span>Code snippets</span>
+      <span>Code snippets for {procName}</span>
     {/if}
   </button>
 
@@ -95,7 +114,7 @@
       in:fade={{ duration: 100 }}
       out:slide={{ duration: 100, axis: "x" }}
     >
-      <pre>{JSON.stringify(value, null, 2)}</pre>
+      <SnippetsCode {curl} />
     </div>
   {/if}
 </div>

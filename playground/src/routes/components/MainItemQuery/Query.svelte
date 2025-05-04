@@ -58,6 +58,6 @@
       {/if}
     </div>
 
-    <Snippets {value} parentDimensions={dimensions} />
+    <Snippets {value} procName={proc.name} parentDimensions={dimensions} />
   </div>
 {/if}
