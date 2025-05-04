@@ -13,26 +13,26 @@ export const activesectionAction: Action<
   undefined,
   { onactivesection: (e: CustomEvent<string>) => void }
 > = (node) => {
+  const scrollOffset = 150; // Cherry picked value
+
   const handleScroll = () => {
     const sections = Array.from(node.querySelectorAll("section[id]"));
     if (!sections.length) return;
 
-    let closestSection = sections[0];
-    let closestDistance = Infinity;
-    const scrollOffset = 100;
-
+    let activeSection: Element | undefined;
     for (const section of sections) {
-      const distance = Math.abs(
-        section.getBoundingClientRect().top - scrollOffset,
-      );
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestSection = section;
+      const rect = section.getBoundingClientRect();
+      const topRel = rect.top;
+      const bottomRel = rect.bottom;
+
+      if (topRel <= scrollOffset && bottomRel > scrollOffset) {
+        activeSection = section;
+        break;
       }
     }
 
     node.dispatchEvent(
-      new CustomEvent("activesection", { detail: closestSection.id }),
+      new CustomEvent("activesection", { detail: activeSection?.id ?? "" }),
     );
   };
 
