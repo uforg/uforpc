@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { activesectionAction } from "$lib/actions/activeSection.svelte.ts";
   import { store } from "$lib/store.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+  import { activesectionAction } from "./activesectionAction.svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";
   import Main from "./components/Main.svelte";
@@ -14,7 +14,7 @@
   $effect(() => {
     if (activeSection) {
       store.activeSection = activeSection;
-      goto(`#${activeSection}`, { noScroll: true });
+      goto(`#${activeSection}`, { noScroll: true, keepFocus: true });
     }
   });
 
