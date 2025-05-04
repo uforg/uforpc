@@ -45,15 +45,8 @@
   $effect(() => {
     if (!monaco) return;
 
-    let defaultTheme = lightTheme;
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      defaultTheme = darkTheme;
-    } else {
-      defaultTheme = lightTheme;
-    }
-
     const themeMap = {
-      system: defaultTheme,
+      system: uiStore.osTheme === "dark" ? darkTheme : lightTheme,
       light: lightTheme,
       dark: darkTheme,
     };
