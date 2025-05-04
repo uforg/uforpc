@@ -47,7 +47,5 @@
   >
     <Header />
     <Main />
-
-    <div class="h-[calc(100dvh-100px)]"></div>
   </div>
 </div>

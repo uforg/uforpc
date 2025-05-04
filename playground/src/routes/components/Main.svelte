@@ -10,7 +10,7 @@
 </script>
 
 <main
-  class="w-full p-4 space-y-[80px]"
+  class="w-full p-4 space-y-[150px]"
   use:dimensionschangeAction
   ondimensionschange={(e) => uiStore.main = e.detail}
 >

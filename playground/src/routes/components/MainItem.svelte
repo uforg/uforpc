@@ -85,7 +85,15 @@
   });
 </script>
 
-<section {id}>
+<section
+  {id}
+  class={[
+    // Last section should have a min-height of 100dvh
+    // to allow the sidebar to mark the section as active
+    // and automatically scroll to it
+    "last:min-h-[100dvh]",
+  ]}
+>
   <a href={`#${id}`} class="block">
     <H2 class="flex justify-start items-center group text-4xl font-extrabold">
       {#if node.kind === "doc"}
