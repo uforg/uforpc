@@ -7,7 +7,12 @@
     Copy,
     ScrollText,
   } from "@lucide/svelte";
-  import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
+  import {
+    darkTheme,
+    getHighlighter,
+    getOrFallbackLanguage,
+    lightTheme,
+  } from "$lib/shiki";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { uiStore } from "$lib/uiStore.svelte";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
@@ -15,7 +20,7 @@
 
   interface Props {
     code: string;
-    lang: "urpc";
+    lang: "urpc" | string;
     class?: ClassValue;
     collapsible?: boolean;
     isOpen?: boolean;
@@ -45,7 +50,7 @@
     (async () => {
       const highlighter = await getHighlighter();
       urpcSchemaHighlighted = highlighter.codeToHtml(codeToHighlight, {
-        lang: lang,
+        lang: getOrFallbackLanguage(lang),
         theme: theme,
         transformers: [transformerColorizedBrackets()],
       });
