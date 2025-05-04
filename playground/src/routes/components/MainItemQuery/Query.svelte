@@ -2,6 +2,8 @@
   import { slide } from "svelte/transition";
   import { ChevronDown, ChevronRight, Zap } from "@lucide/svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
+  import { dimensionschangeAction } from "$lib/uiStore.svelte";
+  import type { UiStoreDimensions } from "$lib/uiStore.svelte";
   import H2 from "$lib/components/H2.svelte";
   import Field from "./Field.svelte";
   import Snippets from "./Snippets.svelte";
@@ -15,10 +17,16 @@
   let value = $state({ root: {} });
   let isOpen = $state(true);
   const toggleIsOpen = () => (isOpen = !isOpen);
+
+  let dimensions: UiStoreDimensions | undefined = $state(undefined);
 </script>
 
 {#if proc.input}
-  <div class="flex space-x-4">
+  <div
+    use:dimensionschangeAction
+    ondimensionschange={(e) => (dimensions = e.detail)}
+    class="flex space-x-4"
+  >
     <div class="flex-grow">
       <button
         class={[
@@ -50,6 +58,6 @@
       {/if}
     </div>
 
-    <Snippets {value} />
+    <Snippets {value} parentDimensions={dimensions} />
   </div>
 {/if}
