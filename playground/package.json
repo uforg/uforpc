@@ -10,7 +10,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "format": "deno fmt .",
     "test": "deno test",
-    "copywasm": "cp ../dist/urpc.wasm ./static/urpc/urpc.wasm && cp ../dist/wasm_exec.js ./static/urpc/wasm_exec.js",
+    "copywasm": "chmod +x copywasm.sh && ./copywasm.sh",
     "genschema": "json2ts ../internal/schema/schema.json > ./src/lib/urpcTypes.ts"
   },
   "devDependencies": {
