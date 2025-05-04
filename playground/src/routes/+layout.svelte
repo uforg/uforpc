@@ -6,13 +6,17 @@
   import { Loader } from "@lucide/svelte";
   import { toast, Toaster } from "svelte-sonner";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
+  import { loadUiStore } from "$lib/uiStore.svelte";
   import {
     loadJsonSchemaFromUrpcSchemaUrl,
     loadStore,
   } from "$lib/store.svelte";
 
-  // Initialize the store
-  onMount(() => loadStore());
+  // Initialize the stores
+  onMount(() => {
+    loadUiStore();
+    loadStore();
+  });
 
   // Initialize the WebAssembly binary
   let initialized = $state(false);

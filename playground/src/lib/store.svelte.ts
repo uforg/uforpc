@@ -39,8 +39,6 @@ export const miniSearch = new MiniSearch({
   },
 });
 
-export type Theme = "system" | "light" | "dark";
-
 export interface Header {
   key: string;
   value: string;
@@ -48,8 +46,6 @@ export interface Header {
 
 export interface Store {
   loaded: boolean;
-  activeSection: string;
-  theme: Theme;
   endpoint: string;
   headers: Header[];
   urpcSchema: string;
@@ -58,8 +54,6 @@ export interface Store {
 
 export const store: Store = $state({
   loaded: false,
-  activeSection: "",
-  theme: "system",
   endpoint: "",
   headers: [],
   urpcSchema: `version 1`,
@@ -82,11 +76,6 @@ export const loadStore = async () => {
   // Prioritize the config stored in the browser's local storage
   await loadDefaultConfig();
 
-  // Read more at /static/theme-helper.js
-  // deno-lint-ignore no-explicit-any
-  const theme = (globalThis as any).getTheme();
-  store.theme = theme || "system";
-
   const endpoint = localStorage.getItem("endpoint");
   if (endpoint) {
     store.endpoint = endpoint;
@@ -106,9 +95,6 @@ export const loadStore = async () => {
  * Should be called when the store is updated.
  */
 export const saveStore = () => {
-  // Read more at /static/theme-helper.js
-  // deno-lint-ignore no-explicit-any
-  (globalThis as any).setTheme(store.theme);
   localStorage.setItem("endpoint", store.endpoint);
   localStorage.setItem("headers", JSON.stringify(store.headers));
 };

@@ -7,6 +7,7 @@
     Type,
   } from "@lucide/svelte";
   import { store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
 
@@ -54,11 +55,11 @@
   });
 
   const navigate = (contentId: string) => {
-    store.activeSection = contentId;
+    uiStore.activeSection = contentId;
   };
 
   let isActive = $derived.by(() => {
-    return store.activeSection === contentId;
+    return uiStore.activeSection === contentId;
   });
 </script>
 

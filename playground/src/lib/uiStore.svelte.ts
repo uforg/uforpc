@@ -86,7 +86,14 @@ const defaultUiStoreDimensions: UiStoreDimensions = {
   },
 };
 
+export type Theme = "system" | "light" | "dark";
+export type OsTheme = "light" | "dark";
+
 export interface UiStore {
+  loaded: boolean;
+  activeSection: string;
+  theme: Theme;
+  osTheme: OsTheme;
   app: UiStoreDimensions;
   aside: UiStoreDimensions;
   contentWrapper: UiStoreDimensions;
@@ -95,12 +102,57 @@ export interface UiStore {
 }
 
 export const uiStore = $state<UiStore>({
+  loaded: false,
+  activeSection: "",
+  theme: "system",
+  osTheme: "dark",
   app: { ...defaultUiStoreDimensions },
   aside: { ...defaultUiStoreDimensions },
   contentWrapper: { ...defaultUiStoreDimensions },
   header: { ...defaultUiStoreDimensions },
   main: { ...defaultUiStoreDimensions },
 });
+
+$effect.root(() => {
+  $effect(() => {
+    if (!uiStore.loaded) return;
+    saveUiStore();
+  });
+});
+
+/**
+ * Loads the store from the browser's local storage.
+ *
+ * Should be called only once at the start of the app.
+ */
+export const loadUiStore = () => {
+  if (
+    globalThis.matchMedia &&
+    globalThis.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    uiStore.osTheme = "dark";
+  } else {
+    uiStore.osTheme = "light";
+  }
+
+  // Read more at /static/theme-helper.js
+  // deno-lint-ignore no-explicit-any
+  const theme = (globalThis as any).getTheme();
+  uiStore.theme = theme || "system";
+
+  uiStore.loaded = true;
+};
+
+/**
+ * Saves the store to the browser's local storage.
+ *
+ * Should be called when the store is updated.
+ */
+export const saveUiStore = () => {
+  // Read more at /static/theme-helper.js
+  // deno-lint-ignore no-explicit-any
+  (globalThis as any).setTheme(uiStore.theme);
+};
 
 //////////////////////
 // Helper functions //

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { store } from "$lib/store.svelte";
-  import type { Theme } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
+  import type { Theme } from "$lib/uiStore.svelte";
   import { Moon, Palette, Sun, SunMoon } from "@lucide/svelte";
 
   const themesArr: Theme[] = ["system", "light", "dark"];
 
   function setTheme(theme: Theme) {
-    store.theme = theme;
+    uiStore.theme = theme;
     (document.activeElement as HTMLElement)?.blur();
   }
 </script>
@@ -41,7 +41,7 @@
     data-tip="Theme"
   >
     <Palette class="size-4" />
-    {@render themeName(false, store.theme)}
+    {@render themeName(false, uiStore.theme)}
   </div>
   <ul
     tabindex="-1"

@@ -9,7 +9,7 @@
   } from "@lucide/svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
-  import { store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
 
@@ -33,7 +33,7 @@
 
   let urpcSchemaHighlighted = $state("");
   $effect(() => {
-    const theme = store.theme === "dark" || store.theme === "system"
+    const theme = uiStore.theme === "dark" || uiStore.theme === "system"
       ? darkTheme
       : lightTheme;
     const codeToHighlight = code.trim();

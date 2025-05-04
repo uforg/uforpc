@@ -3,7 +3,7 @@
   import loader from "@monaco-editor/loader";
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
   import { shikiToMonaco } from "@shikijs/monaco";
-  import { store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
 
   let { value = $bindable(), ...others }: { [key: string]: any } = $props();
@@ -58,7 +58,7 @@
       dark: darkTheme,
     };
 
-    monaco.editor.setTheme(themeMap[store.theme]);
+    monaco.editor.setTheme(themeMap[uiStore.theme]);
   });
 </script>
 

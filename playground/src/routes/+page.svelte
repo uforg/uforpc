@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { store } from "$lib/store.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
   import { activesectionAction } from "./activesectionAction.svelte";
   import Aside from "./components/Aside.svelte";
@@ -13,7 +12,7 @@
   // Update URL hash when active section changes
   $effect(() => {
     if (activeSection) {
-      store.activeSection = activeSection;
+      uiStore.activeSection = activeSection;
       goto(`#${activeSection}`, { noScroll: true, keepFocus: true });
     }
   });
