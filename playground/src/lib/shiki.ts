@@ -1,7 +1,38 @@
 // deno-lint-ignore-file require-await
 
-import { bundledLanguages, createHighlighter } from "shiki";
+import { createHighlighter } from "shiki";
+import type { BundledLanguage } from "shiki";
 import type { BundledTheme, Highlighter } from "shiki";
+
+// Languages that are used in the playground snippets
+const langs: BundledLanguage[] = [
+  "bash",
+  "yaml",
+  "c",
+  "csharp",
+  "clojure",
+  "dart",
+  "elixir",
+  "go",
+  "json",
+  "http",
+  "java",
+  "javascript",
+  "julia",
+  "kotlin",
+  "lua",
+  "matlab",
+  "objective-c",
+  "ocaml",
+  "perl",
+  "php",
+  "powershell",
+  "python",
+  "r",
+  "ruby",
+  "rust",
+  "swift",
+];
 
 /**
  * Returns the provided language if it's supported, otherwise falls back to plain text.
@@ -9,8 +40,8 @@ import type { BundledTheme, Highlighter } from "shiki";
  * @returns {string} The original language if supported, or "text" as fallback
  */
 export const getOrFallbackLanguage = (lang: string) => {
-  const langs = ["urpc", ...Object.keys(bundledLanguages)];
-  if (langs.includes(lang)) return lang;
+  const supportedLangs = ["urpc", ...langs];
+  if (supportedLangs.includes(lang)) return lang;
   return "text"; // https://shiki.matsu.io/languages#plain-text
 };
 
@@ -47,7 +78,7 @@ export const getHighlighter = async (): Promise<Highlighter> => {
     urpcSyntaxJson.name = "urpc";
 
     highlighterInstance = await createHighlighter({
-      langs: [urpcSyntaxJson, ...Object.keys(bundledLanguages)],
+      langs: [urpcSyntaxJson, ...langs],
       themes: [lightTheme, darkTheme],
     });
 
