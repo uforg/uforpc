@@ -1,6 +1,6 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
-  import { ChevronDown, ChevronRight, Zap } from "@lucide/svelte";
+  import { ChevronDown, ChevronRight, Info, Zap } from "@lucide/svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
   import { dimensionschangeAction } from "$lib/uiStore.svelte";
   import type { UiStoreDimensions } from "$lib/uiStore.svelte";
@@ -53,6 +53,14 @@
           transition:slide={{ duration: 100 }}
         >
           <H2>Input</H2>
+
+          <div role="alert" class="alert alert-soft alert-info w-fit">
+            <Info class="size-4" />
+            <span>
+              All validations are performed on the server side
+            </span>
+          </div>
+
           <Field fields={proc.input} path="root" bind:value />
         </div>
       {/if}

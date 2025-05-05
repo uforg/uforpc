@@ -17,12 +17,6 @@
     value: globalValue = $bindable(),
   }: Props = $props();
 
-  export const validate = () => {
-    isTouched = true;
-    return isValid;
-  };
-
-  let isTouched = $state(false);
   let value = $state();
 
   // Listen to changes and update the global value
@@ -33,30 +27,6 @@
     untrack(() => {
       globalValue = setAtPath(globalValue, path, val);
     });
-  });
-
-  let isValid = $derived.by(() => {
-    if (!field.typeName) return true;
-
-    if (field.optional && !value) return true;
-
-    if (field.typeName === "string") {
-      return typeof value === "string" && value.length > 0;
-    }
-
-    if (["int", "float"].includes(field.typeName)) {
-      return typeof value === "number";
-    }
-
-    if (field.typeName === "boolean") {
-      return typeof value === "boolean";
-    }
-
-    if (field.typeName === "datetime") {
-      return typeof value === "string";
-    }
-
-    return false;
   });
 
   let inputType = $derived.by(() => {
@@ -95,12 +65,7 @@
 </script>
 
 <label class="block space-y-1 w-full">
-  <span
-    class={{
-      "block font-semibold": true,
-      "text-error": isTouched && !isValid,
-    }}
-  >
+  <span class="block font-semibold">
     <Label optional={field.optional} {label} />
   </span>
 
@@ -109,12 +74,8 @@
       type={inputType}
       step={inputStep}
       bind:value
-      class={{
-        "input w-full": true,
-        "input-error placeholder:text-error": isTouched && !isValid,
-      }}
+      class="input w-full"
       placeholder={`Enter ${label} here...`}
-      onblur={() => (isTouched = true)}
     />
   {/if}
 
@@ -122,17 +83,7 @@
     <input
       type="checkbox"
       bind:checked={value as boolean}
-      class={{
-        "toggle toggle-lg": true,
-        "toggle-error": isTouched && !isValid,
-      }}
-      onblur={() => (isTouched = true)}
+      class="toggle toggle-lg"
     />
-  {/if}
-
-  {#if isTouched && !isValid}
-    <p class="block label text-xs text-error">
-      {label} is required
-    </p>
   {/if}
 </label>
