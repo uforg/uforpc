@@ -117,7 +117,7 @@
 
   <div class="pl-12 mt-1">
     {#if deprecatedMessage !== ""}
-      <div role="alert" class="alert alert-warning mt-4">
+      <div role="alert" class="alert alert-soft alert-error mt-4 w-fit">
         <TriangleAlert class="size-4" />
         <span>Deprecated: {deprecatedMessage}</span>
       </div>
