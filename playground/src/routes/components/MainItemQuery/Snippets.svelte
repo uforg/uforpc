@@ -3,6 +3,7 @@
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
   import { uiStore, type UiStoreDimensions } from "$lib/uiStore.svelte";
   import { store } from "$lib/store.svelte";
+  import Tooltip from "$lib/components/Tooltip.svelte";
   import SnippetsCode from "./SnippetsCode.svelte";
 
   interface Props {
@@ -75,35 +76,38 @@
   style={`max-height: ${maxHeight}px; margin-top: ${marginTop}px;`}
   bind:clientHeight={height}
 >
-  <button
-    class={[
-      "btn rounded-box w-full flex items-center group border-base-content/20",
-      "tooltip tooltip-left",
-      {
-        "px-4 justify-start rounded-b-none": isOpen,
-        "px-3": !isOpen,
-      },
-    ]}
-    data-tip={isOpen ? "Hide code snippets" : "Show code snippets"}
-    onclick={() => (isOpen = !isOpen)}
+  <Tooltip
+    content={isOpen ? "Hide code snippets" : "Show code snippets"}
+    placement="left"
   >
-    <span
-      class={{
-        "mr-2": isOpen,
-      }}
+    <button
+      class={[
+        "btn rounded-box w-full flex items-center group border-base-content/20",
+        {
+          "px-4 justify-start rounded-b-none": isOpen,
+          "px-3": !isOpen,
+        },
+      ]}
+      onclick={() => (isOpen = !isOpen)}
     >
-      <Code class="size-4 group-hover:hidden" />
-      {#if isOpen}
-        <ChevronRight class="size-4 hidden group-hover:block" />
-      {:else}
-        <ChevronLeft class="size-4 hidden group-hover:block" />
-      {/if}
-    </span>
+      <span
+        class={{
+          "mr-2": isOpen,
+        }}
+      >
+        <Code class="size-4 group-hover:hidden" />
+        {#if isOpen}
+          <ChevronRight class="size-4 hidden group-hover:block" />
+        {:else}
+          <ChevronLeft class="size-4 hidden group-hover:block" />
+        {/if}
+      </span>
 
-    {#if isOpen}
-      <span>Code snippets for {procName}</span>
-    {/if}
-  </button>
+      {#if isOpen}
+        <span>Code snippets for {procName}</span>
+      {/if}
+    </button>
+  </Tooltip>
 
   {#if isOpen}
     <div

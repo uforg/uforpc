@@ -10,6 +10,7 @@
   import { uiStore } from "$lib/uiStore.svelte";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
+  import Tooltip from "$lib/components/Tooltip.svelte";
 
   interface Props {
     node: typeof store.jsonSchema.nodes[number];
@@ -29,10 +30,12 @@
   });
 
   let title = $derived.by(() => {
-    if (node.kind === "rule") return `${name} validation rule`;
-    if (node.kind === "type") return `${name} type`;
-    if (node.kind === "proc") return `${name} procedure`;
-    if (node.kind === "doc") return `${name} documentation`;
+    const deprecated = isDeprecated ? " (Deprecated)" : "";
+
+    if (node.kind === "rule") return `${name} validation rule${deprecated}`;
+    if (node.kind === "type") return `${name} type${deprecated}`;
+    if (node.kind === "proc") return `${name} procedure${deprecated}`;
+    if (node.kind === "doc") return `${name} documentation${deprecated}`;
     return "Unknown";
   });
 
@@ -63,52 +66,51 @@
   });
 </script>
 
-<a
-  {id}
-  {href}
-  {title}
-  onclick={() => navigate(contentId)}
-  class={[
-    "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
-    {
-      "tooltip tooltip-top": isDeprecated,
-      "hover:bg-blue-500/20": node.kind === "doc",
-      "hover:bg-yellow-500/20": node.kind === "rule",
-      "hover:bg-purple-500/20": node.kind === "type",
-      "hover:bg-green-500/20": node.kind === "proc",
-      "bg-blue-500/20": isActive && node.kind === "doc",
-      "bg-yellow-500/20": isActive && node.kind === "rule",
-      "bg-purple-500/20": isActive && node.kind === "type",
-      "bg-green-500/20": isActive && node.kind === "proc",
-    },
-  ]}
-  data-tip={isDeprecated ? "Deprecated" : ""}
->
-  {#if node.kind === "doc"}
-    <BookOpenText class="flex-none size-4" />
-  {/if}
-  {#if node.kind === "rule"}
-    <Scale class="flex-none size-4" />
-  {/if}
-  {#if node.kind === "type"}
-    <Type class="flex-none size-4" />
-  {/if}
-  {#if node.kind === "proc"}
-    <ArrowLeftRight class="flex-none size-4" />
-  {/if}
-
-  <span
+<Tooltip content={title}>
+  <a
+    {id}
+    {href}
+    onclick={() => navigate(contentId)}
     class={[
-      "whitespace-nowrap overflow-hidden overflow-ellipsis",
+      "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
       {
-        "line-through": isDeprecated,
+        "hover:bg-blue-500/20": node.kind === "doc",
+        "hover:bg-yellow-500/20": node.kind === "rule",
+        "hover:bg-purple-500/20": node.kind === "type",
+        "hover:bg-green-500/20": node.kind === "proc",
+        "bg-blue-500/20": isActive && node.kind === "doc",
+        "bg-yellow-500/20": isActive && node.kind === "rule",
+        "bg-purple-500/20": isActive && node.kind === "type",
+        "bg-green-500/20": isActive && node.kind === "proc",
       },
     ]}
   >
-    {name}
-  </span>
+    {#if node.kind === "doc"}
+      <BookOpenText class="flex-none size-4" />
+    {/if}
+    {#if node.kind === "rule"}
+      <Scale class="flex-none size-4" />
+    {/if}
+    {#if node.kind === "type"}
+      <Type class="flex-none size-4" />
+    {/if}
+    {#if node.kind === "proc"}
+      <ArrowLeftRight class="flex-none size-4" />
+    {/if}
 
-  {#if isDeprecated}
-    <TriangleAlert class="flex-none size-4 text-warning" />
-  {/if}
-</a>
+    <span
+      class={[
+        "whitespace-nowrap overflow-hidden overflow-ellipsis",
+        {
+          "line-through": isDeprecated,
+        },
+      ]}
+    >
+      {name}
+    </span>
+
+    {#if isDeprecated}
+      <TriangleAlert class="flex-none size-4 text-warning" />
+    {/if}
+  </a>
+</Tooltip>

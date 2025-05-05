@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Tooltip from "$lib/components/Tooltip.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import type { Theme } from "$lib/uiStore.svelte";
   import { Moon, Palette, Sun, SunMoon } from "@lucide/svelte";
@@ -34,15 +35,17 @@
 {/snippet}
 
 <div class="dropdown dropdown-end">
-  <div
-    tabindex="-1"
-    role="button"
-    class="btn btn-ghost tooltip tooltip-left"
-    data-tip="Theme"
-  >
-    <Palette class="size-4" />
-    {@render themeName(false, uiStore.theme)}
-  </div>
+  <Tooltip content="Theme" placement="left">
+    <div
+      tabindex="-1"
+      role="button"
+      class="btn btn-ghost"
+    >
+      <Palette class="size-4" />
+      {@render themeName(false, uiStore.theme)}
+    </div>
+  </Tooltip>
+
   <ul
     tabindex="-1"
     class="dropdown-content menu bg-base-100 rounded-box z-1 w-[120px] p-2 shadow-md"

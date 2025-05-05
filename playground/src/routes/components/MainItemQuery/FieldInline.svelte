@@ -2,6 +2,7 @@
   import { BrushCleaning, Trash } from "@lucide/svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
   import { setAtPath } from "$lib/helpers/setAtPath";
+  import Tooltip from "$lib/components/Tooltip.svelte";
   import { prettyLabel } from "./prettyLabel";
   import Field from "./Field.svelte";
 
@@ -44,19 +45,27 @@
 {/key}
 
 <div class="flex justify-end">
-  <button
-    class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
-    data-tip={`Clear and reset ${prettyPath} to an empty object`}
-    onclick={clearObject}
+  <Tooltip
+    content={`Clear and reset ${prettyPath} to an empty object`}
+    placement="left"
   >
-    <BrushCleaning class="size-4" />
-  </button>
+    <button
+      class="btn btn-sm btn-ghost btn-square"
+      onclick={clearObject}
+    >
+      <BrushCleaning class="size-4" />
+    </button>
+  </Tooltip>
 
-  <button
-    class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
-    data-tip={`Delete ${prettyPath} from the JSON object`}
-    onclick={deleteObject}
+  <Tooltip
+    content={`Delete ${prettyPath} from the JSON object`}
+    placement="left"
   >
-    <Trash class="size-4" />
-  </button>
+    <button
+      class="btn btn-sm btn-ghost btn-square"
+      onclick={deleteObject}
+    >
+      <Trash class="size-4" />
+    </button>
+  </Tooltip>
 </div>

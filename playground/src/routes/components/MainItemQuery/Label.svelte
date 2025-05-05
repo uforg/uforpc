@@ -2,6 +2,7 @@
   import { CircleHelp, SquareAsterisk } from "@lucide/svelte";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
+  import Tooltip from "$lib/components/Tooltip.svelte";
   import { prettyLabel } from "./prettyLabel";
 
   interface Props {
@@ -18,20 +19,21 @@
   );
 </script>
 
-<span
-  class={mergeClasses([
-    "inline-flex justify-start items-center space-x-1 tooltip tooltip-right",
-    className,
-  ])}
-  data-tip={dataTip}
->
-  <span>
-    {plabel}
-  </span>
+<Tooltip content={dataTip} placement="right">
+  <span
+    class={mergeClasses([
+      "inline-flex justify-start items-center space-x-1",
+      className,
+    ])}
+  >
+    <span>
+      {plabel}
+    </span>
 
-  {#if optional}
-    <CircleHelp class="size-4 text-info" />
-  {:else}
-    <SquareAsterisk class="size-4 text-error" />
-  {/if}
-</span>
+    {#if optional}
+      <CircleHelp class="size-4 text-info" />
+    {:else}
+      <SquareAsterisk class="size-4 text-error" />
+    {/if}
+  </span>
+</Tooltip>

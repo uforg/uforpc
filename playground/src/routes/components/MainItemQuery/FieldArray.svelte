@@ -8,6 +8,7 @@
   } from "@lucide/svelte";
   import { setAtPath } from "$lib/helpers/setAtPath";
   import type { FieldDefinition } from "$lib/urpcTypes";
+  import Tooltip from "$lib/components/Tooltip.svelte";
   import { prettyLabel } from "./prettyLabel";
   import Label from "./Label.svelte";
   import FieldNamed from "./FieldNamed.svelte";
@@ -89,38 +90,54 @@
   {/each}
 
   <div class="flex justify-end">
-    <button
-      class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
-      data-tip={`Clear and reset ${prettyPath} to an empty array`}
-      onclick={clearArray}
+    <Tooltip
+      content={`Clear and reset ${prettyPath} to an empty array`}
+      placement="left"
     >
-      <BrushCleaning class="size-4" />
-    </button>
+      <button
+        class="btn btn-sm btn-ghost btn-square"
+        onclick={clearArray}
+      >
+        <BrushCleaning class="size-4" />
+      </button>
+    </Tooltip>
 
-    <button
-      class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
-      data-tip={`Delete ${prettyPath} array from the JSON object`}
-      onclick={deleteArray}
+    <Tooltip
+      content={`Delete ${prettyPath} array from the JSON object`}
+      placement="left"
     >
-      <Trash class="size-4" />
-    </button>
+      <button
+        class="btn btn-sm btn-ghost btn-square"
+        onclick={deleteArray}
+      >
+        <Trash class="size-4" />
+      </button>
+    </Tooltip>
 
     {#if indexesLen > 0}
-      <button
-        class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
-        data-tip={`Remove last item from ${prettyPath} array`}
-        onclick={removeItem}
+      <Tooltip
+        content={`Remove last item from ${prettyPath} array`}
+        placement="left"
       >
-        <Minus class="size-4" />
-      </button>
+        <button
+          class="btn btn-sm btn-ghost btn-square"
+          onclick={removeItem}
+        >
+          <Minus class="size-4" />
+        </button>
+      </Tooltip>
     {/if}
 
-    <button
-      class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
-      data-tip={`Add item to ${prettyPath} array`}
-      onclick={addItem}
+    <Tooltip
+      content={`Add item to ${prettyPath} array`}
+      placement="left"
     >
-      <Plus class="size-4" />
-    </button>
+      <button
+        class="btn btn-sm btn-ghost btn-square"
+        onclick={addItem}
+      >
+        <Plus class="size-4" />
+      </button>
+    </Tooltip>
   </div>
 </Fieldset>

@@ -3,6 +3,7 @@
   import { BrushCleaning, Trash } from "@lucide/svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
   import { setAtPath } from "$lib/helpers/setAtPath";
+  import Tooltip from "$lib/components/Tooltip.svelte";
   import { prettyLabel } from "./prettyLabel";
   import Label from "./Label.svelte";
 
@@ -89,21 +90,29 @@
         placeholder={`Enter ${label} here...`}
       />
 
-      <button
-        class="w-8 btn btn-ghost btn-square tooltip tooltip-left"
-        data-tip={`Clear and reset ${label} to its default value`}
-        onclick={clearValue}
+      <Tooltip
+        content={`Clear and reset ${label} to its default value`}
+        placement="left"
       >
-        <BrushCleaning class="size-4" />
-      </button>
+        <button
+          class="w-8 btn btn-ghost btn-square"
+          onclick={clearValue}
+        >
+          <BrushCleaning class="size-4" />
+        </button>
+      </Tooltip>
 
-      <button
-        class="w-8 btn btn-ghost btn-square tooltip tooltip-left"
-        data-tip={`Delete ${label} from the JSON object`}
-        onclick={deleteValue}
+      <Tooltip
+        content={`Delete ${label} from the JSON object`}
+        placement="left"
       >
-        <Trash class="size-4" />
-      </button>
+        <button
+          class="w-8 btn btn-ghost btn-square"
+          onclick={deleteValue}
+        >
+          <Trash class="size-4" />
+        </button>
+      </Tooltip>
     </div>
   {/if}
 
@@ -115,13 +124,17 @@
         class="toggle toggle-lg"
       />
 
-      <button
-        class="btn btn-ghost btn-square tooltip tooltip-right"
-        data-tip={`Delete ${label} from the JSON object`}
-        onclick={deleteValue}
+      <Tooltip
+        content={`Delete ${label} from the JSON object`}
+        placement="right"
       >
-        <Trash class="size-4" />
-      </button>
+        <button
+          class="btn btn-ghost btn-square"
+          onclick={deleteValue}
+        >
+          <Trash class="size-4" />
+        </button>
+      </Tooltip>
     </div>
   {/if}
 </label>
