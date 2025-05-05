@@ -9,7 +9,7 @@
   // not be passed in from the parent
   type customTippyProps = Omit<
     TippyProps,
-    "arrow" | "appendTo" | "triggerTarget"
+    "arrow" | "appendTo" | "triggerTarget" | "plugins"
   >;
 
   export interface Props extends Partial<customTippyProps> {
@@ -37,7 +37,7 @@
     const inst = tippy(el, {
       ...tippyProps,
       arrow,
-      appendTo: el,
+      appendTo: document.body,
       triggerTarget: el,
     });
 
