@@ -37,3 +37,10 @@ Deno.test("deleteMarkdownHeadings - handles empty documents", () => {
   const result = deleteMarkdownHeadings(markdown);
   assertEquals(result, "");
 });
+
+Deno.test("deleteMarkdownHeadings - removes level-1 headings with preceding newlines and spaces", () => {
+  const markdown =
+    "Some initial content\n\n\n   # Title with preceding newlines and spaces\nFollowing content";
+  const result = deleteMarkdownHeadings(markdown);
+  assertEquals(result, "Some initial content\n\n\nFollowing content");
+});

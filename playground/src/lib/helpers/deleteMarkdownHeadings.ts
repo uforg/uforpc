@@ -4,7 +4,19 @@
  * @param markdown
  */
 export function deleteMarkdownHeadings(markdown: string): string {
-  // Use global flag (g) to remove all level-1 headers
-  // Specifically target only single hash headers (level 1)
-  return markdown.replace(/^#\s+.*\n/gm, "");
+  const lines = markdown.split("\n");
+
+  // Filter out level-1 headers
+  const filteredLines = lines.filter((line) => {
+    const trimmedLine = line.trim();
+    if (!trimmedLine.startsWith("#")) return true;
+
+    if (trimmedLine.length === 1) return false;
+    if (trimmedLine[1] !== "#") return false;
+
+    return true;
+  });
+
+  // Join the remaining lines back together
+  return filteredLines.join("\n");
 }
