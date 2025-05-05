@@ -1,5 +1,6 @@
 <script lang="ts">
   import { untrack } from "svelte";
+  import { BrushCleaning, Trash } from "@lucide/svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
   import { setAtPath } from "$lib/helpers/setAtPath";
   import { prettyLabel } from "./prettyLabel";
@@ -28,6 +29,15 @@
       globalValue = setAtPath(globalValue, path, val);
     });
   });
+
+  export const deleteValue = () => (value = null);
+  export const clearValue = () => {
+    if (field.typeName === "string") value = "";
+    if (field.typeName === "int") value = 0;
+    if (field.typeName === "float") value = 0;
+    if (field.typeName === "boolean") value = false;
+    if (field.typeName === "datetime") value = new Date();
+  };
 
   let inputType = $derived.by(() => {
     if (!field.typeName) {
@@ -64,26 +74,54 @@
   let label = $derived(prettyLabel(path));
 </script>
 
-<label class="block space-y-1 w-full">
+<label class="block space-y-1 w-full group/field">
   <span class="block font-semibold">
     <Label optional={field.optional} {label} />
   </span>
 
   {#if inputType !== "checkbox"}
-    <input
-      type={inputType}
-      step={inputStep}
-      bind:value
-      class="input w-full"
-      placeholder={`Enter ${label} here...`}
-    />
+    <div class="flex justify-start items-center">
+      <input
+        type={inputType}
+        step={inputStep}
+        bind:value
+        class="input flex-grow mr-1 group-hover/field:border-base-content/50"
+        placeholder={`Enter ${label} here...`}
+      />
+
+      <button
+        class="w-8 btn btn-ghost btn-square tooltip tooltip-left"
+        data-tip={`Clear and reset ${label} to its default value`}
+        onclick={clearValue}
+      >
+        <BrushCleaning class="size-4" />
+      </button>
+
+      <button
+        class="w-8 btn btn-ghost btn-square tooltip tooltip-left"
+        data-tip={`Delete ${label} from the JSON object`}
+        onclick={deleteValue}
+      >
+        <Trash class="size-4" />
+      </button>
+    </div>
   {/if}
 
   {#if inputType === "checkbox"}
-    <input
-      type="checkbox"
-      bind:checked={value as boolean}
-      class="toggle toggle-lg"
-    />
+    <div class="flex justify-start items-center space-x-2">
+      <input
+        type="checkbox"
+        bind:checked={value as boolean}
+        class="toggle toggle-lg"
+      />
+
+      <button
+        class="btn btn-ghost btn-square tooltip tooltip-right"
+        data-tip={`Delete ${label} from the JSON object`}
+        onclick={deleteValue}
+      >
+        <Trash class="size-4" />
+      </button>
+    </div>
   {/if}
 </label>

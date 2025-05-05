@@ -1,7 +1,14 @@
 <script lang="ts">
-  import { PackageOpen, Plus, Trash } from "@lucide/svelte";
+  import {
+    BrushCleaning,
+    Minus,
+    PackageOpen,
+    Plus,
+    Trash,
+  } from "@lucide/svelte";
   import { setAtPath } from "$lib/helpers/setAtPath";
   import type { FieldDefinition } from "$lib/urpcTypes";
+  import { prettyLabel } from "./prettyLabel";
   import Label from "./Label.svelte";
   import FieldNamed from "./FieldNamed.svelte";
   import FieldInline from "./FieldInline.svelte";
@@ -23,14 +30,26 @@
   let lastIndex = $derived(indexes[indexes.length - 1]);
   let indexesLen = $derived(indexes.length);
 
-  function addItem() {
-    indexes.push(indexesLen);
+  let prettyPath = $derived(prettyLabel(path));
+
+  function clearArray() {
+    value = setAtPath(value, path, []);
+    indexes = [];
+  }
+
+  function deleteArray() {
+    value = setAtPath(value, path, null);
+    indexes = [];
   }
 
   function removeItem() {
     if (indexes.length <= 0) return;
     value = setAtPath(value, `${path}.${lastIndex}`, null);
     indexes.pop();
+  }
+
+  function addItem() {
+    indexes.push(indexesLen);
   }
 </script>
 
@@ -69,17 +88,39 @@
     {/if}
   {/each}
 
-  <div class="flex justify-end space-x-2">
+  <div class="flex justify-end">
+    <button
+      class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
+      data-tip={`Clear and reset ${prettyPath} to an empty array`}
+      onclick={clearArray}
+    >
+      <BrushCleaning class="size-4" />
+    </button>
+
+    <button
+      class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
+      data-tip={`Delete ${prettyPath} array from the JSON object`}
+      onclick={deleteArray}
+    >
+      <Trash class="size-4" />
+    </button>
+
     {#if indexesLen > 0}
-      <button class="btn btn-sm btn-soft btn-error" onclick={removeItem}>
-        <Trash class="size-4" />
-        Remove last item
+      <button
+        class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
+        data-tip={`Remove last item from ${prettyPath} array`}
+        onclick={removeItem}
+      >
+        <Minus class="size-4" />
       </button>
     {/if}
 
-    <button class="btn btn-sm" onclick={addItem}>
+    <button
+      class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
+      data-tip={`Add item to ${prettyPath} array`}
+      onclick={addItem}
+    >
       <Plus class="size-4" />
-      Add item to {field.name}
     </button>
   </div>
 </Fieldset>
