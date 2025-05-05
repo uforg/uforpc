@@ -17,7 +17,7 @@
     value: globalValue = $bindable(),
   }: Props = $props();
 
-  let value = $state();
+  let value: any = $state(null);
 
   // Listen to changes and update the global value
   // Use untrack to avoid infinite loop
