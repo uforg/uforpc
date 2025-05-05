@@ -106,6 +106,7 @@
 <section
   {id}
   class={[
+    "py-[75px] first:pt-0 last:pb-0",
     // Last section should have a min-height of 100dvh
     // to allow the sidebar to mark the section as active
     // and automatically scroll to it
