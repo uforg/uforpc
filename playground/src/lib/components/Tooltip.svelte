@@ -1,7 +1,7 @@
 <script lang="ts">
   import "tippy.js/dist/tippy.css";
   import "tippy.js/themes/light-border.css";
-  import "tippy.js/themes/translucent.css";
+  import "tippy.js/themes/material.css";
 
   import tippy from "tippy.js";
   import type { Props as TippyProps } from "tippy.js";
@@ -25,7 +25,7 @@
   }: Props = $props();
 
   const lightTheme = "light-border";
-  const darkTheme = "translucent";
+  const darkTheme = "material";
 
   let hiddenEl: HTMLTemplateElement | undefined = $state(undefined);
 
