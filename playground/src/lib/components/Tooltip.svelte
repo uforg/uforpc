@@ -10,6 +10,7 @@
 
   interface Props {
     children: any;
+    enabled?: boolean;
     content: TippyProps["content"];
     placement?: TippyProps["placement"];
     interactive?: TippyProps["interactive"];
@@ -18,6 +19,7 @@
 
   let {
     children,
+    enabled = true,
     content,
     placement = "top",
     interactive = false,
@@ -30,6 +32,7 @@
   let hiddenEl: HTMLTemplateElement | undefined = $state(undefined);
 
   $effect(() => {
+    if (!enabled) return;
     if (!hiddenEl) return;
 
     const el = hiddenEl.nextElementSibling;
