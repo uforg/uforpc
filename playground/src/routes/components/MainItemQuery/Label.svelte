@@ -14,7 +14,7 @@
 
   let plabel = $derived(prettyLabel(label));
   let dataTip = $derived(
-    optional ? `${plabel} is optional` : `${plabel} is required`,
+    `${plabel} is marked as ${optional ? "optional" : "required"}`,
   );
 </script>
 
