@@ -14,7 +14,6 @@
     content: TippyProps["content"];
     placement?: TippyProps["placement"];
     interactive?: TippyProps["interactive"];
-    followCursor?: TippyProps["followCursor"];
   }
 
   let {
@@ -23,7 +22,6 @@
     content,
     placement = "top",
     interactive = false,
-    followCursor = false,
   }: Props = $props();
 
   const lightTheme = "light-border";
@@ -50,7 +48,6 @@
       content,
       placement,
       interactive,
-      followCursor,
       theme,
     });
 
