@@ -46,7 +46,7 @@
     if (node.kind === "doc") return "";
     if (typeof node.deprecated !== "string") return "";
     if (node.deprecated !== "") return node.deprecated;
-    return `This ${node.kind} is deprecated and it's use is not recommended.`;
+    return `This ${node.kind} is deprecated and it's use is not recommended`;
   });
 
   let documentation = $state("");
