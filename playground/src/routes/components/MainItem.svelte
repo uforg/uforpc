@@ -7,11 +7,13 @@
     TriangleAlert,
     Type,
   } from "@lucide/svelte";
+  import { goto } from "$app/navigation";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import { slugify } from "$lib/helpers/slugify";
   import { store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
   import H2 from "$lib/components/H2.svelte";
   import Code from "$lib/components/Code.svelte";
@@ -22,6 +24,14 @@
   }
 
   const { node }: Props = $props();
+
+  let humanKind = $derived.by(() => {
+    if (node.kind === "rule") return "validation rule";
+    if (node.kind === "type") return "type";
+    if (node.kind === "proc") return "procedure";
+    if (node.kind === "doc") return "documentation";
+    return "unknown";
+  });
 
   let name = $derived.by(() => {
     if (node.kind === "rule") return node.name;
@@ -82,6 +92,14 @@
       name,
     );
     if (extracted) urpcSchema = extracted;
+  });
+
+  // Update url hash and document title when this section is active
+  $effect(() => {
+    if (uiStore.activeSection === id) {
+      goto(`#${id}`, { noScroll: true, keepFocus: true });
+      document.title = `${name} ${humanKind} - UFO RPC Playground`;
+    }
   });
 </script>
 

@@ -1,21 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { goto } from "$app/navigation";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
   import { activesectionAction } from "./activesectionAction.svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";
   import Main from "./components/Main.svelte";
-
-  let activeSection = $state("");
-
-  // Update URL hash when active section changes
-  $effect(() => {
-    if (activeSection) {
-      uiStore.activeSection = activeSection;
-      goto(`#${activeSection}`, { noScroll: true, keepFocus: true });
-    }
-  });
 
   // Scroll to hash on initial load
   onMount(() => {
@@ -40,7 +29,7 @@
   <div
     use:activesectionAction
     use:dimensionschangeAction
-    onactivesection={(e) => (activeSection = e.detail)}
+    onactivesection={(e) => (uiStore.activeSection = e.detail)}
     ondimensionschange={(e) => uiStore.contentWrapper = e.detail}
     class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]"
   >
