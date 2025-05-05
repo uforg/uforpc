@@ -82,7 +82,7 @@
     },
     {
       group: "HTTPie",
-      langCode: "httpie",
+      langCode: "bash",
       label: "HTTPie",
       func: curlconverter.toHttpie,
     },
