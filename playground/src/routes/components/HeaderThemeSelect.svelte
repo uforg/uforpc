@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Menu from "$lib/components/Menu.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import type { Theme } from "$lib/uiStore.svelte";
@@ -34,28 +35,26 @@
   {/if}
 {/snippet}
 
-<div class="dropdown dropdown-end">
-  <Tooltip content="Theme" placement="left">
-    <div
-      tabindex="-1"
-      role="button"
-      class="btn btn-ghost"
-    >
-      <Palette class="size-4" />
-      {@render themeName(false, uiStore.theme)}
-    </div>
-  </Tooltip>
-
-  <ul
-    tabindex="-1"
-    class="dropdown-content menu bg-base-100 rounded-box z-1 w-[120px] p-2 shadow-md"
-  >
+{#snippet content()}
+  <div class="py-1 space-y-2">
     {#each themesArr as themeItem}
-      <li>
-        <button onclick={() => setTheme(themeItem)}>
-          {@render themeName(true, themeItem)}
-        </button>
-      </li>
+      <button
+        class="flex justify-start items-center space-x-2 btn btn-ghost btn-block"
+        onclick={() => setTheme(themeItem)}
+      >
+        {@render themeName(true, themeItem)}
+      </button>
     {/each}
-  </ul>
-</div>
+  </div>
+{/snippet}
+
+<Menu {content}>
+  <div>
+    <Tooltip content="Theme" placement="left">
+      <button class="btn btn-ghost">
+        <Palette class="size-4" />
+        {@render themeName(false, uiStore.theme)}
+      </button>
+    </Tooltip>
+  </div>
+</Menu>
