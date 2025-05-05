@@ -342,6 +342,4 @@
   </select>
 </fieldset>
 
-<div class="prose mt-2">
-  <Code code={pickedCode} lang={pickedLang} />
-</div>
+<Code class="mt-2" code={pickedCode} lang={pickedLang} />
