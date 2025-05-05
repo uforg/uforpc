@@ -29,10 +29,10 @@
   });
 
   let title = $derived.by(() => {
-    if (node.kind === "rule") return `Rule: ${name}`;
-    if (node.kind === "type") return `Type: ${name}`;
-    if (node.kind === "proc") return `Procedure: ${name}`;
-    if (node.kind === "doc") return `Documentation: ${name}`;
+    if (node.kind === "rule") return `${name} validation rule`;
+    if (node.kind === "type") return `${name} type`;
+    if (node.kind === "proc") return `${name} procedure`;
+    if (node.kind === "doc") return `${name} documentation`;
     return "Unknown";
   });
 
