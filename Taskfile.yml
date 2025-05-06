@@ -15,7 +15,7 @@ tasks:
       - cp "/usr/local/go/lib/wasm/wasm_exec.js" ./dist/wasm_exec.js
 
       # Build playground
-      - cd ./playground && deno task build && cd ..
+      - cd ./playground && npm run build && cd ..
 
       # Build and install as local binary
       - go install ./cmd/urpc/.
@@ -41,7 +41,7 @@ tasks:
     desc: Test all code on this repo
     cmds:
       - go test ./...
-      - cd ./playground && deno install && deno task test
+      - cd ./playground && npm install && npm run test
 
   lint:
     desc: Lint all code on this repo
@@ -51,7 +51,7 @@ tasks:
     desc: Format all code on this repo
     cmds:
       - go fmt ./...
-      - deno fmt
+      - npm run format
 
   fixperms:
     desc: Fix permissions on all files
