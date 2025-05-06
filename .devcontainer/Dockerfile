@@ -1,5 +1,4 @@
-# To make sure we have the deno and golang binaries
-FROM denoland/deno:debian-2.2.12 AS deno
+# To make sure we have the golang binaries
 FROM golang:1.24.2-bookworm AS golang
 
 # Set the base image
@@ -21,16 +20,17 @@ ENV GOBIN="/usr/local/go/bin"
 RUN mkdir -p /app/temp /usr/local/dl/bin
 WORKDIR /app/temp
 
-# Install deno from docker image
-COPY --from=deno /usr/bin/deno /usr/local/bin/deno
-
 # Install golang from docker image
 COPY --from=golang /usr/local/go /usr/local/go
 
 # Install system dependencies
 RUN apt update && \
-    apt install -y wget curl zip unzip p7zip-full tzdata git && \
+    apt install -y wget curl zip unzip p7zip-full tzdata git npm && \
     rm -rf /var/lib/apt/lists/*
+
+# Install Node.js using n
+RUN npm install -g n@latest && \
+    n 22.15.0
 
 # Install downloadable binaries
 RUN set -e && \

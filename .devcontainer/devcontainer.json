@@ -8,7 +8,6 @@
       "extensions": [
         "uforg.urpc",
         "golang.go",
-        "denoland.vscode-deno",
         "mhutchie.git-graph",
         "mutantdino.resourcemonitor",
         "Compile-TomaszKasperczyk.copy-to-llm",
@@ -17,53 +16,51 @@
         "tamasfe.even-better-toml",
         "svelte.svelte-vscode",
         "bradlc.vscode-tailwindcss",
-        "Chanzhaoyu.svelte-5-snippets"
+        "Chanzhaoyu.svelte-5-snippets",
+        "esbenp.prettier-vscode",
+        "vitest.explorer",
+        "biomejs.biome"
       ],
       "settings": {
         "urpc.enable": false,
-        "deno.enablePaths": ["./playground"],
         "editor.formatOnSave": true,
         "editor.foldingStrategy": "indentation",
         "files.eol": "\n",
         "[json]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[jsonc]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[typescript]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[javascript]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[css]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "css.validate": false,
         "[html]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[markdown]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[yaml]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "[svelte]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "svelte.enable-ts-plugin": true,
         "[go]": {
           "editor.defaultFormatter": "golang.go"
         },
         "go.lintTool": "golangci-lint",
-        "go.lintFlags": [
-          "--fast"
-        ],
-        "go.testFlags": [
-          "-v"
-        ]
+        "go.lintFlags": ["--fast"],
+        "go.testFlags": ["-v"]
       }
     }
   }
