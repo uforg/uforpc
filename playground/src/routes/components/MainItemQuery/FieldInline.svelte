@@ -12,11 +12,7 @@
     value: any;
   }
 
-  let {
-    fields,
-    path,
-    value = $bindable(),
-  }: Props = $props();
+  let { fields, path, value = $bindable() }: Props = $props();
 
   let prettyPath = $derived(prettyLabel(path));
   let renderKey = $state(0);
@@ -36,11 +32,7 @@
 
 {#key renderKey}
   {#each fields as field}
-    <Field
-      fields={field}
-      {path}
-      bind:value
-    />
+    <Field fields={field} {path} bind:value />
   {/each}
 {/key}
 
@@ -49,10 +41,7 @@
     content={`Clear and reset ${prettyPath} to an empty object`}
     placement="left"
   >
-    <button
-      class="btn btn-sm btn-ghost btn-square"
-      onclick={clearObject}
-    >
+    <button class="btn btn-sm btn-ghost btn-square" onclick={clearObject}>
       <BrushCleaning class="size-4" />
     </button>
   </Tooltip>
@@ -61,10 +50,7 @@
     content={`Delete ${prettyPath} from the JSON object`}
     placement="left"
   >
-    <button
-      class="btn btn-sm btn-ghost btn-square"
-      onclick={deleteObject}
-    >
+    <button class="btn btn-sm btn-ghost btn-square" onclick={deleteObject}>
       <Trash class="size-4" />
     </button>
   </Tooltip>

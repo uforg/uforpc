@@ -30,13 +30,12 @@ export function setAtPath<T extends object>(
     const currentKey = keys[keyIndex];
 
     // Check if the next key in the path is numeric (indicating we need an array)
-    const nextKeyIsNumeric = keyIndex < keys.length - 1 &&
-      /^\d+$/.test(keys[keyIndex + 1]);
+    const nextKeyIsNumeric =
+      keyIndex < keys.length - 1 && /^\d+$/.test(keys[keyIndex + 1]);
 
     // Get the current value at this key (if it exists and is an object)
-    const currentValue = obj != null && typeof obj === "object"
-      ? obj[currentKey]
-      : undefined;
+    const currentValue =
+      obj != null && typeof obj === "object" ? obj[currentKey] : undefined;
 
     // Create the proper container for the next level if it doesn't exist
     // Use an array if the next key is numeric, otherwise use an object

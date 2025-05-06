@@ -13,15 +13,9 @@
     value: any;
   }
 
-  let {
-    fields: fieldOrFields,
-    path,
-    value = $bindable(),
-  }: Props = $props();
+  let { fields: fieldOrFields, path, value = $bindable() }: Props = $props();
 
-  function getCustomTypeFields(
-    typeName: string,
-  ): FieldDefinition[] {
+  function getCustomTypeFields(typeName: string): FieldDefinition[] {
     for (const node of store.jsonSchema.nodes) {
       if (node.kind !== "type") continue;
       if (node.name !== typeName) continue;
@@ -35,9 +29,7 @@
   const primitiveTypes = ["string", "int", "float", "boolean", "datetime"];
 
   let fieldsArray = $derived.by(() => {
-    let arr = Array.isArray(fieldOrFields)
-      ? fieldOrFields
-      : [fieldOrFields];
+    let arr = Array.isArray(fieldOrFields) ? fieldOrFields : [fieldOrFields];
 
     // Transform custom fields to inline fields
     arr = arr.map((field) => {
@@ -61,20 +53,13 @@
 
 {#each fieldsArray as field}
   {#if !field.isArray && field.typeName}
-    <FieldNamed
-      {field}
-      path={`${path}.${field.name}`}
-      bind:value
-    />
+    <FieldNamed {field} path={`${path}.${field.name}`} bind:value />
   {/if}
 
   {#if !field.isArray && field.typeInline}
     <Fieldset>
       <legend class="fieldset-legend">
-        <Label
-          label={`${path}.${field.name}`}
-          optional={field.optional}
-        />
+        <Label label={`${path}.${field.name}`} optional={field.optional} />
       </legend>
       <FieldInline
         fields={field.typeInline.fields}
@@ -85,10 +70,6 @@
   {/if}
 
   {#if field.isArray}
-    <FieldArray
-      {field}
-      path={`${path}.${field.name}`}
-      bind:value
-    />
+    <FieldArray {field} path={`${path}.${field.name}`} bind:value />
   {/if}
 {/each}

@@ -22,7 +22,7 @@
 <Tooltip content={dataTip} placement="right">
   <span
     class={mergeClasses([
-      "inline-flex justify-start items-center space-x-1",
+      "inline-flex items-center justify-start space-x-1",
       className,
     ])}
   >
@@ -31,9 +31,9 @@
     </span>
 
     {#if optional}
-      <CircleHelp class="size-4 text-info" />
+      <CircleHelp class="text-info size-4" />
     {:else}
-      <SquareAsterisk class="size-4 text-error" />
+      <SquareAsterisk class="text-error size-4" />
     {/if}
   </span>
 </Tooltip>

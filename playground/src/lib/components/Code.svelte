@@ -1,12 +1,7 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { toast } from "svelte-sonner";
-  import {
-    ChevronDown,
-    ChevronRight,
-    Copy,
-    ScrollText,
-  } from "@lucide/svelte";
+  import { ChevronDown, ChevronRight, Copy, ScrollText } from "@lucide/svelte";
   import {
     darkTheme,
     getHighlighter,
@@ -39,9 +34,9 @@
   let urpcSchemaHighlighted = $state("");
   $effect(() => {
     const themeMap = {
-      "system": uiStore.osTheme === "dark" ? darkTheme : lightTheme,
-      "dark": darkTheme,
-      "light": lightTheme,
+      system: uiStore.osTheme === "dark" ? darkTheme : lightTheme,
+      dark: darkTheme,
+      light: lightTheme,
     };
     let theme = themeMap[uiStore.theme];
 
@@ -75,16 +70,11 @@
 </script>
 
 {#if urpcSchemaHighlighted !== ""}
-  <div
-    class={mergeClasses(
-      "group",
-      className,
-    )}
-  >
+  <div class={mergeClasses("group", className)}>
     {#if collapsible}
       <button
         class={[
-          "btn w-full justify-start border-base-content/20",
+          "btn border-base-content/20 w-full justify-start",
           "rounded-box group/btn",
           {
             "rounded-b-none": isOpen,
@@ -92,11 +82,11 @@
         ]}
         onclick={toggleCollapse}
       >
-        <ScrollText class="size-4 mr-2 block group-hover/btn:hidden" />
+        <ScrollText class="mr-2 block size-4 group-hover/btn:hidden" />
         {#if isOpen}
-          <ChevronDown class="size-4 mr-2 hidden group-hover/btn:block" />
+          <ChevronDown class="mr-2 hidden size-4 group-hover/btn:block" />
         {:else}
-          <ChevronRight class="size-4 mr-2 hidden group-hover/btn:block" />
+          <ChevronRight class="mr-2 hidden size-4 group-hover/btn:block" />
         {/if}
         {#if title}
           {title}
@@ -107,10 +97,10 @@
     {#if !collapsible || isOpen}
       <div
         class={[
-          "relative z-10 p-4 pt-2 rounded-box",
-          "bg-base-200 border border-base-content/20",
+          "rounded-box relative z-10 p-4 pt-2",
+          "bg-base-200 border-base-content/20 border",
           {
-            "border-t-0 rounded-t-none": collapsible,
+            "rounded-t-none border-t-0": collapsible,
           },
         ]}
         transition:slide={{ duration: 100 }}
@@ -119,7 +109,7 @@
           class="btn absolute top-4 right-4 hidden group-hover:block"
           onclick={() => copyToClipboard(code)}
         >
-          <span class="flex justify-center items-center space-x-2">
+          <span class="flex items-center justify-center space-x-2">
             <Copy class="size-4" />
             <span>Copy</span>
           </span>

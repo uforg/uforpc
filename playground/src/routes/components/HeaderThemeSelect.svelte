@@ -36,10 +36,10 @@
 {/snippet}
 
 {#snippet content()}
-  <div class="py-1 space-y-2">
+  <div class="space-y-2 py-1">
     {#each themesArr as themeItem}
       <button
-        class="flex justify-start items-center space-x-2 btn btn-ghost btn-block"
+        class="btn btn-ghost btn-block flex items-center justify-start space-x-2"
         onclick={() => setTheme(themeItem)}
       >
         {@render themeName(true, themeItem)}

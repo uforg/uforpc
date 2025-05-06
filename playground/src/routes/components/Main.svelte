@@ -12,10 +12,10 @@
 <main
   class="w-full p-4"
   use:dimensionschangeAction
-  ondimensionschange={(e) => uiStore.main = e.detail}
+  ondimensionschange={(e) => (uiStore.main = e.detail)}
 >
   {#if isEmpty}
-    <div class="mt-[200px] flex flex-col justify-center items-center gap-4">
+    <div class="mt-[200px] flex flex-col items-center justify-center gap-4">
       <ScrollText class="size-[100px]" />
       <h1 class="text-3xl font-bold">
         Add a schema with some content to display

@@ -12,9 +12,10 @@ export function extractNodeFromSchema(
   nodeName: string,
 ): string | null {
   const lines = schema.split("\n");
-  const nodePattern = kind === "rule"
-    ? new RegExp(`^\\s*${kind}\\s+@${nodeName}\\s*{`)
-    : new RegExp(`^\\s*${kind}\\s+${nodeName}\\s*{`);
+  const nodePattern =
+    kind === "rule"
+      ? new RegExp(`^\\s*${kind}\\s+@${nodeName}\\s*{`)
+      : new RegExp(`^\\s*${kind}\\s+${nodeName}\\s*{`);
 
   let openBraces = 0;
   let foundNode = false;
@@ -26,8 +27,8 @@ export function extractNodeFromSchema(
       result.push(line);
 
       // Count braces
-      openBraces += (line.match(/{/g) || []).length -
-        (line.match(/}/g) || []).length;
+      openBraces +=
+        (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
 
       // Found closing brace - return the complete node
       if (openBraces === 0) {
@@ -47,8 +48,8 @@ export function extractNodeFromSchema(
       result.push(line);
 
       // Handle case where braces open and close on the same line
-      openBraces = (line.match(/{/g) || []).length -
-        (line.match(/}/g) || []).length;
+      openBraces =
+        (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
       if (openBraces === 0 && line.includes("{") && line.includes("}")) {
         return line;
       }

@@ -1,12 +1,5 @@
 <script lang="ts">
-  import {
-    Link,
-    Plus,
-    RefreshCcw,
-    Settings,
-    Trash,
-    X,
-  } from "@lucide/svelte";
+  import { Link, Plus, RefreshCcw, Settings, Trash, X } from "@lucide/svelte";
   import { loadDefaultConfig, store } from "$lib/store.svelte";
   import Modal from "$lib/components/Modal.svelte";
 
@@ -41,7 +34,7 @@
 </script>
 
 <button
-  class="btn btn-ghost flex justify-start items-center space-x-2 text-sm"
+  class="btn btn-ghost flex items-center justify-start space-x-2 text-sm"
   onclick={openModal}
 >
   <Settings class="size-4" />
@@ -53,16 +46,14 @@
 </button>
 
 <Modal bind:isOpen>
-  <div class="w-full flex justify-between items-center">
+  <div class="flex w-full items-center justify-between">
     <h3 class="text-xl font-bold">Settings</h3>
     <button class="btn btn-circle btn-ghost" onclick={closeModal}>
       <X class="size-4" />
     </button>
   </div>
 
-  <p>
-    Settings are saved in your browser's local storage.
-  </p>
+  <p>Settings are saved in your browser's local storage.</p>
 
   <div class="mt-4 space-y-4">
     <fieldset class="fieldset">
@@ -85,7 +76,7 @@
       <p class="label mb-1">Headers to send with requests to the endpoint.</p>
 
       {#each store.headers as header, index}
-        <div class="flex gap-2 mb-2">
+        <div class="mb-2 flex gap-2">
           <input
             type="text"
             class="input flex-1"
@@ -111,14 +102,14 @@
       {/each}
 
       <button class="btn btn-outline mt-2" onclick={addHeader}>
-        <Plus class="size-4 mr-1" />
+        <Plus class="mr-1 size-4" />
         Add Header
       </button>
     </fieldset>
 
     <div class="flex justify-end">
       <button class="btn btn-ghost" onclick={loadDefaultConfig}>
-        <RefreshCcw class="size-4 mr-1" />
+        <RefreshCcw class="mr-1 size-4" />
         Reset default settings
       </button>
     </div>

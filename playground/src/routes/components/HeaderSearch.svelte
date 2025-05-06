@@ -48,7 +48,7 @@
 </script>
 
 <button
-  class="btn btn-ghost flex justify-start items-center space-x-2 text-sm"
+  class="btn btn-ghost flex items-center justify-start space-x-2 text-sm"
   onclick={openModal}
 >
   <Search class="size-4" />
@@ -60,7 +60,7 @@
 </button>
 
 <Modal bind:isOpen>
-  <div class="flex justify-start items-center space-x-2">
+  <div class="flex items-center justify-start space-x-2">
     <label class="input flex-grow">
       <Search class="size-4" />
       <input
@@ -76,7 +76,9 @@
   </div>
 
   {#if searchResults.length === 0}
-    <div class="my-8 flex flex-col space-y-2 justify-center items-center text-center">
+    <div
+      class="my-8 flex flex-col items-center justify-center space-y-2 text-center"
+    >
       <FileX class="size-12" />
       <H2>No results found</H2>
     </div>
@@ -87,22 +89,22 @@
       {#each searchResults as result}
         <li class="list-row hover:bg-base-200">
           <a href={`#${result.slug}`} onclick={closeModal}>
-            <span class="flex justify-start items-center text-lg font-bold">
+            <span class="flex items-center justify-start text-lg font-bold">
               {#if result.kind === "doc"}
-                <BookOpenText class="flex-none size-4 mr-2" />
+                <BookOpenText class="mr-2 size-4 flex-none" />
               {/if}
               {#if result.kind === "rule"}
-                <Scale class="flex-none size-4 mr-2" />
+                <Scale class="mr-2 size-4 flex-none" />
               {/if}
               {#if result.kind === "type"}
-                <Type class="flex-none size-4 mr-2" />
+                <Type class="mr-2 size-4 flex-none" />
               {/if}
               {#if result.kind === "proc"}
-                <ArrowLeftRight class="flex-none size-4 mr-2" />
+                <ArrowLeftRight class="mr-2 size-4 flex-none" />
               {/if}
               {@html markSearchHints(result, result.name)}
             </span>
-            <p class="text-sm truncate">
+            <p class="truncate text-sm">
               {@html truncateWithMark(result, result.doc)}
             </p>
           </a>

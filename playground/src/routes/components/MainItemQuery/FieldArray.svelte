@@ -21,11 +21,7 @@
     value: any;
   }
 
-  let {
-    field,
-    path,
-    value = $bindable(),
-  }: Props = $props();
+  let { field, path, value = $bindable() }: Props = $props();
 
   let indexes: number[] = $state([]);
   let lastIndex = $derived(indexes[indexes.length - 1]);
@@ -60,19 +56,15 @@
   </legend>
 
   {#if indexesLen == 0}
-    <PackageOpen class="size-6 mx-auto" />
-    <p class="text-sm text-center italic">
+    <PackageOpen class="mx-auto size-6" />
+    <p class="text-center text-sm italic">
       No items, add one using the button below
     </p>
   {/if}
 
   {#each indexes as index}
     {#if field.typeName}
-      <FieldNamed
-        {field}
-        path={`${path}.${index}`}
-        bind:value
-      />
+      <FieldNamed {field} path={`${path}.${index}`} bind:value />
     {/if}
 
     {#if field.typeInline}
@@ -94,10 +86,7 @@
       content={`Clear and reset ${prettyPath} to an empty array`}
       placement="left"
     >
-      <button
-        class="btn btn-sm btn-ghost btn-square"
-        onclick={clearArray}
-      >
+      <button class="btn btn-sm btn-ghost btn-square" onclick={clearArray}>
         <BrushCleaning class="size-4" />
       </button>
     </Tooltip>
@@ -106,10 +95,7 @@
       content={`Delete ${prettyPath} array from the JSON object`}
       placement="left"
     >
-      <button
-        class="btn btn-sm btn-ghost btn-square"
-        onclick={deleteArray}
-      >
+      <button class="btn btn-sm btn-ghost btn-square" onclick={deleteArray}>
         <Trash class="size-4" />
       </button>
     </Tooltip>
@@ -119,23 +105,14 @@
         content={`Remove last item from ${prettyPath} array`}
         placement="left"
       >
-        <button
-          class="btn btn-sm btn-ghost btn-square"
-          onclick={removeItem}
-        >
+        <button class="btn btn-sm btn-ghost btn-square" onclick={removeItem}>
           <Minus class="size-4" />
         </button>
       </Tooltip>
     {/if}
 
-    <Tooltip
-      content={`Add item to ${prettyPath} array`}
-      placement="left"
-    >
-      <button
-        class="btn btn-sm btn-ghost btn-square"
-        onclick={addItem}
-      >
+    <Tooltip content={`Add item to ${prettyPath} array`} placement="left">
+      <button class="btn btn-sm btn-ghost btn-square" onclick={addItem}>
         <Plus class="size-4" />
       </button>
     </Tooltip>

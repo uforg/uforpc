@@ -13,7 +13,7 @@
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   interface Props {
-    node: typeof store.jsonSchema.nodes[number];
+    node: (typeof store.jsonSchema.nodes)[number];
   }
 
   const { node }: Props = $props();
@@ -86,21 +86,21 @@
     ]}
   >
     {#if node.kind === "doc"}
-      <BookOpenText class="flex-none size-4" />
+      <BookOpenText class="size-4 flex-none" />
     {/if}
     {#if node.kind === "rule"}
-      <Scale class="flex-none size-4" />
+      <Scale class="size-4 flex-none" />
     {/if}
     {#if node.kind === "type"}
-      <Type class="flex-none size-4" />
+      <Type class="size-4 flex-none" />
     {/if}
     {#if node.kind === "proc"}
-      <ArrowLeftRight class="flex-none size-4" />
+      <ArrowLeftRight class="size-4 flex-none" />
     {/if}
 
     <span
       class={[
-        "whitespace-nowrap overflow-hidden overflow-ellipsis",
+        "overflow-hidden overflow-ellipsis whitespace-nowrap",
         {
           "line-through": isDeprecated,
         },
@@ -110,7 +110,7 @@
     </span>
 
     {#if isDeprecated}
-      <TriangleAlert class="flex-none size-4 text-warning" />
+      <TriangleAlert class="text-warning size-4 flex-none" />
     {/if}
   </a>
 </Tooltip>

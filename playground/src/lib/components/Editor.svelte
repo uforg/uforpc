@@ -18,16 +18,13 @@
     monaco.languages.register({ id: "urpc" });
     shikiToMonaco(highlighter, monaco);
 
-    editor = monaco.editor.create(
-      editorContainer,
-      {
-        value: value,
-        language: "urpc",
-        tabSize: 2,
-        insertSpaces: true,
-        padding: { top: 30, bottom: 30 },
-      },
-    );
+    editor = monaco.editor.create(editorContainer, {
+      value: value,
+      language: "urpc",
+      tabSize: 2,
+      insertSpaces: true,
+      padding: { top: 30, bottom: 30 },
+    });
 
     editor.onDidChangeModelContent(() => {
       value = editor?.getValue();

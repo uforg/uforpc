@@ -172,9 +172,11 @@ function getScrollableAncestors(el: HTMLElement): (Window | HTMLElement)[] {
     const style = getComputedStyle(parent);
     const overflowY = style.overflowY;
     const overflowX = style.overflowX;
-    const canScrollY = (overflowY === "auto" || overflowY === "scroll") &&
+    const canScrollY =
+      (overflowY === "auto" || overflowY === "scroll") &&
       parent.scrollHeight > parent.clientHeight;
-    const canScrollX = (overflowX === "auto" || overflowX === "scroll") &&
+    const canScrollX =
+      (overflowX === "auto" || overflowX === "scroll") &&
       parent.scrollWidth > parent.clientWidth;
     if (canScrollY || canScrollX) hosts.push(parent);
     parent = parent.parentElement;
@@ -303,7 +305,9 @@ export const dimensionschangeAction: Action<
   function attachScrollListeners() {
     scrollHosts = getScrollableAncestors(node);
     scrollHosts.forEach((host) =>
-      host.addEventListener("scroll", throttledDispatchEvent, { passive: true })
+      host.addEventListener("scroll", throttledDispatchEvent, {
+        passive: true,
+      }),
     );
 
     node.addEventListener("scroll", throttledDispatchEvent);
@@ -311,7 +315,7 @@ export const dimensionschangeAction: Action<
 
   function detachScrollListeners() {
     scrollHosts.forEach((host) =>
-      host.removeEventListener("scroll", throttledDispatchEvent)
+      host.removeEventListener("scroll", throttledDispatchEvent),
     );
     scrollHosts = [];
 

@@ -40,12 +40,12 @@
 {#if isOpen}
   <Portal target="body">
     <div
-      class="z-40 w-screen h-screen fixed top-0 left-0"
+      class="fixed top-0 left-0 z-40 h-screen w-screen"
       transition:fade={{ duration: 100 }}
     >
       <button
         class={mergeClasses(
-          "w-full h-full z-10 bg-black/30",
+          "z-10 h-full w-full bg-black/30",
           backdropClassName,
         )}
         onclick={backdropClose ? closeModal : undefined}
@@ -55,8 +55,8 @@
 
       <div
         class={mergeClasses(
-          "absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-          "bg-base-100 rounded-box p-4 w-[90dvw] max-w-lg max-h-[90dvh] shadow-xl",
+          "absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-1/2",
+          "bg-base-100 rounded-box max-h-[90dvh] w-[90dvw] max-w-lg p-4 shadow-xl",
           "overflow-x-hidden overflow-y-auto",
           className,
         )}

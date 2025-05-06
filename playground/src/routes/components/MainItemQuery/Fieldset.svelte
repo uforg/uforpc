@@ -9,7 +9,7 @@
 <fieldset
   class={[
     "fieldset-component",
-    "fieldset border border-base-content/20 rounded-box w-full p-4 space-y-2",
+    "fieldset border-base-content/20 rounded-box w-full space-y-2 border p-4",
     "hover:border-base-content/50 has-[.fieldset-component:hover]:hover:border-base-content/20",
   ]}
 >

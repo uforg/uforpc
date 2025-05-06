@@ -23,7 +23,7 @@ describe("markSearchHints", () => {
     const text = "test this test string test";
     const result = markSearchHints(searchResult, text);
     expect(result).toBe(
-      "<mark>test</mark> this <mark>test</mark> string <mark>test</mark>"
+      "<mark>test</mark> this <mark>test</mark> string <mark>test</mark>",
     );
   });
 
@@ -83,7 +83,7 @@ describe("truncateWithMark", () => {
     const text = "One two three four test five six seven test eight";
     const result = truncateWithMark(searchResult, text);
     expect(result).toBe(
-      "... two three four <mark>test</mark> five six seven <mark>test</mark> eight"
+      "... two three four <mark>test</mark> five six seven <mark>test</mark> eight",
     );
   });
 

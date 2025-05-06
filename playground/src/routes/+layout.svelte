@@ -26,8 +26,7 @@
     const handleError = (error: unknown) => {
       console.error(error);
       toast.error("Failed to initialize the Playground", {
-        description:
-          `Please try again or contact the developers if the problem persists. Error: ${error}`,
+        description: `Please try again or contact the developers if the problem persists. Error: ${error}`,
         duration: 15000,
       });
     };
@@ -63,12 +62,16 @@
 {#if !initialized}
   <main
     out:fade={{ duration: 200 }}
-    class="flex flex-col fixed top-0 left-0 h-screen w-screen items-center justify-center"
+    class="fixed top-0 left-0 flex h-screen w-screen flex-col items-center justify-center"
   >
-    <img src="/assets/logo-square.png" alt="UFO RPC Logo" class="size-[150px]">
-    <h1 class="text-3xl font-bold mb-2">UFO RPC Playground</h1>
+    <img
+      src="/assets/logo-square.png"
+      alt="UFO RPC Logo"
+      class="size-[150px]"
+    />
+    <h1 class="mb-2 text-3xl font-bold">UFO RPC Playground</h1>
     <h2 class="mb-6">{message}...</h2>
-    <Loader class="animate animate-spin size-10" />
+    <Loader class="animate size-10 animate-spin" />
   </main>
 {/if}
 

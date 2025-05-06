@@ -2,10 +2,7 @@
   import { onMount } from "svelte";
   import { Save, ScrollText, WandSparkles, X } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
-  import {
-    loadJsonSchemaFromUrpcSchemaString,
-    store,
-  } from "$lib/store.svelte";
+  import { loadJsonSchemaFromUrpcSchemaString, store } from "$lib/store.svelte";
   import { cmdFmt } from "$lib/urpc";
   import Modal from "$lib/components/Modal.svelte";
   import Editor from "$lib/components/Editor.svelte";
@@ -55,9 +52,9 @@
 
 <Modal
   bind:isOpen
-  class="space-y-6 w-[90dvw] max-w-[1080px] h-[90dvh] flex flex-col"
+  class="flex h-[90dvh] w-[90dvw] max-w-[1080px] flex-col space-y-6"
 >
-  <div class="w-full flex justify-between items-center">
+  <div class="flex w-full items-center justify-between">
     <h3 class="text-xl font-bold">Schema editor</h3>
     <button class="btn btn-circle btn-ghost" onclick={closeModal}>
       <X class="size-4" />
@@ -66,10 +63,10 @@
 
   <Editor
     bind:value={modifiedSchema}
-    class="w-full flex-grow rounded-box shadow-md overflow-hidden"
+    class="rounded-box w-full flex-grow overflow-hidden shadow-md"
   />
 
-  <div class="w-full flex justify-end items-center space-x-2">
+  <div class="flex w-full items-center justify-end space-x-2">
     <button class="btn btn-ghost" onclick={formatSchema}>
       Format <WandSparkles class="size-4" />
     </button>

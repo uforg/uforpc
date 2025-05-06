@@ -20,7 +20,7 @@
   import MainItemQuery from "./MainItemQuery/Query.svelte";
 
   interface Props {
-    node: typeof store.jsonSchema.nodes[number];
+    node: (typeof store.jsonSchema.nodes)[number];
   }
 
   const { node }: Props = $props();
@@ -68,17 +68,13 @@
         );
       }
       if (
-        (
-          node.kind === "rule" ||
+        (node.kind === "rule" ||
           node.kind === "type" ||
-          node.kind === "proc"
-        ) &&
+          node.kind === "proc") &&
         typeof node.doc === "string" &&
         node.doc != ""
       ) {
-        documentation = await markdownToHtml(
-          deleteMarkdownHeadings(node.doc),
-        );
+        documentation = await markdownToHtml(deleteMarkdownHeadings(node.doc));
       }
     })();
   });
@@ -86,11 +82,7 @@
   let urpcSchema = $state("");
   $effect(() => {
     if (node.kind === "doc") return;
-    const extracted = extractNodeFromSchema(
-      store.urpcSchema,
-      node.kind,
-      name,
-    );
+    const extracted = extractNodeFromSchema(store.urpcSchema, node.kind, name);
     if (extracted) urpcSchema = extracted;
   });
 
@@ -114,27 +106,27 @@
   ]}
 >
   <a href={`#${id}`} class="block">
-    <H2 class="flex justify-start items-center group text-4xl font-extrabold">
+    <H2 class="group flex items-center justify-start text-4xl font-extrabold">
       {#if node.kind === "doc"}
-        <BookOpenText class="size-8 mr-4 flex-none group-hover:hidden" />
+        <BookOpenText class="mr-4 size-8 flex-none group-hover:hidden" />
       {/if}
       {#if node.kind === "rule"}
-        <Scale class="size-8 mr-4 flex-none group-hover:hidden" />
+        <Scale class="mr-4 size-8 flex-none group-hover:hidden" />
       {/if}
       {#if node.kind === "type"}
-        <Type class="size-8 mr-4 flex-none group-hover:hidden" />
+        <Type class="mr-4 size-8 flex-none group-hover:hidden" />
       {/if}
       {#if node.kind === "proc"}
-        <ArrowLeftRight class="size-8 mr-4 flex-none group-hover:hidden" />
+        <ArrowLeftRight class="mr-4 size-8 flex-none group-hover:hidden" />
       {/if}
 
-      <Hash class="size-8 mr-4 flex-none hidden group-hover:block" />
+      <Hash class="mr-4 hidden size-8 flex-none group-hover:block" />
 
       {name}
     </H2>
   </a>
 
-  <div class="pl-12 mt-1">
+  <div class="mt-1 pl-12">
     {#if deprecatedMessage !== ""}
       <div role="alert" class="alert alert-soft alert-error mt-4 w-fit">
         <TriangleAlert class="size-4" />
@@ -143,7 +135,7 @@
     {/if}
 
     {#if documentation !== ""}
-      <div class="prose prose-headings:mt-0 max-w-none mt-6">
+      <div class="prose prose-headings:mt-0 mt-6 max-w-none">
         {@html documentation}
       </div>
     {/if}

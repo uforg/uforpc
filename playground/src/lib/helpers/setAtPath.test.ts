@@ -48,7 +48,7 @@ describe("setAtPath", () => {
     const result = setAtPath(
       original,
       "departments.0.teams.0.members.1",
-      "Charlie"
+      "Charlie",
     );
     expect(result).toEqual({
       departments: [
@@ -258,7 +258,7 @@ describe("setAtPath", () => {
     const result: any = setAtPath(
       original,
       "users.0.posts.0.comments.1.author",
-      "Alice"
+      "Alice",
     );
 
     // Verify the structure instead of making a complete comparison
@@ -276,7 +276,7 @@ describe("setAtPath", () => {
     const result: any = setAtPath(
       original,
       "departments.0.teams.1.members.0.skills.2",
-      "JavaScript"
+      "JavaScript",
     );
 
     // Verify the structure instead of making a complete comparison
@@ -286,13 +286,13 @@ describe("setAtPath", () => {
     expect(result.departments[0].teams[1].members.length).toEqual(1);
     expect(result.departments[0].teams[1].members[0].skills.length).toEqual(3);
     expect(result.departments[0].teams[1].members[0].skills[0]).toEqual(
-      undefined
+      undefined,
     );
     expect(result.departments[0].teams[1].members[0].skills[1]).toEqual(
-      undefined
+      undefined,
     );
     expect(result.departments[0].teams[1].members[0].skills[2]).toEqual(
-      "JavaScript"
+      "JavaScript",
     );
   });
 });

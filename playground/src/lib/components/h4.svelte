@@ -11,12 +11,6 @@
   let { children, class: className, ...rest }: Props = $props();
 </script>
 
-<h4
-  class={mergeClasses(
-    "text-lg font-bold",
-    className,
-  )}
-  {...rest}
->
+<h4 class={mergeClasses("text-lg font-bold", className)} {...rest}>
   {@render children()}
 </h4>

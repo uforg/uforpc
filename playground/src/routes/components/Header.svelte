@@ -8,20 +8,20 @@
 
 <header
   use:dimensionschangeAction
-  ondimensionschange={(e) => uiStore.header = e.detail}
+  ondimensionschange={(e) => (uiStore.header = e.detail)}
   class={[
-    "w-full p-4 flex justify-between items-center space-x-2 h-[72px] sticky top-0 z-30",
+    "sticky top-0 z-30 flex h-[72px] w-full items-center justify-between space-x-2 p-4",
     "bg-base-100/90 backdrop-blur-sm",
     {
       "shadow-xs": uiStore.contentWrapper.scroll.isTopScrolled,
     },
   ]}
 >
-  <div class="flex justify-start items-center space-x-2">
+  <div class="flex items-center justify-start space-x-2">
     <HeaderSearch />
     <HeaderSettings />
   </div>
-  <div class="flex justify-end items-center space-x-2">
+  <div class="flex items-center justify-end space-x-2">
     <a
       href="https://github.com/uforg/uforpc"
       target="_blank"
@@ -34,11 +34,7 @@
         src="https://img.shields.io/github/stars/uforg/uforpc?style=plastic&label=%20"
       />
     </a>
-    <a
-      href="https://uforpc.uforg.dev"
-      target="_blank"
-      class="btn btn-ghost"
-    >
+    <a href="https://uforpc.uforg.dev" target="_blank" class="btn btn-ghost">
       <BookOpenText class="size-4" /> Docs
     </a>
     <HeaderThemeSelect />

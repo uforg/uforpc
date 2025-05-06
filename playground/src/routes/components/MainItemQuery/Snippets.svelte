@@ -24,7 +24,7 @@
     const windowHeight = globalThis.innerHeight;
     const headerHeight = uiStore.header.size.clientHeight;
 
-    const maxHeight = windowHeight - headerHeight - (2 * heightMargin);
+    const maxHeight = windowHeight - headerHeight - 2 * heightMargin;
     return maxHeight;
   });
 
@@ -82,9 +82,9 @@
   >
     <button
       class={[
-        "btn rounded-box w-full flex items-center group border-base-content/20",
+        "btn rounded-box group border-base-content/20 flex w-full items-center",
         {
-          "px-4 justify-start rounded-b-none": isOpen,
+          "justify-start rounded-b-none px-4": isOpen,
           "px-3": !isOpen,
         },
       ]}
@@ -97,9 +97,9 @@
       >
         <Code class="size-4 group-hover:hidden" />
         {#if isOpen}
-          <ChevronRight class="size-4 hidden group-hover:block" />
+          <ChevronRight class="hidden size-4 group-hover:block" />
         {:else}
-          <ChevronLeft class="size-4 hidden group-hover:block" />
+          <ChevronLeft class="hidden size-4 group-hover:block" />
         {/if}
       </span>
 
@@ -112,7 +112,7 @@
   {#if isOpen}
     <div
       class={[
-        "p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20",
+        "rounded-box border-base-content/20 rounded-t-none border border-t-0 p-4",
         "overflow-x-auto overflow-y-auto",
       ]}
       in:fade={{ duration: 100 }}

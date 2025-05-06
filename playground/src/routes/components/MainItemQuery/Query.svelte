@@ -30,7 +30,7 @@
     <div class="flex-grow">
       <button
         class={[
-          "btn justify-start border-base-content/20 rounded-box w-full",
+          "btn border-base-content/20 rounded-box w-full justify-start",
           "group/btn",
           {
             "rounded-b-none": isOpen,
@@ -38,27 +38,25 @@
         ]}
         onclick={toggleIsOpen}
       >
-        <Zap class="size-4 block group-hover/btn:hidden" />
+        <Zap class="block size-4 group-hover/btn:hidden" />
         {#if isOpen}
-          <ChevronDown class="size-4 hidden group-hover/btn:block" />
+          <ChevronDown class="hidden size-4 group-hover/btn:block" />
         {/if}
         {#if !isOpen}
-          <ChevronRight class="size-4 hidden group-hover/btn:block" />
+          <ChevronRight class="hidden size-4 group-hover/btn:block" />
         {/if}
         <span class="ml-2">Try it out</span>
       </button>
       {#if isOpen}
         <div
-          class="p-4 rounded-box rounded-t-none border border-t-0 border-base-content/20 space-y-2 fieldset"
+          class="rounded-box border-base-content/20 fieldset space-y-2 rounded-t-none border border-t-0 p-4"
           transition:slide={{ duration: 100 }}
         >
           <H2>Input</H2>
 
           <div role="alert" class="alert alert-soft alert-info w-fit">
             <Info class="size-4" />
-            <span>
-              All validations are performed on the server side
-            </span>
+            <span> All validations are performed on the server side </span>
           </div>
 
           <Field fields={proc.input} path="root" bind:value />

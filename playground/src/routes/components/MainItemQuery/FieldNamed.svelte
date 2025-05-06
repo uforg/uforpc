@@ -13,11 +13,7 @@
     value: any;
   }
 
-  let {
-    field,
-    path,
-    value: globalValue = $bindable(),
-  }: Props = $props();
+  let { field, path, value: globalValue = $bindable() }: Props = $props();
 
   let value: any = $state(null);
 
@@ -75,18 +71,18 @@
   let label = $derived(prettyLabel(path));
 </script>
 
-<label class="block space-y-1 w-full group/field">
+<label class="group/field block w-full space-y-1">
   <span class="block font-semibold">
     <Label optional={field.optional} {label} />
   </span>
 
   {#if inputType !== "checkbox"}
-    <div class="flex justify-start items-center">
+    <div class="flex items-center justify-start">
       <input
         type={inputType}
         step={inputStep}
         bind:value
-        class="input flex-grow mr-1 group-hover/field:border-base-content/50"
+        class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
         placeholder={`Enter ${label} here...`}
       />
 
@@ -94,10 +90,7 @@
         content={`Clear and reset ${label} to its default value`}
         placement="left"
       >
-        <button
-          class="w-8 btn btn-ghost btn-square"
-          onclick={clearValue}
-        >
+        <button class="btn btn-ghost btn-square w-8" onclick={clearValue}>
           <BrushCleaning class="size-4" />
         </button>
       </Tooltip>
@@ -106,10 +99,7 @@
         content={`Delete ${label} from the JSON object`}
         placement="left"
       >
-        <button
-          class="w-8 btn btn-ghost btn-square"
-          onclick={deleteValue}
-        >
+        <button class="btn btn-ghost btn-square w-8" onclick={deleteValue}>
           <Trash class="size-4" />
         </button>
       </Tooltip>
@@ -117,7 +107,7 @@
   {/if}
 
   {#if inputType === "checkbox"}
-    <div class="flex justify-start items-center space-x-2">
+    <div class="flex items-center justify-start space-x-2">
       <input
         type="checkbox"
         bind:checked={value as boolean}
@@ -128,10 +118,7 @@
         content={`Delete ${label} from the JSON object`}
         placement="right"
       >
-        <button
-          class="btn btn-ghost btn-square"
-          onclick={deleteValue}
-        >
+        <button class="btn btn-ghost btn-square" onclick={deleteValue}>
           <Trash class="size-4" />
         </button>
       </Tooltip>

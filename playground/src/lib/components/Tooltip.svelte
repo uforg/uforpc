@@ -17,11 +17,7 @@
     enabled?: boolean;
   }
 
-  let {
-    children,
-    enabled = true,
-    ...tippyProps
-  }: Props = $props();
+  let { children, enabled = true, ...tippyProps }: Props = $props();
 
   let hiddenEl: HTMLTemplateElement | undefined = $state(undefined);
   let arrow: SVGElement | undefined = $state(undefined);
@@ -58,11 +54,7 @@
 {/if}
 
 <template>
-  <svg
-    width="16"
-    height="6"
-    bind:this={arrow}
-  >
+  <svg width="16" height="6" bind:this={arrow}>
     <path
       class="svg-arrow-border fill-base-content/30"
       d="M0 6s1.796-.013 4.67-3.615C5.851.9 6.93.006 8 0c1.07-.006 2.148.887 3.343 2.385C14.233 6.005 16 6 16 6H0z"
@@ -79,6 +71,6 @@
   @plugin "daisyui";
 
   :global(.tippy-box) {
-    @apply bg-base-200 text-base-content border border-base-content/20;
+    @apply bg-base-200 text-base-content border-base-content/20 border;
   }
 </style>

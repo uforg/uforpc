@@ -22,16 +22,16 @@
 
 <div
   use:dimensionschangeAction
-  ondimensionschange={(e) => uiStore.app = e.detail}
-  class="w-[100dvw] h-[100dvh] flex justify-start"
+  ondimensionschange={(e) => (uiStore.app = e.detail)}
+  class="flex h-[100dvh] w-[100dvw] justify-start"
 >
   <Aside />
   <div
     use:activesectionAction
     use:dimensionschangeAction
     onactivesection={(e) => (uiStore.activeSection = e.detail)}
-    ondimensionschange={(e) => uiStore.contentWrapper = e.detail}
-    class="flex-grow h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]"
+    ondimensionschange={(e) => (uiStore.contentWrapper = e.detail)}
+    class="h-[100dvh] flex-grow scroll-p-[90px] overflow-x-hidden overflow-y-auto"
   >
     <Header />
     <Main />

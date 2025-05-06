@@ -23,15 +23,15 @@
 
 <aside
   use:dimensionschangeAction
-  ondimensionschange={(e) => uiStore.aside = e.detail}
+  ondimensionschange={(e) => (uiStore.aside = e.detail)}
   class={[
-    "flex-none w-full max-w-[280px] h-[100dvh] overflow-x-hidden overflow-y-auto scroll-p-[90px]",
+    "h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[90px] overflow-x-hidden overflow-y-auto",
   ]}
 >
   <a
     class={[
-      "flex space-x-2 items-center whitespace-nowrap",
-      "h-[72px] w-full sticky top-0 p-4 z-10",
+      "flex items-center space-x-2 whitespace-nowrap",
+      "sticky top-0 z-10 h-[72px] w-full p-4",
       "bg-base-100/90 backdrop-blur-sm",
       {
         "shadow-xs": uiStore.aside.scroll.isTopScrolled,
@@ -40,7 +40,7 @@
     href="https://uforpc.uforg.dev"
     target="_blank"
   >
-    <img src="/assets/logo.png" alt="UFO RPC Logo" class="h-full">
+    <img src="/assets/logo.png" alt="UFO RPC Logo" class="h-full" />
     <h1 class="font-bold">UFO RPC Playground</h1>
   </a>
   <nav class="p-4">
