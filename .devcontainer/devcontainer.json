@@ -19,9 +19,11 @@
         "Chanzhaoyu.svelte-5-snippets",
         "esbenp.prettier-vscode",
         "vitest.explorer",
-        "biomejs.biome"
+        "biomejs.biome",
+        "zoma.vscode-auto-open-workspace"
       ],
       "settings": {
+        "autoOpenWorkspace.enableAutoOpenIfSingleWorkspace": true,
         "urpc.enable": false,
         "editor.formatOnSave": true,
         "editor.foldingStrategy": "indentation",
