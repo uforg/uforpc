@@ -1,34 +1,35 @@
-import { assertEquals } from "@std/assert";
+import { expect, describe, it } from "vitest";
 import { extractNodeFromSchema } from "./extractNodeFromSchema.ts";
 
-Deno.test("should return null if node is not found", () => {
-  const schema = `
+describe("extractNodeFromSchema", () => {
+  it("should return null if node is not found", () => {
+    const schema = `
     type User {
       name: string
     }
   `;
 
-  const result = extractNodeFromSchema(schema, "type", "NonExistent");
-  assertEquals(result, null);
-});
+    const result = extractNodeFromSchema(schema, "type", "NonExistent");
+    expect(result).toBe(null);
+  });
 
-Deno.test("should extract a simple type node", () => {
-  const schema = `
+  it("should extract a simple type node", () => {
+    const schema = `
     type User {
       name: string
     }
   `;
 
-  const expected = `    type User {
+    const expected = `    type User {
       name: string
     }`;
 
-  const result = extractNodeFromSchema(schema, "type", "User");
-  assertEquals(result, expected);
-});
+    const result = extractNodeFromSchema(schema, "type", "User");
+    expect(result).toBe(expected);
+  });
 
-Deno.test("should extract a rule node with @ prefix", () => {
-  const schema = `
+  it("should extract a rule node with @ prefix", () => {
+    const schema = `
     rule @minLength {
       for: string
       param: int
@@ -36,18 +37,18 @@ Deno.test("should extract a rule node with @ prefix", () => {
     }
   `;
 
-  const expected = `    rule @minLength {
+    const expected = `    rule @minLength {
       for: string
       param: int
       error: "String is too short"
     }`;
 
-  const result = extractNodeFromSchema(schema, "rule", "minLength");
-  assertEquals(result, expected);
-});
+    const result = extractNodeFromSchema(schema, "rule", "minLength");
+    expect(result).toBe(expected);
+  });
 
-Deno.test("should extract a proc node", () => {
-  const schema = `
+  it("should extract a proc node", () => {
+    const schema = `
     proc GetUser {
       input {
         id: string
@@ -58,7 +59,7 @@ Deno.test("should extract a proc node", () => {
     }
   `;
 
-  const expected = `    proc GetUser {
+    const expected = `    proc GetUser {
       input {
         id: string
       }
@@ -67,12 +68,12 @@ Deno.test("should extract a proc node", () => {
       }
     }`;
 
-  const result = extractNodeFromSchema(schema, "proc", "GetUser");
-  assertEquals(result, expected);
-});
+    const result = extractNodeFromSchema(schema, "proc", "GetUser");
+    expect(result).toBe(expected);
+  });
 
-Deno.test("should handle nested braces correctly", () => {
-  const schema = `
+  it("should handle nested braces correctly", () => {
+    const schema = `
     type ComplexType {
       nested: {
         field1: string
@@ -83,7 +84,7 @@ Deno.test("should handle nested braces correctly", () => {
     }
   `;
 
-  const expected = `    type ComplexType {
+    const expected = `    type ComplexType {
       nested: {
         field1: string
         field2: {
@@ -92,12 +93,12 @@ Deno.test("should handle nested braces correctly", () => {
       }
     }`;
 
-  const result = extractNodeFromSchema(schema, "type", "ComplexType");
-  assertEquals(result, expected);
-});
+    const result = extractNodeFromSchema(schema, "type", "ComplexType");
+    expect(result).toBe(expected);
+  });
 
-Deno.test("should not be confused by similar node names", () => {
-  const schema = `
+  it("should not be confused by similar node names", () => {
+    const schema = `
     type UserBase {
       id: string
     }
@@ -108,17 +109,17 @@ Deno.test("should not be confused by similar node names", () => {
     }
   `;
 
-  const expected = `    type User {
+    const expected = `    type User {
       id: string
       name: string
     }`;
 
-  const result = extractNodeFromSchema(schema, "type", "User");
-  assertEquals(result, expected);
-});
+    const result = extractNodeFromSchema(schema, "type", "User");
+    expect(result).toBe(expected);
+  });
 
-Deno.test("should handle nodes with braces on the same line", () => {
-  const schema = `
+  it("should handle nodes with braces on the same line", () => {
+    const schema = `
     type Empty {}
     
     type User {
@@ -126,14 +127,14 @@ Deno.test("should handle nodes with braces on the same line", () => {
     }
   `;
 
-  const expected = `    type Empty {}`;
+    const expected = `    type Empty {}`;
 
-  const result = extractNodeFromSchema(schema, "type", "Empty");
-  assertEquals(result, expected);
-});
+    const result = extractNodeFromSchema(schema, "type", "Empty");
+    expect(result).toBe(expected);
+  });
 
-Deno.test("should handle complex schema with multiple node types", () => {
-  const schema = `
+  it("should handle complex schema with multiple node types", () => {
+    const schema = `
     version 1
     
     rule @email {
@@ -157,7 +158,7 @@ Deno.test("should handle complex schema with multiple node types", () => {
     }
   `;
 
-  const expected = `    proc VerifyUser {
+    const expected = `    proc VerifyUser {
       input {
         userId: string
       }
@@ -166,6 +167,7 @@ Deno.test("should handle complex schema with multiple node types", () => {
       }
     }`;
 
-  const result = extractNodeFromSchema(schema, "proc", "VerifyUser");
-  assertEquals(result, expected);
+    const result = extractNodeFromSchema(schema, "proc", "VerifyUser");
+    expect(result).toBe(expected);
+  });
 });
