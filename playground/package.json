@@ -9,7 +9,7 @@
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "format": "echo 'TODO: format'",
-    "test": "echo 'TODO: test'",
+    "test": "vitest run",
     "copywasm": "chmod +x copywasm.sh && ./copywasm.sh",
     "genschema": "json2ts ../internal/schema/schema.json > ./src/lib/urpcTypes.ts"
   },
@@ -39,6 +39,7 @@
     "tailwindcss": "4.1.4",
     "tippy.js": "6.3.7",
     "typescript": "5.8.3",
-    "vite": "6.2.5"
+    "vite": "6.2.5",
+    "vitest": "3.1.3"
   }
 }
