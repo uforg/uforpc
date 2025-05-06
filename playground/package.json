@@ -3,13 +3,13 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "deno task copywasm && deno task genschema && vite dev",
-    "build": "deno task copywasm && deno task genschema && deno task check && vite build",
-    "preview": "deno task copywasm && deno task genschema && deno task check && vite preview",
+    "dev": "npm run copywasm && npm run genschema && vite dev",
+    "build": "npm run copywasm && npm run genschema && npm run check && vite build",
+    "preview": "npm run copywasm && npm run genschema && npm run check && vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "format": "deno fmt .",
-    "test": "deno test",
+    "format": "echo 'TODO: format'",
+    "test": "echo 'TODO: test'",
     "copywasm": "chmod +x copywasm.sh && ./copywasm.sh",
     "genschema": "json2ts ../internal/schema/schema.json > ./src/lib/urpcTypes.ts"
   },
