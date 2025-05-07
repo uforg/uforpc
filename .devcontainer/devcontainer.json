@@ -6,6 +6,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "zoma.vscode-auto-open-workspace",
         "uforg.urpc",
         "golang.go",
         "mhutchie.git-graph",
@@ -19,8 +20,7 @@
         "Chanzhaoyu.svelte-5-snippets",
         "esbenp.prettier-vscode",
         "vitest.explorer",
-        "biomejs.biome",
-        "zoma.vscode-auto-open-workspace"
+        "biomejs.biome"
       ],
       "settings": {
         "autoOpenWorkspace.enableAutoOpenIfSingleWorkspace": true,

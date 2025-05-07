@@ -76,9 +76,8 @@ RUN rm -rf /app/temp && \
 ##############
 
 # Add the startup script on every bash session
-COPY scripts/startup.sh /usr/local/bin/startup.sh
-RUN echo "\n\n" >> /root/.bashrc && \
-  cat /usr/local/bin/startup.sh >> /root/.bashrc
+RUN rm -rf /root/.bashrc
+COPY .devcontainer/.bashrc /root/.bashrc
 
 # Command just to keep the container running
 CMD ["sleep", "infinity"]
