@@ -5,8 +5,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/uforg/uforpc/internal/urpc/ast"
-	"github.com/uforg/uforpc/internal/util/strutil"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 // semanalyzer is the semantic alyzer phase for the URPC schema analyzer.

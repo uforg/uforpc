@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/uforg/uforpc/internal/urpc/ast"
-	"github.com/uforg/uforpc/internal/util/debugutil"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/util/debugutil"
 )
 
 ///////////////////////////

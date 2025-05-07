@@ -3,9 +3,9 @@ package formatter
 import (
 	"fmt"
 
-	"github.com/uforg/uforpc/internal/genkit"
-	"github.com/uforg/uforpc/internal/urpc/ast"
-	"github.com/uforg/uforpc/internal/util/strutil"
+	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 type ruleFormatter struct {

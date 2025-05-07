@@ -4,8 +4,8 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/uforg/uforpc/internal/schema"
-	"github.com/uforg/uforpc/internal/util/strutil"
+	"github.com/uforg/uforpc/urpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 //go:embed pieces/optional.go

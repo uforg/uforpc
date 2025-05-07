@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/uforg/uforpc/internal/urpc/analyzer"
-	"github.com/uforg/uforpc/internal/urpc/docstore"
+	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/docstore"
 )
 
 type LSP struct {

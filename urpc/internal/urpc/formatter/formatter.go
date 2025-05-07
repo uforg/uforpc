@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/internal/genkit"
-	"github.com/uforg/uforpc/internal/urpc/ast"
-	"github.com/uforg/uforpc/internal/urpc/parser"
+	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/parser"
 )
 
 // Format formats URPC code according to the spec, using 2 spaces for indentation.

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/uforg/uforpc/internal/urpc/ast"
-	"github.com/uforg/uforpc/internal/urpc/parser"
-	"github.com/uforg/uforpc/internal/util/filepathutil"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/parser"
+	"github.com/uforg/uforpc/urpc/internal/util/filepathutil"
 )
 
 // resolver is in charge of recursively resolve all imports from a given

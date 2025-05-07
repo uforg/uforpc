@@ -3,9 +3,9 @@ package golang
 import (
 	"fmt"
 
-	"github.com/uforg/uforpc/internal/genkit"
-	"github.com/uforg/uforpc/internal/schema"
-	"github.com/uforg/uforpc/internal/util/strutil"
+	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/uforpc/urpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {

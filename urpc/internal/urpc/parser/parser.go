@@ -2,8 +2,8 @@ package parser
 
 import (
 	"github.com/alecthomas/participle/v2"
-	"github.com/uforg/uforpc/internal/urpc/ast"
-	"github.com/uforg/uforpc/internal/urpc/lexer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/lexer"
 )
 
 // Error is an alias for participle.Error

@@ -3,8 +3,8 @@ package lsp
 import (
 	"time"
 
-	"github.com/uforg/uforpc/internal/urpc/analyzer"
-	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 )
 
 // DiagnosticSeverity defines the severity level of a diagnostic.

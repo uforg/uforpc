@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/uforg/uforpc/internal/urpc/formatter"
+	"github.com/uforg/uforpc/urpc/internal/urpc/formatter"
 )
 
 type cmdFmtArgs struct {

@@ -5,13 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/uforg/uforpc/internal/codegen/golang"
-	"github.com/uforg/uforpc/internal/codegen/typescript"
-	"github.com/uforg/uforpc/internal/schema"
-	"github.com/uforg/uforpc/internal/transpile"
-	"github.com/uforg/uforpc/internal/urpc/analyzer"
-	"github.com/uforg/uforpc/internal/urpc/docstore"
-	"github.com/uforg/uforpc/internal/util/filepathutil"
+	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
+	"github.com/uforg/uforpc/urpc/internal/codegen/typescript"
+	"github.com/uforg/uforpc/urpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/transpile"
+	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/docstore"
+	"github.com/uforg/uforpc/urpc/internal/util/filepathutil"
 )
 
 // Run runs the code generator and returns an error if one occurred.

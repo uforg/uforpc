@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/internal/genkit"
-	"github.com/uforg/uforpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/uforpc/urpc/internal/schema"
 	"golang.org/x/tools/imports"
 )
 

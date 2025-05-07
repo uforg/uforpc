@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/uforg/uforpc/internal/urpc/analyzer"
-	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 )
 
 func TestDiagnostics(t *testing.T) {

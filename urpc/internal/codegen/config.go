@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
-	"github.com/uforg/uforpc/internal/codegen/golang"
-	"github.com/uforg/uforpc/internal/codegen/typescript"
+	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
+	"github.com/uforg/uforpc/urpc/internal/codegen/typescript"
 )
 
 // Config is the configuration for the code generator.

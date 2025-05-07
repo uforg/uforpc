@@ -3,8 +3,8 @@ package golang
 import (
 	"strings"
 
-	"github.com/uforg/uforpc/internal/genkit"
-	"github.com/uforg/uforpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/uforpc/urpc/internal/schema"
 )
 
 func generateDomainTypes(sch schema.Schema, config Config) (string, error) {

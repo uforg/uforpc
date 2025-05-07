@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/uforg/uforpc/internal/urpc/token"
+	"github.com/uforg/uforpc/urpc/internal/urpc/token"
 )
 
 type Lexer struct {

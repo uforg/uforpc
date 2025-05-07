@@ -3,7 +3,7 @@ package ast
 import (
 	"strings"
 
-	"github.com/uforg/uforpc/internal/util/strutil"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 // This AST is used for parsing the URPC schema and it uses the

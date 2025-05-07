@@ -1,4 +1,4 @@
-module github.com/uforg/uforpc
+module github.com/uforg/uforpc/urpc
 
 go 1.24.1
 

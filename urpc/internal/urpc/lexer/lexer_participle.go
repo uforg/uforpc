@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	plexer "github.com/alecthomas/participle/v2/lexer"
-	"github.com/uforg/uforpc/internal/urpc/token"
+	"github.com/uforg/uforpc/urpc/internal/urpc/token"
 )
 
 ////////////////////////////////////////////////////////////////////////

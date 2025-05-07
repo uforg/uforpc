@@ -1,8 +1,8 @@
 package golang
 
 import (
-	"github.com/uforg/uforpc/internal/genkit"
-	"github.com/uforg/uforpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/uforpc/urpc/internal/schema"
 )
 
 func generatePackage(_ schema.Schema, config Config) (string, error) {

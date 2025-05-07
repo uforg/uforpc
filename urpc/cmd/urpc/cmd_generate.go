@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/uforg/uforpc/internal/codegen"
+	"github.com/uforg/uforpc/urpc/internal/codegen"
 )
 
 type cmdGenerateArgs struct {

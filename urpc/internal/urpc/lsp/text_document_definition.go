@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/internal/urpc/analyzer"
-	"github.com/uforg/uforpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 )
 
 // RequestMessageTextDocumentDefinition represents a request for the definition of a symbol.
