@@ -5,8 +5,16 @@
       "path": "./"
     },
     {
+      "name": "URPC",
+      "path": "./urpc"
+    },
+    {
       "name": "Playground",
       "path": "./playground"
+    },
+    {
+      "name": "Docs",
+      "path": "./docs"
     }
   ]
 }
