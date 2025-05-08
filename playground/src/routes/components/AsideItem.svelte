@@ -6,7 +6,7 @@
     TriangleAlert,
     Type,
   } from "@lucide/svelte";
-  import { store } from "$lib/store.svelte";
+  import type { store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
