@@ -22,7 +22,8 @@ jobs:
           push: never
           runCmd: >
             /bin/bash -c "
-              go mod download &&
+              task deps &&
               task lint &&
-              task test
+              task test &&
+              task build
             "
