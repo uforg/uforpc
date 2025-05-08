@@ -25,5 +25,8 @@ tasks:
   fmt:
     desc: Run all repository code formatters
     cmds:
+      - prettier . --write # <- Default formatter for the root directory
+      # The following commands are specific to each directory that has its
+      # own formatter
       - cd ./urpc && task fmt
       - cd ./playground && npm run fmt
