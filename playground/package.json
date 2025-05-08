@@ -11,7 +11,7 @@
     "fmt": "prettier . --write",
     "test": "vitest run",
     "copywasm": "chmod +x copywasm.sh && ./copywasm.sh",
-    "genschema": "json2ts ../internal/schema/schema.json > ./src/lib/urpcTypes.ts"
+    "genschema": "json2ts ../urpc/internal/schema/schema.json > ./src/lib/urpcTypes.ts"
   },
   "devDependencies": {
     "@lucide/svelte": "0.507.0",
