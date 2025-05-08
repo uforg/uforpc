@@ -1,0 +1,8 @@
+{
+  "overrides": [
+    {
+      "files": "*.code-workspace",
+      "options": { "parser": "json" }
+    }
+  ]
+}
