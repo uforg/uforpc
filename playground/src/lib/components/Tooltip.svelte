@@ -2,6 +2,7 @@
   import "tippy.js/dist/tippy.css";
   import "tippy.js/dist/svg-arrow.css";
 
+  import type { Snippet } from "svelte";
   import tippy from "tippy.js";
   import type { Props as TippyProps } from "tippy.js";
 
@@ -13,7 +14,7 @@
   >;
 
   export interface Props extends Partial<customTippyProps> {
-    children: any;
+    children: Snippet;
     enabled?: boolean;
   }
 
