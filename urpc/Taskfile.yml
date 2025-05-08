@@ -44,11 +44,14 @@ tasks:
 
   fmt:
     desc: Run code formatter
-    cmd: go fmt ./...
+    cmds:
+      - prettier . --write # Format non-go files
+      - go fmt ./...
 
   fmt-check:
     desc: Run code formatter check
     cmds:
+      - prettier . --check # Check non-go files
       - |
         UNFORMATTED=$(gofmt -l .)
         if [ -n "$UNFORMATTED" ]; then
