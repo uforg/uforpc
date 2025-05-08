@@ -45,3 +45,14 @@ tasks:
   fmt:
     desc: Run code formatter
     cmd: go fmt ./...
+
+  fmt-check:
+    desc: Run code formatter check
+    cmds:
+      - |
+        UNFORMATTED=$(gofmt -l .)
+        if [ -n "$UNFORMATTED" ]; then
+          echo "The following files are not formatted correctly:"
+          echo "$UNFORMATTED"
+          exit 1
+        fi

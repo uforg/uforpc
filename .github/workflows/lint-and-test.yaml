@@ -23,6 +23,7 @@ jobs:
           runCmd: >
             /bin/bash -c "
               task deps &&
+              task fmt-check &&
               task lint &&
               task test &&
               task build
