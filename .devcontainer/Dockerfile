@@ -28,9 +28,11 @@ RUN apt update && \
     apt install -y wget curl zip unzip p7zip-full tzdata git npm && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Node.js using n
+# Install Node.js using n and global node utilities
 RUN npm install -g n@latest && \
-    n 22.15.0
+    n 22.15.0 && \
+    npm install -g prettier@3.5.3 && \
+    npm install -g @biomejs/biome@1.9.4
 
 # Install downloadable binaries
 RUN set -e && \
