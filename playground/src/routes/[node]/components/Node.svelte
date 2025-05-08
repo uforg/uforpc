@@ -1,13 +1,5 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import {
-    ArrowLeftRight,
-    BookOpenText,
-    Hash,
-    Scale,
-    TriangleAlert,
-    Type,
-  } from "@lucide/svelte";
+  import { TriangleAlert } from "@lucide/svelte";
 
   import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
@@ -15,7 +7,6 @@
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import { slugify } from "$lib/helpers/slugify";
   import { store } from "$lib/store.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
 
   import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
@@ -28,14 +19,6 @@
 
   const { node }: Props = $props();
 
-  let humanKind = $derived.by(() => {
-    if (node.kind === "rule") return "validation rule";
-    if (node.kind === "type") return "type";
-    if (node.kind === "proc") return "procedure";
-    if (node.kind === "doc") return "documentation";
-    return "unknown";
-  });
-
   let name = $derived.by(() => {
     if (node.kind === "rule") return node.name;
     if (node.kind === "type") return node.name;
@@ -45,14 +28,6 @@
     }
 
     return "unknown";
-  });
-
-  let id = $derived.by(() => {
-    if (node.kind === "rule") return slugify(`rule-${name}`);
-    if (node.kind === "type") return slugify(`type-${name}`);
-    if (node.kind === "proc") return slugify(`proc-${name}`);
-    if (node.kind === "doc") return slugify(`doc-${name}`);
-    return "#";
   });
 
   let deprecatedMessage = $derived.by(() => {
@@ -88,12 +63,9 @@
     const extracted = extractNodeFromSchema(store.urpcSchema, node.kind, name);
     if (extracted) urpcSchema = extracted;
   });
-
-  // TODO: Add this to layout
-  // document.title = `${name} ${humanKind} - UFO RPC Playground`;
 </script>
 
-<section {id} class="mb-[200px] min-h-[100dvh] space-y-12">
+<section class="mb-[200px] min-h-[100dvh] space-y-12">
   <div class="prose max-w-5xl">
     <h1>{name}</h1>
 
@@ -119,7 +91,7 @@
   {/if}
 
   {#if urpcSchema !== ""}
-    <div class="space-y-2">
+    <div class="space-y-4">
       <H2>URPC Schema</H2>
       <Code lang="urpc" code={urpcSchema} collapsible={false} isOpen />
     </div>

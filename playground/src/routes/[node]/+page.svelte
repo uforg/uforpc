@@ -24,12 +24,45 @@
   });
 
   let nodeExists = $derived(nodeIndex !== -1);
+
+  let node = $derived(store.jsonSchema.nodes[nodeIndex]);
+
+  let name = $derived.by(() => {
+    if (node.kind === "rule") return node.name;
+    if (node.kind === "type") return node.name;
+    if (node.kind === "proc") return node.name;
+    if (node.kind === "doc") {
+      return getMarkdownTitle(node.content);
+    }
+
+    return "unknown";
+  });
+
+  let humanKind = $derived.by(() => {
+    if (node.kind === "rule") return "validation rule";
+    if (node.kind === "type") return "type";
+    if (node.kind === "proc") return "procedure";
+    if (node.kind === "doc") return "documentation";
+    return "unknown";
+  });
+
+  let title = $derived.by(() => {
+    if (!nodeExists) return "UFO RPC Playground";
+
+    return `${name} ${humanKind} - UFO RPC Playground`;
+  });
 </script>
+
+<svelte:head>
+  <title>{title}</title>
+</svelte:head>
 
 {#if !nodeExists}
   <NotFound />
 {/if}
 
 {#if nodeExists}
-  <Node node={store.jsonSchema.nodes[nodeIndex]} />
+  {#key nodeIndex}
+    <Node {node} />
+  {/key}
 {/if}
