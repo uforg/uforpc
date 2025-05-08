@@ -89,13 +89,8 @@
     if (extracted) urpcSchema = extracted;
   });
 
-  // Update url hash and document title when this section is active
-  $effect(() => {
-    if (uiStore.activeSection === id) {
-      goto(`#${id}`, { noScroll: true, keepFocus: true });
-      document.title = `${name} ${humanKind} - UFO RPC Playground`;
-    }
-  });
+  // TODO: Add this to layout
+  // document.title = `${name} ${humanKind} - UFO RPC Playground`;
 </script>
 
 <section

@@ -91,7 +91,6 @@ export type OsTheme = "light" | "dark";
 
 export interface UiStore {
   loaded: boolean;
-  activeSection: string;
   theme: Theme;
   osTheme: OsTheme;
   app: UiStoreDimensions;
@@ -103,7 +102,6 @@ export interface UiStore {
 
 export const uiStore = $state<UiStore>({
   loaded: false,
-  activeSection: "",
   theme: "system",
   osTheme: "dark",
   app: { ...defaultUiStoreDimensions },

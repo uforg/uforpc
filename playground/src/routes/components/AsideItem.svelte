@@ -59,20 +59,13 @@
     return false;
   });
 
-  const navigate = (contentId: string) => {
-    uiStore.activeSection = contentId;
-  };
-
-  let isActive = $derived.by(() => {
-    return uiStore.activeSection === contentId;
-  });
+  let isActive = $state(false);
 </script>
 
 <Tooltip content={title}>
   <a
     {id}
     {href}
-    onclick={() => navigate(contentId)}
     class={[
       "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
       {
