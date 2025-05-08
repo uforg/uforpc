@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { fade } from "svelte/transition";
   import Portal from "svelte-portal";
+  import { fade } from "svelte/transition";
+
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
 

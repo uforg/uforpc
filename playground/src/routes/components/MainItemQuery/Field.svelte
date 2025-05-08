@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { FieldDefinition } from "$lib/urpcTypes";
   import { store } from "$lib/store.svelte";
-  import FieldNamed from "./FieldNamed.svelte";
-  import FieldInline from "./FieldInline.svelte";
+  import type { FieldDefinition } from "$lib/urpcTypes";
+
   import FieldArray from "./FieldArray.svelte";
-  import Label from "./Label.svelte";
+  import FieldInline from "./FieldInline.svelte";
+  import FieldNamed from "./FieldNamed.svelte";
   import Fieldset from "./Fieldset.svelte";
+  import Label from "./Label.svelte";
 
   interface Props {
     fields: FieldDefinition | FieldDefinition[];

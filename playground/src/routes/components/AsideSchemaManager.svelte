@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { Save, ScrollText, WandSparkles, X } from "@lucide/svelte";
+  import { onMount } from "svelte";
   import { toast } from "svelte-sonner";
+
   import { loadJsonSchemaFromUrpcSchemaString, store } from "$lib/store.svelte";
   import { cmdFmt } from "$lib/urpc";
-  import Modal from "$lib/components/Modal.svelte";
+
   import Editor from "$lib/components/Editor.svelte";
+  import Modal from "$lib/components/Modal.svelte";
 
   let isOpen = $state(false);
   const openModal = () => (isOpen = true);

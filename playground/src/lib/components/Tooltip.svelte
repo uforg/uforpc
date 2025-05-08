@@ -1,10 +1,9 @@
 <script lang="ts">
-  import "tippy.js/dist/tippy.css";
-  import "tippy.js/dist/svg-arrow.css";
-
   import type { Snippet } from "svelte";
   import tippy from "tippy.js";
   import type { Props as TippyProps } from "tippy.js";
+  import "tippy.js/dist/svg-arrow.css";
+  import "tippy.js/dist/tippy.css";
 
   // the following props are set by the component and should
   // not be passed in from the parent

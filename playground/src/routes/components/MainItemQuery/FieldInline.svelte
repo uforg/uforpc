@@ -1,10 +1,13 @@
 <script lang="ts">
   import { BrushCleaning, Trash } from "@lucide/svelte";
-  import type { FieldDefinition } from "$lib/urpcTypes";
+
   import { setAtPath } from "$lib/helpers/setAtPath";
+  import type { FieldDefinition } from "$lib/urpcTypes";
+
   import Tooltip from "$lib/components/Tooltip.svelte";
-  import { prettyLabel } from "./prettyLabel";
+
   import Field from "./Field.svelte";
+  import { prettyLabel } from "./prettyLabel";
 
   interface Props {
     fields: FieldDefinition[];

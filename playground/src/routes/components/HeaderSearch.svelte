@@ -8,13 +8,15 @@
     Type,
     X,
   } from "@lucide/svelte";
-  import { miniSearch } from "$lib/store.svelte";
+
   import {
     markSearchHints,
     truncateWithMark,
   } from "$lib/helpers/markSearchHints";
-  import Modal from "$lib/components/Modal.svelte";
+  import { miniSearch } from "$lib/store.svelte";
+
   import H2 from "$lib/components/H2.svelte";
+  import Modal from "$lib/components/Modal.svelte";
 
   const isMac = /mac/.test(navigator.userAgent.toLowerCase());
   const ctrl = isMac ? "⌘" : "CTRL";

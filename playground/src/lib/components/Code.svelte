@@ -1,17 +1,18 @@
 <script lang="ts">
-  import { slide } from "svelte/transition";
-  import { toast } from "svelte-sonner";
   import { ChevronDown, ChevronRight, Copy, ScrollText } from "@lucide/svelte";
+  import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
+  import { toast } from "svelte-sonner";
+  import { slide } from "svelte/trsansition";
+
+  import { mergeClasses } from "$lib/helpers/mergeClasses";
+  import type { ClassValue } from "$lib/helpers/mergeClasses";
   import {
     darkTheme,
     getHighlighter,
     getOrFallbackLanguage,
     lightTheme,
   } from "$lib/shiki";
-  import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { uiStore } from "$lib/uiStore.svelte";
-  import { mergeClasses } from "$lib/helpers/mergeClasses";
-  import type { ClassValue } from "$lib/helpers/mergeClasses";
 
   interface Props {
     code: string;

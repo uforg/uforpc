@@ -1,4 +1,5 @@
-import { expect, describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
+
 import { extractNodeFromSchema } from "./extractNodeFromSchema.ts";
 
 describe("extractNodeFromSchema", () => {

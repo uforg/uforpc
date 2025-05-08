@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+
   import Tooltip from "./Tooltip.svelte";
   import type { Props as TooltipProps } from "./Tooltip.svelte";
 

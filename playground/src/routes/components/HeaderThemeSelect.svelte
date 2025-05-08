@@ -1,9 +1,11 @@
 <script lang="ts">
-  import Menu from "$lib/components/Menu.svelte";
-  import Tooltip from "$lib/components/Tooltip.svelte";
+  import { Moon, Palette, Sun, SunMoon } from "@lucide/svelte";
+
   import { uiStore } from "$lib/uiStore.svelte";
   import type { Theme } from "$lib/uiStore.svelte";
-  import { Moon, Palette, Sun, SunMoon } from "@lucide/svelte";
+
+  import Menu from "$lib/components/Menu.svelte";
+  import Tooltip from "$lib/components/Tooltip.svelte";
 
   const themesArr: Theme[] = ["system", "light", "dark"];
 

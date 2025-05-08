@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
+
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+
   import { activesectionAction } from "./activesectionAction.svelte";
   import Aside from "./components/Aside.svelte";
   import Header from "./components/Header.svelte";

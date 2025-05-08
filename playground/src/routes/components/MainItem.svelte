@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import {
     ArrowLeftRight,
     BookOpenText,
@@ -7,16 +8,18 @@
     TriangleAlert,
     Type,
   } from "@lucide/svelte";
-  import { goto } from "$app/navigation";
-  import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
+
   import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
+  import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
+  import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import { slugify } from "$lib/helpers/slugify";
   import { store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
-  import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
-  import H2 from "$lib/components/H2.svelte";
+
   import Code from "$lib/components/Code.svelte";
+  import H2 from "$lib/components/H2.svelte";
+
   import MainItemQuery from "./MainItemQuery/Query.svelte";
 
   interface Props {

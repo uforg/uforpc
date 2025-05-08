@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import loader from "@monaco-editor/loader";
-  import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
   import { shikiToMonaco } from "@shikijs/monaco";
-  import { mergeClasses, type ClassValue } from "$lib/helpers/mergeClasses";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
+  import { onMount } from "svelte";
+
+  import { type ClassValue, mergeClasses } from "$lib/helpers/mergeClasses";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
+  import { uiStore } from "$lib/uiStore.svelte";
 
   interface Props {
     value: string;

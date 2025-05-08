@@ -1,7 +1,9 @@
 <script lang="ts">
   import { ScrollText } from "@lucide/svelte";
+
   import { store } from "$lib/store.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+
   import MainItem from "./MainItem.svelte";
 
   let isEmpty = $derived.by(() => {

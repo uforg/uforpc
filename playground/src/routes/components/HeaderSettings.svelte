@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Link, Plus, RefreshCcw, Settings, Trash, X } from "@lucide/svelte";
+
   import { loadDefaultConfig, store } from "$lib/store.svelte";
+
   import Modal from "$lib/components/Modal.svelte";
 
   const isMac = /mac/.test(navigator.userAgent.toLowerCase());

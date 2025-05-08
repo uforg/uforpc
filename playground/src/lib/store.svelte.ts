@@ -1,10 +1,11 @@
 import MiniSearch from "minisearch";
+
 import { getCurrentHost } from "./helpers/getCurrentHost.ts";
+import { getMarkdownTitle } from "./helpers/getMarkdownTitle.ts";
+import { markdownToText } from "./helpers/markdownToText.ts";
+import { slugify } from "./helpers/slugify.ts";
 import { transpileUrpcToJson } from "./urpc.ts";
 import type { Schema } from "./urpcTypes.ts";
-import { getMarkdownTitle } from "./helpers/getMarkdownTitle.ts";
-import { slugify } from "./helpers/slugify.ts";
-import { markdownToText } from "./helpers/markdownToText.ts";
 
 type SearchItem = {
   id: number;

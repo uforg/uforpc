@@ -1,6 +1,7 @@
 <script lang="ts">
-  import Code from "$lib/components/Code.svelte";
   import * as curlconverter from "curlconverter";
+
+  import Code from "$lib/components/Code.svelte";
 
   interface Props {
     curl: string;

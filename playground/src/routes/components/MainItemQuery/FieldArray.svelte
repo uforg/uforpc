@@ -6,14 +6,17 @@
     Plus,
     Trash,
   } from "@lucide/svelte";
+
   import { setAtPath } from "$lib/helpers/setAtPath";
   import type { FieldDefinition } from "$lib/urpcTypes";
+
   import Tooltip from "$lib/components/Tooltip.svelte";
-  import { prettyLabel } from "./prettyLabel";
-  import Label from "./Label.svelte";
-  import FieldNamed from "./FieldNamed.svelte";
+
   import FieldInline from "./FieldInline.svelte";
+  import FieldNamed from "./FieldNamed.svelte";
   import Fieldset from "./Fieldset.svelte";
+  import Label from "./Label.svelte";
+  import { prettyLabel } from "./prettyLabel";
 
   interface Props {
     field: FieldDefinition;

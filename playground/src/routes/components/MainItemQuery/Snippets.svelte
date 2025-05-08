@@ -1,9 +1,12 @@
 <script lang="ts">
-  import { fade, slide } from "svelte/transition";
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
-  import { uiStore, type UiStoreDimensions } from "$lib/uiStore.svelte";
+  import { fade, slide } from "svelte/transition";
+
   import { store } from "$lib/store.svelte";
+  import { uiStore, type UiStoreDimensions } from "$lib/uiStore.svelte";
+
   import Tooltip from "$lib/components/Tooltip.svelte";
+
   import SnippetsCode from "./SnippetsCode.svelte";
 
   interface Props {

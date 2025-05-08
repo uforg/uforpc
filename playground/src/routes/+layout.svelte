@@ -1,17 +1,20 @@
 <script lang="ts">
-  let { children } = $props();
-  import "../app.css";
-  import { onMount } from "svelte";
-  import { fade } from "svelte/transition";
   import { Loader } from "@lucide/svelte";
+  import { onMount } from "svelte";
   import { toast, Toaster } from "svelte-sonner";
-  import { initWasm, waitUntilInitialized } from "$lib/urpc";
+  import { fade } from "svelte/transition";
+
   import { initializeShiki } from "$lib/shiki";
-  import { loadUiStore } from "$lib/uiStore.svelte";
   import {
     loadJsonSchemaFromUrpcSchemaUrl,
     loadStore,
   } from "$lib/store.svelte";
+  import { loadUiStore } from "$lib/uiStore.svelte";
+  import { initWasm, waitUntilInitialized } from "$lib/urpc";
+
+  import "../app.css";
+
+  let { children } = $props();
 
   // Initialize the stores
   onMount(() => {

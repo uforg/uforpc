@@ -1,9 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+
   import { store } from "$lib/store.svelte";
-  import AsideSchemaManager from "./AsideSchemaManager.svelte";
+  import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+
   import AsideItem from "./AsideItem.svelte";
+  import AsideSchemaManager from "./AsideSchemaManager.svelte";
 
   // if has hash anchor navigate to it
   onMount(async () => {

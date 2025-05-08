@@ -1,8 +1,11 @@
 <script lang="ts">
   import { CircleHelp, SquareAsterisk } from "@lucide/svelte";
+
   import type { ClassValue } from "$lib/helpers/mergeClasses";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
+
   import Tooltip from "$lib/components/Tooltip.svelte";
+
   import { prettyLabel } from "./prettyLabel";
 
   interface Props {

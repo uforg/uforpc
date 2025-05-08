@@ -1,6 +1,8 @@
 <script lang="ts">
   import { BookOpenText, Github } from "@lucide/svelte";
+
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+
   import HeaderSearch from "./HeaderSearch.svelte";
   import HeaderSettings from "./HeaderSettings.svelte";
   import HeaderThemeSelect from "./HeaderThemeSelect.svelte";
