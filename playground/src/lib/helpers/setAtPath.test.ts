@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
-
 import { expect, describe, it } from "vitest";
 import { setAtPath } from "./setAtPath.ts";
 

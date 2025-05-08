@@ -1,5 +1,3 @@
-// deno-lint-ignore-file require-await
-
 import { createHighlighter } from "shiki";
 import type { BundledLanguage } from "shiki";
 import type { BundledTheme, Highlighter } from "shiki";

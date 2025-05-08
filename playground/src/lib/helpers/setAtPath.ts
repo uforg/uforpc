@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
-
 /**
  * Updates a JSON object at the specified dot notation path, returning a new object without mutating the original.
  * Properties with null or undefined values will be removed from the object.
