@@ -2,7 +2,7 @@
   import { ChevronDown, ChevronRight, Copy, ScrollText } from "@lucide/svelte";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { toast } from "svelte-sonner";
-  import { slide } from "svelte/trsansition";
+  import { slide } from "svelte/transition";
 
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
