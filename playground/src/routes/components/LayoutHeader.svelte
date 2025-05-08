@@ -3,9 +3,9 @@
 
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
 
-  import HeaderSearch from "./HeaderSearch.svelte";
-  import HeaderSettings from "./HeaderSettings.svelte";
-  import HeaderThemeSelect from "./HeaderThemeSelect.svelte";
+  import LayoutHeaderSearch from "./LayoutHeaderSearch.svelte";
+  import LayoutHeaderSettings from "./LayoutHeaderSettings.svelte";
+  import LayoutHeaderThemeSelect from "./LayoutHeaderThemeSelect.svelte";
 </script>
 
 <header
@@ -20,8 +20,8 @@
   ]}
 >
   <div class="flex items-center justify-start space-x-2">
-    <HeaderSearch />
-    <HeaderSettings />
+    <LayoutHeaderSearch />
+    <LayoutHeaderSettings />
   </div>
   <div class="flex items-center justify-end space-x-2">
     <a
@@ -39,6 +39,6 @@
     <a href="https://uforpc.uforg.dev" target="_blank" class="btn btn-ghost">
       <BookOpenText class="size-4" /> Docs
     </a>
-    <HeaderThemeSelect />
+    <LayoutHeaderThemeSelect />
   </div>
 </header>

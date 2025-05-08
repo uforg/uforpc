@@ -4,8 +4,8 @@
   import { store } from "$lib/store.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
 
-  import AsideItem from "./AsideItem.svelte";
-  import AsideSchemaManager from "./AsideSchemaManager.svelte";
+  import LayoutAsideItem from "./LayoutAsideItem.svelte";
+  import LayoutAsideSchemaManager from "./LayoutAsideSchemaManager.svelte";
 
   // if has hash anchor navigate to it
   onMount(async () => {
@@ -46,9 +46,9 @@
     <h1 class="font-bold">UFO RPC Playground</h1>
   </a>
   <nav class="p-4">
-    <AsideSchemaManager />
+    <LayoutAsideSchemaManager />
     {#each store.jsonSchema.nodes as node}
-      <AsideItem {node} />
+      <LayoutAsideItem {node} />
     {/each}
   </nav>
 </aside>

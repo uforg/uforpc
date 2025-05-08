@@ -9,10 +9,16 @@
     loadJsonSchemaFromUrpcSchemaUrl,
     loadStore,
   } from "$lib/store.svelte";
-  import { loadUiStore } from "$lib/uiStore.svelte";
+  import {
+    dimensionschangeAction,
+    loadUiStore,
+    uiStore,
+  } from "$lib/uiStore.svelte";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
 
   import "../app.css";
+  import LayoutAside from "./components/LayoutAside.svelte";
+  import LayoutHeader from "./components/LayoutHeader.svelte";
 
   let { children } = $props();
 
@@ -79,8 +85,27 @@
 {/if}
 
 {#if initialized}
-  <div transition:fade={{ duration: 200 }}>
-    {@render children()}
+  <div
+    transition:fade={{ duration: 200 }}
+    use:dimensionschangeAction
+    ondimensionschange={(e) => (uiStore.app = e.detail)}
+    class="flex h-[100dvh] w-[100dvw] justify-start"
+  >
+    <LayoutAside />
+    <div
+      use:dimensionschangeAction
+      ondimensionschange={(e) => (uiStore.contentWrapper = e.detail)}
+      class="h-[100dvh] flex-grow scroll-p-[90px] overflow-x-hidden overflow-y-auto"
+    >
+      <LayoutHeader />
+      <main
+        class="w-full p-4"
+        use:dimensionschangeAction
+        ondimensionschange={(e) => (uiStore.main = e.detail)}
+      >
+        {@render children()}
+      </main>
+    </div>
   </div>
 {/if}
 
