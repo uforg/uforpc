@@ -1,29 +1,26 @@
 # https://taskfile.dev
 
+# To create a complete build including the embedded playground, execute
+# the build command from the repository root directory which will call
+# all the project builds in the required order.
+#
+# Use the following commands when developing the URPC or WASM binary.
+
 version: "3"
 
 tasks:
   install:
-    desc: Install the urpc binary in the local PATH
+    desc: Build and install the urpc binary in the local PATH for testing
     cmd: go install ./cmd/urpc/.
 
-  build:
-    desc: Build and install the urpc binary in the PATH
+  build:wasm:
+    desc: Build the WebAssembly binary for the Playground
     cmds:
-      # Build wasm version (required by the urpc non-wasm binary)
       - GOOS=js GOARCH=wasm go build -o ./dist/urpc.wasm ./cmd/urpcwasm/.
       - cp "/usr/local/go/lib/wasm/wasm_exec.js" ./dist/wasm_exec.js
 
-      # Build playground
-      - cd ./playground && npm run build && cd ..
-
-      # Build and install as local binary
-      - go install ./cmd/urpc/.
-
-  build:all:
-    desc: Same as build, but builds for all platforms in dist/
-    deps:
-      - build
+  build:urpc:
+    desc: Build the urpc binary
     cmds:
       # LINUX builds
       - GOOS=linux GOARCH=amd64 go build -o ./dist/urpc-linux-amd64 ./cmd/urpc/.
@@ -38,17 +35,13 @@ tasks:
       - GOOS=darwin GOARCH=arm64 go build -o ./dist/urpc-darwin-arm64 ./cmd/urpc/.
 
   test:
-    desc: Test all code on this repo
-    cmds:
-      - go test ./...
-      - cd ./playground && npm install && npm run test
+    desc: Run tests
+    cmd: go test ./...
 
   lint:
-    desc: Lint all code on this repo
+    desc: Run linter
     cmd: golangci-lint run ./...
 
   fmt:
-    desc: Format all code on this repo
-    cmds:
-      - go fmt ./...
-      - npm run format
+    desc: Run code formatter
+    cmd: go fmt ./...

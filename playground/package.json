@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "npm run copywasm && npm run genschema && vite dev",
-    "build": "npm run copywasm && npm run genschema && npm run check && vite build",
-    "preview": "npm run copywasm && npm run genschema && npm run check && vite preview",
+    "build": "npm run copywasm && npm run genschema && npm run lint && vite build",
+    "preview": "npm run copywasm && npm run genschema && npm run lint && vite preview",
     "prepare": "svelte-kit sync || echo ''",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "format": "prettier . --write",
+    "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "fmt": "prettier . --write",
     "test": "vitest run",
     "copywasm": "chmod +x copywasm.sh && ./copywasm.sh",
     "genschema": "json2ts ../internal/schema/schema.json > ./src/lib/urpcTypes.ts"
