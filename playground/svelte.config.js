@@ -16,6 +16,10 @@ const config = {
     paths: {
       relative: true,
     },
+
+    router: {
+      type: "hash",
+    },
   },
 };
 
