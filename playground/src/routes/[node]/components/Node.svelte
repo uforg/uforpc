@@ -93,57 +93,35 @@
   // document.title = `${name} ${humanKind} - UFO RPC Playground`;
 </script>
 
-<section {id} class="min-h-[100dvh]">
-  <a href={`#${id}`} class="block">
-    <H2 class="group flex items-center justify-start text-4xl font-extrabold">
-      {#if node.kind === "doc"}
-        <BookOpenText class="mr-4 size-8 flex-none group-hover:hidden" />
-      {/if}
-      {#if node.kind === "rule"}
-        <Scale class="mr-4 size-8 flex-none group-hover:hidden" />
-      {/if}
-      {#if node.kind === "type"}
-        <Type class="mr-4 size-8 flex-none group-hover:hidden" />
-      {/if}
-      {#if node.kind === "proc"}
-        <ArrowLeftRight class="mr-4 size-8 flex-none group-hover:hidden" />
-      {/if}
+<section {id} class="mb-[200px] min-h-[100dvh] space-y-12">
+  <div class="prose max-w-5xl">
+    <h1>{name}</h1>
 
-      <Hash class="mr-4 hidden size-8 flex-none group-hover:block" />
-
-      {name}
-    </H2>
-  </a>
-
-  <div class="mt-1 pl-12">
     {#if deprecatedMessage !== ""}
-      <div role="alert" class="alert alert-soft alert-error mt-4 w-fit">
+      <div
+        role="alert"
+        class="alert alert-soft alert-error w-fit gap-2 font-bold italic"
+      >
         <TriangleAlert class="size-4" />
         <span>Deprecated: {deprecatedMessage}</span>
       </div>
     {/if}
 
     {#if documentation !== ""}
-      <div class="prose prose-headings:mt-0 mt-6 max-w-none">
-        {@html documentation}
-      </div>
-    {/if}
-
-    {#if urpcSchema !== ""}
-      <Code
-        class="mt-4"
-        lang="urpc"
-        code={urpcSchema}
-        collapsible
-        title={`Schema for ${name}`}
-        isOpen={node.kind === "rule" || node.kind === "type"}
-      />
-    {/if}
-
-    {#if node.kind === "proc"}
-      <div class="mt-4">
-        <NodeQuery proc={node} />
-      </div>
+      {@html documentation}
     {/if}
   </div>
+
+  {#if node.kind === "proc"}
+    <div class="mt-4">
+      <NodeQuery proc={node} />
+    </div>
+  {/if}
+
+  {#if urpcSchema !== ""}
+    <div class="space-y-2">
+      <H2>URPC Schema</H2>
+      <Code lang="urpc" code={urpcSchema} collapsible={false} isOpen />
+    </div>
+  {/if}
 </section>
