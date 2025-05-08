@@ -72,7 +72,7 @@
           node.kind === "type" ||
           node.kind === "proc") &&
         typeof node.doc === "string" &&
-        node.doc != ""
+        node.doc !== ""
       ) {
         documentation = await markdownToHtml(deleteMarkdownHeadings(node.doc));
       }

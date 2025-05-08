@@ -12,7 +12,7 @@
 
     if (window.location.hash) {
       const element = document.getElementById(
-        "navlink-" + window.location.hash.slice(1),
+        `navlink-${window.location.hash.slice(1)}`,
       );
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });

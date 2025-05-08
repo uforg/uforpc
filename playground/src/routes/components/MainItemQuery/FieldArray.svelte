@@ -18,6 +18,7 @@
   interface Props {
     field: FieldDefinition;
     path: string;
+    // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
     value: any;
   }
 

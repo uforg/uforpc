@@ -26,6 +26,7 @@ function loadScript(src: string): Promise<void> {
  * @returns True if the wasm has been initialized, false otherwise
  */
 function isInitialized(): boolean {
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global value
   return (window as any).__urpcWasmReady;
 }
 
@@ -59,6 +60,7 @@ async function initWasm(): Promise<void> {
   if (isInitialized()) return;
   await loadScript(execURL);
 
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
   const go = new (window as any).Go();
   const { instance } = await WebAssembly.instantiateStreaming(
     await fetch(wasmURL),
@@ -66,6 +68,7 @@ async function initWasm(): Promise<void> {
   );
   go.run(instance);
 
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global value
   (window as any).__urpcWasmReady = true;
 }
 
@@ -77,6 +80,7 @@ async function initWasm(): Promise<void> {
  */
 async function cmdFmt(input: string): Promise<string> {
   await waitUntilInitialized();
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
   return (window as any).cmdFmt(input);
 }
 
@@ -90,6 +94,7 @@ async function cmdFmt(input: string): Promise<string> {
  */
 async function cmdTranspile(sourceExt: string, input: string): Promise<string> {
   await waitUntilInitialized();
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
   return (window as any).cmdTranspile(sourceExt, input);
 }
 

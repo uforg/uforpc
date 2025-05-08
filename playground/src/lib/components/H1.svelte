@@ -6,6 +6,7 @@
   interface Props {
     children: Snippet;
     class?: ClassValue;
+    // biome-ignore lint/suspicious/noExplicitAny: can be any other attribute
     rest?: any;
   }
 

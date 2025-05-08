@@ -12,12 +12,14 @@
 export function setAtPath<T extends object>(
   originalJson: T,
   path: string,
+  // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
   value: any,
 ): T {
   // Split the path into individual keys
   const keys = path.split(".");
 
   // Recursive function to update nested properties
+  // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
   const updateNestedProperty = (obj: any, keyIndex: number): any => {
     // Base case: we've processed all keys, return the new value
     if (keyIndex === keys.length) {

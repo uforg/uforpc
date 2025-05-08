@@ -10,18 +10,20 @@
   interface Props {
     field: FieldDefinition;
     path: string;
+    // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
     value: any;
   }
 
   let { field, path, value: globalValue = $bindable() }: Props = $props();
 
+  // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
   let value: any = $state(null);
 
   // Listen to changes and update the global value
   // Use untrack to avoid infinite loop
   // https://svelte.dev/docs/svelte/svelte#untrack
   $effect(() => {
-    let val = value;
+    const val = value;
     untrack(() => {
       globalValue = setAtPath(globalValue, path, val);
     });

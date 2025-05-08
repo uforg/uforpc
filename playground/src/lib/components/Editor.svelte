@@ -6,7 +6,13 @@
   import { uiStore } from "$lib/uiStore.svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
 
-  let { value = $bindable(), ...others }: { [key: string]: any } = $props();
+  interface Props {
+    value: string;
+    // biome-ignore lint/suspicious/noExplicitAny: can be any other attribute
+    others: any;
+  }
+
+  let { value = $bindable(), ...others }: Props = $props();
   let editorContainer: HTMLElement;
   let monaco: typeof Monaco | null = $state(null);
   let editor: Monaco.editor.IStandaloneCodeEditor | null = $state(null);
@@ -27,7 +33,7 @@
     });
 
     editor.onDidChangeModelContent(() => {
-      value = editor?.getValue();
+      value = editor?.getValue() ?? "";
     });
   });
 

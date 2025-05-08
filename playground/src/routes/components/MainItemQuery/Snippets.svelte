@@ -7,6 +7,7 @@
   import SnippetsCode from "./SnippetsCode.svelte";
 
   interface Props {
+    // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
     value: any;
     procName: string;
     parentDimensions: UiStoreDimensions | undefined;
