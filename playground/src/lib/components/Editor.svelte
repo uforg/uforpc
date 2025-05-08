@@ -3,16 +3,18 @@
   import loader from "@monaco-editor/loader";
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
   import { shikiToMonaco } from "@shikijs/monaco";
+  import { mergeClasses, type ClassValue } from "$lib/helpers/mergeClasses";
   import { uiStore } from "$lib/uiStore.svelte";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
 
   interface Props {
     value: string;
+    class?: ClassValue;
     // biome-ignore lint/suspicious/noExplicitAny: can be any other attribute
-    others: any;
+    rest?: any;
   }
 
-  let { value = $bindable(), ...others }: Props = $props();
+  let { value = $bindable(), class: className, ...rest }: Props = $props();
   let editorContainer: HTMLElement;
   let monaco: typeof Monaco | null = $state(null);
   let editor: Monaco.editor.IStandaloneCodeEditor | null = $state(null);
@@ -58,4 +60,8 @@
   });
 </script>
 
-<div {...others} bind:this={editorContainer}></div>
+<div
+  bind:this={editorContainer}
+  class={mergeClasses(className)}
+  {...rest}
+></div>
