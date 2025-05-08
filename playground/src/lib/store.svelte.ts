@@ -56,7 +56,7 @@ export const store: Store = $state({
   loaded: false,
   endpoint: "",
   headers: [],
-  urpcSchema: `version 1`,
+  urpcSchema: "version 1",
   jsonSchema: { version: 1, nodes: [] },
 });
 
@@ -106,11 +106,11 @@ export const saveStore = () => {
  */
 export const getHeadersRecord = (): Record<string, string> => {
   const record: Record<string, string> = {};
-  store.headers.forEach((header) => {
+  for (const header of store.headers) {
     if (header.key.trim()) {
       record[header.key] = header.value;
     }
-  });
+  }
   return record;
 };
 
