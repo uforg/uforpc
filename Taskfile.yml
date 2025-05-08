@@ -3,6 +3,12 @@
 version: "3"
 
 tasks:
+  deps:
+    desc: Install all dependencies for the project
+    cmds:
+      - cd ./urpc && go mod download
+      - cd ./playground && npm install
+
   build:
     desc: Builds the WASM binary, the Playground and the URPC binary
     cmds:
