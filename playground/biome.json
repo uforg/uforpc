@@ -20,6 +20,9 @@
       "recommended": true,
       "style": {
         "useConst": "off"
+      },
+      "suspicious": {
+        "noAssignInExpressions": "off"
       }
     }
   }
