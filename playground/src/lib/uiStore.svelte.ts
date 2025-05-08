@@ -126,17 +126,14 @@ $effect.root(() => {
  * Should be called only once at the start of the app.
  */
 export const loadUiStore = () => {
-  if (
-    globalThis.matchMedia &&
-    globalThis.matchMedia("(prefers-color-scheme: dark)").matches
-  ) {
+  if (globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches) {
     uiStore.osTheme = "dark";
   } else {
     uiStore.osTheme = "light";
   }
 
   // Read more at /static/theme-helper.js
-  // deno-lint-ignore no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
   const theme = (globalThis as any).getTheme();
   uiStore.theme = theme || "system";
 
@@ -150,7 +147,7 @@ export const loadUiStore = () => {
  */
 export const saveUiStore = () => {
   // Read more at /static/theme-helper.js
-  // deno-lint-ignore no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
   (globalThis as any).setTheme(uiStore.theme);
 };
 
@@ -234,20 +231,20 @@ export const dimensionschangeAction: Action<
     };
 
     const style = globalThis.getComputedStyle(node);
-    const width = parseFloat(style.width);
-    const height = parseFloat(style.height);
-    const marginTop = parseFloat(style.marginTop);
-    const marginRight = parseFloat(style.marginRight);
-    const marginBottom = parseFloat(style.marginBottom);
-    const marginLeft = parseFloat(style.marginLeft);
-    const paddingTop = parseFloat(style.paddingTop);
-    const paddingRight = parseFloat(style.paddingRight);
-    const paddingBottom = parseFloat(style.paddingBottom);
-    const paddingLeft = parseFloat(style.paddingLeft);
-    const borderTop = parseFloat(style.borderTopWidth);
-    const borderRight = parseFloat(style.borderRightWidth);
-    const borderBottom = parseFloat(style.borderBottomWidth);
-    const borderLeft = parseFloat(style.borderLeftWidth);
+    const width = Number.parseFloat(style.width);
+    const height = Number.parseFloat(style.height);
+    const marginTop = Number.parseFloat(style.marginTop);
+    const marginRight = Number.parseFloat(style.marginRight);
+    const marginBottom = Number.parseFloat(style.marginBottom);
+    const marginLeft = Number.parseFloat(style.marginLeft);
+    const paddingTop = Number.parseFloat(style.paddingTop);
+    const paddingRight = Number.parseFloat(style.paddingRight);
+    const paddingBottom = Number.parseFloat(style.paddingBottom);
+    const paddingLeft = Number.parseFloat(style.paddingLeft);
+    const borderTop = Number.parseFloat(style.borderTopWidth);
+    const borderRight = Number.parseFloat(style.borderRightWidth);
+    const borderBottom = Number.parseFloat(style.borderBottomWidth);
+    const borderLeft = Number.parseFloat(style.borderLeftWidth);
 
     node.dispatchEvent(
       new CustomEvent<UiStoreDimensions>("dimensionschange", {
@@ -304,19 +301,18 @@ export const dimensionschangeAction: Action<
 
   function attachScrollListeners() {
     scrollHosts = getScrollableAncestors(node);
-    scrollHosts.forEach((host) =>
+    for (const host of scrollHosts) {
       host.addEventListener("scroll", throttledDispatchEvent, {
         passive: true,
-      }),
-    );
+      });
+    }
 
     node.addEventListener("scroll", throttledDispatchEvent);
   }
-
   function detachScrollListeners() {
-    scrollHosts.forEach((host) =>
-      host.removeEventListener("scroll", throttledDispatchEvent),
-    );
+    for (const host of scrollHosts) {
+      host.removeEventListener("scroll", throttledDispatchEvent);
+    }
     scrollHosts = [];
 
     node.removeEventListener("scroll", throttledDispatchEvent);
