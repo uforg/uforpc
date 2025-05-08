@@ -12,4 +12,7 @@ export default defineConfig({
       target: "esnext",
     },
   },
+  build: {
+    target: "ES2022",
+  },
 });
