@@ -13,10 +13,9 @@ function initThemeHelper() {
   }
 
   function setTheme(theme) {
-    if (theme === "system") theme = "";
-
-    localStorage.setItem("theme", theme);
-    document.documentElement.setAttribute("data-theme", theme);
+    const themeToSet = theme === "system" ? "" : theme;
+    localStorage.setItem("theme", themeToSet);
+    document.documentElement.setAttribute("data-theme", themeToSet);
   }
 
   globalThis.getTheme = getTheme;
