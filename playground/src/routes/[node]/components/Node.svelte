@@ -20,7 +20,7 @@
   import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
 
-  import MainItemQuery from "./MainItemQuery/Query.svelte";
+  import NodeQuery from "./NodeQuery/Query.svelte";
 
   interface Props {
     node: (typeof store.jsonSchema.nodes)[number];
@@ -93,16 +93,7 @@
   // document.title = `${name} ${humanKind} - UFO RPC Playground`;
 </script>
 
-<section
-  {id}
-  class={[
-    "py-[75px] first:pt-0 last:pb-0",
-    // Last section should have a min-height of 100dvh
-    // to allow the sidebar to mark the section as active
-    // and automatically scroll to it
-    "last:min-h-[100dvh]",
-  ]}
->
+<section {id} class="min-h-[100dvh]">
   <a href={`#${id}`} class="block">
     <H2 class="group flex items-center justify-start text-4xl font-extrabold">
       {#if node.kind === "doc"}
@@ -151,7 +142,7 @@
 
     {#if node.kind === "proc"}
       <div class="mt-4">
-        <MainItemQuery proc={node} />
+        <NodeQuery proc={node} />
       </div>
     {/if}
   </div>

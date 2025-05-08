@@ -51,7 +51,7 @@
 
   let id = $derived(`navlink-${contentId}`);
 
-  let href = $derived(`#${contentId}`);
+  let href = $derived(`#/${contentId}`);
 
   let isDeprecated = $derived.by(() => {
     if (node.kind === "doc") return false;

@@ -4,6 +4,7 @@
   import { store } from "$lib/store.svelte";
 
   import type { PageProps } from "./$types";
+  import Node from "./components/Node.svelte";
   import NotFound from "./components/NotFound.svelte";
 
   let { data }: PageProps = $props();
@@ -30,5 +31,5 @@
 {/if}
 
 {#if nodeExists}
-  Node {data.nodeName}
+  <Node node={store.jsonSchema.nodes[nodeIndex]} />
 {/if}
