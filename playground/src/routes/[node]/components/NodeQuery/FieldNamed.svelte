@@ -106,7 +106,7 @@
 
 {#snippet menu()}
   <Menu content={menuContent} placement="bottom" trigger="mouseenter click">
-    <button class="btn btn-ghost btn-square w-8">
+    <button class="btn btn-ghost btn-square">
       <EllipsisVertical class="size-4" />
     </button>
   </Menu>
