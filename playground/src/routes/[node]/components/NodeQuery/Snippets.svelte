@@ -67,54 +67,57 @@
 
     return c;
   });
+
+  let isOpen = $derived(uiStore.codeSnippetsOpen);
+  function toggleIsOpen() {
+    uiStore.codeSnippetsOpen = !uiStore.codeSnippetsOpen;
+  }
 </script>
 
 <div
   class={[
     "flex flex-col self-start",
     {
-      "w-[40%]": uiStore.codeSnippetsOpen,
+      "w-[40%]": isOpen,
     },
   ]}
   style={`max-height: ${maxHeight}px; margin-top: ${marginTop}px;`}
   bind:clientHeight={height}
 >
   <Tooltip
-    content={uiStore.codeSnippetsOpen
-      ? "Hide code snippets"
-      : "Show code snippets"}
+    content={isOpen ? "Hide code snippets" : "Show code snippets"}
     placement="left"
   >
     <button
       class={[
         "btn rounded-box group border-base-content/20 flex w-full items-center",
         {
-          "justify-start rounded-b-none px-4": uiStore.codeSnippetsOpen,
-          "px-3": !uiStore.codeSnippetsOpen,
+          "justify-start rounded-b-none px-4": isOpen,
+          "px-3": !isOpen,
         },
       ]}
-      onclick={() => (uiStore.codeSnippetsOpen = !uiStore.codeSnippetsOpen)}
+      onclick={toggleIsOpen}
     >
       <span
         class={{
-          "mr-2": uiStore.codeSnippetsOpen,
+          "mr-2": isOpen,
         }}
       >
         <Code class="size-4 group-hover:hidden" />
-        {#if uiStore.codeSnippetsOpen}
+        {#if isOpen}
           <ChevronRight class="hidden size-4 group-hover:block" />
         {:else}
           <ChevronLeft class="hidden size-4 group-hover:block" />
         {/if}
       </span>
 
-      {#if uiStore.codeSnippetsOpen}
+      {#if isOpen}
         <span>Code snippets for {procName}</span>
       {/if}
     </button>
   </Tooltip>
 
-  {#if uiStore.codeSnippetsOpen}
+  {#if isOpen}
     <div
       class={[
         "rounded-box border-base-content/20 rounded-t-none border border-t-0 p-4",
