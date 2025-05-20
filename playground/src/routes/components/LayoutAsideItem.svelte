@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import {
     ArrowLeftRight,
     BookOpenText,
@@ -59,7 +60,12 @@
     return false;
   });
 
-  let isActive = $state(false);
+  let isActive = $derived.by(() => {
+    const paramsNode = page.params["node"];
+    if (!paramsNode) return false;
+
+    return paramsNode === contentId;
+  });
 </script>
 
 <Tooltip content={title}>

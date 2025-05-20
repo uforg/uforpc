@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import { Home } from "@lucide/svelte";
   import { onMount } from "svelte";
 
@@ -24,6 +25,8 @@
       }
     }
   });
+
+  let isHome = $derived(page.url.hash === "" || page.url.hash === "#/");
 </script>
 
 <aside
@@ -52,7 +55,13 @@
     <LayoutAsideSchemaManager />
 
     <Tooltip content="UFO RPC Home">
-      <a href="/" class="btn btn-ghost btn-block justify-start space-x-2">
+      <a
+        href="/"
+        class={[
+          "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
+          { "bg-blue-500/20": isHome },
+        ]}
+      >
         <Home class="size-4" />
         <span>Home</span>
       </a>

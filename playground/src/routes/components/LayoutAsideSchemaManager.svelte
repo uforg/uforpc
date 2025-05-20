@@ -46,7 +46,7 @@
 
 <Tooltip content="Show/Edit Schema">
   <button
-    class="btn btn-ghost btn-block justify-start space-x-2"
+    class="btn btn-ghost btn-block justify-start space-x-2 border-transparent"
     onclick={openModal}
   >
     <ScrollText class="size-4" />
