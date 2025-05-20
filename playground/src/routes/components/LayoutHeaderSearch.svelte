@@ -89,28 +89,30 @@
   {#if searchResults.length > 0}
     <ul class="list mt-4">
       {#each searchResults as result}
-        <li class="list-row hover:bg-base-200">
-          <a href={`#${result.slug}`} onclick={closeModal}>
-            <span class="flex items-center justify-start text-lg font-bold">
-              {#if result.kind === "doc"}
-                <BookOpenText class="mr-2 size-4 flex-none" />
-              {/if}
-              {#if result.kind === "rule"}
-                <Scale class="mr-2 size-4 flex-none" />
-              {/if}
-              {#if result.kind === "type"}
-                <Type class="mr-2 size-4 flex-none" />
-              {/if}
-              {#if result.kind === "proc"}
-                <ArrowLeftRight class="mr-2 size-4 flex-none" />
-              {/if}
-              {@html markSearchHints(result, result.name)}
-            </span>
-            <p class="truncate text-sm">
-              {@html truncateWithMark(result, result.doc)}
-            </p>
-          </a>
-        </li>
+        <a
+          href={`#/${result.slug}`}
+          onclick={closeModal}
+          class="list-row hover:bg-base-200 block"
+        >
+          <span class="flex items-center justify-start text-lg font-bold">
+            {#if result.kind === "doc"}
+              <BookOpenText class="mr-2 size-4 flex-none" />
+            {/if}
+            {#if result.kind === "rule"}
+              <Scale class="mr-2 size-4 flex-none" />
+            {/if}
+            {#if result.kind === "type"}
+              <Type class="mr-2 size-4 flex-none" />
+            {/if}
+            {#if result.kind === "proc"}
+              <ArrowLeftRight class="mr-2 size-4 flex-none" />
+            {/if}
+            {@html markSearchHints(result, result.name)}
+          </span>
+          <p class="truncate text-sm">
+            {@html truncateWithMark(result, result.doc)}
+          </p>
+        </a>
       {/each}
     </ul>
   {/if}
