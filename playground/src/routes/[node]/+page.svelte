@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { untrack } from "svelte";
+
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
   import { store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
 
   import type { PageProps } from "./$types";
   import Node from "./components/Node.svelte";
@@ -50,6 +53,15 @@
     if (!nodeExists) return "UFO RPC Playground";
 
     return `${name} ${humanKind} - UFO RPC Playground`;
+  });
+
+  // Scroll to top of page when node changes
+  $effect(() => {
+    nodeIndex; // Just to add a dependency to trigger the effect
+    untrack(() => {
+      // Untrack the uiStore.contentWrapper.element to avoid infinite loop
+      uiStore.contentWrapper.element?.scrollTo({ top: 0, behavior: "smooth" });
+    });
   });
 </script>
 

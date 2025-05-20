@@ -1,6 +1,7 @@
 import type { Action } from "svelte/action";
 
 export interface UiStoreDimensions {
+  element: HTMLElement | null;
   size: {
     clientWidth: number;
     clientHeight: number;
@@ -44,6 +45,7 @@ export interface UiStoreDimensions {
 }
 
 const defaultUiStoreDimensions: UiStoreDimensions = {
+  element: null,
   size: {
     clientWidth: 0,
     clientHeight: 0,
@@ -282,6 +284,7 @@ export const dimensionschangeAction: Action<
     node.dispatchEvent(
       new CustomEvent<UiStoreDimensions>("dimensionschange", {
         detail: {
+          element: node,
           size: {
             clientWidth,
             clientHeight,
