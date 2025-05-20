@@ -5,6 +5,8 @@
   import { store } from "$lib/store.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
 
+  import Tooltip from "$lib/components/Tooltip.svelte";
+
   import LayoutAsideItem from "./LayoutAsideItem.svelte";
   import LayoutAsideSchemaManager from "./LayoutAsideSchemaManager.svelte";
 
@@ -49,10 +51,12 @@
   <nav class="p-4">
     <LayoutAsideSchemaManager />
 
-    <a href="/" class="btn btn-ghost btn-block justify-start space-x-2">
-      <Home class="size-4" />
-      <span>Home</span>
-    </a>
+    <Tooltip content="UFO RPC Home">
+      <a href="/" class="btn btn-ghost btn-block justify-start space-x-2">
+        <Home class="size-4" />
+        <span>Home</span>
+      </a>
+    </Tooltip>
 
     {#each store.jsonSchema.nodes as node}
       <LayoutAsideItem {node} />

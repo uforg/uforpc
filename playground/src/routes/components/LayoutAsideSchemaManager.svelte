@@ -8,6 +8,7 @@
 
   import Editor from "$lib/components/Editor.svelte";
   import Modal from "$lib/components/Modal.svelte";
+  import Tooltip from "$lib/components/Tooltip.svelte";
 
   let isOpen = $state(false);
   const openModal = () => (isOpen = true);
@@ -43,14 +44,15 @@
   };
 </script>
 
-<button
-  class="btn btn-ghost btn-block justify-start space-x-2"
-  title="Show/Edit/Format Schema"
-  onclick={openModal}
->
-  <ScrollText class="size-4" />
-  <span>Schema</span>
-</button>
+<Tooltip content="Show/Edit Schema">
+  <button
+    class="btn btn-ghost btn-block justify-start space-x-2"
+    onclick={openModal}
+  >
+    <ScrollText class="size-4" />
+    <span>Schema</span>
+  </button>
+</Tooltip>
 
 <Modal
   bind:isOpen
