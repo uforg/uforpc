@@ -54,11 +54,12 @@
   <nav class="p-4">
     <LayoutAsideSchemaManager />
 
-    <Tooltip content="UFO RPC Home">
+    <Tooltip content="RPC Home">
       <a
         href="/"
         class={[
           "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
+          "hover:bg-blue-500/20",
           { "bg-blue-500/20": isHome },
         ]}
       >
