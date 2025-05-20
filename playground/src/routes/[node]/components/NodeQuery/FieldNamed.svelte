@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { BrushCleaning, Trash } from "@lucide/svelte";
+  import { BrushCleaning, EllipsisVertical, Trash } from "@lucide/svelte";
   import { untrack } from "svelte";
 
   import { setAtPath } from "$lib/helpers/setAtPath";
   import type { FieldDefinition } from "$lib/urpcTypes";
 
+  import Menu from "$lib/components/Menu.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   import Label from "./Label.svelte";
@@ -76,6 +77,41 @@
   let label = $derived(prettyLabel(path));
 </script>
 
+{#snippet menuContent()}
+  <div class="py-1">
+    <Tooltip
+      content={`Clear and reset ${label} to its default value`}
+      placement="left"
+    >
+      <button
+        class="btn btn-ghost btn-block flex items-center justify-start space-x-2"
+        onclick={clearValue}
+      >
+        <BrushCleaning class="size-4" />
+        <span>Clear</span>
+      </button>
+    </Tooltip>
+
+    <Tooltip content={`Delete ${label} from the JSON object`} placement="left">
+      <button
+        class="btn btn-ghost btn-block flex items-center justify-start space-x-2"
+        onclick={deleteValue}
+      >
+        <Trash class="size-4" />
+        <span>Delete</span>
+      </button>
+    </Tooltip>
+  </div>
+{/snippet}
+
+{#snippet menu()}
+  <Menu content={menuContent} placement="bottom" trigger="mouseenter click">
+    <button class="btn btn-ghost btn-square w-8">
+      <EllipsisVertical class="size-4" />
+    </button>
+  </Menu>
+{/snippet}
+
 <label class="group/field block w-full space-y-1">
   <span class="block font-semibold">
     <Label optional={field.optional} {label} />
@@ -91,23 +127,7 @@
         placeholder={`Enter ${label} here...`}
       />
 
-      <Tooltip
-        content={`Clear and reset ${label} to its default value`}
-        placement="left"
-      >
-        <button class="btn btn-ghost btn-square w-8" onclick={clearValue}>
-          <BrushCleaning class="size-4" />
-        </button>
-      </Tooltip>
-
-      <Tooltip
-        content={`Delete ${label} from the JSON object`}
-        placement="left"
-      >
-        <button class="btn btn-ghost btn-square w-8" onclick={deleteValue}>
-          <Trash class="size-4" />
-        </button>
-      </Tooltip>
+      {@render menu()}
     </div>
   {/if}
 
@@ -119,14 +139,7 @@
         class="toggle toggle-lg"
       />
 
-      <Tooltip
-        content={`Delete ${label} from the JSON object`}
-        placement="right"
-      >
-        <button class="btn btn-ghost btn-square" onclick={deleteValue}>
-          <Trash class="size-4" />
-        </button>
-      </Tooltip>
+      {@render menu()}
     </div>
   {/if}
 </label>
