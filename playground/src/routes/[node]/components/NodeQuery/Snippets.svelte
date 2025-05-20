@@ -18,8 +18,6 @@
 
   const { value, procName, parentDimensions }: Props = $props();
 
-  let height = $state(0);
-
   let maxHeight = $derived.by(() => {
     if (!parentDimensions) return 0;
 
@@ -31,25 +29,10 @@
     return maxHeight;
   });
 
-  let marginTop = $derived.by(() => {
-    if (!parentDimensions) return 0;
-
+  let stickyTop = $derived.by(() => {
     const heightMargin = 16;
     const headerHeight = uiStore.header.size.clientHeight;
-    const topThreshold = headerHeight + heightMargin;
-
-    const parentVpTop = parentDimensions.viewportOffset.top;
-    const parentHeight = parentDimensions.size.clientHeight;
-
-    const maxMarginTop = Math.max(0, parentHeight - height);
-
-    let marginTop = 0;
-    if (parentVpTop <= topThreshold) {
-      const desiredMarginTop = Math.max(0, topThreshold - parentVpTop);
-      marginTop = Math.min(desiredMarginTop, maxMarginTop);
-    }
-
-    return marginTop;
+    return headerHeight + heightMargin;
   });
 
   let curl = $derived.by(() => {
@@ -76,13 +59,12 @@
 
 <div
   class={[
-    "flex flex-col self-start",
+    "sticky flex flex-col self-start",
     {
       "w-[40%]": isOpen,
     },
   ]}
-  style={`max-height: ${maxHeight}px; margin-top: ${marginTop}px;`}
-  bind:clientHeight={height}
+  style={`max-height: ${maxHeight}px; top: ${stickyTop}px;`}
 >
   <Tooltip
     content={isOpen ? "Hide code snippets" : "Show code snippets"}
