@@ -5,7 +5,6 @@
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
-  import { slugify } from "$lib/helpers/slugify";
   import { store } from "$lib/store.svelte";
 
   import Code from "$lib/components/Code.svelte";
