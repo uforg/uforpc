@@ -17,6 +17,7 @@
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
 
   import "../app.css";
+
   import LayoutAside from "./components/LayoutAside.svelte";
   import LayoutHeader from "./components/LayoutHeader.svelte";
 

@@ -3,8 +3,8 @@
   "importOrder": [
     "^\\$lib/(?!components)(.*)$",
     "^\\$lib/components/(.*)$",
-    "^[../]",
-    "^[./]"
+    "^[.][.]/",
+    "^[.]/"
   ],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
