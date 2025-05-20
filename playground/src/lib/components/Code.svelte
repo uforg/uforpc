@@ -21,6 +21,8 @@
     collapsible?: boolean;
     isOpen?: boolean;
     title?: string;
+    rounded?: boolean;
+    withBorder?: boolean;
   }
 
   let {
@@ -30,6 +32,8 @@
     collapsible = false,
     isOpen = $bindable(true),
     title = "Code",
+    rounded = true,
+    withBorder = true,
   }: Props = $props();
 
   let urpcSchemaHighlighted = $state("");
@@ -75,9 +79,11 @@
     {#if collapsible}
       <button
         class={[
-          "btn border-base-content/20 w-full justify-start",
-          "rounded-box group/btn",
+          "btn w-full justify-start",
+          "group/btn",
           {
+            "border-base-content/20 border": withBorder,
+            "rounded-box": rounded,
             "rounded-b-none": isOpen,
           },
         ]}
@@ -98,10 +104,12 @@
     {#if !collapsible || isOpen}
       <div
         class={[
-          "rounded-box relative z-10 p-4 pt-2",
-          "bg-base-200 border-base-content/20 border",
+          "relative z-10 p-4",
+          "bg-base-200",
           {
-            "rounded-t-none border-t-0": collapsible,
+            "border-base-content/20 border": withBorder,
+            "rounded-box": rounded,
+            "rounded-t-none border-t-0 pt-2": collapsible,
           },
         ]}
         transition:slide={{ duration: 100 }}

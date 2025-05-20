@@ -120,7 +120,7 @@
   {#if isOpen}
     <div
       class={[
-        "rounded-box border-base-content/20 rounded-t-none border border-t-0 p-4",
+        "rounded-box border-base-content/20 rounded-t-none border border-t-0",
         "overflow-x-auto overflow-y-auto",
       ]}
       in:fade={{ duration: 100 }}

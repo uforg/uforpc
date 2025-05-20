@@ -324,7 +324,7 @@
   });
 </script>
 
-<fieldset class="fieldset">
+<fieldset class="fieldset m-4 mb-6">
   <legend class="fieldset-legend">Language</legend>
   <select class="select w-full" bind:value={pickedLabel}>
     {#each langGroups as langGroup}
@@ -343,4 +343,4 @@
   </select>
 </fieldset>
 
-<Code class="mt-2" code={pickedCode} lang={pickedLang} />
+<Code rounded={false} withBorder={false} code={pickedCode} lang={pickedLang} />
