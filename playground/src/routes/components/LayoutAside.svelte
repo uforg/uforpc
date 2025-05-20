@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Home } from "@lucide/svelte";
   import { onMount } from "svelte";
 
   import { store } from "$lib/store.svelte";
@@ -47,6 +48,12 @@
   </a>
   <nav class="p-4">
     <LayoutAsideSchemaManager />
+
+    <a href="/" class="btn btn-ghost btn-block justify-start space-x-2">
+      <Home class="size-4" />
+      <span>Home</span>
+    </a>
+
     {#each store.jsonSchema.nodes as node}
       <LayoutAsideItem {node} />
     {/each}
