@@ -93,6 +93,7 @@ export interface UiStore {
   loaded: boolean;
   theme: Theme;
   osTheme: OsTheme;
+  codeSnippetsOpen: boolean;
   app: UiStoreDimensions;
   aside: UiStoreDimensions;
   contentWrapper: UiStoreDimensions;
@@ -100,10 +101,15 @@ export interface UiStore {
   main: UiStoreDimensions;
 }
 
+const localStorageKeys = {
+  codeSnippetsOpen: "codeSnippetsOpen",
+};
+
 export const uiStore = $state<UiStore>({
   loaded: false,
   theme: "system",
   osTheme: "dark",
+  codeSnippetsOpen: false,
   app: { ...defaultUiStoreDimensions },
   aside: { ...defaultUiStoreDimensions },
   contentWrapper: { ...defaultUiStoreDimensions },
@@ -135,6 +141,12 @@ export const loadUiStore = () => {
   const theme = (globalThis as any).getTheme();
   uiStore.theme = theme || "system";
 
+  // Load code snippets open state from local storage
+  const codeSnippetsOpen = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsOpen,
+  );
+  uiStore.codeSnippetsOpen = codeSnippetsOpen === "true";
+
   uiStore.loaded = true;
 };
 
@@ -147,6 +159,12 @@ export const saveUiStore = () => {
   // Read more at /static/theme-helper.js
   // biome-ignore lint/suspicious/noExplicitAny: it's a global function
   (globalThis as any).setTheme(uiStore.theme);
+
+  // Save code snippets open state to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsOpen,
+    uiStore.codeSnippetsOpen.toString(),
+  );
 };
 
 //////////////////////

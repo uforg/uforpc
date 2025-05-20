@@ -19,7 +19,6 @@
   const { value, procName, parentDimensions }: Props = $props();
 
   let height = $state(0);
-  let isOpen = $state(true);
 
   let maxHeight = $derived.by(() => {
     if (!parentDimensions) return 0;
@@ -74,46 +73,48 @@
   class={[
     "flex flex-col self-start",
     {
-      "w-[40%]": isOpen,
+      "w-[40%]": uiStore.codeSnippetsOpen,
     },
   ]}
   style={`max-height: ${maxHeight}px; margin-top: ${marginTop}px;`}
   bind:clientHeight={height}
 >
   <Tooltip
-    content={isOpen ? "Hide code snippets" : "Show code snippets"}
+    content={uiStore.codeSnippetsOpen
+      ? "Hide code snippets"
+      : "Show code snippets"}
     placement="left"
   >
     <button
       class={[
         "btn rounded-box group border-base-content/20 flex w-full items-center",
         {
-          "justify-start rounded-b-none px-4": isOpen,
-          "px-3": !isOpen,
+          "justify-start rounded-b-none px-4": uiStore.codeSnippetsOpen,
+          "px-3": !uiStore.codeSnippetsOpen,
         },
       ]}
-      onclick={() => (isOpen = !isOpen)}
+      onclick={() => (uiStore.codeSnippetsOpen = !uiStore.codeSnippetsOpen)}
     >
       <span
         class={{
-          "mr-2": isOpen,
+          "mr-2": uiStore.codeSnippetsOpen,
         }}
       >
         <Code class="size-4 group-hover:hidden" />
-        {#if isOpen}
+        {#if uiStore.codeSnippetsOpen}
           <ChevronRight class="hidden size-4 group-hover:block" />
         {:else}
           <ChevronLeft class="hidden size-4 group-hover:block" />
         {/if}
       </span>
 
-      {#if isOpen}
+      {#if uiStore.codeSnippetsOpen}
         <span>Code snippets for {procName}</span>
       {/if}
     </button>
   </Tooltip>
 
-  {#if isOpen}
+  {#if uiStore.codeSnippetsOpen}
     <div
       class={[
         "rounded-box border-base-content/20 rounded-t-none border border-t-0 p-4",
