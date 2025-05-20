@@ -1,5 +1,8 @@
 <script lang="ts">
   import * as curlconverter from "curlconverter";
+  import { onMount } from "svelte";
+
+  import { uiStore } from "$lib/uiStore.svelte";
 
   import Code from "$lib/components/Code.svelte";
 
@@ -309,24 +312,29 @@
     return groups;
   });
 
-  let pickedLabel = $state(langs[0].label);
-
   let pickedLang = $derived.by(() => {
-    const lang = langs.find((lang) => lang.label === pickedLabel);
+    const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
     if (!lang) return langs[0].langCode;
     return lang.langCode;
   });
 
   let pickedCode = $derived.by(() => {
-    const lang = langs.find((lang) => lang.label === pickedLabel);
+    const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
     if (!lang) return langs[0].func(curl);
     return lang.func(curl);
+  });
+
+  onMount(() => {
+    const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
+    if (!lang) {
+      uiStore.codeSnippetsLang = langs[0].label;
+    }
   });
 </script>
 
 <fieldset class="fieldset m-4 mb-6">
   <legend class="fieldset-legend">Language</legend>
-  <select class="select w-full" bind:value={pickedLabel}>
+  <select class="select w-full" bind:value={uiStore.codeSnippetsLang}>
     {#each langGroups as langGroup}
       {#if langGroup.langs.length > 1}
         <optgroup label={langGroup.group}>

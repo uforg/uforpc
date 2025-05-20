@@ -94,6 +94,7 @@ export interface UiStore {
   theme: Theme;
   osTheme: OsTheme;
   codeSnippetsOpen: boolean;
+  codeSnippetsLang: string;
   app: UiStoreDimensions;
   aside: UiStoreDimensions;
   contentWrapper: UiStoreDimensions;
@@ -103,6 +104,7 @@ export interface UiStore {
 
 const localStorageKeys = {
   codeSnippetsOpen: "codeSnippetsOpen",
+  codeSnippetsLang: "codeSnippetsLang",
 };
 
 export const uiStore = $state<UiStore>({
@@ -110,6 +112,7 @@ export const uiStore = $state<UiStore>({
   theme: "system",
   osTheme: "dark",
   codeSnippetsOpen: false,
+  codeSnippetsLang: "curl",
   app: { ...defaultUiStoreDimensions },
   aside: { ...defaultUiStoreDimensions },
   contentWrapper: { ...defaultUiStoreDimensions },
@@ -147,6 +150,12 @@ export const loadUiStore = () => {
   );
   uiStore.codeSnippetsOpen = codeSnippetsOpen === "true";
 
+  // Load code snippets lang from local storage
+  const codeSnippetsLang = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsLang,
+  );
+  uiStore.codeSnippetsLang = codeSnippetsLang ?? "curl";
+
   uiStore.loaded = true;
 };
 
@@ -164,6 +173,12 @@ export const saveUiStore = () => {
   globalThis.localStorage.setItem(
     localStorageKeys.codeSnippetsOpen,
     uiStore.codeSnippetsOpen.toString(),
+  );
+
+  // Save code snippets lang to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsLang,
+    uiStore.codeSnippetsLang,
   );
 };
 
