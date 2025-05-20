@@ -148,13 +148,15 @@ export const loadUiStore = () => {
   const codeSnippetsOpen = globalThis.localStorage.getItem(
     localStorageKeys.codeSnippetsOpen,
   );
-  uiStore.codeSnippetsOpen = codeSnippetsOpen === "true";
+  uiStore.codeSnippetsOpen = codeSnippetsOpen
+    ? codeSnippetsOpen === "true"
+    : true;
 
   // Load code snippets lang from local storage
   const codeSnippetsLang = globalThis.localStorage.getItem(
     localStorageKeys.codeSnippetsLang,
   );
-  uiStore.codeSnippetsLang = codeSnippetsLang ?? "curl";
+  uiStore.codeSnippetsLang = codeSnippetsLang ?? "Curl";
 
   uiStore.loaded = true;
 };
