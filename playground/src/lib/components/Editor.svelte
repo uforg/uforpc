@@ -52,7 +52,6 @@
     if (!monaco) return;
 
     const themeMap = {
-      system: uiStore.osTheme === "dark" ? darkTheme : lightTheme,
       light: lightTheme,
       dark: darkTheme,
     };

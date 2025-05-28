@@ -44,6 +44,8 @@ export interface UiStoreDimensions {
   };
 }
 
+const matchMediaColor = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
+
 const defaultUiStoreDimensions: UiStoreDimensions = {
   element: null,
   size: {
@@ -88,13 +90,11 @@ const defaultUiStoreDimensions: UiStoreDimensions = {
   },
 };
 
-export type Theme = "system" | "light" | "dark";
-export type OsTheme = "light" | "dark";
+export type Theme = "light" | "dark";
 
 export interface UiStore {
   loaded: boolean;
   theme: Theme;
-  osTheme: OsTheme;
   codeSnippetsOpen: boolean;
   codeSnippetsLang: string;
   app: UiStoreDimensions;
@@ -105,14 +105,14 @@ export interface UiStore {
 }
 
 const localStorageKeys = {
+  theme: "theme",
   codeSnippetsOpen: "codeSnippetsOpen",
   codeSnippetsLang: "codeSnippetsLang",
 };
 
 export const uiStore = $state<UiStore>({
   loaded: false,
-  theme: "system",
-  osTheme: "dark",
+  theme: "dark",
   codeSnippetsOpen: false,
   codeSnippetsLang: "curl",
   app: { ...defaultUiStoreDimensions },
@@ -135,16 +135,11 @@ $effect.root(() => {
  * Should be called only once at the start of the app.
  */
 export const loadUiStore = () => {
-  if (globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches) {
-    uiStore.osTheme = "dark";
-  } else {
-    uiStore.osTheme = "light";
-  }
-
-  // Read more at /static/theme-helper.js
-  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
-  const theme = (globalThis as any).getTheme();
-  uiStore.theme = theme || "system";
+  /**
+   * IMPORTANT:
+   * The theme should be loaded before anything else in
+   * the app.html file.
+   */
 
   // Load code snippets open state from local storage
   const codeSnippetsOpen = globalThis.localStorage.getItem(
@@ -169,9 +164,9 @@ export const loadUiStore = () => {
  * Should be called when the store is updated.
  */
 export const saveUiStore = () => {
-  // Read more at /static/theme-helper.js
-  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
-  (globalThis as any).setTheme(uiStore.theme);
+  // Save theme to local storage
+  globalThis.localStorage.setItem(localStorageKeys.theme, uiStore.theme);
+  setThemeAttribute(uiStore.theme);
 
   // Save code snippets open state to local storage
   globalThis.localStorage.setItem(
@@ -185,6 +180,44 @@ export const saveUiStore = () => {
     uiStore.codeSnippetsLang,
   );
 };
+
+/////////////////////
+// THEME UTILITIES //
+/////////////////////
+/**
+ * Returns the system theme based on the css color scheme
+ */
+function getSystemTheme(): Theme {
+  if (!matchMediaColor) return "dark";
+  return matchMediaColor?.matches ? "dark" : "light";
+}
+
+/**
+ * Sets the theme attribute of the document element, used by DaisyUI
+ */
+function setThemeAttribute(theme: Theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+}
+
+/**
+ * Sets the theme stored in the local storage, it falls back to the
+ * system theme
+ */
+export function initTheme() {
+  const theme = localStorage.getItem(localStorageKeys.theme);
+  if (theme === "light" || theme === "dark") {
+    uiStore.theme = theme;
+  } else {
+    uiStore.theme = getSystemTheme();
+  }
+  setThemeAttribute(uiStore.theme);
+
+  // Listen for changes in the color scheme to change the theme dinamically
+  matchMediaColor?.addEventListener("change", () => {
+    uiStore.theme = getSystemTheme();
+    setThemeAttribute(uiStore.theme);
+  });
+}
 
 //////////////////////
 // Helper functions //

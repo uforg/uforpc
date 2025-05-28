@@ -39,7 +39,6 @@
   let urpcSchemaHighlighted = $state("");
   $effect(() => {
     const themeMap = {
-      system: uiStore.osTheme === "dark" ? darkTheme : lightTheme,
       dark: darkTheme,
       light: lightTheme,
     };

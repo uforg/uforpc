@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Moon, Palette, Sun, SunMoon } from "@lucide/svelte";
+  import { Moon, Palette, Sun } from "@lucide/svelte";
 
   import { uiStore } from "$lib/uiStore.svelte";
   import type { Theme } from "$lib/uiStore.svelte";
@@ -7,7 +7,7 @@
   import Menu from "$lib/components/Menu.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
-  const themesArr: Theme[] = ["system", "light", "dark"];
+  const themesArr: Theme[] = ["light", "dark"];
 
   function setTheme(theme: Theme) {
     uiStore.theme = theme;
@@ -16,9 +16,6 @@
 </script>
 
 {#snippet themeName(showIcon: boolean, tname: Theme)}
-  {#if showIcon && tname === "system"}
-    <SunMoon class="size-4" />
-  {/if}
   {#if showIcon && tname === "light"}
     <Sun class="size-4" />
   {/if}
@@ -26,9 +23,6 @@
     <Moon class="size-4" />
   {/if}
 
-  {#if tname === "system"}
-    System
-  {/if}
   {#if tname === "light"}
     Light
   {/if}
