@@ -13,12 +13,9 @@
 }
 
 /* Flatpickr themes */
-
-[data-theme=""],
 [data-theme="dark"] {
   @import "flatpickr/dist/themes/dark.css";
 }
-
 [data-theme="light"] {
   @import "flatpickr/dist/themes/airbnb.css";
 }
