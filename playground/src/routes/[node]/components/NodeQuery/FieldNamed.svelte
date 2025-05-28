@@ -1,6 +1,7 @@
 <script lang="ts">
   import { BrushCleaning, EllipsisVertical, Trash } from "@lucide/svelte";
-  import { untrack } from "svelte";
+  import flatpickr from "flatpickr";
+  import { onMount, untrack } from "svelte";
 
   import { setAtPath } from "$lib/helpers/setAtPath";
   import type { FieldDefinition } from "$lib/urpcTypes";
@@ -19,6 +20,7 @@
   }
 
   let { field, path, value: globalValue = $bindable() }: Props = $props();
+  const fieldId = $props.id();
 
   // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
   let value: any = $state(null);
@@ -33,13 +35,21 @@
     });
   });
 
-  export const deleteValue = () => (value = null);
+  export const deleteValue = () => {
+    if (flatpickrInstance) flatpickrInstance.clear();
+    value = null;
+  };
+
   export const clearValue = () => {
     if (field.typeName === "string") value = "";
     if (field.typeName === "int") value = 0;
     if (field.typeName === "float") value = 0;
     if (field.typeName === "boolean") value = false;
-    if (field.typeName === "datetime") value = new Date();
+    if (field.typeName === "datetime") {
+      let now = new Date();
+      if (flatpickrInstance) flatpickrInstance.setDate(now);
+      value = now;
+    }
   };
 
   let inputType = $derived.by(() => {
@@ -60,7 +70,7 @@
     }
 
     if (field.typeName === "datetime") {
-      return "datetime-local";
+      return "datetime";
     }
   });
 
@@ -75,6 +85,20 @@
   });
 
   let label = $derived(prettyLabel(path));
+
+  let flatpickrInstance: flatpickr.Instance | null = $state(null);
+  onMount(() => {
+    if (field.typeName !== "datetime") return;
+    let inst = flatpickr(`#${fieldId}`, {
+      enableTime: true,
+      enableSeconds: true,
+      dateFormat: "Z",
+      altInput: true,
+      altFormat: "F j, Y H:i:S",
+    });
+    if (Array.isArray(inst)) inst = inst[0];
+    flatpickrInstance = inst;
+  });
 </script>
 
 {#snippet menuContent()}
@@ -117,9 +141,24 @@
     <Label optional={field.optional} {label} />
   </span>
 
-  {#if inputType !== "checkbox"}
+  {#if inputType !== "checkbox" && inputType !== "datetime"}
     <div class="flex items-center justify-start">
       <input
+        type={inputType}
+        step={inputStep}
+        bind:value
+        class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
+        placeholder={`Enter ${label} here...`}
+      />
+
+      {@render menu()}
+    </div>
+  {/if}
+
+  {#if inputType === "datetime"}
+    <div class="flex items-center justify-start">
+      <input
+        id={fieldId}
         type={inputType}
         step={inputStep}
         bind:value
