@@ -1,56 +1,43 @@
 <script lang="ts">
-  import { Moon, Palette, Sun } from "@lucide/svelte";
+  import { Moon, Sun } from "@lucide/svelte";
+  import { fade } from "svelte/transition";
 
   import { uiStore } from "$lib/uiStore.svelte";
-  import type { Theme } from "$lib/uiStore.svelte";
 
-  import Menu from "$lib/components/Menu.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
-  const themesArr: Theme[] = ["light", "dark"];
-
-  function setTheme(theme: Theme) {
-    uiStore.theme = theme;
-    (document.activeElement as HTMLElement)?.blur();
+  function toggleTheme() {
+    const newTheme = uiStore.theme === "dark" ? "light" : "dark";
+    uiStore.theme = newTheme;
   }
+
+  let tooltipContent = $derived(
+    uiStore.theme === "dark" ? "Set light theme" : "Set dark theme",
+  );
 </script>
 
-{#snippet themeName(showIcon: boolean, tname: Theme)}
-  {#if showIcon && tname === "light"}
-    <Sun class="size-4" />
-  {/if}
-  {#if showIcon && tname === "dark"}
-    <Moon class="size-4" />
-  {/if}
+<Tooltip content={tooltipContent} placement="left">
+  <button class="btn btn-ghost" onclick={toggleTheme}>
+    <span class="relative size-4">
+      {#if uiStore.theme === "light"}
+        <span transition:fade={{ duration: 100 }} class="absolute inset-0">
+          <Sun class="size-4" />
+        </span>
+      {/if}
+      {#if uiStore.theme === "dark"}
+        <span transition:fade={{ duration: 100 }} class="absolute inset-0">
+          <Moon class="size-4" />
+        </span>
+      {/if}
+    </span>
 
-  {#if tname === "light"}
-    Light
-  {/if}
-  {#if tname === "dark"}
-    Dark
-  {/if}
-{/snippet}
-
-{#snippet content()}
-  <div class="space-y-2 py-1">
-    {#each themesArr as themeItem}
-      <button
-        class="btn btn-ghost btn-block flex items-center justify-start space-x-2"
-        onclick={() => setTheme(themeItem)}
-      >
-        {@render themeName(true, themeItem)}
-      </button>
-    {/each}
-  </div>
-{/snippet}
-
-<Menu {content}>
-  <div>
-    <Tooltip content="Theme" placement="left">
-      <button class="btn btn-ghost">
-        <Palette class="size-4" />
-        {@render themeName(false, uiStore.theme)}
-      </button>
-    </Tooltip>
-  </div>
-</Menu>
+    <span class="w-[5ch]">
+      {#if uiStore.theme === "light"}
+        Light
+      {/if}
+      {#if uiStore.theme === "dark"}
+        Dark
+      {/if}
+    </span>
+  </button>
+</Tooltip>
