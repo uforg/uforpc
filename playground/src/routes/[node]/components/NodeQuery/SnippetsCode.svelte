@@ -26,21 +26,22 @@
 
   const langs: Lang[] = [
     {
+      group: "Ansible",
+      langCode: "yaml",
+      label: "Ansible",
+      func: curlconverter.toAnsible,
+    },
+    {
       group: "Bash",
       langCode: "bash",
       label: "Curl",
       func: (code: string) => code,
     },
-
-    //////////////////////////////////////
-    // Alphabetically ordered from here //
-    //////////////////////////////////////
-
     {
-      group: "Ansible",
-      langCode: "yaml",
-      label: "Ansible",
-      func: curlconverter.toAnsible,
+      group: "Bash",
+      langCode: "bash",
+      label: "Wget",
+      func: curlconverter.toWget,
     },
     {
       group: "C",
@@ -288,13 +289,10 @@
       label: "Swift",
       func: curlconverter.toSwift,
     },
-    {
-      group: "Wget",
-      langCode: "bash",
-      label: "Wget",
-      func: curlconverter.toWget,
-    },
   ];
+
+  // Make sure to always have Curl as the default lang
+  const defaultLang = langs[1];
 
   // This takes every lang and puts it into it's group
   const langGroups = $derived.by(() => {
@@ -314,20 +312,20 @@
 
   let pickedLang = $derived.by(() => {
     const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
-    if (!lang) return langs[0].langCode;
+    if (!lang) return defaultLang.langCode;
     return lang.langCode;
   });
 
   let pickedCode = $derived.by(() => {
     const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
-    if (!lang) return langs[0].func(curl);
+    if (!lang) return defaultLang.func(curl);
     return lang.func(curl);
   });
 
   onMount(() => {
     const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
     if (!lang) {
-      uiStore.codeSnippetsLang = langs[0].label;
+      uiStore.codeSnippetsLang = defaultLang.label;
     }
   });
 </script>
