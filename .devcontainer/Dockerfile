@@ -31,8 +31,7 @@ RUN apt update && \
 # Install Node.js using n and global node utilities
 RUN npm install -g n@latest && \
     n 22.15.0 && \
-    npm install -g prettier@3.5.3 && \
-    npm install -g @biomejs/biome@1.9.4
+    npm install -g prettier@3.5.3
 
 # Install downloadable binaries
 RUN set -e && \
