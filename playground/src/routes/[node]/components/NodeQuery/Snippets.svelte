@@ -1,6 +1,5 @@
 <script lang="ts">
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
-  import { json } from "@sveltejs/kit";
   import { fade, slide } from "svelte/transition";
 
   import { store } from "$lib/store.svelte";
@@ -14,14 +13,11 @@
     // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
     value: any;
     procName: string;
-    parentDimensions: UiStoreDimensions | undefined;
   }
 
-  const { value, procName, parentDimensions }: Props = $props();
+  const { value, procName }: Props = $props();
 
   let maxHeight = $derived.by(() => {
-    if (!parentDimensions) return 0;
-
     const heightMargin = 16;
     const windowHeight = globalThis.innerHeight;
     const headerHeight = uiStore.header.size.clientHeight;
