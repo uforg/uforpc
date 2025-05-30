@@ -12,6 +12,11 @@
   scroll-behavior: smooth;
 }
 
+html {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 /* Flatpickr themes */
 [data-theme="dark"] {
   @import "flatpickr/dist/themes/dark.css";
