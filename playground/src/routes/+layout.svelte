@@ -88,7 +88,7 @@
     class="fixed top-0 left-0 flex h-screen w-screen flex-col items-center justify-center"
   >
     <img
-      src="/assets/logo-square.png"
+      src="./assets/logo-square.png"
       alt="UFO RPC Logo"
       class="size-[150px]"
     />

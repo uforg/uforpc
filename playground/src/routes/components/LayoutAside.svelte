@@ -57,7 +57,7 @@
       href="https://uforpc.uforg.dev"
       target="_blank"
     >
-      <img src="/assets/logo.png" alt="UFO RPC Logo" class="h-full" />
+      <img src="./assets/logo.png" alt="UFO RPC Logo" class="h-full" />
       <h1 class="font-bold">UFO RPC Playground</h1>
     </a>
 
