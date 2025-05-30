@@ -82,7 +82,18 @@
     </Tooltip>
 
     {#each store.jsonSchema.nodes as node}
-      <LayoutAsideItem {node} />
+      {#if node.kind === "doc" && !uiStore.asideHideDocs}
+        <LayoutAsideItem {node} />
+      {/if}
+      {#if node.kind === "rule" && !uiStore.asideHideRules}
+        <LayoutAsideItem {node} />
+      {/if}
+      {#if node.kind === "type" && !uiStore.asideHideTypes}
+        <LayoutAsideItem {node} />
+      {/if}
+      {#if node.kind === "proc" && !uiStore.asideHideProcs}
+        <LayoutAsideItem {node} />
+      {/if}
     {/each}
   </nav>
 </aside>
