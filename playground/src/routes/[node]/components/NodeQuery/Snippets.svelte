@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
+  import { json } from "@sveltejs/kit";
   import { fade, slide } from "svelte/transition";
 
   import { store } from "$lib/store.svelte";
@@ -45,7 +46,18 @@
     payloadStr = payloadStr.replace(/'/g, "'\\''");
 
     let c = `curl -X POST ${store.endpoint} \\\n`;
-    c += `-H "Content-Type: application/json" \\\n`;
+
+    let hasContentType = false;
+    for (const header of store.headers) {
+      if (header.key.toLowerCase() === "content-type") hasContentType = true;
+      let rawHeader = `${header.key}: ${header.value}`;
+      c += `-H ${JSON.stringify(rawHeader)} \\\n`;
+    }
+
+    if (!hasContentType) {
+      c += `-H "Content-Type: application/json" \\\n`;
+    }
+
     c += `-d '${payloadStr}'`;
 
     return c;
