@@ -8,6 +8,7 @@
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
+  import LayoutAsideFilters from "./LayoutAsideFilters.svelte";
   import LayoutAsideItem from "./LayoutAsideItem.svelte";
   import LayoutAsideSchemaManager from "./LayoutAsideSchemaManager.svelte";
 
@@ -33,24 +34,36 @@
   use:dimensionschangeAction
   ondimensionschange={(e) => (uiStore.aside = e.detail)}
   class={[
-    "h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[90px] overflow-x-hidden overflow-y-auto",
+    "h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[90px]",
+    "overflow-x-hidden overflow-y-auto",
   ]}
 >
-  <a
+  <header
     class={[
-      "flex items-center space-x-2 whitespace-nowrap",
-      "sticky top-0 z-10 h-[72px] w-full p-4",
-      "bg-base-100/90 backdrop-blur-sm",
+      "bg-base-100/90 sticky top-0 z-10 w-full backdrop-blur-sm",
       {
         "shadow-xs": uiStore.aside.scroll.isTopScrolled,
       },
     ]}
-    href="https://uforpc.uforg.dev"
-    target="_blank"
   >
-    <img src="/assets/logo.png" alt="UFO RPC Logo" class="h-full" />
-    <h1 class="font-bold">UFO RPC Playground</h1>
-  </a>
+    <a
+      class={[
+        "flex items-center space-x-2 whitespace-nowrap",
+        "sticky top-0 z-10 h-[72px] w-full p-4",
+        {
+          "shadow-xs": uiStore.aside.scroll.isTopScrolled,
+        },
+      ]}
+      href="https://uforpc.uforg.dev"
+      target="_blank"
+    >
+      <img src="/assets/logo.png" alt="UFO RPC Logo" class="h-full" />
+      <h1 class="font-bold">UFO RPC Playground</h1>
+    </a>
+
+    <LayoutAsideFilters />
+  </header>
+
   <nav class="p-4">
     <LayoutAsideSchemaManager />
 

@@ -97,6 +97,10 @@ export interface UiStore {
   theme: Theme;
   codeSnippetsOpen: boolean;
   codeSnippetsLang: string;
+  asideHideDocs: boolean;
+  asideHideRules: boolean;
+  asideHideTypes: boolean;
+  asideHideProcs: boolean;
   app: UiStoreDimensions;
   aside: UiStoreDimensions;
   contentWrapper: UiStoreDimensions;
@@ -108,6 +112,10 @@ const localStorageKeys = {
   theme: "theme",
   codeSnippetsOpen: "codeSnippetsOpen",
   codeSnippetsLang: "codeSnippetsLang",
+  asideHideDocs: "asideHideDocs",
+  asideHideRules: "asideHideRules",
+  asideHideTypes: "asideHideTypes",
+  asideHideProcs: "asideHideProcs",
 };
 
 export const uiStore = $state<UiStore>({
@@ -115,6 +123,10 @@ export const uiStore = $state<UiStore>({
   theme: "dark",
   codeSnippetsOpen: false,
   codeSnippetsLang: "curl",
+  asideHideDocs: false,
+  asideHideRules: false,
+  asideHideTypes: false,
+  asideHideProcs: false,
   app: { ...defaultUiStoreDimensions },
   aside: { ...defaultUiStoreDimensions },
   contentWrapper: { ...defaultUiStoreDimensions },
@@ -155,6 +167,30 @@ export const loadUiStore = () => {
   );
   uiStore.codeSnippetsLang = codeSnippetsLang ?? "Curl";
 
+  // Load aside hide docs from local storage
+  const asideHideDocs = globalThis.localStorage.getItem(
+    localStorageKeys.asideHideDocs,
+  );
+  uiStore.asideHideDocs = asideHideDocs === "true";
+
+  // Load aside hide rules from local storage
+  const asideHideRules = globalThis.localStorage.getItem(
+    localStorageKeys.asideHideRules,
+  );
+  uiStore.asideHideRules = asideHideRules === "true";
+
+  // Load aside hide types from local storage
+  const asideHideTypes = globalThis.localStorage.getItem(
+    localStorageKeys.asideHideTypes,
+  );
+  uiStore.asideHideTypes = asideHideTypes === "true";
+
+  // Load aside hide procs from local storage
+  const asideHideProcs = globalThis.localStorage.getItem(
+    localStorageKeys.asideHideProcs,
+  );
+  uiStore.asideHideProcs = asideHideProcs === "true";
+
   uiStore.loaded = true;
 };
 
@@ -178,6 +214,30 @@ export const saveUiStore = () => {
   globalThis.localStorage.setItem(
     localStorageKeys.codeSnippetsLang,
     uiStore.codeSnippetsLang,
+  );
+
+  // Save aside hide docs to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.asideHideDocs,
+    uiStore.asideHideDocs.toString(),
+  );
+
+  // Save aside hide rules to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.asideHideRules,
+    uiStore.asideHideRules.toString(),
+  );
+
+  // Save aside hide types to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.asideHideTypes,
+    uiStore.asideHideTypes.toString(),
+  );
+
+  // Save aside hide procs to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.asideHideProcs,
+    uiStore.asideHideProcs.toString(),
   );
 };
 

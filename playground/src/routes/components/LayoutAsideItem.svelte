@@ -36,7 +36,7 @@
     const deprecated = isDeprecated ? " (Deprecated)" : "";
 
     if (node.kind === "rule") return `${name} validation rule${deprecated}`;
-    if (node.kind === "type") return `${name} type${deprecated}`;
+    if (node.kind === "type") return `${name} data type${deprecated}`;
     if (node.kind === "proc") return `${name} procedure${deprecated}`;
     if (node.kind === "doc") return `${name} documentation${deprecated}`;
     return "Unknown";
