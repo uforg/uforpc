@@ -1,11 +1,14 @@
 <script lang="ts">
-  import { Info } from "@lucide/svelte";
+  import { Info, Loader, Zap } from "@lucide/svelte";
+  import { toast } from "svelte-sonner";
 
+  import { store } from "$lib/store.svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
 
   import H2 from "$lib/components/H2.svelte";
 
   import Field from "./Field.svelte";
+  import Output from "./Output.svelte";
   import Snippets from "./Snippets.svelte";
 
   interface Props {
@@ -15,19 +18,56 @@
   const { proc }: Props = $props();
 
   let value = $state({ root: {} });
-  let output = $state({});
+  let output: object | null = $state(null);
+
+  let isExecuting = $state(false);
+  async function executeProcedure() {
+    if (isExecuting) return;
+    isExecuting = true;
+    output = null;
+
+    try {
+      const headers = new Headers();
+      headers.set("Content-Type", "application/json");
+      for (const header of store.headers) {
+        headers.set(header.key, header.value);
+      }
+
+      const response = await fetch(store.endpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          proc: proc.name,
+          input: value.root,
+        }),
+        headers,
+      });
+
+      const data = await response.json();
+      output = data;
+
+      openOutput();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to send HTTP request", {
+        description: `Error: ${error}`,
+        duration: 5000,
+      });
+    } finally {
+      isExecuting = false;
+    }
+  }
 
   let tab: "input" | "output" = $state("input");
   let wrapper: HTMLDivElement | null = $state(null);
   function openInput() {
     if (tab === "input") return;
     tab = "input";
-    wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
+    wrapper?.scrollIntoView({ behavior: "instant", block: "start" });
   }
   function openOutput() {
     if (tab === "output") return;
     tab = "output";
-    wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
+    wrapper?.scrollIntoView({ behavior: "instant", block: "start" });
   }
 </script>
 
@@ -43,19 +83,13 @@
         <H2>Try {proc.name}</H2>
         <div class="join">
           <button
-            class={[
-              "btn  btn-soft btn-primary join-item",
-              tab === "input" && "btn-active",
-            ]}
+            class={["btn join-item", tab === "input" && "btn-active"]}
             onclick={openInput}
           >
             Input
           </button>
           <button
-            class={[
-              "btn  btn-soft btn-primary join-item",
-              tab === "output" && "btn-active",
-            ]}
+            class={["btn join-item", tab === "output" && "btn-active"]}
             onclick={openOutput}
           >
             Output
@@ -76,6 +110,21 @@
         </div>
 
         <Field fields={proc.input} path="root" bind:value />
+
+        <div class="flex w-full justify-end pt-4">
+          <button
+            class="btn btn-primary"
+            disabled={isExecuting}
+            onclick={executeProcedure}
+          >
+            {#if isExecuting}
+              <Loader class="animate size-4 animate-spin" />
+            {:else}
+              <Zap class="size-4" />
+            {/if}
+            <span>Execute procedure</span>
+          </button>
+        </div>
       </div>
 
       <div
@@ -85,7 +134,7 @@
           block: tab === "output",
         }}
       >
-        Output
+        <Output {output} />
       </div>
     </div>
 
