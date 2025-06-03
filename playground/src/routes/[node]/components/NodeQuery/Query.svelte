@@ -81,7 +81,7 @@
         <div class="join">
           <button
             class={[
-              "btn join-item",
+              "btn join-item border-base-content/20",
               tab === "input" && "btn-primary btn-active",
             ]}
             onclick={openInput}
@@ -91,7 +91,7 @@
           </button>
           <button
             class={[
-              "btn join-item",
+              "btn join-item border-base-content/20",
               tab === "output" && "btn-primary btn-active",
             ]}
             onclick={openOutput}
