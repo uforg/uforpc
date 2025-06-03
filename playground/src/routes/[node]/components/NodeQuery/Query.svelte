@@ -71,11 +71,11 @@
       <div
         class={[
           "sticky top-[72px] z-10 flex w-full items-center justify-between",
-          "bg-base-100 -mt-4 pt-4 pb-2",
+          "bg-base-100 -mt-4 space-x-2 pt-4 pb-2",
         ]}
       >
-        <H2 class="flex items-center space-x-2">
-          <Zap class="size-6" />
+        <H2 class="flex items-center space-x-2 break-all">
+          <Zap class="size-6 flex-none" />
           <span>Try {proc.name}</span>
         </H2>
         <div class="join">
