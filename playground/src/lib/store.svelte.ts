@@ -107,7 +107,7 @@ export const saveStore = () => {
  * @param value The value of the header to add or update.
  */
 export const setHeader = (key: string, value: string) => {
-  const currHeaders = getHeadersRecord();
+  const currHeaders = getHeadersObject();
   currHeaders.set(key, value);
 
   const newHeaders: Header[] = [];
@@ -125,7 +125,7 @@ export const setHeader = (key: string, value: string) => {
  *
  * @returns A Headers object
  */
-export const getHeadersRecord = (): Headers => {
+export const getHeadersObject = (): Headers => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
 

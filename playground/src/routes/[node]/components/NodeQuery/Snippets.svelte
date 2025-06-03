@@ -2,8 +2,8 @@
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
   import { fade, slide } from "svelte/transition";
 
-  import { store } from "$lib/store.svelte";
-  import { uiStore, type UiStoreDimensions } from "$lib/uiStore.svelte";
+  import { getHeadersObject, store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
@@ -43,15 +43,9 @@
 
     let c = `curl -X POST ${store.endpoint} \\\n`;
 
-    let hasContentType = false;
-    for (const header of store.headers) {
-      if (header.key.toLowerCase() === "content-type") hasContentType = true;
-      let rawHeader = `${header.key}: ${header.value}`;
+    for (const header of getHeadersObject().entries()) {
+      let rawHeader = `${header[0]}: ${header[1]}`;
       c += `-H ${JSON.stringify(rawHeader)} \\\n`;
-    }
-
-    if (!hasContentType) {
-      c += `-H "Content-Type: application/json" \\\n`;
     }
 
     c += `-d '${payloadStr}'`;

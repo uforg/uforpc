@@ -2,7 +2,7 @@
   import { Info, Loader, Zap } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
 
-  import { store } from "$lib/store.svelte";
+  import { getHeadersObject, store } from "$lib/store.svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
 
   import H2 from "$lib/components/H2.svelte";
@@ -27,19 +27,13 @@
     output = null;
 
     try {
-      const headers = new Headers();
-      headers.set("Content-Type", "application/json");
-      for (const header of store.headers) {
-        headers.set(header.key, header.value);
-      }
-
       const response = await fetch(store.endpoint, {
         method: "POST",
         body: JSON.stringify({
           proc: proc.name,
           input: value.root,
         }),
-        headers,
+        headers: getHeadersObject(),
       });
 
       const data = await response.json();
