@@ -761,7 +761,7 @@ func TestValidateStructure(t *testing.T) {
 					"output": [
 						{
 							"name": "success",
-							"typeName": "boolean",
+							"typeName": "bool",
 							"isArray": false,
 							"optional": false,
 							"rules": [

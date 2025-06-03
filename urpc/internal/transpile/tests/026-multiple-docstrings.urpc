@@ -58,7 +58,7 @@ type Content {
   contentType: ContentType
   author: User
   tags: string[]
-  published: boolean
+  published: bool
   createdAt: string
   updatedAt: string
 }
@@ -74,12 +74,12 @@ proc CreateContent {
     contentTypeId: string
       @required
     tags: string[]
-    publish: boolean
+    publish: bool
   }
 
   output {
     content: Content
-    success: boolean
+    success: bool
     message: string
   }
 }

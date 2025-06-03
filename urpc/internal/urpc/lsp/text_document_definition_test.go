@@ -25,7 +25,7 @@ proc BarProc {
   }
 
   output {
-    baz: boolean
+    baz: bool
   }
 }`
 
@@ -126,7 +126,7 @@ proc BarProc {
   }
 
   output {
-    baz: boolean
+    baz: bool
   }
 }`
 

@@ -4,7 +4,7 @@ rule
     
             }deprecated
 
-rule @foo {for           : boolean} deprecated( "Deprecated"
+rule @foo {for           : bool} deprecated( "Deprecated"
 )
 rule @foo {param : float}
 rule @foo {error  : "This is an \"error\" \\ message"} 
@@ -28,7 +28,7 @@ error: "Value out of range" }
 rule @foo {}
 
 deprecated rule @foo {
-  for: boolean
+  for: bool
 }
 
 deprecated("Deprecated")

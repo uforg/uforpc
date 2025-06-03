@@ -4,5 +4,5 @@ type Collection {
   id: string
   items: string[]
   matrix: int[]
-  cube: boolean[]
+  cube: bool[]
 }

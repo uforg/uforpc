@@ -68,7 +68,7 @@ func (f *procFormatter) loadNextChild() {
 // Returns:
 //   - The child at the current index +- offset.
 //   - The line diff between the peeked child and the current child.
-//   - A boolean indicating if the peeked child is out of bounds (EOL).
+//   - A bool indicating if the peeked child is out of bounds (EOL).
 func (f *procFormatter) peekChild(offset int) (ast.ProcDeclChild, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex
@@ -274,7 +274,7 @@ func (f *procMetaFormatter) loadNextChild() {
 // Returns:
 //   - The child at the current index +- offset.
 //   - The line diff between the peeked child and the current child.
-//   - A boolean indicating if the peeked child is out of bounds (EOL).
+//   - A bool indicating if the peeked child is out of bounds (EOL).
 func (f *procMetaFormatter) peekChild(offset int) (ast.ProcDeclChildMetaChild, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex

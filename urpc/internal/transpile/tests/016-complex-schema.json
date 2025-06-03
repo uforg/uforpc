@@ -193,7 +193,7 @@
         },
         {
           "name": "isPublished",
-          "typeName": "boolean",
+          "typeName": "bool",
           "isArray": false,
           "optional": false
         }
@@ -270,7 +270,7 @@
         },
         {
           "name": "success",
-          "typeName": "boolean",
+          "typeName": "bool",
           "isArray": false,
           "optional": false
         }
@@ -307,7 +307,7 @@
         },
         {
           "name": "found",
-          "typeName": "boolean",
+          "typeName": "bool",
           "isArray": false,
           "optional": false
         }

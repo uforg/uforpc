@@ -171,7 +171,7 @@
           "name": "published",
           "isArray": false,
           "optional": false,
-          "typeName": "boolean"
+          "typeName": "bool"
         },
         {
           "name": "createdAt",
@@ -230,7 +230,7 @@
           "name": "publish",
           "isArray": false,
           "optional": false,
-          "typeName": "boolean"
+          "typeName": "bool"
         }
       ],
       "output": [
@@ -244,7 +244,7 @@
           "name": "success",
           "isArray": false,
           "optional": false,
-          "typeName": "boolean"
+          "typeName": "bool"
         },
         {
           "name": "message",

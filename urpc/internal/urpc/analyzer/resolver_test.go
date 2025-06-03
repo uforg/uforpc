@@ -665,7 +665,7 @@ func TestResolver(t *testing.T) {
 							id: string
 						}
 						output {
-							success: boolean
+							success: bool
 						}
 					}
 				`,
@@ -682,7 +682,7 @@ func TestResolver(t *testing.T) {
 							@email
 						age: int
 							@min(18)
-						isActive: boolean
+						isActive: bool
 						createdAt: datetime
 						updatedAt: datetime
 					}

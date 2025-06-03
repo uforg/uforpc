@@ -94,7 +94,7 @@ func validateRuleTypeReferences(sch Schema) error {
 		"string":   true,
 		"int":      true,
 		"float":    true,
-		"boolean":  true,
+		"bool":     true,
 		"datetime": true,
 	}
 
@@ -133,7 +133,7 @@ func validateFieldTypeReferences(sch Schema) error {
 		"string":   true,
 		"int":      true,
 		"float":    true,
-		"boolean":  true,
+		"bool":     true,
 		"datetime": true,
 	}
 

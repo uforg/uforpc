@@ -72,7 +72,7 @@
       "output": [
         {
           "name": "result",
-          "typeName": "boolean",
+          "typeName": "bool",
           "isArray": false,
           "optional": false
         }
@@ -93,7 +93,7 @@
       "output": [
         {
           "name": "result",
-          "typeName": "boolean",
+          "typeName": "bool",
           "isArray": false,
           "optional": false
         }

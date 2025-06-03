@@ -57,7 +57,7 @@
                       "name": "enabled",
                       "optional": false,
                       "isArray": false,
-                      "typeName": "boolean"
+                      "typeName": "bool"
                     }
                   ]
                 }

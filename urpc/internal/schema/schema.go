@@ -28,7 +28,7 @@ var (
 	PrimitiveTypeString   = PrimitiveType{Value: "string"}
 	PrimitiveTypeInt      = PrimitiveType{Value: "int"}
 	PrimitiveTypeFloat    = PrimitiveType{Value: "float"}
-	PrimitiveTypeBoolean  = PrimitiveType{Value: "boolean"}
+	PrimitiveTypeBool     = PrimitiveType{Value: "bool"}
 	PrimitiveTypeDatetime = PrimitiveType{Value: "datetime"}
 )
 
@@ -44,10 +44,10 @@ func (f *ParamPrimitiveType) UnmarshalJSON(data []byte) error {
 }
 
 var (
-	ParamPrimitiveTypeString  = ParamPrimitiveType{Value: "string"}
-	ParamPrimitiveTypeInt     = ParamPrimitiveType{Value: "int"}
-	ParamPrimitiveTypeFloat   = ParamPrimitiveType{Value: "float"}
-	ParamPrimitiveTypeBoolean = ParamPrimitiveType{Value: "boolean"}
+	ParamPrimitiveTypeString = ParamPrimitiveType{Value: "string"}
+	ParamPrimitiveTypeInt    = ParamPrimitiveType{Value: "int"}
+	ParamPrimitiveTypeFloat  = ParamPrimitiveType{Value: "float"}
+	ParamPrimitiveTypeBool   = ParamPrimitiveType{Value: "bool"}
 )
 
 ////////////////////
@@ -285,7 +285,7 @@ func (mv *MetaValue) UnmarshalJSON(data []byte) error {
 	case bool:
 		mv.BoolVal = &v
 	default:
-		return fmt.Errorf("invalid meta value type: expected string, number, or boolean, got %T", v)
+		return fmt.Errorf("invalid meta value type: expected string, number, or bool, got %T", v)
 	}
 	return nil
 }
@@ -349,7 +349,7 @@ func (fd *FieldDefinition) IsInline() bool {
 
 // IsBuiltInType checks if the field definition uses a built-in type.
 func (fd *FieldDefinition) IsBuiltInType() bool {
-	return fd.IsNamed() && slices.Contains([]string{"string", "int", "float", "boolean", "datetime"}, *fd.TypeName)
+	return fd.IsNamed() && slices.Contains([]string{"string", "int", "float", "bool", "datetime"}, *fd.TypeName)
 }
 
 // IsCustomType checks if the field definition uses a custom type.

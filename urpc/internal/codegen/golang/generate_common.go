@@ -39,7 +39,7 @@ func renderField(parentTypeName string, field schema.FieldDefinition) string {
 			typeLiteral = "int"
 		case "float":
 			typeLiteral = "float64"
-		case "boolean":
+		case "bool":
 			typeLiteral = "bool"
 		case "datetime":
 			typeLiteral = "time.Time"
@@ -127,7 +127,7 @@ func renderPreField(parentTypeName string, field schema.FieldDefinition) string 
 			typeLiteral = "int"
 		case "float":
 			typeLiteral = "float64"
-		case "boolean":
+		case "bool":
 			typeLiteral = "bool"
 		case "datetime":
 			typeLiteral = "time.Time"

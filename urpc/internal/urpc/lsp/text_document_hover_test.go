@@ -24,7 +24,7 @@ proc BarProc {
   }
 
   output {
-    baz: boolean
+    baz: bool
   }
 }`
 
@@ -46,7 +46,7 @@ proc BarProc {
 			name:      "Extract proc definition",
 			startLine: 7,
 			endLine:   15,
-			want:      "\nproc BarProc {\n  input {\n    foo: FooType\n  }\n\n  output {\n    baz: boolean\n  }",
+			want:      "\nproc BarProc {\n  input {\n    foo: FooType\n  }\n\n  output {\n    baz: bool\n  }",
 			wantErr:   false,
 		},
 		{
@@ -107,7 +107,7 @@ proc BarProc {
   }
 
   output {
-    baz: boolean
+    baz: bool
   }
 }`
 

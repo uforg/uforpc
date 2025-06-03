@@ -117,7 +117,7 @@
       "output": [
         {
           "name": "isValid",
-          "typeName": "boolean",
+          "typeName": "bool",
           "isArray": false,
           "optional": false
         },

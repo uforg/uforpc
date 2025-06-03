@@ -11,6 +11,6 @@ proc GetUser {
       name: string
       email: string
     }
-    success: boolean
+    success: bool
   }
 }

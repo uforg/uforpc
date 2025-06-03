@@ -51,7 +51,7 @@
                 "name": "inStock",
                 "optional": true,
                 "isArray": false,
-                "typeName": "boolean"
+                "typeName": "bool"
               }
             ]
           }
@@ -173,13 +173,13 @@
                 "name": "hasNextPage",
                 "optional": false,
                 "isArray": false,
-                "typeName": "boolean"
+                "typeName": "bool"
               },
               {
                 "name": "hasPreviousPage",
                 "optional": false,
                 "isArray": false,
-                "typeName": "boolean"
+                "typeName": "bool"
               }
             ]
           }

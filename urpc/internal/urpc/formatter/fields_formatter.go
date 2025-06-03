@@ -64,7 +64,7 @@ func (f *fieldsFormatter) loadNextChild() {
 // Returns:
 //   - The child at the current index +- offset.
 //   - The line diff between the peeked child and the current child.
-//   - A boolean indicating if the peeked child is out of bounds (EOL).
+//   - A bool indicating if the peeked child is out of bounds (EOL).
 func (f *fieldsFormatter) peekChild(offset int) (ast.FieldOrComment, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex
@@ -277,7 +277,7 @@ func (f *fieldRulesFormatter) loadNextChild() {
 // Returns:
 //   - The child at the current index +- offset.
 //   - The line diff between the peeked child and the current child.
-//   - A boolean indicating if the peeked child is out of bounds (EOL).
+//   - A bool indicating if the peeked child is out of bounds (EOL).
 func (f *fieldRulesFormatter) peekChild(offset int) (ast.FieldChild, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex
@@ -393,8 +393,8 @@ func (f *fieldRulesFormatter) formatRule() {
 			hasParam = true
 		}
 
-		if f.currentIndexChild.Rule.Body.ParamListBoolean != nil {
-			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListBoolean, ", "))
+		if f.currentIndexChild.Rule.Body.ParamListBool != nil {
+			f.g.Inlinef("[%s]", strings.Join(f.currentIndexChild.Rule.Body.ParamListBool, ", "))
 			hasParam = true
 		}
 

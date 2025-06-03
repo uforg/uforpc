@@ -46,7 +46,7 @@ type BlogPost {
   }
   tags: string[]
     @tags(5)
-  isPublished: boolean
+  isPublished: bool
 }
 
 """Creates a new blog post"""
@@ -63,7 +63,7 @@ proc CreatePost {
 
   output {
     post: BlogPost
-    success: boolean
+    success: bool
   }
 
   meta {
@@ -80,6 +80,6 @@ proc GetPost {
 
   output {
     post?: BlogPost
-    found: boolean
+    found: bool
   }
 }

@@ -61,7 +61,7 @@ func (f *ruleFormatter) loadNextChild() {
 // Returns:
 //   - The child at the current index +- offset.
 //   - The line diff between the peeked child and the current child.
-//   - A boolean indicating if the peeked child is out of bounds (EOL).
+//   - A bool indicating if the peeked child is out of bounds (EOL).
 func (f *ruleFormatter) peekChild(offset int) (ast.RuleDeclChild, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex

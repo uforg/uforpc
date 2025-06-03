@@ -140,7 +140,7 @@ func (a *semanalyzer) validateCustomTypeReferences() {
 		"string":   true,
 		"int":      true,
 		"float":    true,
-		"boolean":  true,
+		"bool":     true,
 		"datetime": true,
 	}
 
@@ -479,7 +479,7 @@ func (a *semanalyzer) validateCustomRuleReferences() {
 		"string":   {"equals", "contains", "minlen", "maxlen", "enum", "lowercase", "uppercase"},
 		"int":      {"equals", "min", "max", "enum"},
 		"float":    {"min", "max"},
-		"boolean":  {"equals"},
+		"bool":     {"equals"},
 		"array":    {"minlen", "maxlen"},
 		"datetime": {"min", "max"},
 	}

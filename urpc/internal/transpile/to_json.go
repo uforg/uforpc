@@ -127,8 +127,8 @@ func convertParamTypeToJSON(paramType string) (schema.ParamPrimitiveType, error)
 		return schema.ParamPrimitiveTypeInt, nil
 	case "float":
 		return schema.ParamPrimitiveTypeFloat, nil
-	case "boolean":
-		return schema.ParamPrimitiveTypeBoolean, nil
+	case "bool":
+		return schema.ParamPrimitiveTypeBool, nil
 	default:
 		return schema.ParamPrimitiveType{}, fmt.Errorf("invalid parameter type: %s", paramType)
 	}
@@ -238,7 +238,7 @@ func convertFieldRuleToJSON(fieldRule *ast.FieldRule) (schema.AppliedRule, error
 		len(fieldRule.Body.ParamListString) > 0 ||
 		len(fieldRule.Body.ParamListInt) > 0 ||
 		len(fieldRule.Body.ParamListFloat) > 0 ||
-		len(fieldRule.Body.ParamListBoolean) > 0 {
+		len(fieldRule.Body.ParamListBool) > 0 {
 
 		param := &schema.AppliedParam{}
 
@@ -269,10 +269,10 @@ func convertFieldRuleToJSON(fieldRule *ast.FieldRule) (schema.AppliedRule, error
 			param.IsArray = true
 			param.ArrayValues = fieldRule.Body.ParamListFloat
 		}
-		if len(fieldRule.Body.ParamListBoolean) > 0 {
-			param.Type = schema.ParamPrimitiveTypeBoolean
+		if len(fieldRule.Body.ParamListBool) > 0 {
+			param.Type = schema.ParamPrimitiveTypeBool
 			param.IsArray = true
-			param.ArrayValues = fieldRule.Body.ParamListBoolean
+			param.ArrayValues = fieldRule.Body.ParamListBool
 		}
 
 		rule.Param = param
@@ -293,10 +293,10 @@ func extractParamValue(literal ast.AnyLiteral) (schema.ParamPrimitiveType, strin
 		return schema.ParamPrimitiveTypeFloat, *literal.Float, nil
 	}
 	if literal.True != nil {
-		return schema.ParamPrimitiveTypeBoolean, "true", nil
+		return schema.ParamPrimitiveTypeBool, "true", nil
 	}
 	if literal.False != nil {
-		return schema.ParamPrimitiveTypeBoolean, "false", nil
+		return schema.ParamPrimitiveTypeBool, "false", nil
 	}
 
 	return schema.ParamPrimitiveType{}, "", fmt.Errorf("empty literal value")

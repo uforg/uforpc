@@ -134,8 +134,8 @@ func convertParamTypeToURPC(paramType schema.ParamPrimitiveType) (string, error)
 		return "int", nil
 	case schema.ParamPrimitiveTypeFloat:
 		return "float", nil
-	case schema.ParamPrimitiveTypeBoolean:
-		return "boolean", nil
+	case schema.ParamPrimitiveTypeBool:
+		return "bool", nil
 	default:
 		return "", fmt.Errorf("invalid parameter type: %s", paramType.Value)
 	}
@@ -267,8 +267,8 @@ func convertAppliedRuleToURPC(rule schema.AppliedRule) (*ast.FieldRule, error) {
 					body.ParamListInt = rule.Param.ArrayValues
 				case "float":
 					body.ParamListFloat = rule.Param.ArrayValues
-				case "boolean":
-					body.ParamListBoolean = rule.Param.ArrayValues
+				case "bool":
+					body.ParamListBool = rule.Param.ArrayValues
 				default:
 					return nil, fmt.Errorf("unsupported array parameter type: %s", rule.Param.Type.Value)
 				}
@@ -292,7 +292,7 @@ func convertParamValueToURPC(paramType schema.ParamPrimitiveType, value string) 
 		literal.Int = &value
 	case "float":
 		literal.Float = &value
-	case "boolean":
+	case "bool":
 		if value == "true" {
 			t := "true"
 			literal.True = &t

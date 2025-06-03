@@ -81,7 +81,7 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false for param string int float boolean import datetime deprecated"
+		input := "version rule type proc input output meta error true false for param string int float bool import datetime deprecated extends"
 
 		tests := []token.Token{
 			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 1, LineEnd: 1, ColumnStart: 1, ColumnEnd: 7},
@@ -114,14 +114,16 @@ func TestLexer(t *testing.T) {
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 79, LineEnd: 1, ColumnEnd: 79},
 			{Type: token.Float, Literal: "float", FileName: "test.urpc", LineStart: 1, ColumnStart: 80, LineEnd: 1, ColumnEnd: 84},
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 85, LineEnd: 1, ColumnEnd: 85},
-			{Type: token.Boolean, Literal: "boolean", FileName: "test.urpc", LineStart: 1, ColumnStart: 86, LineEnd: 1, ColumnEnd: 92},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 93, LineEnd: 1, ColumnEnd: 93},
-			{Type: token.Import, Literal: "import", FileName: "test.urpc", LineStart: 1, ColumnStart: 94, LineEnd: 1, ColumnEnd: 99},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 100, LineEnd: 1, ColumnEnd: 100},
-			{Type: token.Datetime, Literal: "datetime", FileName: "test.urpc", LineStart: 1, ColumnStart: 101, LineEnd: 1, ColumnEnd: 108},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 109, LineEnd: 1, ColumnEnd: 109},
-			{Type: token.Deprecated, Literal: "deprecated", FileName: "test.urpc", LineStart: 1, ColumnStart: 110, LineEnd: 1, ColumnEnd: 119},
-			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 120, LineEnd: 1, ColumnEnd: 120},
+			{Type: token.Bool, Literal: "bool", FileName: "test.urpc", LineStart: 1, ColumnStart: 86, LineEnd: 1, ColumnEnd: 89},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 90, LineEnd: 1, ColumnEnd: 90},
+			{Type: token.Import, Literal: "import", FileName: "test.urpc", LineStart: 1, ColumnStart: 91, LineEnd: 1, ColumnEnd: 96},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 97, LineEnd: 1, ColumnEnd: 97},
+			{Type: token.Datetime, Literal: "datetime", FileName: "test.urpc", LineStart: 1, ColumnStart: 98, LineEnd: 1, ColumnEnd: 105},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 106, LineEnd: 1, ColumnEnd: 106},
+			{Type: token.Deprecated, Literal: "deprecated", FileName: "test.urpc", LineStart: 1, ColumnStart: 107, LineEnd: 1, ColumnEnd: 116},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 117, LineEnd: 1, ColumnEnd: 117},
+			{Type: token.Extends, Literal: "extends", FileName: "test.urpc", LineStart: 1, ColumnStart: 118, LineEnd: 1, ColumnEnd: 124},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 125, LineEnd: 1, ColumnEnd: 125},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
@@ -585,7 +587,7 @@ func TestLexer(t *testing.T) {
 
 			""" Product is a type that represents a product. """
 			deprecated("This type will be removed in v2.0")
-			type Product {
+			type Product extends BaseProduct, OtherType {
 				id: string
 					@uuid
 					@minLen(36)
@@ -610,7 +612,7 @@ func TestLexer(t *testing.T) {
 				}
 				
 				output {
-					success: boolean
+					success: bool
 					productId: string
 						@uuid
 				}
@@ -634,6 +636,10 @@ func TestLexer(t *testing.T) {
 			{Type: token.RParen, Literal: ")"},
 			{Type: token.Type, Literal: "type"},
 			{Type: token.Ident, Literal: "Product"},
+			{Type: token.Extends, Literal: "extends"},
+			{Type: token.Ident, Literal: "BaseProduct"},
+			{Type: token.Comma, Literal: ","},
+			{Type: token.Ident, Literal: "OtherType"},
 			{Type: token.LBrace, Literal: "{"},
 			{Type: token.Ident, Literal: "id"},
 			{Type: token.Colon, Literal: ":"},
@@ -710,7 +716,7 @@ func TestLexer(t *testing.T) {
 			{Type: token.LBrace, Literal: "{"},
 			{Type: token.Ident, Literal: "success"},
 			{Type: token.Colon, Literal: ":"},
-			{Type: token.Boolean, Literal: "boolean"},
+			{Type: token.Bool, Literal: "bool"},
 			{Type: token.Ident, Literal: "productId"},
 			{Type: token.Colon, Literal: ":"},
 			{Type: token.String, Literal: "string"},

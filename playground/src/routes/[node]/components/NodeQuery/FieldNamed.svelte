@@ -44,7 +44,7 @@
     if (field.typeName === "string") value = "";
     if (field.typeName === "int") value = 0;
     if (field.typeName === "float") value = 0;
-    if (field.typeName === "boolean") value = false;
+    if (field.typeName === "bool") value = false;
     if (field.typeName === "datetime") {
       let now = new Date();
       if (flatpickrInstance) flatpickrInstance.setDate(now);
@@ -65,7 +65,7 @@
       return "number";
     }
 
-    if (field.typeName === "boolean") {
+    if (field.typeName === "bool") {
       return "checkbox";
     }
 

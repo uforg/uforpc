@@ -17,7 +17,7 @@
           "name": "success",
           "optional": false,
           "isArray": false,
-          "typeName": "boolean"
+          "typeName": "bool"
         },
         {
           "name": "message",

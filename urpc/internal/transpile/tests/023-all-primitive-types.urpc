@@ -4,24 +4,24 @@ type AllPrimitives {
   stringValue: string
   intValue: int
   floatValue: float
-  booleanValue: boolean
+  booleanValue: bool
   datetimeValue: datetime
 
   stringArrayValue: string[]
   intArrayValue: int[]
   floatArrayValue: float[]
-  booleanArrayValue: boolean[]
+  booleanArrayValue: bool[]
   datetimeArrayValue: datetime[]
 
   stringArrayArrayValue: string[]
   intArrayArrayValue: int[]
   floatArrayArrayValue: float[]
-  booleanArrayArrayValue: boolean[]
+  booleanArrayArrayValue: bool[]
   datetimeArrayArrayValue: datetime[]
 
   optionalString?: string
   optionalInt?: int
   optionalFloat?: float
-  optionalBoolean?: boolean
+  optionalBoolean?: bool
   optionalDatetime?: datetime
 }

@@ -57,6 +57,7 @@ const (
 	Deprecated TokenType = "Deprecated"
 	Rule       TokenType = "Rule"
 	Type       TokenType = "Type"
+	Extends    TokenType = "Extends"
 	Proc       TokenType = "Proc"
 	Input      TokenType = "Input"
 	Output     TokenType = "Output"
@@ -67,7 +68,7 @@ const (
 	String     TokenType = "String"
 	Int        TokenType = "Int"
 	Float      TokenType = "Float"
-	Boolean    TokenType = "Boolean"
+	Bool       TokenType = "Bool"
 	Datetime   TokenType = "Datetime"
 )
 
@@ -109,6 +110,7 @@ var TokenTypes = []TokenType{
 	Deprecated,
 	Rule,
 	Type,
+	Extends,
 	Proc,
 	Input,
 	Output,
@@ -119,7 +121,7 @@ var TokenTypes = []TokenType{
 	String,
 	Int,
 	Float,
-	Boolean,
+	Bool,
 	Datetime,
 }
 
@@ -156,6 +158,7 @@ var keywords = map[string]TokenType{
 	"deprecated": Deprecated,
 	"rule":       Rule,
 	"type":       Type,
+	"extends":    Extends,
 	"proc":       Proc,
 	"input":      Input,
 	"output":     Output,
@@ -166,7 +169,7 @@ var keywords = map[string]TokenType{
 	"string":     String,
 	"int":        Int,
 	"float":      Float,
-	"boolean":    Boolean,
+	"bool":       Bool,
 	"datetime":   Datetime,
 }
 

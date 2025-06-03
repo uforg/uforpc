@@ -9,7 +9,7 @@ proc SearchResults {
       category?: string
       minPrice?: float
       maxPrice?: float
-      inStock?: boolean
+      inStock?: bool
     }
     sort: {
       field: string
@@ -34,8 +34,8 @@ proc SearchResults {
       currentPage: int
       totalPages: int
       totalResults: int
-      hasNextPage: boolean
-      hasPreviousPage: boolean
+      hasNextPage: bool
+      hasPreviousPage: bool
     }
     facets: {
       name: string

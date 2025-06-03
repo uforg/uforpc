@@ -5,12 +5,12 @@ proc Login {
   input {
     username: string
     password: string
-    rememberMe: boolean
+    rememberMe: bool
   }
 
   output {
     token: string
     expiresAt: datetime
-    success: boolean
+    success: bool
   }
 }

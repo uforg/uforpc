@@ -9,7 +9,7 @@ proc CreateUser {
 
   output {
     userId: string
-    success: boolean
+    success: bool
   }
 
   meta {

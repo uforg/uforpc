@@ -218,13 +218,13 @@
     "PrimitiveTypeEnum": {
       "description": "Enumeration of allowed primitive type names.",
       "type": "string",
-      "enum": ["string", "int", "float", "boolean", "datetime"]
+      "enum": ["string", "int", "float", "bool", "datetime"]
     },
 
     "paramPrimitiveTypeEnum": {
       "description": "Enumeration of allowed primitive type names for rule parameters.",
       "type": "string",
-      "enum": ["string", "int", "float", "boolean"]
+      "enum": ["string", "int", "float", "bool"]
     },
 
     "fieldDefinition": {

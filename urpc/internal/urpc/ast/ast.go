@@ -188,14 +188,14 @@ type RuleDeclChild struct {
 // RuleDeclChildFor represents the "for" clause within a RuleDecl block.
 type RuleDeclChildFor struct {
 	Positions
-	Type    string `parser:"For Colon @(Ident | String | Int | Float | Boolean | Datetime)"`
+	Type    string `parser:"For Colon @(Ident | String | Int | Float | Bool | Datetime)"`
 	IsArray bool   `parser:"@(LBracket RBracket)?"`
 }
 
 // RuleDeclChildParam represents the "param" clause within a RuleDecl block.
 type RuleDeclChildParam struct {
 	Positions
-	Param   string `parser:"Param Colon @(String | Int | Float | Boolean)"`
+	Param   string `parser:"Param Colon @(String | Int | Float | Bool)"`
 	IsArray bool   `parser:"@(LBracket RBracket)?"`
 }
 
@@ -274,7 +274,7 @@ type Docstring struct {
 	Value string `parser:"@Docstring"`
 }
 
-// GetExternal returns a path and a boolean indicating if the docstring
+// GetExternal returns a path and a bool indicating if the docstring
 // references an external Markdown file.
 func (d Docstring) GetExternal() (string, bool) {
 	trimmed := strings.TrimSpace(d.Value)
@@ -365,7 +365,7 @@ type FieldType struct {
 // FieldTypeBase represents the base type of a field (primitive, named, or inline object).
 type FieldTypeBase struct {
 	Positions
-	Named  *string          `parser:"@(Ident | String | Int | Float | Boolean | Datetime)"`
+	Named  *string          `parser:"@(Ident | String | Int | Float | Bool | Datetime)"`
 	Object *FieldTypeObject `parser:"| @@"`
 }
 
@@ -387,11 +387,11 @@ type FieldRule struct {
 type FieldRuleBody struct {
 	Positions
 	// Parameters are captured positionally; validation must ensure correct number/type.
-	ParamSingle      *AnyLiteral `parser:"@@?"`
-	ParamListString  []string    `parser:"(LBracket @StringLiteral (Comma @StringLiteral)* RBracket)?"`
-	ParamListInt     []string    `parser:"(LBracket @IntLiteral (Comma @IntLiteral)* RBracket)?"`
-	ParamListFloat   []string    `parser:"(LBracket @FloatLiteral (Comma @FloatLiteral)* RBracket)?"`
-	ParamListBoolean []string    `parser:"(LBracket @(TrueLiteral | FalseLiteral) (Comma @(TrueLiteral | FalseLiteral))* RBracket)?"`
+	ParamSingle     *AnyLiteral `parser:"@@?"`
+	ParamListString []string    `parser:"(LBracket @StringLiteral (Comma @StringLiteral)* RBracket)?"`
+	ParamListInt    []string    `parser:"(LBracket @IntLiteral (Comma @IntLiteral)* RBracket)?"`
+	ParamListFloat  []string    `parser:"(LBracket @FloatLiteral (Comma @FloatLiteral)* RBracket)?"`
+	ParamListBool   []string    `parser:"(LBracket @(TrueLiteral | FalseLiteral) (Comma @(TrueLiteral | FalseLiteral))* RBracket)?"`
 	// Error clause, if present, must appear after parameters.
 	Error *string `parser:"(Comma? Error Colon @StringLiteral)?"`
 }

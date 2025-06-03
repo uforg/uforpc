@@ -400,7 +400,7 @@ func TestSemanalyzer_BuiltInRuleValidation(t *testing.T) {
 		    @min(0.0)
 		    @max(999.99)
 
-		  isActive: boolean
+		  isActive: bool
 		    @equals(true)
 
 		  tags: string[]
@@ -883,7 +883,7 @@ func TestSemanalyzer_ProcWithMultipleOutputSections(t *testing.T) {
 			// Procedure with multiple 'output' sections
 			proc InvalidProc {
 			  output {
-			    success: boolean
+			    success: bool
 			  }
 
 			  output {  // Duplicate 'output' section
@@ -971,7 +971,7 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		    @minlen(8)
 		  age: int
 		    @range([18, 120], error: "Age must be between 18 and 120")
-		  isActive: boolean
+		  isActive: bool
 		    @equals(true)
 		  address: Address
 		  tags: string[]
@@ -983,7 +983,7 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		    preferences: {
 		      theme: string
 		        @enum(["light", "dark", "system"])
-		      notifications: boolean
+		      notifications: bool
 		    }
 		  }
 		}
@@ -994,7 +994,7 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		  }
 
 		  output {
-		    success: boolean
+		    success: bool
 		    userId: string
 		    errors: string[]
 		  }

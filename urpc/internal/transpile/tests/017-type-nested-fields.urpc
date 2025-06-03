@@ -10,7 +10,7 @@ type DeepNestedType {
         }
         count: int
       }
-      enabled: boolean
+      enabled: bool
     }
     metadata: string
   }

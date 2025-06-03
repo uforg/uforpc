@@ -28,7 +28,7 @@
     return [];
   }
 
-  const primitiveTypes = ["string", "int", "float", "boolean", "datetime"];
+  const primitiveTypes = ["string", "int", "float", "bool", "datetime"];
 
   let fieldsArray = $derived.by(() => {
     let arr = Array.isArray(fieldOrFields) ? fieldOrFields : [fieldOrFields];

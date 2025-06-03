@@ -611,7 +611,7 @@ func TestParserField(t *testing.T) {
 				field1: string
 				field2: int
 				field3: float
-				field4: boolean
+				field4: bool
 				field5: datetime
 			}
 		`
@@ -652,7 +652,7 @@ func TestParserField(t *testing.T) {
 								Field: &ast.Field{
 									Name: "field4",
 									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: testutil.Pointer("boolean")},
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("bool")},
 									},
 								},
 							},
@@ -960,7 +960,7 @@ func TestParserField(t *testing.T) {
 											Rule: &ast.FieldRule{
 												Name: "enum",
 												Body: &ast.FieldRuleBody{
-													ParamListBoolean: []string{"true", "false"},
+													ParamListBool: []string{"true", "false"},
 												},
 											},
 										},
@@ -2277,7 +2277,7 @@ func TestParserFullSchema(t *testing.T) {
 			name: string
 				@minlen(3, error: "Name must be at least 3 characters long")
 			description?: string
-			isActive: boolean
+			isActive: bool
 				@equals(true)
 			parentId?: string
 				@uuid
@@ -2347,7 +2347,7 @@ func TestParserFullSchema(t *testing.T) {
 
 			output {
 				category: Category
-				exists: boolean
+				exists: bool
 			}
 
 			meta {
@@ -2368,15 +2368,15 @@ func TestParserFullSchema(t *testing.T) {
 			input {
 				product: Product
 				options?: {
-					draft: boolean
-					notify: boolean
+					draft: bool
+					notify: bool
 					scheduledFor?: string
 						@iso8601(error: "Must be a valid ISO8601 date")
 					tags?: string[]
 				}
 
 				validation: {
-					skipValidation?: boolean
+					skipValidation?: bool
 					customRules?: {
 						name: string
 						severity: int
@@ -2387,7 +2387,7 @@ func TestParserFullSchema(t *testing.T) {
 			}
 
 			output {
-				success: boolean
+				success: bool
 				productId: string
 					@uuid(error: "Product ID must be a valid UUID")
 				errors?: {
@@ -2401,7 +2401,7 @@ func TestParserFullSchema(t *testing.T) {
 					processingSteps: {
 						name: string
 						duration: float
-						success: boolean
+						success: bool
 					}[]
 					serverInfo: {
 						id: string
@@ -2666,7 +2666,7 @@ func TestParserFullSchema(t *testing.T) {
 								Name: "isActive",
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
-										Named: testutil.Pointer("boolean"),
+										Named: testutil.Pointer("bool"),
 									},
 								},
 								Children: []*ast.FieldChild{
@@ -3147,7 +3147,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "exists",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: testutil.Pointer("boolean"),
+													Named: testutil.Pointer("bool"),
 												},
 											},
 										},
@@ -3224,7 +3224,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name: "draft",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: testutil.Pointer("boolean"),
+																			Named: testutil.Pointer("bool"),
 																		},
 																	},
 																},
@@ -3234,7 +3234,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Name: "notify",
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: testutil.Pointer("boolean"),
+																			Named: testutil.Pointer("bool"),
 																		},
 																	},
 																},
@@ -3291,7 +3291,7 @@ func TestParserFullSchema(t *testing.T) {
 																	Optional: true,
 																	Type: ast.FieldType{
 																		Base: &ast.FieldTypeBase{
-																			Named: testutil.Pointer("boolean"),
+																			Named: testutil.Pointer("bool"),
 																		},
 																	},
 																},
@@ -3373,7 +3373,7 @@ func TestParserFullSchema(t *testing.T) {
 											Name: "success",
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
-													Named: testutil.Pointer("boolean"),
+													Named: testutil.Pointer("bool"),
 												},
 											},
 										},
@@ -3494,7 +3494,7 @@ func TestParserFullSchema(t *testing.T) {
 																							Name: "success",
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
-																									Named: testutil.Pointer("boolean"),
+																									Named: testutil.Pointer("bool"),
 																								},
 																							},
 																						},

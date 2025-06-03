@@ -27,7 +27,7 @@
           "name": "booleanValue",
           "isArray": false,
           "optional": false,
-          "typeName": "boolean"
+          "typeName": "bool"
         },
         {
           "name": "datetimeValue",
@@ -57,7 +57,7 @@
           "name": "booleanArrayValue",
           "isArray": true,
           "optional": false,
-          "typeName": "boolean"
+          "typeName": "bool"
         },
         {
           "name": "datetimeArrayValue",
@@ -87,7 +87,7 @@
           "name": "booleanArrayArrayValue",
           "isArray": true,
           "optional": false,
-          "typeName": "boolean"
+          "typeName": "bool"
         },
         {
           "name": "datetimeArrayArrayValue",
@@ -117,7 +117,7 @@
           "name": "optionalBoolean",
           "isArray": false,
           "optional": true,
-          "typeName": "boolean"
+          "typeName": "bool"
         },
         {
           "name": "optionalDatetime",

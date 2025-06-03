@@ -6,7 +6,7 @@ proc ComplexMetadata {
   }
 
   output {
-    success: boolean
+    success: bool
     message: string
   }
 

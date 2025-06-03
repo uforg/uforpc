@@ -8,7 +8,7 @@ type Foo {
 
 
 
-  field4: boolean @equals(true) field5: datetime @min("2021-01-01") @max("2021-12-31")
+  field4: bool @equals(true) field5: datetime @min("2021-01-01") @max("2021-12-31")
 
   field6: string @minlen(3) @maxlen(100,
   error: "Name too long")
@@ -52,7 +52,7 @@ type Foo {
     @min(0.0)
     @max(100.0)
 
-  field4: boolean
+  field4: bool
     @equals(true)
   field5: datetime
     @min("2021-01-01")

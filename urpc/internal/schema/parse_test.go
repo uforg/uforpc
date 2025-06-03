@@ -610,7 +610,7 @@ func TestBasicMetaValue(t *testing.T) {
 		require.Equal(t, floatVal, *newMV.FloatVal)
 	})
 
-	t.Run("Boolean value", func(t *testing.T) {
+	t.Run("Bool value", func(t *testing.T) {
 		boolVal := true
 		mv := MetaValue{BoolVal: &boolVal}
 
