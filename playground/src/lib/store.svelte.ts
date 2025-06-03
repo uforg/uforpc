@@ -101,18 +101,39 @@ export const saveStore = () => {
 };
 
 /**
- * Converts the headers array to a record for use in fetch requests
+ * Add or update a header in the store.headers array.
  *
- * @returns A record of header key-value pairs
+ * @param key The key of the header to add or update.
+ * @param value The value of the header to add or update.
  */
-export const getHeadersRecord = (): Record<string, string> => {
-  const record: Record<string, string> = {};
-  for (const header of store.headers) {
-    if (header.key.trim()) {
-      record[header.key] = header.value;
-    }
+export const setHeader = (key: string, value: string) => {
+  const currHeaders = getHeadersRecord();
+  currHeaders.set(key, value);
+
+  const newHeaders: Header[] = [];
+  for (const header of currHeaders.entries()) {
+    newHeaders.push({ key: header[0], value: header[1] });
   }
-  return record;
+
+  store.headers = newHeaders;
+};
+
+/**
+ * Converts the headers array to a Headers object for use in fetch requests
+ * it will set the "Content-Type" header to "application/json" by default
+ * if that header is not present in the store.headers array.
+ *
+ * @returns A Headers object
+ */
+export const getHeadersRecord = (): Headers => {
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+
+  for (const header of store.headers) {
+    if (header.key.trim()) headers.set(header.key, header.value);
+  }
+
+  return headers;
 };
 
 /**
