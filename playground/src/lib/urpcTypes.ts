@@ -8,7 +8,7 @@
 /**
  * Enumeration of allowed primitive type names.
  */
-export type PrimitiveTypeEnum = "string" | "int" | "float" | "boolean" | "datetime";
+export type PrimitiveTypeEnum = "string" | "int" | "float" | "bool" | "datetime";
 /**
  * The parameter value(s) passed to the rule instance (null if none).
  */
@@ -86,7 +86,7 @@ export interface ParameterDefinition {
   /**
    * The primitive type expected for the parameter (excluding datetime).
    */
-  type: "string" | "int" | "float" | "boolean";
+  type: "string" | "int" | "float" | "bool";
   /**
    * Indicates if the parameter is expected to be an array of the specified type.
    */
