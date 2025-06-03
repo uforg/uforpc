@@ -56,12 +56,12 @@
   function openInput() {
     if (tab === "input") return;
     tab = "input";
-    wrapper?.scrollIntoView({ behavior: "instant", block: "start" });
+    wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   function openOutput() {
     if (tab === "output") return;
     tab = "output";
-    wrapper?.scrollIntoView({ behavior: "instant", block: "start" });
+    wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 </script>
 
