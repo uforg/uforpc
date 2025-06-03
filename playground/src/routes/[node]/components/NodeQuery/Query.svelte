@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Info, Loader, Zap } from "@lucide/svelte";
+  import { Info, Loader, MoveDownLeft, MoveUpRight, Zap } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
 
   import { getHeadersObject, store } from "$lib/store.svelte";
@@ -77,16 +77,24 @@
         <H2>Try {proc.name}</H2>
         <div class="join">
           <button
-            class={["btn join-item", tab === "input" && "btn-active"]}
+            class={[
+              "btn join-item",
+              tab === "input" && "btn-primary btn-active",
+            ]}
             onclick={openInput}
           >
+            <MoveUpRight class="size-4" />
             Input
           </button>
           <button
-            class={["btn join-item", tab === "output" && "btn-active"]}
+            class={[
+              "btn join-item",
+              tab === "output" && "btn-primary btn-active",
+            ]}
             onclick={openOutput}
           >
-            Output
+            <MoveDownLeft class="size-4" />
+            <span>Output</span>
           </button>
         </div>
       </div>
