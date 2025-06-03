@@ -74,7 +74,10 @@
           "bg-base-100 -mt-4 pt-4 pb-2",
         ]}
       >
-        <H2>Try {proc.name}</H2>
+        <H2 class="flex items-center space-x-2">
+          <Zap class="size-6" />
+          <span>Try {proc.name}</span>
+        </H2>
         <div class="join">
           <button
             class={[
