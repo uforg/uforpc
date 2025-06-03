@@ -24,8 +24,6 @@ version <number>
   <multiline comment>
 */
 
-import "<schema_path>"
-
 """
 <Custom rule documentation>
 """
@@ -54,7 +52,24 @@ proc <ProcedureName> {
 
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
+  }
+
+  meta {
+    <key>: <value>
+  }
+}
+
+"""
+<Stream documentation>
+"""
+stream <StreamName> {
+  input {
+    <field>[?]: <PrimitiveType> | <CustomType>
       [@<validationRule>(<param>, [error: <"message">])]
+  }
+
+  output {
+    <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   meta {
@@ -63,29 +78,12 @@ proc <ProcedureName> {
 }
 ```
 
-## 3. Importing Schemas
-
-To achieve modularity, you can import external schema files with a simple
-syntax.
-
-All paths should be relative to the file that is importing the other schema.
-
-```urpc
-import "<schema_path>"
-```
-
-### 3.1 Conflict resolution
-
-If there are conflicting custom validation rules, custom types or procedures,
-the transpiler will throw an error. Make sure to use unique names across schemas
-to avoid issues.
-
-## 4. Types
+## 3. Types
 
 Types are the building blocks of your API. They define the structure of the data
 that can be exchanged between the client and the server.
 
-### 4.1 Primitive Types
+### 3.1 Primitive Types
 
 Primitive types are the types that are built-in into the URPC DSL.
 
@@ -97,7 +95,7 @@ Primitive types are the types that are built-in into the URPC DSL.
 | `bool`     | boolean   | Either true or false                  |
 | `datetime` | string    | Date and time value (ISO 8601 format) |
 
-### 4.2 Composite Types
+### 3.2 Composite Types
 
 Composite types are types that are composed of other types. They can be used to
 create more complex data structures.
@@ -113,7 +111,7 @@ ElementType[]  // E.g.: string[]
 }
 ```
 
-### 4.3 Custom Types
+### 3.3 Custom Types
 
 You can define custom types additional of the primitive types provided by the
 transpiler that you can use in the input and output of your procedures.
@@ -128,13 +126,13 @@ type <CustomTypeName> [extends <OtherCustomTypeName>, <OtherCustomTypeName>, ...
 }
 ```
 
-#### 4.3.1 Custom type documentation
+#### 3.3.1 Custom type documentation
 
 You can add documentation to your custom types to help the developer understand
 how to use them, they can include Markdown syntax that will be rendered in the
 generated documentation.
 
-#### 4.3.2 Type inheritance
+#### 3.3.2 Type inheritance
 
 Types can extend other types, inheriting their fields and validation rules.
 
@@ -147,7 +145,7 @@ type ExtendedType extends BaseType {
 }
 ```
 
-#### 4.3.3 Optional fields
+#### 3.3.3 Optional fields
 
 All fields of a type are required by default. To make a field optional, use the
 `?` suffix.
@@ -157,7 +155,7 @@ All fields of a type are required by default. To make a field optional, use the
 field?: Type
 ```
 
-## 5. Defining Procedures
+## 4. Defining Procedures
 
 Procedures are the main building block of your API. They define the procedures
 (AKA functions) that can be implemented on the server and called from the
@@ -175,7 +173,6 @@ proc <ProcedureName> {
 
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
-      [@<validationRule>(<param>, [error: <"message">])]
   }
 
   meta {
@@ -184,17 +181,20 @@ proc <ProcedureName> {
 }
 ```
 
-### 5.1 Procedure documentation
+### 4.1 Procedure documentation
 
 You can add documentation to your procedures to help the developer understand
 how to use them, they can include Markdown syntax that will be rendered in the
 generated documentation.
 
-### 5.2 Procedure input/output
+### 4.2 Procedure input/output
 
-The input and output of a procedure is defined in the same way as the types.
+The input of a procedure defines the parameters that can be validated before
+processing. The output defines the structure of the response data.
 
-### 5.3 Procedure metadata
+Validation rules can only be applied to input fields.
+
+### 4.3 Procedure metadata
 
 The metadata of a procedure is a map of key-value pairs that can be used to
 provide additional information about the procedure.
@@ -223,10 +223,82 @@ meta {
 }
 ```
 
+## 5. Defining Streams
+
+Streams allow server-to-client real-time communication using Server-Sent Events
+(SSE). They enable unidirectional data flow from the server to subscribed
+clients.
+
+```urpc
+"""
+<Stream documentation>
+"""
+stream <StreamName> {
+  input {
+    <field>[?]: <PrimitiveType> | <CustomType>
+      [@<validationRule>(<param>, [error: <"message">])]
+  }
+
+  output {
+    <field>[?]: <PrimitiveType> | <CustomType>
+  }
+
+  meta {
+    <key>: <value>
+  }
+}
+```
+
+### 5.1 Stream documentation
+
+You can add documentation to your streams to help developers understand their
+purpose and usage. Documentation can include Markdown syntax.
+
+### 5.2 Stream input
+
+The input section defines the parameters required to establish a stream
+subscription. These parameters determine what data the client wants to receive
+and can include validation rules.
+
+### 5.3 Stream output
+
+The output section defines the structure of events that will be emitted through
+the stream. Each event sent to the client will conform to this structure.
+
+### 5.4 Stream metadata
+
+Stream metadata works the same way as procedure metadata, allowing you to attach
+additional information to the stream definition.
+
+### 5.5 Example
+
+```urpc
+"""
+Stream of new messages in a specific chat room
+"""
+stream NewMessage {
+  input {
+    chatId: string
+      @minlen(1)
+  }
+
+  output {
+    id: string
+    message: string
+    userId: string
+    timestamp: datetime
+  }
+
+  meta {
+    auth: "required"
+  }
+}
+```
+
 ## 6. Validation Rules
 
-Validation rules can be applied to fields of a type to validate the value of the
-field.
+Validation rules can be applied to input fields to validate the value before
+processing.
 
 ```urpc
 @<ruleName>([param][, error: "message"])
@@ -456,6 +528,10 @@ deprecated type MyType {
 deprecated proc MyProc {
   // procedure definition
 }
+
+deprecated stream MyStream {
+  // stream definition
+}
 ```
 
 ### 8.2 Deprecation with Message
@@ -478,12 +554,17 @@ deprecated("This procedure will be removed in v2.0")
 proc MyProc {
   // procedure definition
 }
+
+deprecated("Use NewMessageStream instead")
+stream MyStream {
+  // stream definition
+}
 ```
 
 ### 8.3 Placement
 
 The `deprecated` keyword must be placed between any docstring and the element
-definition (rule, type, or proc):
+definition (rule, type, proc, or stream):
 
 ```urpc
 """
@@ -507,8 +588,6 @@ Deprecated elements will:
 
 ```urpc
 version 1
-
-import "path/to/other_schema.urpc"
 
 """ ./docs/welcome.md """
 """ ./docs/authentication.md """
@@ -587,7 +666,6 @@ proc CreateProduct {
   output {
     success: bool
     productId: string
-      @uuid
   }
 
   meta {
@@ -607,6 +685,42 @@ proc GetProduct {
 
   output {
     product: ReviewedProduct
+  }
+}
+
+"""
+Sends a message to a chat room
+"""
+proc SendMessage {
+  input {
+    chatId: string
+    message: string
+      @maxlen(1000)
+  }
+
+  output {
+    messageId: string
+    timestamp: datetime
+  }
+}
+
+"""
+Stream of new messages in a specific chat room
+"""
+stream NewMessage {
+  input {
+    chatId: string
+  }
+
+  output {
+    id: string
+    message: string
+    userId: string
+    timestamp: datetime
+  }
+
+  meta {
+    auth: "required"
   }
 }
 ```
