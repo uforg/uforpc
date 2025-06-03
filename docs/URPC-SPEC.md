@@ -5,7 +5,7 @@
 The UFO-RPC DSL (URPC) is a domain-specific language designed to define RPC
 services with strong type validation and business rules. It provides a
 declarative syntax for defining data structures, validation rules, and
-procedures that transpile into UFO-RPC-compatible JSON Schema.
+procedures that UFO RPC can interpret and generate code for.
 
 The primary goal of URPC is to offer an intuitive, human-readable format that
 ensures the best possible developer experience (DX) while maintaining strict
@@ -94,7 +94,7 @@ Primitive types are the types that are built-in into the URPC DSL.
 | `string`   | string    | UTF-8 text string                     |
 | `int`      | integer   | 64-bit integer                        |
 | `float`    | number    | Floating point number                 |
-| `boolean`  | boolean   | Either true or false                  |
+| `bool`     | boolean   | Either true or false                  |
 | `datetime` | string    | Date and time value (ISO 8601 format) |
 
 ### 4.2 Composite Types
@@ -209,12 +209,12 @@ You can only define values of the following types:
 - string
 - int
 - float
-- boolean
+- bool
 
 ```urpc
 meta {
   // Allowed values
-  <key>: string|int|float|boolean
+  <key>: string|int|float|bool
 
   // Examples
   cache: true
@@ -282,11 +282,11 @@ own logic to address this limitation.
 | `min` | number     | `@min(0.0)`   |
 | `max` | number     | `@max(100.0)` |
 
-#### 6.1.4 Boolean built-in rules
+#### 6.1.4 Bool built-in rules
 
 | Rule     | Parameters | Example         |
 | -------- | ---------- | --------------- |
-| `equals` | boolean    | `@equals(true)` |
+| `equals` | bool       | `@equals(true)` |
 
 #### 6.1.5 Array built-in rules
 
@@ -320,7 +320,7 @@ in any way you want with your own logic.
 """
 rule @<RuleName> {
   for: <Type>                // Type of the field this rule can be applied to
-  param: <Type>              // Allowed: string|int|float|boolean or array of only these types
+  param: <Type>              // Allowed: string|int|float|bool or array of only these types
   error: "<Default message>" // Optional
 }
 ```
@@ -585,7 +585,7 @@ proc CreateProduct {
   }
 
   output {
-    success: boolean
+    success: bool
     productId: string
       @uuid
   }
