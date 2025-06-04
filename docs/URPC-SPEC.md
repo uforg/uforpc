@@ -36,7 +36,7 @@ rule @<CustomRuleName> {
 """
 <Type documentation>
 """
-type <CustomTypeName> [extends <OtherCustomTypeName>, <OtherCustomTypeName>, ...] {
+type <CustomTypeName> {
   <field>[?]: <Type>
     [@<validationRule>(<param>, [error: <"message">])]
 }
@@ -120,7 +120,7 @@ transpiler that you can use in the input and output of your procedures.
 """
 <Type documentation>
 """
-type <CustomTypeName> [extends <OtherCustomTypeName>, <OtherCustomTypeName>, ...] {
+type <CustomTypeName> {
   <field>[?]: <Type>
     [@<validationRule>(<param>, [error: <"message">])]
 }
@@ -132,16 +132,21 @@ You can add documentation to your custom types to help the developer understand
 how to use them, they can include Markdown syntax that will be rendered in the
 generated documentation.
 
-#### 3.3.2 Type inheritance
+#### 3.3.2 Type composition
 
-Types can extend other types, inheriting their fields and validation rules.
-
-Fields or validation rules defined in the parent type can't be overridden by the
-child type.
+To reuse fields from other types, use composition by including the type as a field:
 
 ```urpc
-type ExtendedType extends BaseType {
-  // Additional fields and rules
+type BaseEntity {
+  id: string
+  createdAt: datetime
+  updatedAt: datetime
+}
+
+type User {
+  base: BaseEntity
+  email: string
+  name: string
 }
 ```
 
@@ -432,12 +437,10 @@ input {
 }
 ```
 
-### 6.3 Validation rules and type inheritance
+### 6.3 Validation rules with types
 
-- Any type that extends another type will inherit the validation rules of the
-  parent type.
-- If a custom type is used as a field type in another type, the validation rules
-  of the referenced type will be applied to the field.
+If a custom type is used as a field type in another type, the validation rules
+of the referenced type will be applied to the field.
 
 ## 7. Documentation
 
@@ -615,11 +618,20 @@ rule @priceRange {
 }
 
 """
+Base entity with common fields
+"""
+type BaseEntity {
+  id: string
+    @uuid
+  createdAt: datetime
+  updatedAt: datetime
+}
+
+"""
 Represents a product in the catalog
 """
 type Product {
-  id: string
-    @uuid
+  base: BaseEntity
 
   name: string
     @minlen(3)
@@ -649,13 +661,6 @@ type Review {
 }
 
 """
-Represents a product with its reviews
-"""
-type ReviewedProduct extends Product {
-  reviews: Review[]
-}
-
-"""
 Creates a new product in the system and returns the product id.
 """
 proc CreateProduct {
@@ -675,7 +680,7 @@ proc CreateProduct {
 }
 
 """
-Get a product by id, it returns a product with its reviews.
+Get a product by id with its reviews.
 """
 proc GetProduct {
   input {
@@ -684,7 +689,8 @@ proc GetProduct {
   }
 
   output {
-    product: ReviewedProduct
+    product: Product
+    reviews: Review[]
   }
 }
 
@@ -729,3 +735,4 @@ stream NewMessage {
 
 1. Keywords can't be used as identifiers
 2. Custom validators require external implementation
+3. Circular type dependencies are not allowed
