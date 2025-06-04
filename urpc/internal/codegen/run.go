@@ -26,9 +26,9 @@ func Run(configPath string) error {
 		return fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	/////////////////////////////
-	// ANALYZE THE URPC SCHEMA //
-	/////////////////////////////
+	///////////////////////////////////////
+	// PARSE AND ANALYZE THE URPC SCHEMA //
+	///////////////////////////////////////
 
 	absSchemaPath, err := filepathutil.NormalizeFromWD(config.Schema)
 	if err != nil {
@@ -40,7 +40,7 @@ func Run(configPath string) error {
 		return fmt.Errorf("failed to create URPC analyzer: %w", err)
 	}
 
-	combinedSchema, _, err := an.Analyze(absSchemaPath)
+	astSchema, _, err := an.Analyze(absSchemaPath)
 	if err != nil {
 		return fmt.Errorf("invalid schema: %w", err)
 	}
@@ -49,7 +49,7 @@ func Run(configPath string) error {
 	// TRANSPILE TO JSON //
 	///////////////////////
 
-	jsonSchema, err := transpile.ToJSON(*combinedSchema.Schema)
+	jsonSchema, err := transpile.ToJSON(*astSchema)
 	if err != nil {
 		return fmt.Errorf("failed to transpile schema to its JSON representation: %w", err)
 	}
