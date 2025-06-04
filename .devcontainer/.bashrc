@@ -19,7 +19,7 @@ umask 000
 
 # Run the 'fixperms' task that fixes the permissions of the files and
 # directories in the project.
-chmod -R 777 /workspaces/uforpc
+chmod -R 777 /workspaces
 
 # Configure Git to ignore ownership and file mode changes.
 git config --global --add safe.directory '*'
