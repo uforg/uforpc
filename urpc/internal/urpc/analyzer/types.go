@@ -43,12 +43,3 @@ func (d Diagnostic) String() string {
 func (d Diagnostic) Error() string {
 	return d.String()
 }
-
-// CombinedSchema is the result of the process of combining multiple URPC schemas
-// based on an entry point and it's recursive import checks.
-type CombinedSchema struct {
-	Schema    *ast.Schema              // The combined AST of all schemas.
-	RuleDecls map[string]*ast.RuleDecl // Map of all rule names -> ast.RuleDecl from the combined Schema.
-	TypeDecls map[string]*ast.TypeDecl // Map of all type names -> ast.TypeDecl from the combined Schema.
-	ProcDecls map[string]*ast.ProcDecl // Map of all proc names -> ast.ProcDecl from the combined Schema.
-}

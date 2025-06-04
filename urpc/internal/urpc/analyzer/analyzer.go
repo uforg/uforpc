@@ -3,39 +3,80 @@
 // by performing a full analysis without caching results between calls.
 package analyzer
 
+import (
+	"fmt"
+
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/parser"
+)
+
 // Analyzer manages the analysis process for URPC schemas without caching.
 type Analyzer struct {
-	fileProvider FileProvider
-	resolver     *docstringResolver
+	fileProvider      FileProvider
+	docstringResolver *docstringResolver
 }
 
 // NewAnalyzer creates a new cache-less Analyzer instance.
 func NewAnalyzer(fileProvider FileProvider) (*Analyzer, error) {
 	return &Analyzer{
-		fileProvider: fileProvider,
-		resolver:     newDocstringResolver(fileProvider),
+		fileProvider:      fileProvider,
+		docstringResolver: newDocstringResolver(fileProvider),
 	}, nil
 }
 
 // Analyze performs semantic analysis on a URPC schema starting from the given entry point.
-// It resolves all imports, combines the schemas, and returns the combined schema along with
-// any diagnostics encountered during the resolution and analysis phases.
+// It parses the entry point file, resolves all docstrings and then performs the semantic analysis.
 //
 // It consists of two phases:
-//   - Resolution phase: Resolves all imports and combines the schemas.
-//   - Semantic analysis phase: Performs semantic analysis on the combined schema.
-func (a *Analyzer) Analyze(entryPointFilePath string) (CombinedSchema, []Diagnostic, error) {
-	// combinedSchema, resolverDiagnostics, _ := a.resolver.resolve(entryPointFilePath)
-	// if len(resolverDiagnostics) > 0 {
-	// 	return combinedSchema, resolverDiagnostics, resolverDiagnostics[0]
-	// }
+//   - Resolution phase: Parses the entry point file and resolves all external docstrings.
+//   - Semantic analysis phase: Performs semantic analysis on the resolved schema.
+func (a *Analyzer) Analyze(entryPointFilePath string) (*ast.Schema, []Diagnostic, error) {
+	fileContent, _, err := a.fileProvider.GetFileAndHash("", entryPointFilePath)
+	if err != nil {
+		diag := Diagnostic{
+			Positions: Positions{
+				Pos:    ast.Position{Filename: entryPointFilePath, Line: 1, Column: 1, Offset: 0},
+				EndPos: ast.Position{Filename: entryPointFilePath, Line: 1, Column: 1, Offset: 0},
+			},
+			Message: fmt.Sprintf("failed to read entry point file: %s", err.Error()),
+		}
+		return nil, []Diagnostic{diag}, err
+	}
 
-	// semanalyzer := newSemanalyzer(combinedSchema)
-	// semanalyzerDiagnostics, _ := semanalyzer.analyze()
-	// if len(semanalyzerDiagnostics) > 0 {
-	// 	return combinedSchema, semanalyzerDiagnostics, semanalyzerDiagnostics[0]
-	// }
+	astSchema, err := parser.ParserInstance.ParseString(entryPointFilePath, fileContent)
+	if err != nil {
+		diag := Diagnostic{
+			Positions: Positions{
+				Pos:    ast.Position{Filename: entryPointFilePath, Line: 1, Column: 1, Offset: 0},
+				EndPos: ast.Position{Filename: entryPointFilePath, Line: 1, Column: 1, Offset: 0},
+			},
+			Message: fmt.Sprintf("error parsing file: %v", err),
+		}
 
-	// return combinedSchema, nil, nil
-	return CombinedSchema{}, nil, nil
+		// Assert parser error if possible
+		if parserErr, ok := err.(parser.Error); ok {
+			diag = Diagnostic{
+				Positions: Positions{
+					Pos:    parserErr.Position(),
+					EndPos: parserErr.Position(),
+				},
+				Message: parserErr.Message(),
+			}
+		}
+
+		return nil, []Diagnostic{diag}, err
+	}
+
+	astSchema, dsResolverDiagnostics, _ := a.docstringResolver.resolve(astSchema)
+	if len(dsResolverDiagnostics) > 0 {
+		return astSchema, dsResolverDiagnostics, dsResolverDiagnostics[0]
+	}
+
+	semanalyzer := newSemanalyzer(astSchema)
+	semanalyzerDiagnostics, _ := semanalyzer.analyze()
+	if len(semanalyzerDiagnostics) > 0 {
+		return astSchema, semanalyzerDiagnostics, semanalyzerDiagnostics[0]
+	}
+
+	return astSchema, nil, nil
 }

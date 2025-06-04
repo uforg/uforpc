@@ -9,47 +9,22 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/urpc/parser"
 )
 
-// createCombinedSchema creates a CombinedSchema from the given schema.
+// parseSchema parses the given input string into an ast.Schema.
 // this is a test helper function.
-func parseToCombinedSchema(input string) (CombinedSchema, error) {
+func parseSchema(input string) (*ast.Schema, error) {
 	schema, err := parser.ParserInstance.ParseString("test.urpc", input)
 	if err != nil {
-		return CombinedSchema{}, err
+		return nil, err
 	}
 
-	// Collect all declarations from the combined schema
-	ruleDecls := make(map[string]*ast.RuleDecl)
-	typeDecls := make(map[string]*ast.TypeDecl)
-	procDecls := make(map[string]*ast.ProcDecl)
-
-	// Collect rule declarations
-	for _, rule := range schema.GetRules() {
-		ruleDecls[rule.Name] = rule
-	}
-
-	// Collect type declarations
-	for _, typeDecl := range schema.GetTypes() {
-		typeDecls[typeDecl.Name] = typeDecl
-	}
-
-	// Collect procedure declarations
-	for _, proc := range schema.GetProcs() {
-		procDecls[proc.Name] = proc
-	}
-
-	return CombinedSchema{
-		Schema:    schema,
-		RuleDecls: ruleDecls,
-		TypeDecls: typeDecls,
-		ProcDecls: procDecls,
-	}, nil
+	return schema, nil
 }
 
 func TestSemanalyzer_ValidVersion(t *testing.T) {
 	input := `
 		version 1
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -73,7 +48,7 @@ func TestSemanalyzer_ValidCustomRule(t *testing.T) {
 		  error: "Invalid int format"
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -98,7 +73,7 @@ func TestSemanalyzer_DuplicateCustomRule(t *testing.T) {
 		  error: "Another invalid string format"
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -119,7 +94,7 @@ func TestSemanalyzer_InvalidCustomRuleName(t *testing.T) {
 		  error: "Invalid string format"
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -139,7 +114,7 @@ func TestSemanalyzer_ValidCustomType(t *testing.T) {
 		  age: int
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -163,7 +138,7 @@ func TestSemanalyzer_DuplicateCustomType(t *testing.T) {
 		  name: string
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -183,7 +158,7 @@ func TestSemanalyzer_InvalidCustomTypeName(t *testing.T) {
 		  id: string
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -213,7 +188,7 @@ func TestSemanalyzer_ValidProcedure(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -240,7 +215,34 @@ func TestSemanalyzer_DuplicateProcedure(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "is already declared")
+}
+
+func TestSemanalyzer_DuplicateStream(t *testing.T) {
+	input := `
+		version 1
+
+		stream GetUser {
+		  input {
+		    userId: string
+		  }
+		}
+
+		stream GetUser {
+		  input {
+		    id: string
+		  }
+		}
+	`
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -262,7 +264,7 @@ func TestSemanalyzer_InvalidProcedureName(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -283,7 +285,7 @@ func TestSemanalyzer_NonExistentRuleReference(t *testing.T) {
 		    @nonExistentRule
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -308,7 +310,7 @@ func TestSemanalyzer_RuleTypeMismatch(t *testing.T) {
 		    @customStringRule
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -330,7 +332,7 @@ func TestSemanalyzer_NonExistentTypeReference(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -351,7 +353,7 @@ func TestSemanalyzer_ValidArrayWithRules(t *testing.T) {
 		    @minlen(1)
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -371,7 +373,7 @@ func TestSemanalyzer_InvalidArrayRule(t *testing.T) {
 		    @contains("tag")
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -408,7 +410,7 @@ func TestSemanalyzer_BuiltInRuleValidation(t *testing.T) {
 		    @maxlen(10)
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -435,7 +437,7 @@ func TestSemanalyzer_ValidProcedureMeta(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -458,7 +460,7 @@ func TestSemanalyzer_ValidInlineObject(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -484,7 +486,7 @@ func TestSemanalyzer_ValidNestedInlineObject(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -509,7 +511,7 @@ func TestSemanalyzer_ValidInlineObjectWithRules(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -532,7 +534,7 @@ func TestSemanalyzer_InvalidRuleInInlineObject(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -552,7 +554,7 @@ func TestSemanalyzer_ValidArray(t *testing.T) {
 		    @minlen(1)
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -575,7 +577,7 @@ func TestSemanalyzer_ValidArrayOfObjects(t *testing.T) {
 		    @minlen(1)
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -600,7 +602,7 @@ func TestSemanalyzer_CustomRuleWithParameters(t *testing.T) {
 		    @regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", error: "Invalid email format")
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -625,7 +627,7 @@ func TestSemanalyzer_CustomRuleWithArrayParameter(t *testing.T) {
 		    @range([10, 1000], error: "Price must be between 10 and 1000")
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -647,7 +649,7 @@ func TestSemanalyzer_EnumValidation(t *testing.T) {
 		    @enum([1, 2, 3])
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -669,7 +671,7 @@ func TestSemanalyzer_DatetimeValidation(t *testing.T) {
 		    @max("2030-12-31T23:59:59Z")
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -693,7 +695,7 @@ func TestSemanalyzer_OptionalFields(t *testing.T) {
 		  }
 		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -718,7 +720,7 @@ func TestSemanalyzer_CircularTypeDependency(t *testing.T) {
 			  author: User  // This creates a circular dependency
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -750,17 +752,27 @@ func TestSemanalyzer_CircularTypeDependencyWithOptionalField(t *testing.T) {
 
 			type Post {
 			  id: string
-			  author?: User  // Optional field breaks the circular dependency
+			  author?: User  // This creates a circular dependency
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
 	errors, err := analyzer.analyze()
 
-	require.NoError(t, err)
-	require.Empty(t, errors)
+	require.Error(t, err)
+	require.NotEmpty(t, errors)
+
+	// Check that at least one error contains the expected message
+	found := false
+	for _, diag := range errors {
+		if strings.Contains(diag.Message, "circular dependency detected between types") {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "Expected to find an error about circular dependency")
 }
 
 func TestSemanalyzer_RuleWithoutForClause(t *testing.T) {
@@ -772,7 +784,7 @@ func TestSemanalyzer_RuleWithoutForClause(t *testing.T) {
 			  error: "Invalid value"
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -794,7 +806,7 @@ func TestSemanalyzer_RuleWithMultipleForClauses(t *testing.T) {
 			  error: "Invalid value"
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -817,7 +829,7 @@ func TestSemanalyzer_RuleWithMultipleParamClauses(t *testing.T) {
 			  error: "Invalid value"
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -839,7 +851,7 @@ func TestSemanalyzer_RuleWithMultipleErrorClauses(t *testing.T) {
 			  error: "Another error message"  // Duplicate 'error' clause
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -865,7 +877,7 @@ func TestSemanalyzer_ProcWithMultipleInputSections(t *testing.T) {
 			  }
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -891,7 +903,7 @@ func TestSemanalyzer_ProcWithMultipleOutputSections(t *testing.T) {
 			  }
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -917,7 +929,85 @@ func TestSemanalyzer_ProcWithMultipleMetaSections(t *testing.T) {
 			  }
 			}
 		`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'meta' section")
+}
+
+func TestSemanalyzer_StreamWithMultipleInputSections(t *testing.T) {
+	input := `
+			version 1
+
+			// Stream with multiple 'input' sections
+			stream InvalidStream {
+			  input {
+			    id: string
+			  }
+
+			  input {  // Duplicate 'input' section
+			    name: string
+			  }
+			}
+		`
+	combinedSchema, err := parseSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'input' section")
+}
+
+func TestSemanalyzer_StreamWithMultipleOutputSections(t *testing.T) {
+	input := `
+			version 1
+
+			// Stream with multiple 'output' sections
+			stream InvalidStream {
+			  output {
+			    success: bool
+			  }
+
+			  output {  // Duplicate 'output' section
+			    message: string
+			  }
+			}
+		`
+	combinedSchema, err := parseSchema(input)
+	require.NoError(t, err)
+
+	analyzer := newSemanalyzer(combinedSchema)
+	errors, err := analyzer.analyze()
+
+	require.Error(t, err)
+	require.Len(t, errors, 1)
+	require.Contains(t, errors[0].Message, "cannot have more than one 'output' section")
+}
+
+func TestSemanalyzer_StreamWithMultipleMetaSections(t *testing.T) {
+	input := `
+			version 1
+
+			// Stream with multiple 'meta' sections
+			stream InvalidStream {
+			  meta {
+			    requiresAuth: true
+			  }
+
+			  meta {  // Duplicate 'meta' section
+			    timeout: 30
+			  }
+			}
+		`
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
@@ -1022,8 +1112,24 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		    description: "Retrieves a user by ID"
 		  }
 		}
+
+		stream MyStream {
+		  input {
+		    userId: string
+		      @minlen(10)
+		  }
+
+		  output {
+		    user: User
+		  }
+
+		  meta {
+		    requiresAuth: true
+		    cacheTTL: 300
+		  }
+		}
 	`
-	combinedSchema, err := parseToCombinedSchema(input)
+	combinedSchema, err := parseSchema(input)
 	require.NoError(t, err)
 
 	analyzer := newSemanalyzer(combinedSchema)
