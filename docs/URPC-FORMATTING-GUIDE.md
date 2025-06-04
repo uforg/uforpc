@@ -9,6 +9,10 @@ This specification is enforced by the official URPC formatter.
 
 ## 1. General Principles
 
+This guide is for reference only. All the formatting rules are enforced by the
+official URPC formatter included in the UFO-RPC CLI so you don't have to worry
+about it, continue reading for reference only.
+
 - **Encoding:** UTF-8.
 - **Line Endings:** Use newline characters (`\n`).
 - **Trailing Whitespace:** None.
@@ -30,7 +34,7 @@ type Example {
 
 ## 3. Top-Level Elements
 
-Top-level elements include `version`, `import`, `rule`, `type`, `proc`, and
+Top-level elements include `version`, `rule`, `type`, `proc`, `stream`, and
 standalone comments.
 
 - **Default:** Separate each top-level element with one blank line.
@@ -38,22 +42,15 @@ standalone comments.
   - **First Element:** No blank line before the very first element.
   - **Consecutive Comments:** Do not insert extra blank lines between
     consecutive standalone comments.
-  - **Consecutive Imports:** Successive `import` statements share no blank line
-    between them.
-  - **Imports vs. Others:** An `import` must be separated from any non-import
-    element by a blank line.
   - **Following a Comment:** When an element follows a standalone comment, do
     not add an extra blank line unless the source intentionally contains one.
 - **Preservation:** Intentionally placed blank lines in the source (e.g. between
-  comments or imports) are respected.
+  comments) are respected.
 
 _Example:_
 
 ```urpc
 version 1
-
-import "a.urpc"
-import "b.urpc"
 
 // A standalone comment
 // Another standalone comment
@@ -61,7 +58,9 @@ type TypeA {
   field: string
 }
 
-import "c.urpc"  // (Here, an import following a type must be separated from the type block by a blank line)
+type TypeB {
+  field: int
+}
 ```
 
 ## 4. Fields and Blocks
@@ -69,7 +68,8 @@ import "c.urpc"  // (Here, an import following a type must be separated from the
 ### 4.1 Fields in a Type
 
 This section applies to fields in a type block, as well as fields in a
-procedure’s input, output, meta, or inline object.
+procedure's input, output, meta, or inline object, and stream's input, output,
+meta.
 
 - Each field is placed on its own line.
 - **Field Separation:** It is recommended to leave one blank line between fields
@@ -116,13 +116,13 @@ address: {
 - Contents inside non-empty blocks always start on a new, indented line.
 - The closing brace (`}`) is placed on its own line, aligned with the opening
   line.
-- In procedure bodies, separate the `input`, `output`, and `meta` blocks with
+- In procedure and stream bodies, separate the `input`, `output`, and `meta` blocks with
   one blank line.
 
 ## 5. Spacing
 
 - **Colons (`:`):** No space before; one space after (e.g. `field: string`).
-- **Commas (`,`):** No space before; one space after (e.g. `extends A, B`).
+- **Commas (`,`):** No space before; one space after.
 - **Braces (`{` and `}`):** One space before `{` in declarations; inside blocks,
   use newlines and proper indentation.
 - **Brackets (`[]`):** No spaces for array types (e.g. `string[]`); no extra
@@ -146,8 +146,6 @@ _Example:_
 ```urpc
 version 1 // EOL comment
 
-import "path" /* EOL comment */
-
 type Example {
   field: string // Inline comment for field
     @rule /* Inline rule comment */
@@ -156,7 +154,7 @@ type Example {
 
 ## 7. Docstrings
 
-- Place docstrings immediately above the `rule`, `type`, or `proc` they
+- Place docstrings immediately above the `rule`, `type`, `proc`, or `stream` they
   document.
 - They are enclosed in triple quotes (`"""`), preserving internal newlines and
   formatting.
@@ -168,6 +166,13 @@ _Example:_
 Docstring for MyType.
 """
 type MyType {
+  // ...
+}
+
+"""
+Docstring for MyStream.
+"""
+stream MyStream {
   // ...
 }
 ```
@@ -190,7 +195,7 @@ type User {
 
 ## 9. Deprecation
 
-The `deprecated` keyword is used to mark rules, types, or procedures as
+The `deprecated` keyword is used to mark rules, types, procedures, or streams as
 deprecated.
 
 - Place the `deprecated` keyword on its own line immediately before the element
@@ -218,6 +223,10 @@ Documentation for MyProc
 deprecated proc MyProc {
   // procedure definition
 }
+
+deprecated stream MyStream {
+  // stream definition
+}
 ```
 
 ### 9.2 Deprecation with Message
@@ -236,5 +245,10 @@ Documentation for MyType
 deprecated("Replaced by ImprovedType")
 type MyType {
   // type definition
+}
+
+deprecated("Use NewStream instead")
+stream MyStream {
+  // stream definition
 }
 ```
