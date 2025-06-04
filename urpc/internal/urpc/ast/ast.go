@@ -65,6 +65,15 @@ func (s *Schema) GetRules() []*RuleDecl {
 	return rules
 }
 
+// GetRulesMap returns a map of rule names to rule declarations.
+func (s *Schema) GetRulesMap() map[string]*RuleDecl {
+	rulesMap := make(map[string]*RuleDecl)
+	for _, rule := range s.GetRules() {
+		rulesMap[rule.Name] = rule
+	}
+	return rulesMap
+}
+
 // GetTypes returns all custom types in the URPC schema.
 func (s *Schema) GetTypes() []*TypeDecl {
 	types := []*TypeDecl{}
@@ -74,6 +83,15 @@ func (s *Schema) GetTypes() []*TypeDecl {
 		}
 	}
 	return types
+}
+
+// GetTypesMap returns a map of type names to type declarations.
+func (s *Schema) GetTypesMap() map[string]*TypeDecl {
+	typesMap := make(map[string]*TypeDecl)
+	for _, typeDecl := range s.GetTypes() {
+		typesMap[typeDecl.Name] = typeDecl
+	}
+	return typesMap
 }
 
 // GetProcs returns all procedures in the URPC schema.
@@ -87,6 +105,15 @@ func (s *Schema) GetProcs() []*ProcDecl {
 	return procs
 }
 
+// GetProcsMap returns a map of procedure names to procedure declarations.
+func (s *Schema) GetProcsMap() map[string]*ProcDecl {
+	procsMap := make(map[string]*ProcDecl)
+	for _, proc := range s.GetProcs() {
+		procsMap[proc.Name] = proc
+	}
+	return procsMap
+}
+
 // GetStreams returns all streams in the URPC schema.
 func (s *Schema) GetStreams() []*StreamDecl {
 	streams := []*StreamDecl{}
@@ -96,6 +123,15 @@ func (s *Schema) GetStreams() []*StreamDecl {
 		}
 	}
 	return streams
+}
+
+// GetStreamsMap returns a map of stream names to stream declarations.
+func (s *Schema) GetStreamsMap() map[string]*StreamDecl {
+	streamsMap := make(map[string]*StreamDecl)
+	for _, stream := range s.GetStreams() {
+		streamsMap[stream.Name] = stream
+	}
+	return streamsMap
 }
 
 // SchemaChildKind represents the kind of a schema child node.
