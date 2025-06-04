@@ -61,6 +61,13 @@ func ToJSON(astSchema ast.Schema) (schema.Schema, error) {
 				return schema.Schema{}, fmt.Errorf("error converting procedure '%s': %w", child.Proc.Name, err)
 			}
 			result.Nodes = append(result.Nodes, procNode)
+
+		case child.Stream != nil:
+			streamNode, err := convertStreamToJSON(child.Stream)
+			if err != nil {
+				return schema.Schema{}, fmt.Errorf("error converting stream '%s': %w", child.Stream.Name, err)
+			}
+			result.Nodes = append(result.Nodes, streamNode)
 		}
 	}
 
@@ -366,6 +373,72 @@ func convertProcToJSON(procDecl *ast.ProcDecl) (*schema.NodeProc, error) {
 	}
 
 	return procNode, nil
+}
+
+// convertStreamToJSON converts an AST StreamDecl to a schema NodeStream
+func convertStreamToJSON(streamDecl *ast.StreamDecl) (*schema.NodeStream, error) {
+	streamNode := &schema.NodeStream{
+		Kind: "stream",
+		Name: streamDecl.Name,
+	}
+
+	// Add docstring if available
+	if streamDecl.Docstring != nil {
+		docValue := streamDecl.Docstring.Value
+		streamNode.Doc = &docValue
+	}
+
+	// Add deprecated if available
+	if streamDecl.Deprecated != nil {
+		if streamDecl.Deprecated.Message != nil {
+			streamNode.Deprecated = streamDecl.Deprecated.Message
+		} else {
+			empty := ""
+			streamNode.Deprecated = &empty
+		}
+	}
+
+	// Process procedure children
+	for _, child := range streamDecl.Children {
+		if child.Input != nil {
+			for _, fieldOrComment := range child.Input.Children {
+				if fieldOrComment.Field != nil {
+					fieldDef, err := convertFieldToJSON(fieldOrComment.Field)
+					if err != nil {
+						return nil, fmt.Errorf("error converting input field '%s': %w", fieldOrComment.Field.Name, err)
+					}
+					streamNode.Input = append(streamNode.Input, fieldDef)
+				}
+			}
+		}
+		if child.Output != nil {
+			for _, fieldOrComment := range child.Output.Children {
+				if fieldOrComment.Field != nil {
+					fieldDef, err := convertFieldToJSON(fieldOrComment.Field)
+					if err != nil {
+						return nil, fmt.Errorf("error converting output field '%s': %w", fieldOrComment.Field.Name, err)
+					}
+					streamNode.Output = append(streamNode.Output, fieldDef)
+				}
+			}
+		}
+		if child.Meta != nil {
+			for _, metaChild := range child.Meta.Children {
+				if metaChild.KV != nil {
+					metaValue, err := convertMetaValueToJSON(metaChild.KV.Value)
+					if err != nil {
+						return nil, fmt.Errorf("error converting meta value for key '%s': %w", metaChild.KV.Key, err)
+					}
+					streamNode.Meta = append(streamNode.Meta, schema.MetaKeyValue{
+						Key:   metaChild.KV.Key,
+						Value: metaValue,
+					})
+				}
+			}
+		}
+	}
+
+	return streamNode, nil
 }
 
 // convertMetaValueToJSON converts an AST AnyLiteral to a schema MetaValue

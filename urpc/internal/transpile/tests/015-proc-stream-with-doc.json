@@ -45,6 +45,51 @@
           "optional": false
         }
       ]
+    },
+    {
+      "kind": "stream",
+      "name": "Login",
+      "doc": "Authenticates a user and returns a session token",
+      "input": [
+        {
+          "name": "username",
+          "typeName": "string",
+          "isArray": false,
+          "optional": false
+        },
+        {
+          "name": "password",
+          "typeName": "string",
+          "isArray": false,
+          "optional": false
+        },
+        {
+          "name": "rememberMe",
+          "typeName": "bool",
+          "isArray": false,
+          "optional": false
+        }
+      ],
+      "output": [
+        {
+          "name": "token",
+          "typeName": "string",
+          "isArray": false,
+          "optional": false
+        },
+        {
+          "name": "expiresAt",
+          "typeName": "datetime",
+          "isArray": false,
+          "optional": false
+        },
+        {
+          "name": "success",
+          "typeName": "bool",
+          "isArray": false,
+          "optional": false
+        }
+      ]
     }
   ]
 }

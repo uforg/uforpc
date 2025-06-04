@@ -60,6 +60,14 @@ func ToURPC(jsonSchema schema.Schema) (ast.Schema, error) {
 			result.Children = append(result.Children, &ast.SchemaChild{
 				Proc: procDecl,
 			})
+		case *schema.NodeStream:
+			streamDecl, err := convertStreamToURPC(n)
+			if err != nil {
+				return ast.Schema{}, fmt.Errorf("error converting stream '%s': %w", n.Name, err)
+			}
+			result.Children = append(result.Children, &ast.SchemaChild{
+				Stream: streamDecl,
+			})
 		}
 	}
 
@@ -398,6 +406,98 @@ func convertProcToURPC(procNode *schema.NodeProc) (*ast.ProcDecl, error) {
 	}
 
 	return procDecl, nil
+}
+
+// convertStreamToURPC converts a schema NodeStream to an AST StreamDecl
+func convertStreamToURPC(streamNode *schema.NodeStream) (*ast.StreamDecl, error) {
+	streamDecl := &ast.StreamDecl{
+		Name: streamNode.Name,
+	}
+
+	// Add docstring if available
+	if streamNode.Doc != nil && *streamNode.Doc != "" {
+		streamDecl.Docstring = &ast.Docstring{
+			Value: *streamNode.Doc,
+		}
+	}
+
+	// Add deprecated if available
+	if streamNode.Deprecated != nil {
+		deprecated := &ast.Deprecated{}
+		if *streamNode.Deprecated != "" {
+			deprecated.Message = streamNode.Deprecated
+		}
+		streamDecl.Deprecated = deprecated
+	}
+
+	// Process input fields if any
+	if len(streamNode.Input) > 0 {
+		inputChild := &ast.ProcOrStreamDeclChildInput{}
+
+		for _, field := range streamNode.Input {
+			fieldNode, err := convertFieldToURPC(field)
+			if err != nil {
+				return nil, fmt.Errorf("error converting input field '%s': %w", field.Name, err)
+			}
+
+			inputChild.Children = append(inputChild.Children, &ast.FieldOrComment{
+				Field: fieldNode,
+			})
+		}
+
+		streamDecl.Children = append(streamDecl.Children, &ast.ProcOrStreamDeclChild{
+			Input: inputChild,
+		})
+	}
+
+	// Process output fields if any
+	if len(streamNode.Output) > 0 {
+		outputChild := &ast.ProcOrStreamDeclChildOutput{}
+
+		for _, field := range streamNode.Output {
+			fieldNode, err := convertFieldToURPC(field)
+			if err != nil {
+				return nil, fmt.Errorf("error converting output field '%s': %w", field.Name, err)
+			}
+
+			outputChild.Children = append(outputChild.Children, &ast.FieldOrComment{
+				Field: fieldNode,
+			})
+		}
+
+		streamDecl.Children = append(streamDecl.Children, &ast.ProcOrStreamDeclChild{
+			Output: outputChild,
+		})
+	}
+
+	// Process meta fields if any
+	if len(streamNode.Meta) > 0 {
+		metaChild := &ast.ProcOrStreamDeclChildMeta{}
+
+		// Process any remaining keys that weren't in the predefined order
+		for _, metaKV := range streamNode.Meta {
+			key := metaKV.Key
+			value := metaKV.Value
+
+			literal, err := convertMetaValueToURPC(value)
+			if err != nil {
+				return nil, fmt.Errorf("error converting meta value for key '%s': %w", key, err)
+			}
+
+			metaChild.Children = append(metaChild.Children, &ast.ProcOrStreamDeclChildMetaChild{
+				KV: &ast.ProcOrStreamDeclChildMetaKV{
+					Key:   key,
+					Value: literal,
+				},
+			})
+		}
+
+		streamDecl.Children = append(streamDecl.Children, &ast.ProcOrStreamDeclChild{
+			Meta: metaChild,
+		})
+	}
+
+	return streamDecl, nil
 }
 
 // convertMetaValueToURPC converts a schema MetaValue to an AST AnyLiteral

@@ -40,3 +40,20 @@ proc ValidateUser {
     errors: string[]
   }
 }
+
+stream ValidateUser {
+  input {
+    username: string
+      @minLength(3)
+      @maxLength(20)
+    email: string
+      @regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+    age: int
+      @min(18)
+  }
+
+  output {
+    isValid: bool
+    errors: string[]
+  }
+}

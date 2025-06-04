@@ -20,3 +20,24 @@ proc CreateUser {
     tags: "user,create,registration"
   }
 }
+
+stream CreateUser {
+  input {
+    username: string
+    email: string
+    password: string
+  }
+
+  output {
+    userId: string
+    success: bool
+  }
+
+  meta {
+    auth: true
+    rateLimit: 10
+    timeout: 30.5
+    endpoint: "api/v1/users"
+    tags: "user,create,registration"
+  }
+}

@@ -47,6 +47,53 @@
           "optional": false
         }
       ]
+    },
+    {
+      "kind": "stream",
+      "name": "GetUser",
+      "input": [
+        {
+          "name": "userId",
+          "typeName": "string",
+          "isArray": false,
+          "optional": false
+        }
+      ],
+      "output": [
+        {
+          "name": "user",
+          "typeInline": {
+            "fields": [
+              {
+                "name": "id",
+                "typeName": "string",
+                "isArray": false,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "typeName": "string",
+                "isArray": false,
+                "optional": false
+              },
+              {
+                "name": "email",
+                "typeName": "string",
+                "isArray": false,
+                "optional": false
+              }
+            ]
+          },
+          "isArray": false,
+          "optional": false
+        },
+        {
+          "name": "success",
+          "typeName": "bool",
+          "isArray": false,
+          "optional": false
+        }
+      ]
     }
   ]
 }

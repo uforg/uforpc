@@ -15,7 +15,8 @@
           { "$ref": "#/$defs/docNode" },
           { "$ref": "#/$defs/ruleNode" },
           { "$ref": "#/$defs/typeNode" },
-          { "$ref": "#/$defs/procNode" }
+          { "$ref": "#/$defs/procNode" },
+          { "$ref": "#/$defs/streamNode" }
         ]
       }
     }
@@ -194,6 +195,65 @@
           "items": {
             "title": "Meta Definition",
             "description": "Defines a meta within a procedure.",
+            "type": "object",
+            "properties": {
+              "key": {
+                "description": "Key of the meta.",
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9]*$"
+              },
+              "value": {
+                "description": "Value of the meta.",
+                "type": ["string", "integer", "number", "boolean"]
+              }
+            },
+            "required": ["key", "value"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["kind", "name"],
+      "additionalProperties": false
+    },
+
+    "streamNode": {
+      "title": "Stream Definition Node",
+      "description": "Defines an RPC stream.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "description": "Node type identifier.",
+          "const": "stream"
+        },
+        "name": {
+          "description": "Name of the stream.",
+          "type": "string",
+          "pattern": "^[A-Z][a-zA-Z0-9]*$"
+        },
+        "doc": {
+          "description": "Associated documentation string (optional).",
+          "type": "string"
+        },
+        "deprecated": {
+          "description": "Indicates if the procedure is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.",
+          "type": "string"
+        },
+        "input": {
+          "description": "Ordered list of input fields for the stream.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        },
+        "output": {
+          "description": "Ordered list of output fields for the stream.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldDefinition" }
+        },
+        "meta": {
+          "description": "Optional key-value metadata associated with the stream (null if none).",
+          "type": "array",
+          "items": {
+            "title": "Meta Definition",
+            "description": "Defines a meta within a stream.",
             "type": "object",
             "properties": {
               "key": {

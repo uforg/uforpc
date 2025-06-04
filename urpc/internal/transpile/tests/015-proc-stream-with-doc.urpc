@@ -14,3 +14,18 @@ proc Login {
     success: bool
   }
 }
+
+"""Authenticates a user and returns a session token"""
+stream Login {
+  input {
+    username: string
+    password: string
+    rememberMe: bool
+  }
+
+  output {
+    token: string
+    expiresAt: datetime
+    success: bool
+  }
+}

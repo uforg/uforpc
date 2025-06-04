@@ -117,6 +117,10 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 			var procNode NodeProc
 			err = json.Unmarshal(rawNode, &procNode)
 			node = &procNode
+		case "stream":
+			var streamNode NodeStream
+			err = json.Unmarshal(rawNode, &streamNode)
+			node = &streamNode
 		default:
 			return fmt.Errorf("unknown node kind '%s' at index %d", nodeKind.Kind, i)
 		}
@@ -152,6 +156,16 @@ func (s *Schema) GetRuleNodes() []*NodeRule {
 	return ruleNodes
 }
 
+// GetRuleNodesMap returns a map of rule nodes by name.
+func (s *Schema) GetRuleNodesMap() map[string]*NodeRule {
+	ruleNodes := s.GetRuleNodes()
+	ruleNodesMap := make(map[string]*NodeRule)
+	for _, node := range ruleNodes {
+		ruleNodesMap[node.Name] = node
+	}
+	return ruleNodesMap
+}
+
 // GetTypeNodes returns all TypeNode instances from the schema.
 func (s *Schema) GetTypeNodes() []*NodeType {
 	typeNodes := []*NodeType{}
@@ -163,6 +177,16 @@ func (s *Schema) GetTypeNodes() []*NodeType {
 	return typeNodes
 }
 
+// GetTypeNodesMap returns a map of type nodes by name.
+func (s *Schema) GetTypeNodesMap() map[string]*NodeType {
+	typeNodes := s.GetTypeNodes()
+	typeNodesMap := make(map[string]*NodeType)
+	for _, node := range typeNodes {
+		typeNodesMap[node.Name] = node
+	}
+	return typeNodesMap
+}
+
 // GetProcNodes returns all ProcNode instances from the schema.
 func (s *Schema) GetProcNodes() []*NodeProc {
 	procNodes := []*NodeProc{}
@@ -172,6 +196,38 @@ func (s *Schema) GetProcNodes() []*NodeProc {
 		}
 	}
 	return procNodes
+}
+
+// GetProcNodesMap returns a map of proc nodes by name.
+
+func (s *Schema) GetProcNodesMap() map[string]*NodeProc {
+	procNodes := s.GetProcNodes()
+	procNodesMap := make(map[string]*NodeProc)
+	for _, node := range procNodes {
+		procNodesMap[node.Name] = node
+	}
+	return procNodesMap
+}
+
+// GetStreamNodes returns all StreamNode instances from the schema.
+func (s *Schema) GetStreamNodes() []*NodeStream {
+	streamNodes := []*NodeStream{}
+	for _, node := range s.Nodes {
+		if streamNode, ok := node.(*NodeStream); ok {
+			streamNodes = append(streamNodes, streamNode)
+		}
+	}
+	return streamNodes
+}
+
+// GetStreamNodesMap returns a map of stream nodes by name.
+func (s *Schema) GetStreamNodesMap() map[string]*NodeStream {
+	streamNodes := s.GetStreamNodes()
+	streamNodesMap := make(map[string]*NodeStream)
+	for _, node := range streamNodes {
+		streamNodesMap[node.Name] = node
+	}
+	return streamNodesMap
 }
 
 ////////////////
@@ -238,6 +294,25 @@ type NodeProc struct {
 }
 
 func (n *NodeProc) NodeKind() string { return n.Kind }
+
+// NodeStream represents the definition of an RPC stream.
+type NodeStream struct {
+	Kind string `json:"kind"` // Always "stream"
+	Name string `json:"name"`
+	// Doc is the associated documentation string (optional).
+	Doc *string `json:"doc,omitempty"`
+	// Deprecated indicates if the stream is deprecated and contains the message
+	// associated with the deprecation.
+	Deprecated *string `json:"deprecated,omitempty"`
+	// Input is the ordered list of input fields for the stream.
+	Input []FieldDefinition `json:"input"`
+	// Output is the ordered list of output fields for the stream.
+	Output []FieldDefinition `json:"output"`
+	// Meta contains optional key-value metadata.
+	Meta []MetaKeyValue `json:"meta,omitempty"`
+}
+
+func (n *NodeStream) NodeKind() string { return n.Kind }
 
 //////////////////////////
 // Auxiliary Structures //

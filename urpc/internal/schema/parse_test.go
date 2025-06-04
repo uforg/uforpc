@@ -453,6 +453,95 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.Equal(t, "auth", meta2.Key)
 		require.True(t, *meta2.Value.BoolVal)
 	})
+
+	t.Run("Schema with stream node", func(t *testing.T) {
+		input := `{
+			"version": 1,
+			"nodes": [
+				{
+					"kind": "stream",
+					"name": "GetUser",
+					"doc": "Get user by ID",
+					"input": [
+						{
+							"name": "id",
+							"typeName": "string",
+							"isArray": false,
+							"optional": false,
+							"rules": []
+						}
+					],
+					"output": [
+						{
+							"name": "user",
+							"typeName": "User",
+							"isArray": false,
+							"optional": false,
+							"rules": []
+						}
+					],
+					"meta": [
+						{
+							"key": "http.method",
+							"value": "GET"
+						},
+						{
+							"key": "http.path",
+							"value": "/users/{id}"
+						},
+						{
+							"key": "auth",
+							"value": true
+						}
+					]
+				}
+			]
+		}`
+
+		var schema Schema
+		err := json.Unmarshal([]byte(input), &schema)
+		require.NoError(t, err)
+		require.Equal(t, 1, schema.Version)
+		require.Len(t, schema.Nodes, 1)
+
+		// Check that the node is a proc node
+		streamNode, ok := schema.Nodes[0].(*NodeStream)
+		require.True(t, ok, "Node should be a NodeStream")
+		require.Equal(t, "stream", streamNode.Kind)
+		require.Equal(t, "GetUser", streamNode.Name)
+		require.NotNil(t, streamNode.Doc)
+		require.Equal(t, "Get user by ID", *streamNode.Doc)
+
+		// Check input fields
+		require.Len(t, streamNode.Input, 1)
+		require.Equal(t, "id", streamNode.Input[0].Name)
+		require.NotNil(t, streamNode.Input[0].TypeName)
+		require.Equal(t, "string", *streamNode.Input[0].TypeName)
+
+		// Check output fields
+		require.Len(t, streamNode.Output, 1)
+		require.Equal(t, "user", streamNode.Output[0].Name)
+		require.NotNil(t, streamNode.Output[0].TypeName)
+		require.Equal(t, "User", *streamNode.Output[0].TypeName)
+
+		// Check metadata
+		require.Len(t, streamNode.Meta, 3)
+
+		// Check http.method
+		meta0 := streamNode.Meta[0]
+		require.Equal(t, "http.method", meta0.Key)
+		require.Equal(t, "GET", *meta0.Value.StringVal)
+
+		// Check http.path
+		meta1 := streamNode.Meta[1]
+		require.Equal(t, "http.path", meta1.Key)
+		require.Equal(t, "/users/{id}", *meta1.Value.StringVal)
+
+		// Check auth
+		meta2 := streamNode.Meta[2]
+		require.Equal(t, "auth", meta2.Key)
+		require.True(t, *meta2.Value.BoolVal)
+	})
 }
 
 func TestGetNodeMethods(t *testing.T) {

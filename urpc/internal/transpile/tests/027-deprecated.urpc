@@ -40,3 +40,24 @@ proc DeprecatedProcWithMessage {
     result: bool
   }
 }
+
+deprecated stream DeprecatedStream {
+  input {
+    param1: string
+  }
+
+  output {
+    result: bool
+  }
+}
+
+deprecated("Deprecated")
+stream DeprecatedStreamWithMessage {
+  input {
+    param1: string
+  }
+
+  output {
+    result: bool
+  }
+}
