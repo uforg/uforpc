@@ -5,8 +5,10 @@ import (
 	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/docstore"
 	"github.com/uforg/uforpc/urpc/internal/urpc/lexer"
 	"github.com/uforg/uforpc/urpc/internal/urpc/token"
+	"github.com/uforg/uforpc/urpc/internal/util/filepathutil"
 )
 
 // RequestMessageTextDocumentDefinition represents a request for the definition of a symbol.
@@ -96,6 +98,14 @@ func (l *LSP) findDefinition(content string, position ast.Position, astSchema *a
 		return nil
 	}
 
+	if strings.HasSuffix(tokenLiteral, ".md") {
+		if location := findExternalDocstringDefinition(l.docstore, position, tokenLiteral); location != nil {
+			return []Location{*location}
+		}
+
+		return nil
+	}
+
 	// Check if the tokenLiteral is a reference to a type
 	if location := findTypeDefinition(tokenLiteral, astSchema); location != nil {
 		return []Location{*location}
@@ -119,8 +129,18 @@ func findTokenAtPosition(content string, position ast.Position) (string, error) 
 			break
 		}
 
-		if tok.Type != token.Ident {
+		// Skip non-identifier and non-docstring tokens
+		if tok.Type != token.Ident && tok.Type != token.Docstring {
 			continue
+		}
+
+		// Skip docstrings that are not markdown files
+		if tok.Type == token.Docstring {
+			literal := strings.TrimSpace(tok.Literal)
+			linesLen := len(strings.Split(literal, "\n"))
+			if linesLen > 1 || !strings.HasSuffix(literal, ".md") {
+				continue
+			}
 		}
 
 		matchLine := tok.LineStart <= position.Line && tok.LineEnd >= position.Line
@@ -128,11 +148,33 @@ func findTokenAtPosition(content string, position ast.Position) (string, error) 
 		match := matchLine && matchColumn
 
 		if match {
-			return tok.Literal, nil
+			return strings.TrimSpace(tok.Literal), nil
 		}
 	}
 
 	return "", fmt.Errorf("no token at position")
+}
+
+// findExternalDocstringDefinition finds the definition of an external docstring.
+func findExternalDocstringDefinition(docstore *docstore.Docstore, position ast.Position, tokenLiteral string) *Location {
+	// Check if the file exists in the docstore
+	_, _, err := docstore.GetFileAndHash(position.Filename, tokenLiteral)
+	if err != nil {
+		return nil
+	}
+
+	normFilePath, err := filepathutil.Normalize(position.Filename, tokenLiteral)
+	if err != nil {
+		return nil
+	}
+
+	return &Location{
+		URI: "file://" + strings.TrimPrefix(normFilePath, "file://"),
+		Range: TextDocumentRange{
+			Start: TextDocumentPosition{Line: 1, Character: 1},
+			End:   TextDocumentPosition{Line: 1, Character: 1},
+		},
+	}
 }
 
 // findTypeDefinition finds the definition of a type.
