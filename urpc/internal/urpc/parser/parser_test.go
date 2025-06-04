@@ -121,26 +121,6 @@ func TestParserVersion(t *testing.T) {
 	})
 }
 
-func TestParserImport(t *testing.T) {
-	t.Run("Import parsing", func(t *testing.T) {
-		input := `import "../../my_sub_schema.urpc"`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Import: &ast.Import{
-						Path: "../../my_sub_schema.urpc",
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-}
-
 func TestParserRuleDecl(t *testing.T) {
 	t.Run("Minimum rule declaration parsing", func(t *testing.T) {
 		input := `
@@ -1097,9 +1077,9 @@ func TestParserProcDecl(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
-								Input: &ast.ProcDeclChildInput{
+								Input: &ast.ProcOrStreamDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1135,9 +1115,9 @@ func TestParserProcDecl(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
-								Output: &ast.ProcDeclChildOutput{
+								Output: &ast.ProcOrStreamDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1177,24 +1157,24 @@ func TestParserProcDecl(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
-								Meta: &ast.ProcDeclChildMeta{
-									Children: []*ast.ProcDeclChildMetaChild{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key1", Value: ast.AnyLiteral{Str: testutil.Pointer("hello")}},
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key1", Value: ast.AnyLiteral{Str: testutil.Pointer("hello")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key2", Value: ast.AnyLiteral{Int: testutil.Pointer("123")}},
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key2", Value: ast.AnyLiteral{Int: testutil.Pointer("123")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key3", Value: ast.AnyLiteral{Float: testutil.Pointer("1.23")}},
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key3", Value: ast.AnyLiteral{Float: testutil.Pointer("1.23")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key4", Value: ast.AnyLiteral{True: testutil.Pointer("true")}},
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key4", Value: ast.AnyLiteral{True: testutil.Pointer("true")}},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{Key: "key5", Value: ast.AnyLiteral{False: testutil.Pointer("false")}},
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key5", Value: ast.AnyLiteral{False: testutil.Pointer("false")}},
 										},
 									},
 								},
@@ -1242,9 +1222,9 @@ func TestParserProcDecl(t *testing.T) {
 							Message: testutil.Pointer("Use newProc instead"),
 						},
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
-								Input: &ast.ProcDeclChildInput{
+								Input: &ast.ProcOrStreamDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1259,7 +1239,7 @@ func TestParserProcDecl(t *testing.T) {
 								},
 							},
 							{
-								Output: &ast.ProcDeclChildOutput{
+								Output: &ast.ProcOrStreamDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1274,34 +1254,362 @@ func TestParserProcDecl(t *testing.T) {
 								},
 							},
 							{
-								Meta: &ast.ProcDeclChildMeta{
-									Children: []*ast.ProcDeclChildMetaChild{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key1",
 												Value: ast.AnyLiteral{Str: testutil.Pointer("hello")},
 											},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key2",
 												Value: ast.AnyLiteral{Int: testutil.Pointer("123")},
 											},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key3",
 												Value: ast.AnyLiteral{Float: testutil.Pointer("1.23")},
 											},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key4",
 												Value: ast.AnyLiteral{True: testutil.Pointer("true")},
 											},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
+												Key:   "key5",
+												Value: ast.AnyLiteral{False: testutil.Pointer("false")},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+}
+
+func TestParserStreamDecl(t *testing.T) {
+	t.Run("Minimum stream declaration parsing", func(t *testing.T) {
+		input := `
+			stream MyStream {}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Name: "MyStream",
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Stream with docstring", func(t *testing.T) {
+		input := `
+			""" MyStream is a stream that does something. """
+			stream MyStream {}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Docstring: &ast.Docstring{
+							Value: " MyStream is a stream that does something. ",
+						},
+						Name: "MyStream",
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Stream with deprecated", func(t *testing.T) {
+		input := `
+			deprecated stream MyStream {}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Deprecated: &ast.Deprecated{},
+						Name:       "MyStream",
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Stream with deprecated with message", func(t *testing.T) {
+		input := `
+			deprecated("Use newStream instead")
+			stream MyStream {}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("Use newStream instead"),
+						},
+						Name: "MyStream",
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Stream with input", func(t *testing.T) {
+		input := `
+			stream MyStream {
+				input {
+					field1: string
+				}
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Name: "MyStream",
+						Children: []*ast.ProcOrStreamDeclChild{
+							{
+								Input: &ast.ProcOrStreamDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "field1",
+												Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")}},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Stream with output", func(t *testing.T) {
+		input := `
+			stream MyStream {
+				output {
+					field1: int
+				}
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Name: "MyStream",
+						Children: []*ast.ProcOrStreamDeclChild{
+							{
+								Output: &ast.ProcOrStreamDeclChildOutput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "field1",
+												Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")}},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Stream with meta", func(t *testing.T) {
+		input := `
+			stream MyStream {
+				meta {
+					key1: "hello"
+					key2: 123
+					key3: 1.23
+					key4: true
+					key5: false
+				}
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Name: "MyStream",
+						Children: []*ast.ProcOrStreamDeclChild{
+							{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key1", Value: ast.AnyLiteral{Str: testutil.Pointer("hello")}},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key2", Value: ast.AnyLiteral{Int: testutil.Pointer("123")}},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key3", Value: ast.AnyLiteral{Float: testutil.Pointer("1.23")}},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key4", Value: ast.AnyLiteral{True: testutil.Pointer("true")}},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{Key: "key5", Value: ast.AnyLiteral{False: testutil.Pointer("false")}},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
+	t.Run("Full stream", func(t *testing.T) {
+		input := `
+			""" MyStream is a stream that does something. """
+			deprecated("Use NewStream instead")
+			stream MyStream {
+				input {
+					input1: string[]
+				}
+				output {
+					output1?: int
+				}
+				meta {
+					key1: "hello"
+					key2: 123
+					key3: 1.23
+					key4: true
+					key5: false
+				}
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Docstring: &ast.Docstring{
+							Value: " MyStream is a stream that does something. ",
+						},
+						Deprecated: &ast.Deprecated{
+							Message: testutil.Pointer("Use NewStream instead"),
+						},
+						Name: "MyStream",
+						Children: []*ast.ProcOrStreamDeclChild{
+							{
+								Input: &ast.ProcOrStreamDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "input1",
+												Type: ast.FieldType{
+													IsArray: true,
+													Base:    &ast.FieldTypeBase{Named: testutil.Pointer("string")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{
+								Output: &ast.ProcOrStreamDeclChildOutput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name:     "output1",
+												Optional: true,
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
+												Key:   "key1",
+												Value: ast.AnyLiteral{Str: testutil.Pointer("hello")},
+											},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
+												Key:   "key2",
+												Value: ast.AnyLiteral{Int: testutil.Pointer("123")},
+											},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
+												Key:   "key3",
+												Value: ast.AnyLiteral{Float: testutil.Pointer("1.23")},
+											},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
+												Key:   "key4",
+												Value: ast.AnyLiteral{True: testutil.Pointer("true")},
+											},
+										},
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key5",
 												Value: ast.AnyLiteral{False: testutil.Pointer("false")},
 											},
@@ -1324,14 +1632,14 @@ func TestParserComments(t *testing.T) {
 		input := `
 			// Version comment
 			version 1
-			/* Import comment */
-			import "path/to/file.urpc"
 			// Rule comment
 			rule @myRule { for: string }
 			/* Type comment */
 			type MyType { field: int }
 			// Proc comment
 			proc MyProc {}
+			// Stream comment
+			stream MyStream {}
 			/* Trailing comment */
 		`
 		parsed, err := ParserInstance.ParseString("schema.urpc", input)
@@ -1344,12 +1652,6 @@ func TestParserComments(t *testing.T) {
 				},
 				{
 					Version: &ast.Version{Number: 1},
-				},
-				{
-					Comment: &ast.Comment{Block: testutil.Pointer(" Import comment ")},
-				},
-				{
-					Import: &ast.Import{Path: "path/to/file.urpc"},
 				},
 				{
 					Comment: &ast.Comment{Simple: testutil.Pointer(" Rule comment")},
@@ -1387,6 +1689,12 @@ func TestParserComments(t *testing.T) {
 				},
 				{
 					Proc: &ast.ProcDecl{Name: "MyProc"},
+				},
+				{
+					Comment: &ast.Comment{Simple: testutil.Pointer(" Stream comment")},
+				},
+				{
+					Stream: &ast.StreamDecl{Name: "MyStream"},
 				},
 				{
 					Comment: &ast.Comment{Block: testutil.Pointer(" Trailing comment ")},
@@ -1519,12 +1827,12 @@ func TestParserComments(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
 								Comment: &ast.Comment{Simple: testutil.Pointer(" Before input")},
 							},
 							{
-								Input: &ast.ProcDeclChildInput{
+								Input: &ast.ProcOrStreamDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1541,7 +1849,7 @@ func TestParserComments(t *testing.T) {
 								Comment: &ast.Comment{Block: testutil.Pointer(" Between input and output ")},
 							},
 							{
-								Output: &ast.ProcDeclChildOutput{
+								Output: &ast.ProcOrStreamDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1558,10 +1866,10 @@ func TestParserComments(t *testing.T) {
 								Comment: &ast.Comment{Simple: testutil.Pointer(" Between output and meta")},
 							},
 							{
-								Meta: &ast.ProcDeclChildMeta{
-									Children: []*ast.ProcDeclChildMetaChild{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key",
 												Value: ast.AnyLiteral{Str: testutil.Pointer("value")},
 											},
@@ -1600,9 +1908,9 @@ func TestParserComments(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
-								Input: &ast.ProcDeclChildInput{
+								Input: &ast.ProcOrStreamDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
 											Comment: &ast.Comment{Simple: testutil.Pointer(" Before fieldIn1")},
@@ -1660,9 +1968,9 @@ func TestParserComments(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
-								Output: &ast.ProcDeclChildOutput{
+								Output: &ast.ProcOrStreamDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
 											Comment: &ast.Comment{Simple: testutil.Pointer(" Before fieldOut1")},
@@ -1720,16 +2028,16 @@ func TestParserComments(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
-								Meta: &ast.ProcDeclChildMeta{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
 
-									Children: []*ast.ProcDeclChildMetaChild{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
 										{
 											Comment: &ast.Comment{Simple: testutil.Pointer(" Before key1")},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key1",
 												Value: ast.AnyLiteral{Str: testutil.Pointer("value1")},
 											},
@@ -1738,7 +2046,7 @@ func TestParserComments(t *testing.T) {
 											Comment: &ast.Comment{Block: testutil.Pointer(" Between key1 and key2 ")},
 										},
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "key2",
 												Value: ast.AnyLiteral{Int: testutil.Pointer("123")},
 											},
@@ -1883,10 +2191,69 @@ func TestParserComments(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
+	t.Run("Comments within StreamDecl Input block", func(t *testing.T) {
+		input := `
+			stream MyStream {
+				input {
+					// Before fieldIn1
+					fieldIn1: string
+					/* Between fieldIn1 and fieldIn2 */
+					fieldIn2: int
+					// Trailing comment in input
+				}
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Stream: &ast.StreamDecl{
+						Name: "MyStream",
+						Children: []*ast.ProcOrStreamDeclChild{
+							{
+								Input: &ast.ProcOrStreamDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Before fieldIn1")},
+										},
+										{
+											Field: &ast.Field{
+												Name: "fieldIn1",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
+												},
+											},
+										},
+										{
+											Comment: &ast.Comment{Block: testutil.Pointer(" Between fieldIn1 and fieldIn2 ")},
+										},
+										{
+											Field: &ast.Field{
+												Name: "fieldIn2",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
+												},
+											},
+										},
+										{
+											Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in input")},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
+
 	t.Run("End-of-line comments", func(t *testing.T) {
 		input := `
 			version 1 // EOL on version
-			import "path" // EOL on import
 			rule @myRule { // EOL on rule start
 				for: string // EOL on for
 				param: int // EOL on param
@@ -1900,6 +2267,11 @@ func TestParserComments(t *testing.T) {
 				output { o: int } // EOL on output
 				meta { k: "v" } // EOL on meta
 			} // EOL on proc end
+			stream MyStream { // EOL on stream start
+				input { f: int } // EOL on input
+				output { o: int } // EOL on output
+				meta { k: "v" } // EOL on meta
+			} // EOL on stream end
 		`
 		parsed, err := ParserInstance.ParseString("schema.urpc", input)
 		require.NoError(t, err)
@@ -1911,12 +2283,6 @@ func TestParserComments(t *testing.T) {
 				},
 				{
 					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on version")},
-				},
-				{
-					Import: &ast.Import{Path: "path"},
-				},
-				{
-					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on import")},
 				},
 				{
 					Rule: &ast.RuleDecl{
@@ -1960,10 +2326,10 @@ func TestParserComments(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "MyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on proc start")}}, // Comment inside the block
 							{
-								Input: &ast.ProcDeclChildInput{
+								Input: &ast.ProcOrStreamDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1978,7 +2344,7 @@ func TestParserComments(t *testing.T) {
 							},
 							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on input")}},
 							{
-								Output: &ast.ProcDeclChildOutput{
+								Output: &ast.ProcOrStreamDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
 											Field: &ast.Field{
@@ -1993,10 +2359,10 @@ func TestParserComments(t *testing.T) {
 							},
 							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on output")}},
 							{
-								Meta: &ast.ProcDeclChildMeta{
-									Children: []*ast.ProcDeclChildMetaChild{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
 										{
-											KV: &ast.ProcDeclChildMetaKV{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
 												Key:   "k",
 												Value: ast.AnyLiteral{Str: testutil.Pointer("v")},
 											},
@@ -2010,6 +2376,60 @@ func TestParserComments(t *testing.T) {
 				},
 				{
 					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on proc end")},
+				}, // Comment after the block
+				{
+					Stream: &ast.StreamDecl{
+						Name: "MyStream",
+						Children: []*ast.ProcOrStreamDeclChild{
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on stream start")}}, // Comment inside the block
+							{
+								Input: &ast.ProcOrStreamDeclChildInput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "f",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on input")}},
+							{
+								Output: &ast.ProcOrStreamDeclChildOutput{
+									Children: []*ast.FieldOrComment{
+										{
+											Field: &ast.Field{
+												Name: "o",
+												Type: ast.FieldType{
+													Base: &ast.FieldTypeBase{Named: testutil.Pointer("int")},
+												},
+											},
+										},
+									},
+								},
+							},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on output")}},
+							{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
+										{
+											KV: &ast.ProcOrStreamDeclChildMetaKV{
+												Key:   "k",
+												Value: ast.AnyLiteral{Str: testutil.Pointer("v")},
+											},
+										},
+									},
+								},
+							},
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on meta")}},
+						},
+					},
+				},
+				{
+					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on stream end")},
 				}, // Comment after the block
 			},
 		}
@@ -2060,12 +2480,12 @@ func TestParserComments(t *testing.T) {
 				{
 					Proc: &ast.ProcDecl{
 						Name: "EmptyProc",
-						Children: []*ast.ProcDeclChild{
+						Children: []*ast.ProcOrStreamDeclChild{
 							{
 								Comment: &ast.Comment{Block: testutil.Pointer(" Proc Comment ")},
 							},
 							{
-								Input: &ast.ProcDeclChildInput{
+								Input: &ast.ProcOrStreamDeclChildInput{
 									Children: []*ast.FieldOrComment{
 										{
 											Comment: &ast.Comment{Block: testutil.Pointer(" Input Comment ")},
@@ -2074,7 +2494,7 @@ func TestParserComments(t *testing.T) {
 								},
 							},
 							{
-								Output: &ast.ProcDeclChildOutput{
+								Output: &ast.ProcOrStreamDeclChildOutput{
 									Children: []*ast.FieldOrComment{
 										{
 											Comment: &ast.Comment{Simple: testutil.Pointer(" Output Comment")},
@@ -2083,8 +2503,8 @@ func TestParserComments(t *testing.T) {
 								},
 							},
 							{
-								Meta: &ast.ProcDeclChildMeta{
-									Children: []*ast.ProcDeclChildMetaChild{
+								Meta: &ast.ProcOrStreamDeclChildMeta{
+									Children: []*ast.ProcOrStreamDeclChildMetaChild{
 										{
 											Comment: &ast.Comment{Block: testutil.Pointer(" Meta Comment ")},
 										},
@@ -2225,9 +2645,6 @@ func TestParserDocstrings(t *testing.T) {
 func TestParserFullSchema(t *testing.T) {
 	input := `
 		version 1
-
-		/* Import other schema */
-		import "my_sub_schema.urpc"
 
 		// Custom rule declarations
 
@@ -2431,6 +2848,20 @@ func TestParserFullSchema(t *testing.T) {
 			param: int[]
 			error: "Value out of range"
 		}
+
+		// Stream declarations
+		deprecated stream MyStream {
+			input {
+				fieldIn1: string
+			}
+			output {
+				fieldOut1: string
+			}
+			meta {
+				cache: true
+				cacheTime: 300
+			}
+		}
 	`
 
 	parsed, err := ParserInstance.ParseString("schema.urpc", input)
@@ -2441,16 +2872,6 @@ func TestParserFullSchema(t *testing.T) {
 			{
 				Version: &ast.Version{
 					Number: 1,
-				},
-			},
-			{
-				Comment: &ast.Comment{
-					Block: testutil.Pointer(" Import other schema "),
-				},
-			},
-			{
-				Import: &ast.Import{
-					Path: "my_sub_schema.urpc",
 				},
 			},
 			{
@@ -3102,9 +3523,9 @@ func TestParserFullSchema(t *testing.T) {
 					},
 					Deprecated: &ast.Deprecated{},
 					Name:       "GetCategory",
-					Children: []*ast.ProcDeclChild{
+					Children: []*ast.ProcOrStreamDeclChild{
 						{
-							Input: &ast.ProcDeclChildInput{
+							Input: &ast.ProcOrStreamDeclChildInput{
 								Children: []*ast.FieldOrComment{
 									{
 										Field: &ast.Field{
@@ -3130,7 +3551,7 @@ func TestParserFullSchema(t *testing.T) {
 							},
 						},
 						{
-							Output: &ast.ProcDeclChildOutput{
+							Output: &ast.ProcOrStreamDeclChildOutput{
 								Children: []*ast.FieldOrComment{
 									{
 										Field: &ast.Field{
@@ -3156,28 +3577,28 @@ func TestParserFullSchema(t *testing.T) {
 							},
 						},
 						{
-							Meta: &ast.ProcDeclChildMeta{
-								Children: []*ast.ProcDeclChildMetaChild{
+							Meta: &ast.ProcOrStreamDeclChildMeta{
+								Children: []*ast.ProcOrStreamDeclChildMetaChild{
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "cache",
 											Value: ast.AnyLiteral{True: testutil.Pointer("true")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "cacheTime",
 											Value: ast.AnyLiteral{Int: testutil.Pointer("300")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "requiresAuth",
 											Value: ast.AnyLiteral{False: testutil.Pointer("false")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "apiVersion",
 											Value: ast.AnyLiteral{Str: testutil.Pointer("1.0.0")},
 										},
@@ -3197,9 +3618,9 @@ func TestParserFullSchema(t *testing.T) {
 						Message: testutil.Pointer("Deprecated"),
 					},
 					Name: "CreateProduct",
-					Children: []*ast.ProcDeclChild{
+					Children: []*ast.ProcOrStreamDeclChild{
 						{
-							Input: &ast.ProcDeclChildInput{
+							Input: &ast.ProcOrStreamDeclChildInput{
 								Children: []*ast.FieldOrComment{
 									{
 										Field: &ast.Field{
@@ -3366,7 +3787,7 @@ func TestParserFullSchema(t *testing.T) {
 							},
 						},
 						{
-							Output: &ast.ProcDeclChildOutput{
+							Output: &ast.ProcOrStreamDeclChildOutput{
 								Children: []*ast.FieldOrComment{
 									{
 										Field: &ast.Field{
@@ -3577,40 +3998,40 @@ func TestParserFullSchema(t *testing.T) {
 							},
 						},
 						{
-							Meta: &ast.ProcDeclChildMeta{
-								Children: []*ast.ProcDeclChildMetaChild{
+							Meta: &ast.ProcOrStreamDeclChildMeta{
+								Children: []*ast.ProcOrStreamDeclChildMetaChild{
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "auth",
 											Value: ast.AnyLiteral{Str: testutil.Pointer("required")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "roles",
 											Value: ast.AnyLiteral{Str: testutil.Pointer("admin,product-manager")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "rateLimit",
 											Value: ast.AnyLiteral{Int: testutil.Pointer("100")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "timeout",
 											Value: ast.AnyLiteral{Float: testutil.Pointer("30.5")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "audit",
 											Value: ast.AnyLiteral{True: testutil.Pointer("true")},
 										},
 									},
 									{
-										KV: &ast.ProcDeclChildMetaKV{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
 											Key:   "apiVersion",
 											Value: ast.AnyLiteral{Str: testutil.Pointer("1.2.0")},
 										},
@@ -3642,6 +4063,59 @@ func TestParserFullSchema(t *testing.T) {
 						{
 							Error: &ast.RuleDeclChildError{
 								Error: "Value out of range",
+							},
+						},
+					},
+				},
+			},
+			{
+				Comment: &ast.Comment{Simple: testutil.Pointer(" Stream declarations")},
+			},
+			{
+				Stream: &ast.StreamDecl{
+					Deprecated: &ast.Deprecated{},
+					Name:       "MyStream",
+					Children: []*ast.ProcOrStreamDeclChild{
+						{
+							Input: &ast.ProcOrStreamDeclChildInput{
+								Children: []*ast.FieldOrComment{
+									{
+										Field: &ast.Field{
+											Name: "fieldIn1",
+											Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")}},
+										},
+									},
+								},
+							},
+						},
+						{
+							Output: &ast.ProcOrStreamDeclChildOutput{
+								Children: []*ast.FieldOrComment{
+									{
+										Field: &ast.Field{
+											Name: "fieldOut1",
+											Type: ast.FieldType{Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")}},
+										},
+									},
+								},
+							},
+						},
+						{
+							Meta: &ast.ProcOrStreamDeclChildMeta{
+								Children: []*ast.ProcOrStreamDeclChildMetaChild{
+									{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
+											Key:   "cache",
+											Value: ast.AnyLiteral{True: testutil.Pointer("true")},
+										},
+									},
+									{
+										KV: &ast.ProcOrStreamDeclChildMetaKV{
+											Key:   "cacheTime",
+											Value: ast.AnyLiteral{Int: testutil.Pointer("300")},
+										},
+									},
+								},
 							},
 						},
 					},

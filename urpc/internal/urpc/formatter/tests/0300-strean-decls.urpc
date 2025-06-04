@@ -1,0 +1,100 @@
+/* With docstring */          """
+This is a test proc.
+"""deprecated("Deprecated")
+stream 
+Test   {    
+                    } deprecated
+
+
+stream ProcWithInput {input{
+  field1: string@uppercase
+}
+}
+
+// With output
+stream ProcWithOutput {
+  output
+  {  field1: datetime[
+
+  ]@min("2000-06-25T00:00:00Z"
+  )
+}
+}
+
+// With meta
+stream ProcWithMeta {
+  meta {
+    field: "string"    field: 1
+    field: 1.1field: 
+    true field: false  }}
+
+// With input, output and meta
+stream ProcFull {input{
+  field1: string@uppercase
+}
+output
+  {  field1: datetime[
+
+  ]@min("2000-06-25T00:00:00Z"
+  )
+}meta {
+    field: "string"    field: 1
+    field: 1.1field: 
+    true field: false  }
+}
+
+// >>>>
+
+/* With docstring */
+"""
+This is a test proc.
+"""
+deprecated("Deprecated")
+stream Test {}
+
+deprecated stream ProcWithInput {
+  input {
+    field1: string
+      @uppercase
+  }
+}
+
+// With output
+stream ProcWithOutput {
+  output {
+    field1: datetime[]
+      @min("2000-06-25T00:00:00Z")
+  }
+}
+
+// With meta
+stream ProcWithMeta {
+  meta {
+    field: "string"
+    field: 1
+    field: 1.1
+    field: true
+    field: false
+  }
+}
+
+// With input, output and meta
+stream ProcFull {
+  input {
+    field1: string
+      @uppercase
+  }
+
+  output {
+    field1: datetime[]
+      @min("2000-06-25T00:00:00Z")
+  }
+
+  meta {
+    field: "string"
+    field: 1
+    field: 1.1
+    field: true
+    field: false
+  }
+}

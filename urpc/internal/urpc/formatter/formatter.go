@@ -112,14 +112,14 @@ func (f *schemaFormatter) format() *genkit.GenKit {
 			f.formatStandaloneDocstring()
 		case ast.SchemaChildKindVersion:
 			f.formatVersion()
-		case ast.SchemaChildKindImport:
-			f.formatImport()
 		case ast.SchemaChildKindRule:
 			f.formatRule()
 		case ast.SchemaChildKindType:
 			f.formatType()
 		case ast.SchemaChildKindProc:
 			f.formatProc()
+		case ast.SchemaChildKindStream:
+			f.formatStream()
 		}
 
 		f.loadNextChild()
@@ -205,27 +205,6 @@ func (f *schemaFormatter) formatVersion() {
 	f.LineAndCommentf("version %d", f.currentIndexChild.Version.Number)
 }
 
-func (f *schemaFormatter) formatImport() {
-	prev, prevLineDiff, prevEOF := f.peekChild(-1)
-
-	shouldBreakBefore := false
-	if !prevEOF {
-		if prev.Kind() != ast.SchemaChildKindImport && prev.Kind() != ast.SchemaChildKindComment {
-			shouldBreakBefore = true
-		}
-
-		if prevLineDiff.StartToStart < -1 {
-			shouldBreakBefore = true
-		}
-	}
-
-	if shouldBreakBefore {
-		f.g.Break()
-	}
-
-	f.LineAndCommentf(`import "%s"`, f.currentIndexChild.Import.Path)
-}
-
 func (f *schemaFormatter) formatRule() {
 	prev, prevLineDiff, prevEOF := f.peekChild(-1)
 
@@ -290,4 +269,26 @@ func (f *schemaFormatter) formatProc() {
 
 	procFormatter := newProcFormatter(f.currentIndexChild.Proc)
 	f.LineAndComment(strings.TrimSpace(procFormatter.format().String()))
+}
+
+func (f *schemaFormatter) formatStream() {
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
+
+	shouldBreakBefore := false
+	if !prevEOF {
+		if prev.Kind() != ast.SchemaChildKindComment {
+			shouldBreakBefore = true
+		}
+
+		if prevLineDiff.StartToStart < -1 {
+			shouldBreakBefore = true
+		}
+	}
+
+	if shouldBreakBefore {
+		f.g.Break()
+	}
+
+	streamFormatter := newStreamFormatter(f.currentIndexChild.Stream)
+	f.LineAndComment(strings.TrimSpace(streamFormatter.format().String()))
 }

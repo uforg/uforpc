@@ -8,9 +8,9 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
-type procFormatter struct {
+type streamFormatter struct {
 	g                 *genkit.GenKit
-	procDecl          *ast.ProcDecl
+	streamDecl        *ast.StreamDecl
 	children          []*ast.ProcOrStreamDeclChild
 	maxIndex          int
 	currentIndex      int
@@ -18,28 +18,28 @@ type procFormatter struct {
 	currentIndexChild ast.ProcOrStreamDeclChild
 }
 
-func newProcFormatter(procDecl *ast.ProcDecl) *procFormatter {
-	if procDecl == nil {
-		procDecl = &ast.ProcDecl{}
+func newStreamFormatter(streamDecl *ast.StreamDecl) *streamFormatter {
+	if streamDecl == nil {
+		streamDecl = &ast.StreamDecl{}
 	}
 
-	if procDecl.Children == nil {
-		procDecl.Children = []*ast.ProcOrStreamDeclChild{}
+	if streamDecl.Children == nil {
+		streamDecl.Children = []*ast.ProcOrStreamDeclChild{}
 	}
 
-	maxIndex := max(len(procDecl.Children)-1, 0)
+	maxIndex := max(len(streamDecl.Children)-1, 0)
 	currentIndex := 0
-	currentIndexEOF := len(procDecl.Children) < 1
+	currentIndexEOF := len(streamDecl.Children) < 1
 	currentIndexChild := ast.ProcOrStreamDeclChild{}
 
 	if !currentIndexEOF {
-		currentIndexChild = *procDecl.Children[0]
+		currentIndexChild = *streamDecl.Children[0]
 	}
 
-	return &procFormatter{
+	return &streamFormatter{
 		g:                 genkit.NewGenKit().WithSpaces(2),
-		procDecl:          procDecl,
-		children:          procDecl.Children,
+		streamDecl:        streamDecl,
+		children:          streamDecl.Children,
 		maxIndex:          maxIndex,
 		currentIndex:      currentIndex,
 		currentIndexEOF:   currentIndexEOF,
@@ -48,7 +48,7 @@ func newProcFormatter(procDecl *ast.ProcDecl) *procFormatter {
 }
 
 // loadNextChild moves the current index to the next child.
-func (f *procFormatter) loadNextChild() {
+func (f *streamFormatter) loadNextChild() {
 	currentIndex := f.currentIndex + 1
 	currentIndexEOF := currentIndex > f.maxIndex
 	currentIndexChild := ast.ProcOrStreamDeclChild{}
@@ -68,7 +68,7 @@ func (f *procFormatter) loadNextChild() {
 //   - The child at the current index +- offset.
 //   - The line diff between the peeked child and the current child.
 //   - A bool indicating if the peeked child is out of bounds (EOL).
-func (f *procFormatter) peekChild(offset int) (ast.ProcOrStreamDeclChild, ast.LineDiff, bool) {
+func (f *streamFormatter) peekChild(offset int) (ast.ProcOrStreamDeclChild, ast.LineDiff, bool) {
 	peekIndex := f.currentIndex + offset
 	peekIndexEOF := peekIndex < 0 || peekIndex > f.maxIndex
 	peekIndexChild := ast.ProcOrStreamDeclChild{}
@@ -85,30 +85,30 @@ func (f *procFormatter) peekChild(offset int) (ast.ProcOrStreamDeclChild, ast.Li
 // format formats the entire procDecl, handling spacing and EOL comments.
 //
 // Returns the formatted genkit.GenKit.
-func (f *procFormatter) format() *genkit.GenKit {
-	if f.procDecl.Docstring != nil {
-		f.g.Linef(`"""%s"""`, f.procDecl.Docstring.Value)
+func (f *streamFormatter) format() *genkit.GenKit {
+	if f.streamDecl.Docstring != nil {
+		f.g.Linef(`"""%s"""`, f.streamDecl.Docstring.Value)
 	}
 
-	if f.procDecl.Deprecated != nil {
-		if f.procDecl.Deprecated.Message == nil {
+	if f.streamDecl.Deprecated != nil {
+		if f.streamDecl.Deprecated.Message == nil {
 			f.g.Inline("deprecated ")
 		}
-		if f.procDecl.Deprecated.Message != nil {
-			f.g.Linef("deprecated(\"%s\")", strutil.EscapeQuotes(*f.procDecl.Deprecated.Message))
+		if f.streamDecl.Deprecated.Message != nil {
+			f.g.Linef("deprecated(\"%s\")", strutil.EscapeQuotes(*f.streamDecl.Deprecated.Message))
 		}
 	}
 
-	f.g.Inlinef(`proc %s `, f.procDecl.Name)
+	f.g.Inlinef(`stream %s `, f.streamDecl.Name)
 
-	if len(f.procDecl.Children) < 1 {
+	if len(f.streamDecl.Children) < 1 {
 		f.g.Inline("{}")
 		return f.g
 	}
 
 	hasInlineComment := false
 	if f.currentIndexChild.Comment != nil {
-		lineDiff := ast.GetLineDiff(f.currentIndexChild, f.procDecl)
+		lineDiff := ast.GetLineDiff(f.currentIndexChild, f.streamDecl)
 		if lineDiff.StartToStart == 0 {
 			hasInlineComment = true
 		}
@@ -147,7 +147,7 @@ func (f *procFormatter) format() *genkit.GenKit {
 	return f.g
 }
 
-func (f *procFormatter) formatComment() {
+func (f *streamFormatter) formatComment() {
 	_, prevLineDiff, prevEOF := f.peekChild(-1)
 
 	shouldBreakBefore := false
@@ -170,7 +170,7 @@ func (f *procFormatter) formatComment() {
 	}
 }
 
-func (f *procFormatter) breakBeforeBlock() {
+func (f *streamFormatter) breakBeforeBlock() {
 	prev, prevLineDiff, prevEOF := f.peekChild(-1)
 	prevWasComment := prev.Comment != nil
 
@@ -189,21 +189,21 @@ func (f *procFormatter) breakBeforeBlock() {
 	f.g.Break()
 }
 
-func (f *procFormatter) formatInput() {
+func (f *streamFormatter) formatInput() {
 	f.breakBeforeBlock()
 	f.g.Inline("input ")
 	fieldsFormatter := newFieldsFormatter(f.currentIndexChild, f.currentIndexChild.Input.Children)
 	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
 }
 
-func (f *procFormatter) formatOutput() {
+func (f *streamFormatter) formatOutput() {
 	f.breakBeforeBlock()
 	f.g.Inline("output ")
 	fieldsFormatter := newFieldsFormatter(f.currentIndexChild, f.currentIndexChild.Output.Children)
 	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
 }
 
-func (f *procFormatter) formatMeta() {
+func (f *streamFormatter) formatMeta() {
 	f.breakBeforeBlock()
 	f.g.Inline("meta ")
 	metaFormatter := newProcOrStreamMetaFormatter(f.currentIndexChild.Meta)

@@ -59,6 +59,7 @@ const (
 	Type       TokenType = "Type"
 	Extends    TokenType = "Extends"
 	Proc       TokenType = "Proc"
+	Stream     TokenType = "Stream"
 	Input      TokenType = "Input"
 	Output     TokenType = "Output"
 	Meta       TokenType = "Meta"
@@ -112,6 +113,7 @@ var TokenTypes = []TokenType{
 	Type,
 	Extends,
 	Proc,
+	Stream,
 	Input,
 	Output,
 	Meta,
@@ -160,6 +162,7 @@ var keywords = map[string]TokenType{
 	"type":       Type,
 	"extends":    Extends,
 	"proc":       Proc,
+	"stream":     Stream,
 	"input":      Input,
 	"output":     Output,
 	"meta":       Meta,

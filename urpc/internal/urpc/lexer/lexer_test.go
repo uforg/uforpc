@@ -81,7 +81,7 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false for param string int float bool import datetime deprecated extends"
+		input := "version rule type proc input output meta error true false for param string int float bool import datetime deprecated extends stream"
 
 		tests := []token.Token{
 			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 1, LineEnd: 1, ColumnStart: 1, ColumnEnd: 7},
@@ -123,7 +123,9 @@ func TestLexer(t *testing.T) {
 			{Type: token.Deprecated, Literal: "deprecated", FileName: "test.urpc", LineStart: 1, ColumnStart: 107, LineEnd: 1, ColumnEnd: 116},
 			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 117, LineEnd: 1, ColumnEnd: 117},
 			{Type: token.Extends, Literal: "extends", FileName: "test.urpc", LineStart: 1, ColumnStart: 118, LineEnd: 1, ColumnEnd: 124},
-			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 125, LineEnd: 1, ColumnEnd: 125},
+			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 125, LineEnd: 1, ColumnEnd: 125},
+			{Type: token.Stream, Literal: "stream", FileName: "test.urpc", LineStart: 1, ColumnStart: 126, LineEnd: 1, ColumnEnd: 131},
+			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 132, LineEnd: 1, ColumnEnd: 132},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
@@ -621,6 +623,12 @@ func TestLexer(t *testing.T) {
 					audit: true
 					maxRetries: 3
 				}
+			}
+
+			stream NewProduct {
+				input {
+					product: Product
+				}
 			}`
 
 		tests := []token.Token{
@@ -731,6 +739,16 @@ func TestLexer(t *testing.T) {
 			{Type: token.Ident, Literal: "maxRetries"},
 			{Type: token.Colon, Literal: ":"},
 			{Type: token.IntLiteral, Literal: "3"},
+			{Type: token.RBrace, Literal: "}"},
+			{Type: token.RBrace, Literal: "}"},
+			{Type: token.Stream, Literal: "stream"},
+			{Type: token.Ident, Literal: "NewProduct"},
+			{Type: token.LBrace, Literal: "{"},
+			{Type: token.Input, Literal: "input"},
+			{Type: token.LBrace, Literal: "{"},
+			{Type: token.Ident, Literal: "product"},
+			{Type: token.Colon, Literal: ":"},
+			{Type: token.Ident, Literal: "Product"},
 			{Type: token.RBrace, Literal: "}"},
 			{Type: token.RBrace, Literal: "}"},
 			{Type: token.Eof, Literal: ""},

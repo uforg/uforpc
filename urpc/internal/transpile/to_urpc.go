@@ -332,7 +332,7 @@ func convertProcToURPC(procNode *schema.NodeProc) (*ast.ProcDecl, error) {
 
 	// Process input fields if any
 	if len(procNode.Input) > 0 {
-		inputChild := &ast.ProcDeclChildInput{}
+		inputChild := &ast.ProcOrStreamDeclChildInput{}
 
 		for _, field := range procNode.Input {
 			fieldNode, err := convertFieldToURPC(field)
@@ -345,14 +345,14 @@ func convertProcToURPC(procNode *schema.NodeProc) (*ast.ProcDecl, error) {
 			})
 		}
 
-		procDecl.Children = append(procDecl.Children, &ast.ProcDeclChild{
+		procDecl.Children = append(procDecl.Children, &ast.ProcOrStreamDeclChild{
 			Input: inputChild,
 		})
 	}
 
 	// Process output fields if any
 	if len(procNode.Output) > 0 {
-		outputChild := &ast.ProcDeclChildOutput{}
+		outputChild := &ast.ProcOrStreamDeclChildOutput{}
 
 		for _, field := range procNode.Output {
 			fieldNode, err := convertFieldToURPC(field)
@@ -365,14 +365,14 @@ func convertProcToURPC(procNode *schema.NodeProc) (*ast.ProcDecl, error) {
 			})
 		}
 
-		procDecl.Children = append(procDecl.Children, &ast.ProcDeclChild{
+		procDecl.Children = append(procDecl.Children, &ast.ProcOrStreamDeclChild{
 			Output: outputChild,
 		})
 	}
 
 	// Process meta fields if any
 	if len(procNode.Meta) > 0 {
-		metaChild := &ast.ProcDeclChildMeta{}
+		metaChild := &ast.ProcOrStreamDeclChildMeta{}
 
 		// Process any remaining keys that weren't in the predefined order
 		for _, metaKV := range procNode.Meta {
@@ -384,15 +384,15 @@ func convertProcToURPC(procNode *schema.NodeProc) (*ast.ProcDecl, error) {
 				return nil, fmt.Errorf("error converting meta value for key '%s': %w", key, err)
 			}
 
-			metaChild.Children = append(metaChild.Children, &ast.ProcDeclChildMetaChild{
-				KV: &ast.ProcDeclChildMetaKV{
+			metaChild.Children = append(metaChild.Children, &ast.ProcOrStreamDeclChildMetaChild{
+				KV: &ast.ProcOrStreamDeclChildMetaKV{
 					Key:   key,
 					Value: literal,
 				},
 			})
 		}
 
-		procDecl.Children = append(procDecl.Children, &ast.ProcDeclChild{
+		procDecl.Children = append(procDecl.Children, &ast.ProcOrStreamDeclChild{
 			Meta: metaChild,
 		})
 	}

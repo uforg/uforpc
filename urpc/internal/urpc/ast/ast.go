@@ -54,17 +54,6 @@ func (s *Schema) GetDocstrings() []*Docstring {
 	return docstrings
 }
 
-// GetImports returns all import statements in the URPC schema.
-func (s *Schema) GetImports() []*Import {
-	imports := []*Import{}
-	for _, node := range s.Children {
-		if node.Kind() == SchemaChildKindImport {
-			imports = append(imports, node.Import)
-		}
-	}
-	return imports
-}
-
 // GetRules returns all custom validation rules in the URPC schema.
 func (s *Schema) GetRules() []*RuleDecl {
 	rules := []*RuleDecl{}
@@ -98,6 +87,17 @@ func (s *Schema) GetProcs() []*ProcDecl {
 	return procs
 }
 
+// GetStreams returns all streams in the URPC schema.
+func (s *Schema) GetStreams() []*StreamDecl {
+	streams := []*StreamDecl{}
+	for _, node := range s.Children {
+		if node.Kind() == SchemaChildKindStream {
+			streams = append(streams, node.Stream)
+		}
+	}
+	return streams
+}
+
 // SchemaChildKind represents the kind of a schema child node.
 type SchemaChildKind string
 
@@ -105,22 +105,22 @@ const (
 	SchemaChildKindVersion   SchemaChildKind = "Version"
 	SchemaChildKindComment   SchemaChildKind = "Comment"
 	SchemaChildKindDocstring SchemaChildKind = "Docstring"
-	SchemaChildKindImport    SchemaChildKind = "Import"
 	SchemaChildKindRule      SchemaChildKind = "Rule"
 	SchemaChildKindType      SchemaChildKind = "Type"
 	SchemaChildKindProc      SchemaChildKind = "Proc"
+	SchemaChildKindStream    SchemaChildKind = "Stream"
 )
 
 // SchemaChild represents a child node of the Schema root node.
 type SchemaChild struct {
 	Positions
-	Version   *Version   `parser:"  @@"`
-	Comment   *Comment   `parser:"| @@"`
-	Import    *Import    `parser:"| @@"`
-	Rule      *RuleDecl  `parser:"| @@"`
-	Type      *TypeDecl  `parser:"| @@"`
-	Proc      *ProcDecl  `parser:"| @@"`
-	Docstring *Docstring `parser:"| @@"`
+	Version   *Version    `parser:"  @@"`
+	Comment   *Comment    `parser:"| @@"`
+	Rule      *RuleDecl   `parser:"| @@"`
+	Type      *TypeDecl   `parser:"| @@"`
+	Proc      *ProcDecl   `parser:"| @@"`
+	Stream    *StreamDecl `parser:"| @@"`
+	Docstring *Docstring  `parser:"| @@"`
 }
 
 func (n *SchemaChild) Kind() SchemaChildKind {
@@ -133,9 +133,6 @@ func (n *SchemaChild) Kind() SchemaChildKind {
 	if n.Docstring != nil {
 		return SchemaChildKindDocstring
 	}
-	if n.Import != nil {
-		return SchemaChildKindImport
-	}
 	if n.Rule != nil {
 		return SchemaChildKindRule
 	}
@@ -144,6 +141,9 @@ func (n *SchemaChild) Kind() SchemaChildKind {
 	}
 	if n.Proc != nil {
 		return SchemaChildKindProc
+	}
+	if n.Stream != nil {
+		return SchemaChildKindStream
 	}
 	return ""
 }
@@ -159,12 +159,6 @@ type Comment struct {
 	Positions
 	Simple *string `parser:"  @Comment"`
 	Block  *string `parser:"| @CommentBlock"`
-}
-
-// Import represents an import statement.
-type Import struct {
-	Positions
-	Path string `parser:"Import @StringLiteral"`
 }
 
 // RuleDecl represents a custom validation rule declaration.
@@ -217,48 +211,57 @@ type TypeDecl struct {
 // ProcDecl represents a procedure declaration.
 type ProcDecl struct {
 	Positions
-	Docstring  *Docstring       `parser:"(@@ (?! Newline Newline))?"`
-	Deprecated *Deprecated      `parser:"(@@ (?= Proc))?"`
-	Name       string           `parser:"Proc @Ident"`
-	Children   []*ProcDeclChild `parser:"LBrace @@* RBrace"`
+	Docstring  *Docstring               `parser:"(@@ (?! Newline Newline))?"`
+	Deprecated *Deprecated              `parser:"(@@ (?= Proc))?"`
+	Name       string                   `parser:"Proc @Ident"`
+	Children   []*ProcOrStreamDeclChild `parser:"LBrace @@* RBrace"`
 }
 
-// ProcDeclChild represents a child node within a ProcDecl block (Comment, Input, Output, or Meta).
-type ProcDeclChild struct {
+// StreamDecl represents a stream declaration.
+type StreamDecl struct {
 	Positions
-	Comment *Comment             `parser:"  @@"`
-	Input   *ProcDeclChildInput  `parser:"| @@"`
-	Output  *ProcDeclChildOutput `parser:"| @@"`
-	Meta    *ProcDeclChildMeta   `parser:"| @@"`
+	Docstring  *Docstring               `parser:"(@@ (?! Newline Newline))?"`
+	Deprecated *Deprecated              `parser:"(@@ (?= Stream))?"`
+	Name       string                   `parser:"Stream @Ident"`
+	Children   []*ProcOrStreamDeclChild `parser:"LBrace @@* RBrace"`
 }
 
-// ProcDeclChildInput represents the Input{...} block within a ProcDecl.
-type ProcDeclChildInput struct {
+// ProcOrStreamDeclChild represents a child node within a ProcDecl or StreamDecl block (Comment, Input, Output, or Meta).
+type ProcOrStreamDeclChild struct {
+	Positions
+	Comment *Comment                     `parser:"  @@"`
+	Input   *ProcOrStreamDeclChildInput  `parser:"| @@"`
+	Output  *ProcOrStreamDeclChildOutput `parser:"| @@"`
+	Meta    *ProcOrStreamDeclChildMeta   `parser:"| @@"`
+}
+
+// ProcOrStreamDeclChildInput represents the Input{...} block within a ProcDecl or StreamDecl.
+type ProcOrStreamDeclChildInput struct {
 	Positions
 	Children []*FieldOrComment `parser:"Input LBrace @@* RBrace"`
 }
 
-// ProcDeclChildOutput represents the Output{...} block within a ProcDecl.
-type ProcDeclChildOutput struct {
+// ProcOrStreamDeclChildOutput represents the Output{...} block within a ProcDecl or StreamDecl.
+type ProcOrStreamDeclChildOutput struct {
 	Positions
 	Children []*FieldOrComment `parser:"Output LBrace @@* RBrace"`
 }
 
-// ProcDeclChildMeta represents the Meta{...} block within a ProcDecl.
-type ProcDeclChildMeta struct {
+// ProcOrStreamDeclChildMeta represents the Meta{...} block within a ProcDecl or StreamDecl.
+type ProcOrStreamDeclChildMeta struct {
 	Positions
-	Children []*ProcDeclChildMetaChild `parser:"Meta LBrace @@* RBrace"`
+	Children []*ProcOrStreamDeclChildMetaChild `parser:"Meta LBrace @@* RBrace"`
 }
 
-// ProcDeclChildMetaChild represents a child node within a MetaBlock (either a Comment or a Key-Value pair).
-type ProcDeclChildMetaChild struct {
+// ProcOrStreamDeclChildMetaChild represents a child node within a MetaBlock (either a Comment or a Key-Value pair).
+type ProcOrStreamDeclChildMetaChild struct {
 	Positions
-	Comment *Comment             `parser:"  @@"`
-	KV      *ProcDeclChildMetaKV `parser:"| @@"`
+	Comment *Comment                     `parser:"  @@"`
+	KV      *ProcOrStreamDeclChildMetaKV `parser:"| @@"`
 }
 
-// ProcDeclChildMetaKV represents a key-value pair within a MetaBlock.
-type ProcDeclChildMetaKV struct {
+// ProcOrStreamDeclChildMetaKV represents a key-value pair within a MetaBlock.
+type ProcOrStreamDeclChildMetaKV struct {
 	Positions
 	Key   string     `parser:"@Ident"`
 	Value AnyLiteral `parser:"Colon @@"`

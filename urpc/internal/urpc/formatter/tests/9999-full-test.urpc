@@ -1,8 +1,5 @@
 version 1
 
-    /* Import other schema */
-    import "foo.urpc" // Comment
-    import "bar.urpc"
     """ ./docs/welcome.md """ // Welcome and introduction to the API
     """ ./docs/authentication.md """ // Authentication guide
 
@@ -200,15 +197,20 @@ deprecated("Deprecated")
       for: int
       param: int[]
       error: "Value out of range"
+    } """ MyStream """deprecated
+    stream MyStream{
+      input {
+        field1: string
+          @uppercase
+      }
+
+      output {
+        field1: datetime[]}
     }
 
 // >>>>
 
 version 1
-
-/* Import other schema */
-import "foo.urpc" // Comment
-import "bar.urpc"
 
 """ ./docs/welcome.md """ // Welcome and introduction to the API
 """ ./docs/authentication.md """ // Authentication guide
@@ -413,4 +415,16 @@ rule @range {
   for: int
   param: int[]
   error: "Value out of range"
+}
+
+""" MyStream """
+deprecated stream MyStream {
+  input {
+    field1: string
+      @uppercase
+  }
+
+  output {
+    field1: datetime[]
+  }
 }
