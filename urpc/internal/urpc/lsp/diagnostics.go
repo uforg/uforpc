@@ -71,31 +71,6 @@ func convertASTPositionToLSPPosition(pos ast.Position) TextDocumentPosition {
 	}
 }
 
-// debounceTime is the time to wait before running the analyzer after a document change.
-const debounceTime = 500 * time.Millisecond
-
-// analyzeAndPublishDiagnostics analyzes the document at the given URI and publishes diagnostics.
-func (l *LSP) analyzeAndPublishDiagnostics(uri string) {
-	// Get the document content
-	_, _, found, err := l.docstore.GetInMemory("", uri)
-	if err != nil || !found {
-		l.logger.Error("failed to get document content", "uri", uri, "error", err)
-		return
-	}
-
-	// Run the analyzer
-	_, diagnostics, _ := l.analyzer.Analyze(uri)
-
-	// Convert analyzer diagnostics to LSP diagnostics
-	lspDiagnostics := make([]Diagnostic, 0, len(diagnostics))
-	for _, diag := range diagnostics {
-		lspDiagnostics = append(lspDiagnostics, ConvertAnalyzerDiagnosticToLSPDiagnostic(diag))
-	}
-
-	// Publish diagnostics
-	l.publishDiagnostics(uri, lspDiagnostics)
-}
-
 // publishDiagnostics sends diagnostics to the client.
 func (l *LSP) publishDiagnostics(uri string, diagnostics []Diagnostic) {
 	notification := NotificationMessagePublishDiagnostics{
@@ -119,4 +94,69 @@ func (l *LSP) publishDiagnostics(uri string, diagnostics []Diagnostic) {
 // clearDiagnostics clears diagnostics for the given URI.
 func (l *LSP) clearDiagnostics(uri string) {
 	l.publishDiagnostics(uri, []Diagnostic{})
+}
+
+// analyzeAndPublishDiagnostics analyzes the document at the given URI and publishes diagnostics.
+func (l *LSP) analyzeAndPublishDiagnostics(uri string) {
+	// Get the document content
+	_, _, found, err := l.docstore.GetInMemory("", uri)
+	if err != nil || !found {
+		l.logger.Error("failed to get document content", "uri", uri, "error", err)
+		return
+	}
+
+	// Run the analyzer
+	_, diagnostics, _ := l.analyzer.Analyze(uri)
+
+	// Convert analyzer diagnostics to LSP diagnostics
+	lspDiagnostics := make([]Diagnostic, 0, len(diagnostics))
+	for _, diag := range diagnostics {
+		lspDiagnostics = append(lspDiagnostics, ConvertAnalyzerDiagnosticToLSPDiagnostic(diag))
+	}
+
+	// Publish diagnostics
+	l.publishDiagnostics(uri, lspDiagnostics)
+}
+
+// analyzeAndPublishDiagnosticsDebounced schedules an analysis for the given URI with debouncing.
+// If another analysis is scheduled within the debounce time, the previous one is cancelled.
+func (l *LSP) analyzeAndPublishDiagnosticsDebounced(uri string) {
+	// debounceTime is the time to wait before running the analyzer after a document change.
+	const debounceTime = 500 * time.Millisecond
+
+	// Skip if analyzer is not available
+	if l.analyzer == nil {
+		l.logger.Warn("analyzer not available, skipping analysis")
+		return
+	}
+
+	l.analysisTimerMu.Lock()
+	defer l.analysisTimerMu.Unlock()
+
+	// Cancel any existing timer
+	if l.analysisTimer != nil {
+		l.analysisTimer.Stop()
+	}
+
+	// Schedule a new analysis
+	l.analysisTimer = time.AfterFunc(debounceTime, func() {
+		// Check if another analysis is already in progress
+		l.analysisInProgressMu.Lock()
+		if l.analysisInProgress {
+			l.analysisInProgressMu.Unlock()
+			// If an analysis is already in progress, schedule another one
+			l.analyzeAndPublishDiagnosticsDebounced(uri)
+			return
+		}
+		l.analysisInProgress = true
+		l.analysisInProgressMu.Unlock()
+
+		// Run the analysis
+		l.analyzeAndPublishDiagnostics(uri)
+
+		// Mark analysis as complete
+		l.analysisInProgressMu.Lock()
+		l.analysisInProgress = false
+		l.analysisInProgressMu.Unlock()
+	})
 }

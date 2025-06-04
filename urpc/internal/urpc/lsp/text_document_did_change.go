@@ -34,7 +34,7 @@ func (l *LSP) handleTextDocumentDidChange(rawMessage []byte) (any, error) {
 
 	// Schedule analysis with debouncing
 	if l.analyzer != nil {
-		l.scheduleAnalysis(filePath)
+		l.analyzeAndPublishDiagnosticsDebounced(filePath)
 	}
 
 	return nil, nil

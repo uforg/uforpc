@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/urpc/lexer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/token"
 )
 
 // RequestMessageTextDocumentDefinition represents a request for the definition of a symbol.
@@ -57,7 +58,7 @@ func (l *LSP) handleTextDocumentDefinition(rawMessage []byte) (any, error) {
 	}
 
 	// Run the analyzer to get the combined schema
-	combinedSchema, _, err := l.analyzer.Analyze(filePath)
+	astSchema, _, err := l.analyzer.Analyze(filePath)
 	if err != nil {
 		l.logger.Error("failed to analyze document", "uri", filePath, "error", err)
 	}
@@ -70,7 +71,7 @@ func (l *LSP) handleTextDocumentDefinition(rawMessage []byte) (any, error) {
 	}
 
 	// Find the definition
-	locations := l.findDefinition(content, astPosition, combinedSchema)
+	locations := l.findDefinition(content, astPosition, astSchema)
 
 	response := ResponseMessageTextDocumentDefinition{
 		ResponseMessage: ResponseMessage{
@@ -84,24 +85,24 @@ func (l *LSP) handleTextDocumentDefinition(rawMessage []byte) (any, error) {
 }
 
 // findDefinition finds the definition of a symbol at the given position.
-func (l *LSP) findDefinition(content string, position ast.Position, combinedSchema analyzer.CombinedSchema) []Location {
+func (l *LSP) findDefinition(content string, position ast.Position, astSchema *ast.Schema) []Location {
 	// We don't need to parse the document here since we're using the token finder
-	// to extract the token at the position and then look it up in the combinedSchema
+	// to extract the token at the position and then look it up in the astSchema
 
-	// Find the token at the position
-	token, err := findTokenAtPosition(content, position)
+	// Find the tokenLiteral at the position
+	tokenLiteral, err := findTokenAtPosition(content, position)
 	if err != nil {
 		l.logger.Error("failed to find token at position", "position", position, "error", err)
 		return nil
 	}
 
-	// Check if the token is a reference to a type
-	if location := findTypeDefinition(token, position, combinedSchema); location != nil {
+	// Check if the tokenLiteral is a reference to a type
+	if location := findTypeDefinition(tokenLiteral, astSchema); location != nil {
 		return []Location{*location}
 	}
 
-	// Check if the token is a reference to a rule
-	if location := findRuleDefinition(token, position, combinedSchema); location != nil {
+	// Check if the tokenLiteral is a reference to a rule
+	if location := findRuleDefinition(tokenLiteral, astSchema); location != nil {
 		return []Location{*location}
 	}
 
@@ -110,69 +111,34 @@ func (l *LSP) findDefinition(content string, position ast.Position, combinedSche
 
 // findTokenAtPosition finds the token at the given position in the content.
 func findTokenAtPosition(content string, position ast.Position) (string, error) {
-	// This is a simple implementation that extracts the word at the position
-	// A more robust implementation would use the lexer to get the token
+	lex := lexer.NewLexer("", content)
 
-	// Convert content to lines
-	lines := splitLines(content)
-	if position.Line <= 0 || position.Line > len(lines) {
-		return "", fmt.Errorf("line out of range: %d", position.Line)
-	}
+	for {
+		tok := lex.NextToken()
+		if tok.Type == token.Eof {
+			break
+		}
 
-	line := lines[position.Line-1]
-	if position.Column <= 0 || position.Column > len(line)+1 {
-		return "", fmt.Errorf("column out of range: %d", position.Column)
-	}
+		if tok.Type != token.Ident {
+			continue
+		}
 
-	// Find the start and end of the word
-	start := position.Column - 1
-	for start > 0 && isIdentifierChar(line[start-1]) {
-		start--
-	}
+		matchLine := tok.LineStart <= position.Line && tok.LineEnd >= position.Line
+		matchColumn := tok.ColumnStart <= position.Column && tok.ColumnEnd >= position.Column
+		match := matchLine && matchColumn
 
-	end := position.Column - 1
-	for end < len(line) && isIdentifierChar(line[end]) {
-		end++
-	}
-
-	if start == end {
-		// No token at position (e.g., whitespace or punctuation)
-		return "", fmt.Errorf("no token at position")
-	}
-
-	return line[start:end], nil
-}
-
-// isIdentifierChar returns true if the character is valid in an identifier.
-func isIdentifierChar(c byte) bool {
-	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'
-}
-
-// splitLines splits the content into lines.
-func splitLines(content string) []string {
-	if content == "" {
-		return []string{}
-	}
-
-	var lines []string
-	var line string
-	for _, c := range content {
-		if c == '\n' {
-			lines = append(lines, line)
-			line = ""
-		} else if c != '\r' {
-			line += string(c)
+		if match {
+			return tok.Literal, nil
 		}
 	}
-	// Always append the last line, even if it's empty
-	lines = append(lines, line)
-	return lines
+
+	return "", fmt.Errorf("no token at position")
 }
 
 // findTypeDefinition finds the definition of a type.
-func findTypeDefinition(token string, _ ast.Position, combinedSchema analyzer.CombinedSchema) *Location {
+func findTypeDefinition(tokenLiteral string, astSchema *ast.Schema) *Location {
 	// Check if the token is a type name
-	typeDecl, exists := combinedSchema.TypeDecls[token]
+	typeDecl, exists := astSchema.GetTypesMap()[tokenLiteral]
 	if !exists {
 		return nil
 	}
@@ -194,14 +160,9 @@ func findTypeDefinition(token string, _ ast.Position, combinedSchema analyzer.Co
 }
 
 // findRuleDefinition finds the definition of a rule.
-func findRuleDefinition(token string, _ ast.Position, combinedSchema analyzer.CombinedSchema) *Location {
-	// If the token starts with @, remove it
-	if len(token) > 0 && token[0] == '@' {
-		token = token[1:]
-	}
-
+func findRuleDefinition(tokenLiteral string, astSchema *ast.Schema) *Location {
 	// Check if the token is a rule name
-	ruleDecl, exists := combinedSchema.RuleDecls[token]
+	ruleDecl, exists := astSchema.GetRulesMap()[tokenLiteral]
 	if !exists {
 		return nil
 	}

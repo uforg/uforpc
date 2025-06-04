@@ -161,8 +161,3 @@ proc BarProc {
 	assert.Contains(t, hoverResponse.Result.Contents.Value, "```urpc")
 	assert.Contains(t, hoverResponse.Result.Contents.Value, "type FooType")
 }
-
-func TestFindHoverInfo(t *testing.T) {
-	// Skip this test for now as it requires more complex setup
-	t.Skip("Skipping hover info test until we can properly mock the file provider")
-}

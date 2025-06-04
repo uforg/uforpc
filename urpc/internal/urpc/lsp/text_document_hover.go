@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 )
 
@@ -65,7 +64,7 @@ func (l *LSP) handleTextDocumentHover(rawMessage []byte) (any, error) {
 	}
 
 	// Run the analyzer to get the combined schema
-	combinedSchema, _, err := l.analyzer.Analyze(filePath)
+	astSchema, _, err := l.analyzer.Analyze(filePath)
 	if err != nil {
 		l.logger.Error("failed to analyze document", "uri", filePath, "error", err)
 	}
@@ -78,7 +77,7 @@ func (l *LSP) handleTextDocumentHover(rawMessage []byte) (any, error) {
 	}
 
 	// Find the hover information
-	hoverResult := l.findHoverInfo(content, astPosition, combinedSchema)
+	hoverResult := l.findHoverInfo(content, astPosition, astSchema)
 
 	response := ResponseMessageTextDocumentHover{
 		ResponseMessage: ResponseMessage{
@@ -92,21 +91,21 @@ func (l *LSP) handleTextDocumentHover(rawMessage []byte) (any, error) {
 }
 
 // findHoverInfo finds hover information for a symbol at the given position.
-func (l *LSP) findHoverInfo(content string, position ast.Position, combinedSchema analyzer.CombinedSchema) *HoverResult {
-	// Find the token at the position
-	token, err := findTokenAtPosition(content, position)
+func (l *LSP) findHoverInfo(content string, position ast.Position, astSchema *ast.Schema) *HoverResult {
+	// Find the tokenLiteral at the position
+	tokenLiteral, err := findTokenAtPosition(content, position)
 	if err != nil {
 		l.logger.Error("failed to find token at position", "position", position, "error", err)
 		return nil
 	}
 
 	// Check if the token is a reference to a type
-	if hoverInfo := l.findTypeHoverInfo(token, combinedSchema); hoverInfo != nil {
+	if hoverInfo := l.findTypeHoverInfo(tokenLiteral, astSchema); hoverInfo != nil {
 		return hoverInfo
 	}
 
 	// Check if the token is a reference to a rule
-	if hoverInfo := l.findRuleHoverInfo(token, combinedSchema); hoverInfo != nil {
+	if hoverInfo := l.findRuleHoverInfo(tokenLiteral, astSchema); hoverInfo != nil {
 		return hoverInfo
 	}
 
@@ -114,9 +113,9 @@ func (l *LSP) findHoverInfo(content string, position ast.Position, combinedSchem
 }
 
 // findTypeHoverInfo finds hover information for a type.
-func (l *LSP) findTypeHoverInfo(token string, combinedSchema analyzer.CombinedSchema) *HoverResult {
+func (l *LSP) findTypeHoverInfo(tokenLiteral string, astSchema *ast.Schema) *HoverResult {
 	// Check if the token is a type name
-	typeDecl, exists := combinedSchema.TypeDecls[token]
+	typeDecl, exists := astSchema.GetTypesMap()[tokenLiteral]
 	if !exists {
 		return nil
 	}
@@ -124,7 +123,7 @@ func (l *LSP) findTypeHoverInfo(token string, combinedSchema analyzer.CombinedSc
 	// Get the source code of the type definition
 	sourceCode, err := l.getTypeSourceCode(typeDecl)
 	if err != nil {
-		l.logger.Error("failed to get type source code", "type", token, "error", err)
+		l.logger.Error("failed to get type source code", "type", tokenLiteral, "error", err)
 		return nil
 	}
 
@@ -138,14 +137,9 @@ func (l *LSP) findTypeHoverInfo(token string, combinedSchema analyzer.CombinedSc
 }
 
 // findRuleHoverInfo finds hover information for a rule.
-func (l *LSP) findRuleHoverInfo(token string, combinedSchema analyzer.CombinedSchema) *HoverResult {
-	// If the token starts with @, remove it
-	if len(token) > 0 && token[0] == '@' {
-		token = token[1:]
-	}
-
+func (l *LSP) findRuleHoverInfo(tokenLiteral string, astSchema *ast.Schema) *HoverResult {
 	// Check if the token is a rule name
-	ruleDecl, exists := combinedSchema.RuleDecls[token]
+	ruleDecl, exists := astSchema.GetRulesMap()[tokenLiteral]
 	if !exists {
 		return nil
 	}
@@ -153,7 +147,7 @@ func (l *LSP) findRuleHoverInfo(token string, combinedSchema analyzer.CombinedSc
 	// Get the source code of the rule definition
 	sourceCode, err := l.getRuleSourceCode(ruleDecl)
 	if err != nil {
-		l.logger.Error("failed to get rule source code", "rule", token, "error", err)
+		l.logger.Error("failed to get rule source code", "rule", tokenLiteral, "error", err)
 		return nil
 	}
 
@@ -168,15 +162,7 @@ func (l *LSP) findRuleHoverInfo(token string, combinedSchema analyzer.CombinedSc
 
 // getTypeSourceCode extracts the source code of a type definition.
 func (l *LSP) getTypeSourceCode(typeDecl *ast.TypeDecl) (string, error) {
-	// Get the file content
-	content, _, found, err := l.docstore.GetInMemory("", typeDecl.Pos.Filename)
-	if !found {
-		// Try to get from disk if not in memory
-		content, _, found, err = l.docstore.GetFromDisk("", typeDecl.Pos.Filename)
-		if !found || err != nil {
-			return "", fmt.Errorf("failed to get file content: %w", err)
-		}
-	}
+	content, _, err := l.docstore.GetFileAndHash("", typeDecl.Pos.Filename)
 	if err != nil {
 		return "", fmt.Errorf("failed to get file content: %w", err)
 	}
@@ -187,15 +173,7 @@ func (l *LSP) getTypeSourceCode(typeDecl *ast.TypeDecl) (string, error) {
 
 // getRuleSourceCode extracts the source code of a rule definition.
 func (l *LSP) getRuleSourceCode(ruleDecl *ast.RuleDecl) (string, error) {
-	// Get the file content
-	content, _, found, err := l.docstore.GetInMemory("", ruleDecl.Pos.Filename)
-	if !found {
-		// Try to get from disk if not in memory
-		content, _, found, err = l.docstore.GetFromDisk("", ruleDecl.Pos.Filename)
-		if !found || err != nil {
-			return "", fmt.Errorf("failed to get file content: %w", err)
-		}
-	}
+	content, _, err := l.docstore.GetFileAndHash("", ruleDecl.Pos.Filename)
 	if err != nil {
 		return "", fmt.Errorf("failed to get file content: %w", err)
 	}
@@ -206,7 +184,7 @@ func (l *LSP) getRuleSourceCode(ruleDecl *ast.RuleDecl) (string, error) {
 
 // extractCodeFromContent extracts a range of lines from the content.
 func extractCodeFromContent(content string, startLine, endLine int) (string, error) {
-	lines := splitLines(content)
+	lines := strings.Split(content, "\n")
 
 	if startLine <= 0 || startLine > len(lines) {
 		return "", fmt.Errorf("start line out of range: %d", startLine)
