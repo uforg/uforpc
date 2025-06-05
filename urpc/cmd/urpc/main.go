@@ -18,6 +18,15 @@ type allArgs struct {
 }
 
 func main() {
+	// Check for version flags before argument parsing
+	if len(os.Args) > 1 {
+		arg := os.Args[1]
+		if arg == "--version" || arg == "-v" {
+			cmdVersion(nil)
+			return
+		}
+	}
+
 	// If the LSP is called, then omit the arg parser to avoid taking
 	// control of the stdin/stdout because the LSP will need it.
 	if len(os.Args) > 1 && os.Args[1] == "lsp" {
