@@ -3,7 +3,7 @@
 
 version = 1
 
-schema = "./schema.urpc"
+schema = "{{schema_path}}"
 
 # Uncomment your desired output language(s) below and then
 # run `urpc generate` to execute the code generator.

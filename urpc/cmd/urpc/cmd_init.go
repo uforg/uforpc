@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -35,21 +36,29 @@ func cmdInit(args *cmdInitArgs) {
 	}
 
 	// Generate unique filenames
-	schemaPath, configPath := generateUniqueFilenames(args.Path)
+	schemaName, schemaPath, _, configPath := generateUniqueFilenames(args.Path)
 
 	// Write both files
 	if err := os.WriteFile(schemaPath, initSchema, 0644); err != nil {
 		log.Fatalf("failed to write schema file: %s", err)
 	}
 
-	if err := os.WriteFile(configPath, initConfig, 0644); err != nil {
+	initConfigStr := strings.ReplaceAll(string(initConfig), "{{schema_path}}", "./"+schemaName)
+	if err := os.WriteFile(configPath, []byte(initConfigStr), 0644); err != nil {
 		log.Fatalf("failed to write config file: %s", err)
 	}
 
 	fmt.Printf("URPC files initialized:\n- %s\n- %s\n", schemaPath, configPath)
 }
 
-func generateUniqueFilenames(dir string) (string, string) {
+// generateUniqueFilenames generates unique filenames for the schema and config files
+//
+// Returns:
+// - schemaName: The name of the schema file
+// - schemaPath: The path to the schema file
+// - configName: The name of the config file
+// - configPath: The path to the config file
+func generateUniqueFilenames(dir string) (string, string, string, string) {
 	schemaName := "schema.urpc"
 	configName := "uforpc.toml"
 
@@ -59,7 +68,7 @@ func generateUniqueFilenames(dir string) (string, string) {
 	// Check if files exist
 	if _, err := os.Stat(schemaPath); os.IsNotExist(err) {
 		if _, err := os.Stat(configPath); os.IsNotExist(err) {
-			return schemaPath, configPath
+			return schemaName, schemaPath, configName, configPath
 		}
 	}
 
@@ -68,5 +77,5 @@ func generateUniqueFilenames(dir string) (string, string) {
 	schemaName = fmt.Sprintf("schema-%d.urpc", timestamp)
 	configName = fmt.Sprintf("uforpc-%d.toml", timestamp)
 
-	return filepath.Join(dir, schemaName), filepath.Join(dir, configName)
+	return schemaName, filepath.Join(dir, schemaName), configName, filepath.Join(dir, configName)
 }
