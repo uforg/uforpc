@@ -14,6 +14,7 @@ type allArgs struct {
 	Transpile *cmdTranspileArgs `arg:"subcommand:transpile" help:"Transpile a URPC schema to JSON and vice versa, the result will be printed to stdout"`
 	Generate  *cmdGenerateArgs  `arg:"subcommand:generate" help:"Generate code from the URPC schema"`
 	LSP       *cmdLSPArgs       `arg:"subcommand:lsp" help:"Start the LSP server"`
+	Version   *cmdVersionArgs   `arg:"subcommand:version" help:"Show urpc version information"`
 }
 
 func main() {
@@ -43,17 +44,24 @@ func main() {
 
 	if args.Init != nil {
 		cmdInit(args.Init)
+		return
 	}
 
 	if args.Fmt != nil {
 		cmdFmt(args.Fmt)
+		return
 	}
 
 	if args.Transpile != nil {
 		cmdTranspile(args.Transpile)
+		return
 	}
 
 	if args.Generate != nil {
 		cmdGenerate(args.Generate)
+		return
 	}
+
+	// If no subcommand was specified, show version by default
+	cmdVersion(nil)
 }
