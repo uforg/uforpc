@@ -6,10 +6,12 @@ import (
 	"path/filepath"
 
 	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
+	"github.com/uforg/uforpc/urpc/internal/codegen/playground"
 	"github.com/uforg/uforpc/urpc/internal/codegen/typescript"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/transpile"
 	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
+	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/urpc/docstore"
 	"github.com/uforg/uforpc/urpc/internal/util/filepathutil"
 )
@@ -30,10 +32,13 @@ func Run(configPath string) error {
 	// PARSE AND ANALYZE THE URPC SCHEMA //
 	///////////////////////////////////////
 
-	absSchemaPath, err := filepathutil.NormalizeFromWD(config.Schema)
+	absConfigPath, err := filepathutil.NormalizeFromWD(configPath)
 	if err != nil {
-		return fmt.Errorf("failed to normalize schema path: %w", err)
+		return fmt.Errorf("failed to normalize config path: %w", err)
 	}
+
+	absConfigDir := filepath.Dir(absConfigPath)
+	absSchemaPath := filepath.Join(absConfigDir, config.Schema)
 
 	an, err := analyzer.NewAnalyzer(docstore.NewDocstore())
 	if err != nil {
@@ -58,14 +63,20 @@ func Run(configPath string) error {
 	// RUN CODE GENERATORS //
 	/////////////////////////
 
+	if config.HasPlayground() {
+		if err := runPlayground(absConfigDir, config.Playground, astSchema); err != nil {
+			return fmt.Errorf("failed to run playground code generator: %w", err)
+		}
+	}
+
 	if config.HasGolang() {
-		if err := runGolang(config.Golang, jsonSchema); err != nil {
+		if err := runGolang(absConfigDir, config.Golang, jsonSchema); err != nil {
 			return fmt.Errorf("failed to run golang code generator: %w", err)
 		}
 	}
 
 	if config.HasTypescript() {
-		if err := runTypescript(config.Typescript, jsonSchema); err != nil {
+		if err := runTypescript(absConfigDir, config.Typescript, jsonSchema); err != nil {
 			return fmt.Errorf("failed to run typescript code generator: %w", err)
 		}
 	}
@@ -73,9 +84,28 @@ func Run(configPath string) error {
 	return nil
 }
 
-func runGolang(config *golang.Config, schema schema.Schema) error {
+func runPlayground(absConfigDir string, config *playground.Config, astSchema *ast.Schema) error {
+	outputDir := filepath.Join(absConfigDir, config.OutputDir)
+
 	// Ensure output directory exists
-	if err := os.MkdirAll(config.OutputDir, 0755); err != nil {
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Generate the playground
+	err := playground.Generate(absConfigDir, astSchema, *config)
+	if err != nil {
+		return fmt.Errorf("failed to generate playground: %w", err)
+	}
+
+	return nil
+}
+
+func runGolang(absConfigDir string, config *golang.Config, schema schema.Schema) error {
+	outputDir := filepath.Join(absConfigDir, config.OutputDir)
+
+	// Ensure output directory exists
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
@@ -86,7 +116,7 @@ func runGolang(config *golang.Config, schema schema.Schema) error {
 	}
 
 	// Write the code to the output directory
-	filePath := filepath.Join(config.OutputDir, "uforpc_gen.go")
+	filePath := filepath.Join(outputDir, "uforpc_gen.go")
 	if err := os.WriteFile(filePath, []byte(code), 0644); err != nil {
 		return fmt.Errorf("failed to write generated code to file: %w", err)
 	}
@@ -94,6 +124,6 @@ func runGolang(config *golang.Config, schema schema.Schema) error {
 	return nil
 }
 
-func runTypescript(_ *typescript.Config, _ schema.Schema) error {
+func runTypescript(_ string, _ *typescript.Config, _ schema.Schema) error {
 	return nil
 }

@@ -2,5 +2,5 @@ package embedplayground
 
 import "embed"
 
-//go:embed build
+//go:embed build/**
 var BuildFS embed.FS
