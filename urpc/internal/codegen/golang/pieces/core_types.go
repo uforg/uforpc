@@ -33,6 +33,11 @@ func (r Response[T]) String() string {
 	return string(b)
 }
 
+// Bytes returns the Response as a JSON-formatted byte slice.
+func (r Response[T]) Bytes() []byte {
+	return []byte(r.String())
+}
+
 // Error represents a standardized error in the UFO RPC system.
 //
 // It provides structured information about errors that occur within the system,
