@@ -2,6 +2,7 @@ package playground
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -25,6 +26,42 @@ func Generate(absConfigDir string, sch *ast.Schema, config Config) error {
 	formattedSchemaPath := filepath.Join(outputDir, "schema.urpc")
 	if err := os.WriteFile(formattedSchemaPath, []byte(formattedSchema), 0644); err != nil {
 		return fmt.Errorf("error writing formatted schema to %s: %w", formattedSchemaPath, err)
+	}
+
+	hasConfig := config.DefaultEndpoint != "" || len(config.DefaultHeaders) > 0
+	if hasConfig {
+		type jsonConfigHeader struct {
+			Key   string `json:"key"`
+			Value string `json:"value"`
+		}
+
+		type jsonConfig struct {
+			Endpoint string             `json:"endpoint,omitempty,omitzero"`
+			Headers  []jsonConfigHeader `json:"headers,omitempty,omitzero"`
+		}
+
+		jsonConfigHeaders := make([]jsonConfigHeader, len(config.DefaultHeaders))
+		for i, header := range config.DefaultHeaders {
+			jsonConfigHeaders[i] = jsonConfigHeader{
+				Key:   header.Key,
+				Value: header.Value,
+			}
+		}
+
+		jsonConf := jsonConfig{
+			Endpoint: config.DefaultEndpoint,
+			Headers:  jsonConfigHeaders,
+		}
+
+		jsonConfigBytes, err := json.Marshal(jsonConf)
+		if err != nil {
+			return fmt.Errorf("error marshalling config to JSON: %w", err)
+		}
+
+		configPath := filepath.Join(outputDir, "config.json")
+		if err := os.WriteFile(configPath, jsonConfigBytes, 0644); err != nil {
+			return fmt.Errorf("error writing config to %s: %w", configPath, err)
+		}
 	}
 
 	return nil
