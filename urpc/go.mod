@@ -1,6 +1,10 @@
 module github.com/uforg/uforpc/urpc
 
-go 1.24.1
+go 1.24.2
+
+require github.com/uforg/uforpc/embedplayground v0.0.0
+
+replace github.com/uforg/uforpc/embedplayground v0.0.0 => ../playground
 
 require (
 	github.com/BurntSushi/toml v1.5.0
