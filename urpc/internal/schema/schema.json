@@ -90,7 +90,7 @@
         "type": {
           "description": "The primitive or custom type name this rule applies to.",
           "oneOf": [
-            { "$ref": "#/$defs/PrimitiveTypeEnum" },
+            { "$ref": "#/$defs/primitiveTypeEnum" },
             {
               "type": "string",
               "description": "Custom type name",
@@ -192,24 +192,7 @@
         "meta": {
           "description": "Optional key-value metadata associated with the procedure (null if none).",
           "type": "array",
-          "items": {
-            "title": "Meta Definition",
-            "description": "Defines a meta within a procedure.",
-            "type": "object",
-            "properties": {
-              "key": {
-                "description": "Key of the meta.",
-                "type": "string",
-                "pattern": "^[a-zA-Z0-9]*$"
-              },
-              "value": {
-                "description": "Value of the meta.",
-                "type": ["string", "integer", "number", "boolean"]
-              }
-            },
-            "required": ["key", "value"],
-            "additionalProperties": false
-          }
+          "items": { "$ref": "#/$defs/metaDefinition" }
         }
       },
       "required": ["kind", "name"],
@@ -251,31 +234,14 @@
         "meta": {
           "description": "Optional key-value metadata associated with the stream (null if none).",
           "type": "array",
-          "items": {
-            "title": "Meta Definition",
-            "description": "Defines a meta within a stream.",
-            "type": "object",
-            "properties": {
-              "key": {
-                "description": "Key of the meta.",
-                "type": "string",
-                "pattern": "^[a-zA-Z0-9]*$"
-              },
-              "value": {
-                "description": "Value of the meta.",
-                "type": ["string", "integer", "number", "boolean"]
-              }
-            },
-            "required": ["key", "value"],
-            "additionalProperties": false
-          }
+          "items": { "$ref": "#/$defs/metaDefinition" }
         }
       },
       "required": ["kind", "name"],
       "additionalProperties": false
     },
 
-    "PrimitiveTypeEnum": {
+    "primitiveTypeEnum": {
       "description": "Enumeration of allowed primitive type names.",
       "type": "string",
       "enum": ["string", "int", "float", "bool", "datetime"]
@@ -320,6 +286,25 @@
         }
       },
       "required": ["name", "isArray", "optional"],
+      "additionalProperties": false
+    },
+
+    "metaDefinition": {
+      "title": "Meta Definition Item",
+      "description": "Defines a meta within a procedure or stream.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "Key of the meta.",
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]*$"
+        },
+        "value": {
+          "description": "Value of the meta.",
+          "type": ["string", "integer", "number", "boolean"]
+        }
+      },
+      "required": ["key", "value"],
       "additionalProperties": false
     },
 
