@@ -5,6 +5,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
+	"github.com/uforg/uforpc/urpc/internal/codegen/playground"
 	"github.com/uforg/uforpc/urpc/internal/codegen/typescript"
 )
 
@@ -12,8 +13,13 @@ import (
 type Config struct {
 	Version    int                `toml:"version"`
 	Schema     string             `toml:"schema"`
+	Playground *playground.Config `toml:"playground"`
 	Golang     *golang.Config     `toml:"golang"`
 	Typescript *typescript.Config `toml:"typescript"`
+}
+
+func (c *Config) HasPlayground() bool {
+	return c.Playground != nil
 }
 
 func (c *Config) HasGolang() bool {
@@ -42,6 +48,12 @@ func (c *Config) Validate() error {
 
 	if c.Schema == "" {
 		return fmt.Errorf(`"schema" is required`)
+	}
+
+	if c.Playground != nil {
+		if err := c.Playground.Validate(); err != nil {
+			return fmt.Errorf("playground config is invalid: %w", err)
+		}
 	}
 
 	if c.Golang != nil {
