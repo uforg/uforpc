@@ -9,9 +9,9 @@ UFO RPC is **100% open source** and uses a dual-license approach:
 
 ### What This Means
 
-✅ **For UFO RPC**: Anyone who modifies UFO RPC must share their changes with the community
-✅ **For Your Code**: Use generated code in any project (commercial, private, open source)
-✅ **Forever Free**: No one can make UFO RPC proprietary or closed-source
+- ✅ **For UFO RPC**: Anyone who modifies UFO RPC must share their changes with the community
+- ✅ **For Your Code**: Use generated code in any project (commercial, private, open source)
+- ✅ **Forever Free**: No one can make UFO RPC proprietary or closed-source
 
 ### ⚠️ Disclaimer
 
