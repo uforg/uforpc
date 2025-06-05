@@ -9,6 +9,8 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
+// TODO: Add protection against duplicate names for Procs and Streams
+
 var primitiveTypes = map[string]bool{
 	"string":   true,
 	"int":      true,
