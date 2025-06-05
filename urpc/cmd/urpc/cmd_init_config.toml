@@ -1,1 +1,28 @@
+# UFO RPC Code generator config file
+# Read more at https://github.com/uforg/uforpc
 
+version = 1
+
+schema = "./schema.urpc"
+
+# Uncomment your desired output language(s) below and then
+# run `urpc generate` to execute the code generator.
+
+# [playground]
+# output_dir = "./ufogen/playground"
+
+# [golang]
+# output_dir = "./ufogen/golang"
+# package_name = "ufogen"
+# include_server = true
+# include_client = true
+# omit_server_request_validation = false
+# omit_client_request_validation = false
+
+# [typescript]
+# output_dir = "./ufogen/typescript"
+# include_server = true
+# include_client = true
+# omit_server_request_validation = false
+# omit_client_request_validation = false
+# omit_client_default_fetch = false
