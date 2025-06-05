@@ -8,7 +8,7 @@
  */
 export function extractNodeFromSchema(
   schema: string,
-  kind: "rule" | "type" | "proc",
+  kind: "rule" | "type" | "proc" | "stream",
   nodeName: string,
 ): string | null {
   const lines = schema.split("\n");
