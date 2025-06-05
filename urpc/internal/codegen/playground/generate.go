@@ -42,10 +42,7 @@ func Generate(absConfigDir string, sch *ast.Schema, config Config) error {
 
 		jsonConfigHeaders := make([]jsonConfigHeader, len(config.DefaultHeaders))
 		for i, header := range config.DefaultHeaders {
-			jsonConfigHeaders[i] = jsonConfigHeader{
-				Key:   header.Key,
-				Value: header.Value,
-			}
+			jsonConfigHeaders[i] = jsonConfigHeader(header)
 		}
 
 		jsonConf := jsonConfig{
