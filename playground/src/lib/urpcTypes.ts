@@ -24,7 +24,13 @@ export interface Schema {
   /**
    * An ordered array of all declared elements (nodes) in the URPC schema.
    */
-  nodes: (DocumentationNode | RuleDefinitionNode | TypeDefinitionNode | ProcedureDefinitionNode)[];
+  nodes: (
+    | DocumentationNode
+    | RuleDefinitionNode
+    | TypeDefinitionNode
+    | ProcedureDefinitionNode
+    | StreamDefinitionNode
+  )[];
 }
 /**
  * Represents a standalone documentation block.
@@ -197,12 +203,12 @@ export interface ProcedureDefinitionNode {
   /**
    * Optional key-value metadata associated with the procedure (null if none).
    */
-  meta?: MetaDefinition[];
+  meta?: MetaDefinitionItem[];
 }
 /**
- * Defines a meta within a procedure.
+ * Defines a meta within a procedure or stream.
  */
-export interface MetaDefinition {
+export interface MetaDefinitionItem {
   /**
    * Key of the meta.
    */
@@ -211,4 +217,37 @@ export interface MetaDefinition {
    * Value of the meta.
    */
   value: string | number | boolean;
+}
+/**
+ * Defines an RPC stream.
+ */
+export interface StreamDefinitionNode {
+  /**
+   * Node type identifier.
+   */
+  kind: "stream";
+  /**
+   * Name of the stream.
+   */
+  name: string;
+  /**
+   * Associated documentation string (optional).
+   */
+  doc?: string;
+  /**
+   * Indicates if the procedure is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.
+   */
+  deprecated?: string;
+  /**
+   * Ordered list of input fields for the stream.
+   */
+  input?: FieldDefinition[];
+  /**
+   * Ordered list of output fields for the stream.
+   */
+  output?: FieldDefinition[];
+  /**
+   * Optional key-value metadata associated with the stream (null if none).
+   */
+  meta?: MetaDefinitionItem[];
 }
