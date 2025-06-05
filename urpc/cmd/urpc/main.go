@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/alexflint/go-arg"
+	"github.com/uforg/uforpc/urpc/internal/version"
 )
 
 type allArgs struct {
@@ -18,6 +19,16 @@ type allArgs struct {
 }
 
 func main() {
+	// If the LSP is called, then omit the arg parser to avoid taking
+	// control of the stdin/stdout because the LSP will need it.
+	if len(os.Args) > 1 && os.Args[1] == "lsp" {
+		cmdLSP(nil)
+		return
+	}
+
+	// If the command is not lsp, then continue with the rest of the logic.
+	fmt.Printf("%s\n\n", version.AsciiArt)
+
 	// Check for version flags before argument parsing
 	if len(os.Args) > 1 {
 		arg := os.Args[1]
@@ -25,13 +36,6 @@ func main() {
 			cmdVersion(nil)
 			return
 		}
-	}
-
-	// If the LSP is called, then omit the arg parser to avoid taking
-	// control of the stdin/stdout because the LSP will need it.
-	if len(os.Args) > 1 && os.Args[1] == "lsp" {
-		cmdLSP(nil)
-		return
 	}
 
 	var args allArgs

@@ -10,5 +10,4 @@ type cmdVersionArgs struct{}
 
 func cmdVersion(_ *cmdVersionArgs) {
 	fmt.Printf("UFO RPC %s\n", version.VersionWithPrefix)
-	fmt.Println("Please star the repo at https://github.com/uforg/uforpc")
 }
