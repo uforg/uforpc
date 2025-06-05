@@ -16,6 +16,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generateCoreTypes,
 		generateDomainTypes,
 		generateProcedureTypes,
+		generateStreamTypes,
 		generateOptional,
 		generateServer,
 	}
