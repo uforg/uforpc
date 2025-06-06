@@ -210,10 +210,10 @@ func (s *internalServer[T]) handleRequest(reqResProvider ServerRequestResponsePr
 // writeProcResponse writes a procedure response to the client
 func (s *internalServer[T]) writeProcResponse(
 	reqResProvider ServerRequestResponseProvider[T],
-	resp Response[any],
+	response Response[any],
 ) error {
 	reqResProvider.ResponseSetHeader("Content-Type", "application/json")
-	_, err := reqResProvider.ResponseWrite(resp.Bytes())
+	_, err := reqResProvider.ResponseWrite(response.Bytes())
 	if err != nil {
 		return err
 	}
@@ -306,7 +306,12 @@ func (s *internalServer[T]) handleStreamRequest(
 	// emit sends a response event to the client.
 	// If the client disconnects, it returns an error.
 	emit := func(data any) error {
-		jsonData, err := json.Marshal(data)
+		response := Response[any]{
+			Ok:     true,
+			Output: data,
+		}
+
+		jsonData, err := json.Marshal(response)
 		if err != nil {
 			return err
 		}
@@ -328,48 +333,48 @@ func (s *internalServer[T]) handleStreamRequest(
 
 	// Validate stream name
 	if !slices.Contains(s.streamNames, streamName) {
-		resp := Response[any]{
+		response := Response[any]{
 			Ok: false,
 			Error: Error{
 				Message: streamName + " stream not found",
 				Details: map[string]any{"stream": streamName},
 			},
 		}
-		return emit(resp)
+		return emit(response)
 	}
 
 	// Validate stream implementation
 	if _, ok := s.streamHandlers[streamName]; !ok {
-		resp := Response[any]{
+		response := Response[any]{
 			Ok: false,
 			Error: Error{
 				Message: streamName + " stream not implemented",
 				Details: map[string]any{"stream": streamName},
 			},
 		}
-		return emit(resp)
+		return emit(response)
 	}
 
 	// Execute Before middlewares
 	for _, fn := range s.beforeMiddlewares {
 		var err error
 		if currentContext, err = fn("stream", streamName, currentContext); err != nil {
-			resp := Response[any]{
+			response := Response[any]{
 				Ok:    false,
 				Error: asError(err),
 			}
-			return emit(resp)
+			return emit(response)
 		}
 	}
 
 	// Run the stream handler and wait for it to finish
 	err := s.streamHandlers[streamName](currentContext, rawInput, emit)
 	if err != nil {
-		resp := Response[any]{
+		response := Response[any]{
 			Ok:    false,
 			Error: asError(err),
 		}
-		return emit(resp)
+		return emit(response)
 	}
 
 	return nil
