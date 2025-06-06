@@ -28,12 +28,12 @@
     output = "";
 
     try {
+      openOutput(true);
       const controller = new AbortController();
       const signal = controller.signal;
 
       cancelRequest = () => {
         controller.abort();
-        openInput(false);
         toast.info("Stream stopped");
       };
 
@@ -63,11 +63,12 @@
       const decoder = new TextDecoder();
       let buffer = "";
 
-      openOutput(true);
-
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          toast.info("Stream ended by server");
+          break;
+        }
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split("\n");
@@ -89,9 +90,9 @@
             try {
               const parsedData = JSON.parse(eventData);
 
-              // Add message to output at the beginning with separator
+              // Add message to output at the beginning
               if (output) {
-                output = `${JSON.stringify(parsedData, null, 2)}\n${"─".repeat(50)}\n${output}`;
+                output = `${JSON.stringify(parsedData, null, 2)}\n\n${output}`;
               } else {
                 output = JSON.stringify(parsedData, null, 2);
               }
@@ -107,12 +108,7 @@
         }
       }
     } catch (error: unknown) {
-      if (error instanceof Error && error.name === "AbortError") {
-        console.log("Stream cancelled by user");
-        toast.info("Stream cancelled", {
-          duration: 3000,
-        });
-      } else {
+      if (!(error instanceof Error && error.name === "AbortError")) {
         console.error(error);
         toast.error("Failed to send HTTP request", {
           description: `Error: ${error}`,

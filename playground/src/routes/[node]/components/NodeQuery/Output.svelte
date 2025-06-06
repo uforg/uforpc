@@ -30,7 +30,7 @@
 
 {#snippet CancelButton()}
   {#if isExecuting}
-    <button class="btn btn-ghost" onclick={cancelRequest}>
+    <button class="btn btn-error" onclick={cancelRequest}>
       <CircleX class="size-4" />
       {type === "proc" ? "Cancel procedure call" : "Stop stream"}
     </button>
@@ -44,7 +44,8 @@
   </div>
 
   <p class="pt-4 text-center">
-    Please execute the procedure from the input tab to see the output.
+    Please execute the {type === "proc" ? "procedure" : "stream"} from the input
+    tab to see the output.
   </p>
 {/if}
 
@@ -58,7 +59,9 @@
     </H3>
   </div>
 
-  {@render CancelButton()}
+  <div class="flex justify-center">
+    {@render CancelButton()}
+  </div>
 {/if}
 
 {#if hasOutput}
@@ -83,14 +86,12 @@
     </div>
   {/if}
 
-  {#if type == "stream"}
-    <div class="flex items-end justify-between space-x-2">
-      {@render CancelButton()}
-      <p>
-        The data stream is currently active using Server Sent Events (SSE). You
-        can stop it by clicking the button below.
-      </p>
-    </div>
+  {#if type == "stream" && isExecuting}
+    <p>
+      The data stream is currently active using Server Sent Events (SSE). You
+      can stop it by clicking the button below.
+    </p>
+    {@render CancelButton()}
   {/if}
 
   <Editor

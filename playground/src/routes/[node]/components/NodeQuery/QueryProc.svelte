@@ -28,12 +28,12 @@
     output = null;
 
     try {
+      openOutput(true);
       const controller = new AbortController();
       const signal = controller.signal;
 
       cancelRequest = () => {
         controller.abort();
-        openInput(false);
         toast.info("Procedure call cancelled");
       };
 
@@ -48,16 +48,16 @@
         signal: signal,
       });
 
-      const data = await response.text();
-      output = data;
-
-      openOutput(true);
+      const data = await response.json();
+      output = JSON.stringify(data, null, 2);
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to send HTTP request", {
-        description: `Error: ${error}`,
-        duration: 5000,
-      });
+      if (!(error instanceof Error && error.name === "AbortError")) {
+        console.error(error);
+        toast.error("Failed to send HTTP request", {
+          description: `Error: ${error}`,
+          duration: 5000,
+        });
+      }
     } finally {
       isExecuting = false;
       cancelRequest = () => {};
