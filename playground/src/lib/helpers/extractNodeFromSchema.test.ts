@@ -29,25 +29,6 @@ describe("extractNodeFromSchema", () => {
     expect(result).toBe(expected);
   });
 
-  it("should extract a rule node with @ prefix", () => {
-    const schema = `
-    rule @minLength {
-      for: string
-      param: int
-      error: "String is too short"
-    }
-  `;
-
-    const expected = `    rule @minLength {
-      for: string
-      param: int
-      error: "String is too short"
-    }`;
-
-    const result = extractNodeFromSchema(schema, "rule", "minLength");
-    expect(result).toBe(expected);
-  });
-
   it("should extract a proc node", () => {
     const schema = `
     proc GetUser {
@@ -138,10 +119,7 @@ describe("extractNodeFromSchema", () => {
     const schema = `
     version 1
     
-    rule @email {
-      for: string
-      error: "Invalid email format"
-    }
+  
     
     type User {
       email: string

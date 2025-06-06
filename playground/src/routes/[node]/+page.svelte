@@ -31,9 +31,9 @@
   let node = $derived(store.jsonSchema.nodes[nodeIndex]);
 
   let name = $derived.by(() => {
-    if (node.kind === "rule") return node.name;
     if (node.kind === "type") return node.name;
     if (node.kind === "proc") return node.name;
+    if (node.kind === "stream") return node.name;
     if (node.kind === "doc") {
       return getMarkdownTitle(node.content);
     }
@@ -42,9 +42,9 @@
   });
 
   let humanKind = $derived.by(() => {
-    if (node.kind === "rule") return "validation rule";
     if (node.kind === "type") return "type";
     if (node.kind === "proc") return "procedure";
+    if (node.kind === "stream") return "stream";
     if (node.kind === "doc") return "documentation";
     return "unknown";
   });

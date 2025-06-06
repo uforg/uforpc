@@ -9,7 +9,7 @@ import type { Schema } from "./urpcTypes.ts";
 
 type SearchItem = {
   id: number;
-  kind: "doc" | "rule" | "type" | "proc" | "stream";
+  kind: "doc" | "type" | "proc" | "stream";
   name: string;
   slug: string;
   doc: string;

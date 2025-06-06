@@ -19,9 +19,9 @@
   const { node }: Props = $props();
 
   let name = $derived.by(() => {
-    if (node.kind === "rule") return node.name;
     if (node.kind === "type") return node.name;
     if (node.kind === "proc") return node.name;
+    if (node.kind === "stream") return node.name;
     if (node.kind === "doc") {
       return getMarkdownTitle(node.content);
     }
@@ -45,7 +45,7 @@
         );
       }
       if (
-        (node.kind === "rule" ||
+        (node.kind === "stream" ||
           node.kind === "type" ||
           node.kind === "proc") &&
         typeof node.doc === "string" &&

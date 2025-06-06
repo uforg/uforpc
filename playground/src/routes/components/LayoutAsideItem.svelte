@@ -3,7 +3,7 @@
   import {
     ArrowLeftRight,
     BookOpenText,
-    Scale,
+    CornerRightDown,
     TriangleAlert,
     Type,
   } from "@lucide/svelte";
@@ -22,9 +22,9 @@
   const { node }: Props = $props();
 
   let name = $derived.by(() => {
-    if (node.kind === "rule") return node.name;
     if (node.kind === "type") return node.name;
     if (node.kind === "proc") return node.name;
+    if (node.kind === "stream") return node.name;
     if (node.kind === "doc") {
       return getMarkdownTitle(node.content);
     }
@@ -35,17 +35,17 @@
   let title = $derived.by(() => {
     const deprecated = isDeprecated ? " (Deprecated)" : "";
 
-    if (node.kind === "rule") return `${name} validation rule${deprecated}`;
     if (node.kind === "type") return `${name} data type${deprecated}`;
     if (node.kind === "proc") return `${name} procedure${deprecated}`;
+    if (node.kind === "stream") return `${name} stream${deprecated}`;
     if (node.kind === "doc") return `${name} documentation${deprecated}`;
     return "Unknown";
   });
 
   let contentId = $derived.by(() => {
-    if (node.kind === "rule") return slugify(`rule-${name}`);
     if (node.kind === "type") return slugify(`type-${name}`);
     if (node.kind === "proc") return slugify(`proc-${name}`);
+    if (node.kind === "stream") return slugify(`stream-${name}`);
     if (node.kind === "doc") return slugify(`doc-${name}`);
     return "";
   });
@@ -76,27 +76,27 @@
       "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
       {
         "hover:bg-blue-500/20": node.kind === "doc",
-        "hover:bg-yellow-500/20": node.kind === "rule",
         "hover:bg-purple-500/20": node.kind === "type",
         "hover:bg-green-500/20": node.kind === "proc",
+        "hover:bg-yellow-500/20": node.kind === "stream",
         "bg-blue-500/20": isActive && node.kind === "doc",
-        "bg-yellow-500/20": isActive && node.kind === "rule",
         "bg-purple-500/20": isActive && node.kind === "type",
         "bg-green-500/20": isActive && node.kind === "proc",
+        "bg-yellow-500/20": isActive && node.kind === "stream",
       },
     ]}
   >
     {#if node.kind === "doc"}
       <BookOpenText class="size-4 flex-none" />
     {/if}
-    {#if node.kind === "rule"}
-      <Scale class="size-4 flex-none" />
-    {/if}
     {#if node.kind === "type"}
       <Type class="size-4 flex-none" />
     {/if}
     {#if node.kind === "proc"}
       <ArrowLeftRight class="size-4 flex-none" />
+    {/if}
+    {#if node.kind === "stream"}
+      <CornerRightDown class="size-4 flex-none" />
     {/if}
 
     <span

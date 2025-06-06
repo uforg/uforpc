@@ -8,14 +8,11 @@
  */
 export function extractNodeFromSchema(
   schema: string,
-  kind: "rule" | "type" | "proc" | "stream",
+  kind: "type" | "proc" | "stream",
   nodeName: string,
 ): string | null {
   const lines = schema.split("\n");
-  const nodePattern =
-    kind === "rule"
-      ? new RegExp(`^\\s*${kind}\\s+@${nodeName}\\s*{`)
-      : new RegExp(`^\\s*${kind}\\s+${nodeName}\\s*{`);
+  const nodePattern = new RegExp(`^\\s*${kind}\\s+${nodeName}\\s*{`);
 
   let openBraces = 0;
   let foundNode = false;

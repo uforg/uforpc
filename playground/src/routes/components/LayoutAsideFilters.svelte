@@ -2,9 +2,9 @@
   import {
     ArrowLeftRight,
     BookOpenText,
+    CornerRightDown,
     Funnel,
     FunnelX,
-    Scale,
     Type,
   } from "@lucide/svelte";
 
@@ -15,22 +15,18 @@
   const docsTooltip = $derived(
     uiStore.asideHideDocs ? "Show documentation" : "Hide documentation",
   );
-  const rulesTooltip = $derived(
-    uiStore.asideHideRules ? "Show validation rules" : "Hide validation rules",
-  );
   const typesTooltip = $derived(
     uiStore.asideHideTypes ? "Show data types" : "Hide data types",
   );
   const procsTooltip = $derived(
     uiStore.asideHideProcs ? "Show procedures" : "Hide procedures",
   );
+  const streamsTooltip = $derived(
+    uiStore.asideHideStreams ? "Show streams" : "Hide streams",
+  );
 
   function toggleDocs() {
     uiStore.asideHideDocs = !uiStore.asideHideDocs;
-  }
-
-  function toggleRules() {
-    uiStore.asideHideRules = !uiStore.asideHideRules;
   }
 
   function toggleTypes() {
@@ -41,11 +37,15 @@
     uiStore.asideHideProcs = !uiStore.asideHideProcs;
   }
 
+  function toggleStreams() {
+    uiStore.asideHideStreams = !uiStore.asideHideStreams;
+  }
+
   function resetFilters() {
     uiStore.asideHideDocs = false;
-    uiStore.asideHideRules = false;
     uiStore.asideHideTypes = false;
     uiStore.asideHideProcs = false;
+    uiStore.asideHideStreams = false;
   }
 </script>
 
@@ -72,15 +72,15 @@
         <BookOpenText class="size-4" />
       </button>
     </Tooltip>
-    <Tooltip content={rulesTooltip} placement="bottom">
+    <Tooltip content={streamsTooltip} placement="bottom">
       <button
         class={[
           "btn btn-sm join-item relative flex-none",
-          uiStore.asideHideRules && "toggle-disabled",
+          uiStore.asideHideStreams && "toggle-disabled",
         ]}
-        onclick={toggleRules}
+        onclick={toggleStreams}
       >
-        <Scale class="size-4" />
+        <CornerRightDown class="size-4" />
       </button>
     </Tooltip>
     <Tooltip content={typesTooltip} placement="bottom">

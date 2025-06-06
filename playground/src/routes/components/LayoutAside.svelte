@@ -85,13 +85,13 @@
       {#if node.kind === "doc" && !uiStore.asideHideDocs}
         <LayoutAsideItem {node} />
       {/if}
-      {#if node.kind === "rule" && !uiStore.asideHideRules}
-        <LayoutAsideItem {node} />
-      {/if}
       {#if node.kind === "type" && !uiStore.asideHideTypes}
         <LayoutAsideItem {node} />
       {/if}
       {#if node.kind === "proc" && !uiStore.asideHideProcs}
+        <LayoutAsideItem {node} />
+      {/if}
+      {#if node.kind === "stream" && !uiStore.asideHideStreams}
         <LayoutAsideItem {node} />
       {/if}
     {/each}
