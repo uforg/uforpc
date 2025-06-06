@@ -18,13 +18,18 @@
   const { stream }: Props = $props();
 
   let value = $state({ root: {} });
-  let output: object | null = $state(null);
+  let output: string | null = $state(null);
 
   let isExecuting = $state(false);
+  let abortController: AbortController | null = null;
+
   async function executeStream() {
     if (isExecuting) return;
     isExecuting = true;
-    output = null;
+    output = "";
+
+    // Create abort controller for cancellation
+    abortController = new AbortController();
 
     try {
       const response = await fetch(store.endpoint, {
@@ -34,21 +39,90 @@
           name: stream.name,
           input: value.root,
         }),
-        headers: getHeadersObject(),
+        headers: {
+          ...getHeadersObject(),
+          Accept: "text/event-stream",
+          "Cache-Control": "no-cache",
+        },
+        signal: abortController.signal,
       });
 
-      const data = await response.json();
-      output = data;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Response body is null");
+      }
+      const decoder = new TextDecoder();
+      let buffer = "";
 
       openOutput(true);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to send HTTP request", {
-        description: `Error: ${error}`,
-        duration: 5000,
-      });
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+
+        // Keep the last incomplete line in buffer
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.trim() === "") continue;
+
+          if (line.startsWith("data: ")) {
+            const eventData = line.slice(6);
+
+            // Skip heartbeat or keep-alive messages
+            if (eventData.trim() === "" || eventData.trim() === "heartbeat")
+              continue;
+
+            try {
+              const parsedData = JSON.parse(eventData);
+
+              // Add message to output at the beginning with separator
+              if (output) {
+                output = `${JSON.stringify(parsedData, null, 2)}\n${"─".repeat(50)}\n${output}`;
+              } else {
+                output = JSON.stringify(parsedData, null, 2);
+              }
+            } catch (parseError) {
+              // If not JSON, treat as plain text
+              if (output) {
+                output = `${eventData}\n${"─".repeat(50)}\n${output}`;
+              } else {
+                output = eventData;
+              }
+            }
+          }
+        }
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "AbortError") {
+        console.log("Stream cancelled by user");
+        toast.info("Stream cancelled", {
+          duration: 3000,
+        });
+      } else {
+        console.error(error);
+        toast.error("Failed to send HTTP request", {
+          description: `Error: ${error}`,
+          duration: 5000,
+        });
+      }
     } finally {
       isExecuting = false;
+      abortController = null;
+    }
+  }
+
+  function cancelStream() {
+    if (abortController) {
+      abortController.abort();
     }
   }
 
@@ -117,7 +191,15 @@
 
         <Field fields={stream.input} path="root" bind:value />
 
-        <div class="flex w-full justify-end pt-4">
+        <div class="flex w-full justify-end gap-2 pt-4">
+          {#if isExecuting}
+            <button class="btn btn-error" onclick={cancelStream}>
+              <svg class="size-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 6h12v12H6z" />
+              </svg>
+              <span>Cancel</span>
+            </button>
+          {/if}
           <button
             class="btn btn-primary"
             disabled={isExecuting}

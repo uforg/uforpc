@@ -9,13 +9,15 @@
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   interface Props {
-    output: object | null;
+    output: object | string | null;
   }
 
   const { output }: Props = $props();
 
   let hasOutput = $derived(!!output);
-  let outputString = $derived(JSON.stringify(output, null, 2));
+  let outputString = $derived(
+    typeof output === "string" ? output : JSON.stringify(output, null, 2),
+  );
 
   // Discover authentication tokens in the response
   let foundTokens = $derived(discoverAuthToken(output));
