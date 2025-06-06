@@ -32,11 +32,21 @@ for (const file of files) {
     continue;
   }
 
-  const data = await fs.promises.readFile(file, "utf8");
-  await fs.promises.writeFile(
-    file,
-    data.replace(/http:\/\/REPLACEME/g, "."),
-    "utf8",
-  );
+  let data = await fs.promises.readFile(file, "utf8");
+
+  // Replace to relative paths
+  data = data.replaceAll("http://REPLACEME", ".");
+
+  // Replace /tree-sitter.wasm to ./tree-sitter.wasm
+  data = data.replaceAll("/tree-sitter.wasm", "./tree-sitter.wasm");
+  data = data.replaceAll('"/tree-sitter.wasm', '"./tree-sitter.wasm');
+
+  // Replace /tree-sitter-bash.wasm to ./tree-sitter-bash.wasm
+  data = data.replaceAll("/tree-sitter-bash.wasm", "./tree-sitter-bash.wasm");
+  data = data.replaceAll('"/tree-sitter-bash.wasm', '"./tree-sitter-bash.wasm');
+
+  // Write the new file
+  await fs.promises.writeFile(file, data, "utf8");
+
   console.log(`Wrote file '${file}'`);
 }
