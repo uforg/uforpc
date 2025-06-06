@@ -40,7 +40,7 @@
       const data = await response.json();
       output = data;
 
-      openOutput();
+      openOutput(true);
     } catch (error) {
       console.error(error);
       toast.error("Failed to send HTTP request", {
@@ -54,15 +54,15 @@
 
   let tab: "input" | "output" = $state("input");
   let wrapper: HTMLDivElement | null = $state(null);
-  function openInput() {
+  function openInput(scroll = false) {
     if (tab === "input") return;
     tab = "input";
-    wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (scroll) wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  function openOutput() {
+  function openOutput(scroll = false) {
     if (tab === "output") return;
     tab = "output";
-    wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (scroll) wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 </script>
 
@@ -85,7 +85,7 @@
               "btn join-item border-base-content/20",
               tab === "input" && "btn-primary btn-active",
             ]}
-            onclick={openInput}
+            onclick={() => openInput(false)}
           >
             <MoveUpRight class="size-4" />
             Input
@@ -95,7 +95,7 @@
               "btn join-item border-base-content/20",
               tab === "output" && "btn-primary btn-active",
             ]}
-            onclick={openOutput}
+            onclick={() => openOutput(false)}
           >
             <MoveDownLeft class="size-4" />
             <span>Output</span>
