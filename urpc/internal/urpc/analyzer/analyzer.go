@@ -80,3 +80,14 @@ func (a *Analyzer) Analyze(entryPointFilePath string) (*ast.Schema, []Diagnostic
 
 	return astSchema, nil, nil
 }
+
+func (a *Analyzer) AnalyzeAstSchema(astSchema *ast.Schema) ([]Diagnostic, error) {
+	semanalyzer := newSemanalyzer(astSchema)
+
+	semanalyzerDiagnostics, _ := semanalyzer.analyze()
+	if len(semanalyzerDiagnostics) > 0 {
+		return semanalyzerDiagnostics, semanalyzerDiagnostics[0]
+	}
+
+	return nil, nil
+}
