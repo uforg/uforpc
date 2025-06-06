@@ -56,31 +56,11 @@ func generateStreamTypes(sch schema.Schema, _ Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	g.Line("// StreamName represents the name of a stream.")
-	g.Line("type StreamName string")
-	g.Break()
-
-	g.Line("// StreamNames is a struct that contains all stream names in its literal string form.")
-	g.Line("var StreamNames = struct {")
+	g.Line("// ufoStreamNames is a list of all stream names.")
+	g.Line("var ufoStreamNames = []string{")
 	g.Block(func() {
 		for _, streamNode := range sch.GetStreamNodes() {
-			g.Linef("%s StreamName", streamNode.Name)
-		}
-	})
-	g.Line("}{")
-	g.Block(func() {
-		for _, streamNode := range sch.GetStreamNodes() {
-			g.Linef("%s: \"%s\",", streamNode.Name, streamNode.Name)
-		}
-	})
-	g.Line("}")
-	g.Break()
-
-	g.Line("// StreamNamesList is a list of all stream names.")
-	g.Line("var StreamNamesList = []StreamName{")
-	g.Block(func() {
-		for _, streamNode := range sch.GetStreamNodes() {
-			g.Linef("StreamNames.%s,", streamNode.Name)
+			g.Linef("\"%s\",", streamNode.Name)
 		}
 	})
 	g.Line("}")
