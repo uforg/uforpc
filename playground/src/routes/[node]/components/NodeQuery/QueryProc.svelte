@@ -18,15 +18,25 @@
   const { proc }: Props = $props();
 
   let value = $state({ root: {} });
-  let output: object | null = $state(null);
-
+  let output: string | null = $state(null);
   let isExecuting = $state(false);
+  let cancelRequest = $state<() => void>(() => {});
+
   async function executeProcedure() {
     if (isExecuting) return;
     isExecuting = true;
     output = null;
 
     try {
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      cancelRequest = () => {
+        controller.abort();
+        openInput(false);
+        toast.info("Procedure call cancelled");
+      };
+
       const response = await fetch(store.endpoint, {
         method: "POST",
         body: JSON.stringify({
@@ -35,9 +45,10 @@
           input: value.root,
         }),
         headers: getHeadersObject(),
+        signal: signal,
       });
 
-      const data = await response.json();
+      const data = await response.text();
       output = data;
 
       openOutput(true);
@@ -49,6 +60,7 @@
       });
     } finally {
       isExecuting = false;
+      cancelRequest = () => {};
     }
   }
 
@@ -140,7 +152,7 @@
           block: tab === "output",
         }}
       >
-        <Output {output} />
+        <Output {cancelRequest} {isExecuting} type="proc" {output} />
       </div>
     </div>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CloudAlert, Key, Sparkles } from "@lucide/svelte";
+  import { CircleX, CloudAlert, Key, Loader, Sparkles } from "@lucide/svelte";
 
   import { discoverAuthToken } from "$lib/helpers/discoverAuthToken.ts";
   import { setHeader } from "$lib/store.svelte";
@@ -9,18 +9,17 @@
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   interface Props {
-    output: object | string | null;
+    type: "stream" | "proc";
+    cancelRequest: () => void;
+    isExecuting: boolean;
+    output: string | null;
   }
 
-  const { output }: Props = $props();
-
+  const { cancelRequest, isExecuting, output, type }: Props = $props();
   let hasOutput = $derived(!!output);
-  let outputString = $derived(
-    typeof output === "string" ? output : JSON.stringify(output, null, 2),
-  );
 
   // Discover authentication tokens in the response
-  let foundTokens = $derived(discoverAuthToken(output));
+  let foundTokens = $derived(type === "proc" ? discoverAuthToken(output) : []);
   let hasToken = $derived(foundTokens.length > 0);
 
   // Function to handle selecting a specific token
@@ -29,7 +28,16 @@
   }
 </script>
 
-{#if !hasOutput}
+{#snippet CancelButton()}
+  {#if isExecuting}
+    <button class="btn btn-ghost" onclick={cancelRequest}>
+      <CircleX class="size-4" />
+      {type === "proc" ? "Cancel procedure call" : "Stop stream"}
+    </button>
+  {/if}
+{/snippet}
+
+{#if !hasOutput && !isExecuting}
   <div class="mt-12 flex w-full flex-col items-center justify-center space-y-2">
     <CloudAlert class="size-10" />
     <H3 class="flex items-center justify-start space-x-2">No Output</H3>
@@ -40,8 +48,21 @@
   </p>
 {/if}
 
+{#if !hasOutput && isExecuting}
+  <div
+    class="mt-12 mb-4 flex w-full flex-col items-center justify-center space-y-2"
+  >
+    <Loader class="animate size-10 animate-spin" />
+    <H3 class="flex items-center justify-start space-x-2">
+      {type === "proc" ? "Executing procedure" : "Starting data stream"}
+    </H3>
+  </div>
+
+  {@render CancelButton()}
+{/if}
+
 {#if hasOutput}
-  {#if hasToken}
+  {#if type == "proc" && hasToken}
     <div class="flex flex-wrap items-center justify-start space-x-2">
       <span class="flex flex-none items-center pr-2 text-sm font-bold">
         <Sparkles class="mr-1 size-4" />
@@ -62,8 +83,18 @@
     </div>
   {/if}
 
+  {#if type == "stream"}
+    <div class="flex items-end justify-between space-x-2">
+      {@render CancelButton()}
+      <p>
+        The data stream is currently active using Server Sent Events (SSE). You
+        can stop it by clicking the button below.
+      </p>
+    </div>
+  {/if}
+
   <Editor
     class="rounded-box h-[600px] w-full overflow-hidden shadow-md"
-    value={outputString}
+    value={output ?? ""}
   />
 {/if}

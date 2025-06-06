@@ -19,19 +19,24 @@
 
   let value = $state({ root: {} });
   let output: string | null = $state(null);
-
   let isExecuting = $state(false);
-  let abortController: AbortController | null = null;
+  let cancelRequest = $state<() => void>(() => {});
 
   async function executeStream() {
     if (isExecuting) return;
     isExecuting = true;
     output = "";
 
-    // Create abort controller for cancellation
-    abortController = new AbortController();
-
     try {
+      const controller = new AbortController();
+      const signal = controller.signal;
+
+      cancelRequest = () => {
+        controller.abort();
+        openInput(false);
+        toast.info("Stream stopped");
+      };
+
       const response = await fetch(store.endpoint, {
         method: "POST",
         body: JSON.stringify({
@@ -44,7 +49,7 @@
           Accept: "text/event-stream",
           "Cache-Control": "no-cache",
         },
-        signal: abortController.signal,
+        signal: signal,
       });
 
       if (!response.ok) {
@@ -62,7 +67,6 @@
 
       while (true) {
         const { done, value } = await reader.read();
-
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
@@ -78,8 +82,9 @@
             const eventData = line.slice(6);
 
             // Skip heartbeat or keep-alive messages
-            if (eventData.trim() === "" || eventData.trim() === "heartbeat")
+            if (eventData.trim() === "" || eventData.trim() === "heartbeat") {
               continue;
+            }
 
             try {
               const parsedData = JSON.parse(eventData);
@@ -116,13 +121,7 @@
       }
     } finally {
       isExecuting = false;
-      abortController = null;
-    }
-  }
-
-  function cancelStream() {
-    if (abortController) {
-      abortController.abort();
+      cancelRequest = () => {};
     }
   }
 
@@ -192,14 +191,6 @@
         <Field fields={stream.input} path="root" bind:value />
 
         <div class="flex w-full justify-end gap-2 pt-4">
-          {#if isExecuting}
-            <button class="btn btn-error" onclick={cancelStream}>
-              <svg class="size-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 6h12v12H6z" />
-              </svg>
-              <span>Cancel</span>
-            </button>
-          {/if}
           <button
             class="btn btn-primary"
             disabled={isExecuting}
@@ -222,7 +213,7 @@
           block: tab === "output",
         }}
       >
-        <Output {output} />
+        <Output {cancelRequest} {isExecuting} type="stream" {output} />
       </div>
     </div>
 

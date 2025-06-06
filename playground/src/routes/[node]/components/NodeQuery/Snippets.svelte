@@ -50,7 +50,13 @@
       c += "-N \\\n";
     }
 
-    for (const header of getHeadersObject().entries()) {
+    let headers = getHeadersObject();
+    if (type === "stream") {
+      headers.set("Accept", "text/event-stream");
+      headers.set("Cache-Control", "no-cache");
+    }
+
+    for (const header of headers.entries()) {
       let rawHeader = `${header[0]}: ${header[1]}`;
       c += `-H ${JSON.stringify(rawHeader)} \\\n`;
     }

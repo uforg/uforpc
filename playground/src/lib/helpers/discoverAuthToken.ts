@@ -174,6 +174,21 @@ export function discoverAuthToken(
   data: unknown,
   options: DiscoverTokenOptions = {},
 ): TokenInfo[] {
+  if (data === null || (typeof data !== "string" && typeof data !== "object")) {
+    return [];
+  }
+
+  let dataObject: object = {};
+  if (typeof data === "string") {
+    try {
+      dataObject = JSON.parse(data);
+    } catch (error) {
+      return [];
+    }
+  } else {
+    dataObject = data;
+  }
+
   const defaultOptions: RequiredDiscoverTokenOptions = {
     maxDepth: options.maxDepth ?? 10,
     customPattern: options.customPattern ?? null,
@@ -181,7 +196,7 @@ export function discoverAuthToken(
     minTokenLength: options.minTokenLength ?? 1,
   };
 
-  const tokens = searchTokensRecursively(data, defaultOptions, "", 0);
+  const tokens = searchTokensRecursively(dataObject, defaultOptions, "", 0);
 
   // Sort by depth (shallowest first), then by path alphabetically
   return tokens.sort((a, b) => {
