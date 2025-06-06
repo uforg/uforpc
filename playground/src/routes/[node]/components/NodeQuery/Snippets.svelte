@@ -5,6 +5,7 @@
   import { getHeadersObject, store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
+  import CodeComponent from "$lib/components/Code.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   import SnippetsCode from "./SnippetsCode.svelte";
@@ -12,10 +13,11 @@
   interface Props {
     // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
     value: any;
-    procName: string;
+    type: "proc" | "stream";
+    name: string;
   }
 
-  const { value, procName }: Props = $props();
+  const { value, type, name }: Props = $props();
 
   let maxHeight = $derived.by(() => {
     const heightMargin = 16;
@@ -34,8 +36,8 @@
 
   let curl = $derived.by(() => {
     const payload = {
-      type: "proc",
-      name: procName,
+      type: type,
+      name: name,
       input: value.root ?? {},
     };
 
@@ -43,6 +45,10 @@
     payloadStr = payloadStr.replace(/'/g, "'\\''");
 
     let c = `curl -X POST ${store.endpoint} \\\n`;
+
+    if (type === "stream") {
+      c += "-N \\\n";
+    }
 
     for (const header of getHeadersObject().entries()) {
       let rawHeader = `${header[0]}: ${header[1]}`;
@@ -97,7 +103,7 @@
       </span>
 
       {#if isOpen}
-        <span>Code snippets for {procName}</span>
+        <span>Code snippets for {name}</span>
       {/if}
     </button>
   </Tooltip>
@@ -111,7 +117,28 @@
       in:fade={{ duration: 100 }}
       out:slide={{ duration: 100, axis: "x" }}
     >
-      <SnippetsCode {curl} />
+      {#if type === "stream"}
+        <p class="p-4 text-sm">
+          Streams are handled with Server Sent Events and only Curl snippets are
+          available. If you want to use a different language, you can implement
+          the client side by yourself or use an UFO RPC client.
+          <br />
+          <a href="https://uforpc.uforg.dev/r/sse" target="_blank" class="link">
+            Learn more here
+          </a>
+        </p>
+
+        <CodeComponent
+          rounded={false}
+          withBorder={false}
+          code={curl}
+          lang="bash"
+        />
+      {/if}
+
+      {#if type === "proc"}
+        <SnippetsCode {curl} />
+      {/if}
     </div>
   {/if}
 </div>

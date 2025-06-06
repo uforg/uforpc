@@ -3,7 +3,7 @@
   import { toast } from "svelte-sonner";
 
   import { getHeadersObject, store } from "$lib/store.svelte";
-  import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
+  import type { StreamDefinitionNode } from "$lib/urpcTypes";
 
   import H2 from "$lib/components/H2.svelte";
 
@@ -12,16 +12,16 @@
   import Snippets from "./Snippets.svelte";
 
   interface Props {
-    proc: ProcedureDefinitionNode;
+    stream: StreamDefinitionNode;
   }
 
-  const { proc }: Props = $props();
+  const { stream }: Props = $props();
 
   let value = $state({ root: {} });
   let output: object | null = $state(null);
 
   let isExecuting = $state(false);
-  async function executeProcedure() {
+  async function executeStream() {
     if (isExecuting) return;
     isExecuting = true;
     output = null;
@@ -30,8 +30,8 @@
       const response = await fetch(store.endpoint, {
         method: "POST",
         body: JSON.stringify({
-          type: "proc",
-          name: proc.name,
+          type: "stream",
+          name: stream.name,
           input: value.root,
         }),
         headers: getHeadersObject(),
@@ -66,7 +66,7 @@
   }
 </script>
 
-{#if proc.input}
+{#if stream.input}
   <div class="flex space-x-4" bind:this={wrapper}>
     <div class="flex-grow space-y-2 rounded-t-none">
       <div
@@ -77,7 +77,7 @@
       >
         <H2 class="flex items-center space-x-2 break-all">
           <Zap class="size-6 flex-none" />
-          <span>Try {proc.name}</span>
+          <span>Try {stream.name}</span>
         </H2>
         <div class="join">
           <button
@@ -115,20 +115,20 @@
           <span> All validations are performed on the server side </span>
         </div>
 
-        <Field fields={proc.input} path="root" bind:value />
+        <Field fields={stream.input} path="root" bind:value />
 
         <div class="flex w-full justify-end pt-4">
           <button
             class="btn btn-primary"
             disabled={isExecuting}
-            onclick={executeProcedure}
+            onclick={executeStream}
           >
             {#if isExecuting}
               <Loader class="animate size-4 animate-spin" />
             {:else}
               <Zap class="size-4" />
             {/if}
-            <span>Execute procedure</span>
+            <span>Start stream</span>
           </button>
         </div>
       </div>
@@ -144,6 +144,6 @@
       </div>
     </div>
 
-    <Snippets {value} procName={proc.name} />
+    <Snippets {value} type="stream" name={stream.name} />
   </div>
 {/if}

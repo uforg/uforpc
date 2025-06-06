@@ -10,7 +10,8 @@
   import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
 
-  import NodeQuery from "./NodeQuery/Query.svelte";
+  import NodeQueryProc from "./NodeQuery/QueryProc.svelte";
+  import NodeQueryStream from "./NodeQuery/QueryStream.svelte";
 
   interface Props {
     node: (typeof store.jsonSchema.nodes)[number];
@@ -85,7 +86,13 @@
 
   {#if node.kind === "proc"}
     <div class="mt-4">
-      <NodeQuery proc={node} />
+      <NodeQueryProc proc={node} />
+    </div>
+  {/if}
+
+  {#if node.kind === "stream"}
+    <div class="mt-4">
+      <NodeQueryStream stream={node} />
     </div>
   {/if}
 
