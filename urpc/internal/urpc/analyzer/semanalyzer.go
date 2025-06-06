@@ -2,14 +2,11 @@ package analyzer
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
-
-// TODO: Add protection against duplicate names for Procs and Streams
 
 var primitiveTypes = map[string]bool{
 	"string":   true,
@@ -22,10 +19,8 @@ var primitiveTypes = map[string]bool{
 // semanalyzer is the semantic alyzer phase for the URPC schema analyzer.
 //
 // It performs the following checks:
-//   - Custom validation rule names are unique and valid.
 //   - Custom type names are unique and valid.
 //   - Custom procedure names are unique and valid.
-//   - All referenced validation rules exist.
 //   - All referenced types exist.
 type semanalyzer struct {
 	astSchema   *ast.Schema
@@ -47,15 +42,11 @@ func newSemanalyzer(astSchema *ast.Schema) *semanalyzer {
 //   - A list of diagnostics that occurred during the analysis.
 //   - The first diagnostic converted to Error interface if any.
 func (a *semanalyzer) analyze() ([]Diagnostic, error) {
-	a.validateCustomValidationRuleNames()
 	a.validateCustomTypeNames()
-	a.validateProcNames()
-	a.validateStreamNames()
+	a.validateProcAndStreamNames()
 	a.validateCustomTypeReferences()
-	a.validateCustomRuleReferences()
 	a.validateTypeFieldUniqueness()
 	a.validateTypeCircularDependencies()
-	a.validateRuleStructure()
 	a.validateProcStructure()
 	a.validateStreamStructure()
 
@@ -63,33 +54,6 @@ func (a *semanalyzer) analyze() ([]Diagnostic, error) {
 		return a.diagnostics, a.diagnostics[0]
 	}
 	return nil, nil
-}
-
-// validateCustomValidationRuleNames validates the custom validation rule names and detects duplicates.
-func (a *semanalyzer) validateCustomValidationRuleNames() {
-	visited := map[string]Positions{}
-
-	for _, ruleDecl := range a.astSchema.GetRules() {
-		positions := Positions(ruleDecl.Positions)
-		ruleName := ruleDecl.Name
-
-		if decl, isDecl := visited[ruleName]; isDecl {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: positions,
-				Message:   fmt.Sprintf("custom validation rule \"%s\" is already declared at %s", ruleName, decl.Pos.String()),
-			})
-			continue
-		}
-		visited[ruleName] = positions
-
-		if !strutil.IsCamelCase(ruleName) {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: positions,
-				Message:   fmt.Sprintf("custom validation rule name \"%s\" must be in camelCase", ruleName),
-			})
-			continue
-		}
-	}
 }
 
 // validateCustomTypeNames validates the custom type names and detects duplicates.
@@ -119,8 +83,8 @@ func (a *semanalyzer) validateCustomTypeNames() {
 	}
 }
 
-// validateProcNames validates the procedure names and detects duplicates.
-func (a *semanalyzer) validateProcNames() {
+// validateProcAndStreamNames validates the procedure names and detects duplicates.
+func (a *semanalyzer) validateProcAndStreamNames() {
 	visited := map[string]Positions{}
 
 	for _, procDecl := range a.astSchema.GetProcs() {
@@ -144,11 +108,6 @@ func (a *semanalyzer) validateProcNames() {
 			continue
 		}
 	}
-}
-
-// validateStreamNames validates the stream names and detects duplicates.
-func (a *semanalyzer) validateStreamNames() {
-	visited := map[string]Positions{}
 
 	for _, streamDecl := range a.astSchema.GetStreams() {
 		positions := Positions(streamDecl.Positions)
@@ -212,25 +171,6 @@ func (a *semanalyzer) validateCustomTypeReferences() {
 		}
 	}
 
-	// Check custom validation rule declarations
-	for _, ruleDecl := range a.astSchema.GetRules() {
-		for _, child := range ruleDecl.Children {
-			if child.For == nil {
-				continue
-			}
-
-			if !isValidType(child.For.Type) {
-				a.diagnostics = append(a.diagnostics, Diagnostic{
-					Positions: Positions{
-						Pos:    child.For.Pos,
-						EndPos: child.For.EndPos,
-					},
-					Message: fmt.Sprintf("type \"%s\" referenced at for clause of rule \"%s\" is not declared", child.For.Type, ruleDecl.Name),
-				})
-			}
-		}
-	}
-
 	// Check type declarations
 	for _, typeDecl := range a.astSchema.GetTypes() {
 		// Check fields
@@ -282,219 +222,6 @@ func extractFields(fieldOrComments []*ast.FieldOrComment) []*ast.Field {
 		}
 	}
 	return fields
-}
-
-// validateCustomRuleReferences validates that all custom rule references are valid.
-func (a *semanalyzer) validateCustomRuleReferences() {
-	// Map of primitive types and their supported built-in rules
-	typesAndRulesMap := map[string][]string{
-		"string":   {"equals", "contains", "minlen", "maxlen", "enum", "lowercase", "uppercase"},
-		"int":      {"equals", "min", "max", "enum"},
-		"float":    {"min", "max"},
-		"bool":     {"equals"},
-		"array":    {"minlen", "maxlen"},
-		"datetime": {"min", "max"},
-	}
-
-	// Is the reverse of typesAndRulesMap and maps rules to their supported types
-	rulesAndTypesMap := func() map[string][]string {
-		rulesMap := map[string][]string{}
-		for typeName, rules := range typesAndRulesMap {
-			for _, rule := range rules {
-				rulesMap[rule] = append(rulesMap[rule], typeName)
-			}
-		}
-		return rulesMap
-	}()
-
-	// Helper function to get the base type of a field
-	getFieldBaseType := func(field *ast.Field) (string, bool) {
-		var baseType string
-		isArray := field.Type.IsArray
-
-		if field.Type.Base.Named != nil {
-			baseType = *field.Type.Base.Named
-		} else if field.Type.Base.Object != nil {
-			baseType = "object"
-		} else {
-			return "", false
-		}
-
-		return baseType, isArray
-	}
-
-	// Helper function to check if a rule can be applied to a type
-	canRuleApplyToType := func(ruleName, fieldType string, isArray bool) bool {
-		isCustomRule := false
-		for _, ruleDecl := range a.astSchema.GetRules() {
-			if ruleDecl.Name == ruleName {
-				isCustomRule = true
-				break
-			}
-		}
-
-		if isCustomRule {
-			rule := &ast.RuleDecl{}
-			for _, ruleItem := range a.astSchema.GetRules() {
-				if ruleItem.Name == ruleName {
-					rule = ruleItem
-					break
-				}
-			}
-
-			// Find the 'for' clause in the rule declaration
-			var forType string
-			for _, child := range rule.Children {
-				if child.For != nil {
-					forType = child.For.Type
-					break
-				}
-			}
-
-			// Check if rule applies to arrays
-			if forType == "array" && isArray {
-				return true
-			}
-
-			// Check if rule applies to the field type
-			return forType == fieldType
-		}
-
-		builtinRules, hasBuiltinRules := typesAndRulesMap[fieldType]
-		if !isArray && !hasBuiltinRules {
-			return false
-		}
-		if isArray {
-			builtinRules = typesAndRulesMap["array"]
-		}
-
-		return slices.Contains(builtinRules, ruleName)
-	}
-
-	// Helper function to check rules in a field
-	var checkFieldRules func([]*ast.Field, string)
-	checkFieldRules = func(fields []*ast.Field, context string) {
-		for _, field := range fields {
-			baseType, isArray := getFieldBaseType(field)
-
-			// Check rules in field.Children
-			for _, child := range field.Children {
-				if child.Rule == nil {
-					continue
-				}
-
-				// Check for rule existence
-				rule := child.Rule
-				if _, isBuiltIn := rulesAndTypesMap[rule.Name]; !isBuiltIn {
-					isCustomRule := false
-					for _, ruleDecl := range a.astSchema.GetRules() {
-						if ruleDecl.Name == rule.Name {
-							isCustomRule = true
-							break
-						}
-					}
-
-					if !isCustomRule {
-						a.diagnostics = append(a.diagnostics, Diagnostic{
-							Positions: Positions{
-								Pos:    rule.Pos,
-								EndPos: rule.EndPos,
-							},
-							Message: fmt.Sprintf("referenced rule \"%s\" %s is not declared", rule.Name, context),
-						})
-						continue
-					}
-				}
-
-				// Check if the rule can be applied to the field type
-				if !canRuleApplyToType(rule.Name, baseType, isArray) {
-					var ruleAppliesTo string
-
-					if customRule, isCustomRule := a.astSchema.GetRulesMap()[rule.Name]; isCustomRule {
-						// Find the 'for' clause in the rule declaration
-						var forType string
-						for _, ruleChild := range customRule.Children {
-							if ruleChild.For != nil {
-								forType = ruleChild.For.Type
-								break
-							}
-						}
-						ruleAppliesTo = forType
-					} else if supportedTypes, isBuiltIn := typesAndRulesMap[rule.Name]; isBuiltIn {
-						ruleAppliesTo = strings.Join(supportedTypes, " or ")
-					} else {
-						ruleAppliesTo = "unknown"
-					}
-
-					if isArray {
-						a.diagnostics = append(a.diagnostics, Diagnostic{
-							Positions: Positions{
-								Pos:    rule.Pos,
-								EndPos: rule.EndPos,
-							},
-							Message: fmt.Sprintf("rule \"%s\" %s cannot be applied to array type \"%s[]\", it can only be applied to %s",
-								rule.Name, context, baseType, ruleAppliesTo),
-						})
-					}
-
-					if !isArray {
-						a.diagnostics = append(a.diagnostics, Diagnostic{
-							Positions: Positions{
-								Pos:    rule.Pos,
-								EndPos: rule.EndPos,
-							},
-							Message: fmt.Sprintf("rule \"%s\" %s cannot be applied to type \"%s\", it can only be applied to %s",
-								rule.Name, context, baseType, ruleAppliesTo),
-						})
-					}
-				}
-			}
-
-			// Check inline object fields
-			if field.Type.Base.Object != nil {
-				inlineFields := extractFields(field.Type.Base.Object.Children)
-				checkFieldRules(inlineFields, fmt.Sprintf("at inline object at field \"%s\"", field.Name))
-			}
-		}
-	}
-
-	// Check type declarations
-	for _, typeDecl := range a.astSchema.GetTypes() {
-		typeFields := extractFields(typeDecl.Children)
-		checkFieldRules(typeFields, fmt.Sprintf("at type \"%s\"", typeDecl.Name))
-	}
-
-	// Check procedure declarations
-	for _, proc := range a.astSchema.GetProcs() {
-		// Check input fields
-		for _, child := range proc.Children {
-			if child.Input != nil {
-				inputFields := extractFields(child.Input.Children)
-				checkFieldRules(inputFields, fmt.Sprintf("at input of procedure \"%s\"", proc.Name))
-			}
-
-			if child.Output != nil {
-				outputFields := extractFields(child.Output.Children)
-				checkFieldRules(outputFields, fmt.Sprintf("at output of procedure \"%s\"", proc.Name))
-			}
-		}
-	}
-
-	// Check stream declarations
-	for _, stream := range a.astSchema.GetStreams() {
-		// Check input fields
-		for _, child := range stream.Children {
-			if child.Input != nil {
-				inputFields := extractFields(child.Input.Children)
-				checkFieldRules(inputFields, fmt.Sprintf("at input of stream \"%s\"", stream.Name))
-			}
-
-			if child.Output != nil {
-				outputFields := extractFields(child.Output.Children)
-				checkFieldRules(outputFields, fmt.Sprintf("at output of stream \"%s\"", stream.Name))
-			}
-		}
-	}
 }
 
 // validateTypeFieldUniqueness validates that fields in a type (including extended types) are unique.
@@ -589,72 +316,6 @@ func validateTypeCircularDependenciesCheckField(fieldType ast.FieldType, types m
 	}
 
 	return nil
-}
-
-// validateRuleStructure validates that rule declarations have the correct structure:
-// - Exactly one 'for' clause
-// - At most one 'param' clause
-// - At most one 'error' clause
-func (a *semanalyzer) validateRuleStructure() {
-	for _, ruleDecl := range a.astSchema.GetRules() {
-		forCount := 0
-		paramCount := 0
-		errorCount := 0
-
-		// Count the number of each clause
-		for _, child := range ruleDecl.Children {
-			if child.For != nil {
-				forCount++
-			}
-			if child.Param != nil {
-				paramCount++
-			}
-			if child.Error != nil {
-				errorCount++
-			}
-		}
-
-		// Validate 'for' clause
-		if forCount == 0 {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: Positions{
-					Pos:    ruleDecl.Pos,
-					EndPos: ruleDecl.EndPos,
-				},
-				Message: fmt.Sprintf("rule \"%s\" must have exactly one 'for' clause", ruleDecl.Name),
-			})
-		} else if forCount > 1 {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: Positions{
-					Pos:    ruleDecl.Pos,
-					EndPos: ruleDecl.EndPos,
-				},
-				Message: fmt.Sprintf("rule \"%s\" cannot have more than one 'for' clause", ruleDecl.Name),
-			})
-		}
-
-		// Validate 'param' clause
-		if paramCount > 1 {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: Positions{
-					Pos:    ruleDecl.Pos,
-					EndPos: ruleDecl.EndPos,
-				},
-				Message: fmt.Sprintf("rule \"%s\" cannot have more than one 'param' clause", ruleDecl.Name),
-			})
-		}
-
-		// Validate 'error' clause
-		if errorCount > 1 {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: Positions{
-					Pos:    ruleDecl.Pos,
-					EndPos: ruleDecl.EndPos,
-				},
-				Message: fmt.Sprintf("rule \"%s\" cannot have more than one 'error' clause", ruleDecl.Name),
-			})
-		}
-	}
 }
 
 // validateProcStructure validates that procedure declarations have the correct structure:

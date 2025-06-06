@@ -54,26 +54,6 @@ func (s *Schema) GetDocstrings() []*Docstring {
 	return docstrings
 }
 
-// GetRules returns all custom validation rules in the URPC schema.
-func (s *Schema) GetRules() []*RuleDecl {
-	rules := []*RuleDecl{}
-	for _, node := range s.Children {
-		if node.Kind() == SchemaChildKindRule {
-			rules = append(rules, node.Rule)
-		}
-	}
-	return rules
-}
-
-// GetRulesMap returns a map of rule names to rule declarations.
-func (s *Schema) GetRulesMap() map[string]*RuleDecl {
-	rulesMap := make(map[string]*RuleDecl)
-	for _, rule := range s.GetRules() {
-		rulesMap[rule.Name] = rule
-	}
-	return rulesMap
-}
-
 // GetTypes returns all custom types in the URPC schema.
 func (s *Schema) GetTypes() []*TypeDecl {
 	types := []*TypeDecl{}
@@ -141,7 +121,6 @@ const (
 	SchemaChildKindVersion   SchemaChildKind = "Version"
 	SchemaChildKindComment   SchemaChildKind = "Comment"
 	SchemaChildKindDocstring SchemaChildKind = "Docstring"
-	SchemaChildKindRule      SchemaChildKind = "Rule"
 	SchemaChildKindType      SchemaChildKind = "Type"
 	SchemaChildKindProc      SchemaChildKind = "Proc"
 	SchemaChildKindStream    SchemaChildKind = "Stream"
@@ -152,7 +131,6 @@ type SchemaChild struct {
 	Positions
 	Version   *Version    `parser:"  @@"`
 	Comment   *Comment    `parser:"| @@"`
-	Rule      *RuleDecl   `parser:"| @@"`
 	Type      *TypeDecl   `parser:"| @@"`
 	Proc      *ProcDecl   `parser:"| @@"`
 	Stream    *StreamDecl `parser:"| @@"`
@@ -168,9 +146,6 @@ func (n *SchemaChild) Kind() SchemaChildKind {
 	}
 	if n.Docstring != nil {
 		return SchemaChildKindDocstring
-	}
-	if n.Rule != nil {
-		return SchemaChildKindRule
 	}
 	if n.Type != nil {
 		return SchemaChildKindType
@@ -195,44 +170,6 @@ type Comment struct {
 	Positions
 	Simple *string `parser:"  @Comment"`
 	Block  *string `parser:"| @CommentBlock"`
-}
-
-// RuleDecl represents a custom validation rule declaration.
-type RuleDecl struct {
-	Positions
-	Docstring  *Docstring       `parser:"(@@ (?! Newline Newline))?"`
-	Deprecated *Deprecated      `parser:"(@@ (?= Rule))?"`
-	Name       string           `parser:"Rule At @Ident"`
-	Children   []*RuleDeclChild `parser:"LBrace @@* RBrace"`
-}
-
-// RuleDeclChild represents a child node within a RuleDecl block.
-type RuleDeclChild struct {
-	Positions
-	Comment *Comment            `parser:"  @@"`
-	For     *RuleDeclChildFor   `parser:"| @@"`
-	Param   *RuleDeclChildParam `parser:"| @@"`
-	Error   *RuleDeclChildError `parser:"| @@"`
-}
-
-// RuleDeclChildFor represents the "for" clause within a RuleDecl block.
-type RuleDeclChildFor struct {
-	Positions
-	Type    string `parser:"For Colon @(Ident | String | Int | Float | Bool | Datetime)"`
-	IsArray bool   `parser:"@(LBracket RBracket)?"`
-}
-
-// RuleDeclChildParam represents the "param" clause within a RuleDecl block.
-type RuleDeclChildParam struct {
-	Positions
-	Param   string `parser:"Param Colon @(String | Int | Float | Bool)"`
-	IsArray bool   `parser:"@(LBracket RBracket)?"`
-}
-
-// RuleDeclChildError represents the "error" clause within a RuleDecl block.
-type RuleDeclChildError struct {
-	Positions
-	Error string `parser:"Error Colon @StringLiteral"`
 }
 
 // TypeDecl represents a custom type declaration.
@@ -376,22 +313,12 @@ type FieldOrComment struct {
 	Field   *Field   `parser:"| @@"`
 }
 
-// Field represents a field definition. It can contain comments and rules after the type definition.
+// Field represents a field definition.
 type Field struct {
 	Positions
-	Name     string        `parser:"@Ident"`
-	Optional bool          `parser:"@(Question)?"`
-	Type     FieldType     `parser:"Colon @@"`
-	Children []*FieldChild `parser:"@@*"` // Captures rules and comments following the type
-}
-
-// FieldChild represents a child node following a Field's type definition (either a Comment or a FieldRule).
-type FieldChild struct {
-	Positions
-	// Field comments are only captured if they are followed by a rule
-	// otherwise they are captured by the parent FieldOrComment
-	Comment *Comment   `parser:"  @@ (?= At Ident )"`
-	Rule    *FieldRule `parser:"| @@"`
+	Name     string    `parser:"@Ident"`
+	Optional bool      `parser:"@(Question)?"`
+	Type     FieldType `parser:"Colon @@"`
 }
 
 // FieldType represents the type of a field.
@@ -412,25 +339,4 @@ type FieldTypeBase struct {
 type FieldTypeObject struct {
 	Positions
 	Children []*FieldOrComment `parser:"LBrace @@* RBrace"`
-}
-
-// FieldRule represents a validation rule applied to a field. It does not support comments within its body.
-type FieldRule struct {
-	Positions
-	Name string         `parser:"At @Ident"`
-	Body *FieldRuleBody `parser:"(LParen @@ RParen)?"` // Body is optional
-}
-
-// FieldRuleBody represents the body of a validation rule applied to a field.
-// It captures parameters and an optional error message. Comments are not supported within this structure.
-type FieldRuleBody struct {
-	Positions
-	// Parameters are captured positionally; validation must ensure correct number/type.
-	ParamSingle     *AnyLiteral `parser:"@@?"`
-	ParamListString []string    `parser:"(LBracket @StringLiteral (Comma @StringLiteral)* RBracket)?"`
-	ParamListInt    []string    `parser:"(LBracket @IntLiteral (Comma @IntLiteral)* RBracket)?"`
-	ParamListFloat  []string    `parser:"(LBracket @FloatLiteral (Comma @FloatLiteral)* RBracket)?"`
-	ParamListBool   []string    `parser:"(LBracket @(TrueLiteral | FalseLiteral) (Comma @(TrueLiteral | FalseLiteral))* RBracket)?"`
-	// Error clause, if present, must appear after parameters.
-	Error *string `parser:"(Comma? Error Colon @StringLiteral)?"`
 }

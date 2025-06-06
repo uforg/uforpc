@@ -130,17 +130,10 @@ func TestResolver(t *testing.T) {
 
 						""" docs/overview.md """
 
-						"""docs/rule.md"""
-						rule @validEmail {
-							for: string
-							error: "Invalid email format"
-						}
-
 						"""docs/type.md"""
 						type User {
 							id: string
 							email: string
-								@validEmail
 						}
 
 						""" docs/proc.md """
@@ -164,7 +157,6 @@ func TestResolver(t *testing.T) {
 						}
 					`,
 				"/main.urpc/docs/overview.md": "# API Overview\n\nThis is the main API documentation.\n",
-				"/main.urpc/docs/rule.md":     "# Email Validation Rule\n\nValidates email format.\n",
 				"/main.urpc/docs/type.md":     "# User Type\n\nRepresents a user in the system.\n",
 				"/main.urpc/docs/proc.md":     "# GetUser Procedure\n\nRetrieves a user by ID.\n",
 				"/main.urpc/docs/stream.md":   "# MyStream Stream\n\nStream for user events.\n",
@@ -187,10 +179,6 @@ func TestResolver(t *testing.T) {
 		// Check standalone docstring
 		require.Len(t, astSchema.GetDocstrings(), 1)
 		require.Equal(t, "# API Overview\n\nThis is the main API documentation.\n", astSchema.GetDocstrings()[0].Value)
-
-		// Check rule docstring
-		require.Len(t, astSchema.GetRules(), 1)
-		require.Equal(t, "# Email Validation Rule\n\nValidates email format.\n", astSchema.GetRules()[0].Docstring.Value)
 
 		// Check type docstring
 		require.Len(t, astSchema.GetTypes(), 1)

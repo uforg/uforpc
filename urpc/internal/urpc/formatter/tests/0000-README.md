@@ -15,7 +15,7 @@ Where:
 
 - `NNNN` is a three-digit number (e.g., `0001`, `0015`, `1234`).
 - `<descriptive-name>` briefly explains the purpose of the test (e.g.,
-  `rule-declaration`, `nested-fields`).
+  `docstrings`, `nested-fields`).
 
 Example: `0001-simple-comment.urpc`
 

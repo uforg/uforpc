@@ -6,7 +6,7 @@
 
 """ Standalone """/* Comment */""" Standalone """""" Associated """ type Test {} """ Standalone """
 
-""" Associated """ rule @test {}""" Associated """ type Test {}""" Associated """ proc Test {}
+""" Associated """ type Test {}""" Associated """ proc Test {}
 
 """ Standalone """
 // Comment
@@ -30,9 +30,6 @@
 type Test {}
 
 """ Standalone """
-
-""" Associated """
-rule @test {}
 
 """ Associated """
 type Test {}

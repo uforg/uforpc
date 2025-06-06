@@ -104,11 +104,6 @@ func (l *LSP) findHoverInfo(content string, position ast.Position, astSchema *as
 		return hoverInfo
 	}
 
-	// Check if the token is a reference to a rule
-	if hoverInfo := l.findRuleHoverInfo(tokenLiteral, astSchema); hoverInfo != nil {
-		return hoverInfo
-	}
-
 	return nil
 }
 
@@ -136,30 +131,6 @@ func (l *LSP) findTypeHoverInfo(tokenLiteral string, astSchema *ast.Schema) *Hov
 	}
 }
 
-// findRuleHoverInfo finds hover information for a rule.
-func (l *LSP) findRuleHoverInfo(tokenLiteral string, astSchema *ast.Schema) *HoverResult {
-	// Check if the token is a rule name
-	ruleDecl, exists := astSchema.GetRulesMap()[tokenLiteral]
-	if !exists {
-		return nil
-	}
-
-	// Get the source code of the rule definition
-	sourceCode, err := l.getRuleSourceCode(ruleDecl)
-	if err != nil {
-		l.logger.Error("failed to get rule source code", "rule", tokenLiteral, "error", err)
-		return nil
-	}
-
-	// Create a hover result with the source code
-	return &HoverResult{
-		Contents: MarkupContent{
-			Kind:  "markdown",
-			Value: fmt.Sprintf("```urpc\n%s\n```", sourceCode),
-		},
-	}
-}
-
 // getTypeSourceCode extracts the source code of a type definition.
 func (l *LSP) getTypeSourceCode(typeDecl *ast.TypeDecl) (string, error) {
 	content, _, err := l.docstore.GetFileAndHash("", typeDecl.Pos.Filename)
@@ -169,17 +140,6 @@ func (l *LSP) getTypeSourceCode(typeDecl *ast.TypeDecl) (string, error) {
 
 	// Extract the type definition from the content
 	return extractCodeFromContent(content, typeDecl.Pos.Line, typeDecl.EndPos.Line)
-}
-
-// getRuleSourceCode extracts the source code of a rule definition.
-func (l *LSP) getRuleSourceCode(ruleDecl *ast.RuleDecl) (string, error) {
-	content, _, err := l.docstore.GetFileAndHash("", ruleDecl.Pos.Filename)
-	if err != nil {
-		return "", fmt.Errorf("failed to get file content: %w", err)
-	}
-
-	// Extract the rule definition from the content
-	return extractCodeFromContent(content, ruleDecl.Pos.Line, ruleDecl.EndPos.Line)
 }
 
 // extractCodeFromContent extracts a range of lines from the content.

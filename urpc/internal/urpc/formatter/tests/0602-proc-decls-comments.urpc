@@ -4,7 +4,6 @@ proc Test {// Comment
     field: { // Comment
       subfield: {
         subsubfield: string[]
-          @uppercase
       }[]
     }[]
   }
@@ -13,7 +12,6 @@ proc Test {// Comment
     field: { // Comment
       subfield: { // Comment
         subsubfield: string[]
-          @uppercase
       }[]
     }[]
   }
@@ -47,7 +45,6 @@ proc Test { // Comment
     field: { // Comment
       subfield: {
         subsubfield: string[]
-          @uppercase
       }[]
     }[]
   }
@@ -57,7 +54,6 @@ proc Test { // Comment
     field: { // Comment
       subfield: { // Comment
         subsubfield: string[]
-          @uppercase
       }[]
     }[]
   }

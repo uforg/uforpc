@@ -112,8 +112,6 @@ func (f *schemaFormatter) format() *genkit.GenKit {
 			f.formatStandaloneDocstring()
 		case ast.SchemaChildKindVersion:
 			f.formatVersion()
-		case ast.SchemaChildKindRule:
-			f.formatRule()
 		case ast.SchemaChildKindType:
 			f.formatType()
 		case ast.SchemaChildKindProc:
@@ -203,28 +201,6 @@ func (f *schemaFormatter) formatStandaloneDocstring() {
 
 func (f *schemaFormatter) formatVersion() {
 	f.LineAndCommentf("version %d", f.currentIndexChild.Version.Number)
-}
-
-func (f *schemaFormatter) formatRule() {
-	prev, prevLineDiff, prevEOF := f.peekChild(-1)
-
-	shouldBreakBefore := false
-	if !prevEOF {
-		if prev.Kind() != ast.SchemaChildKindComment {
-			shouldBreakBefore = true
-		}
-
-		if prevLineDiff.StartToStart < -1 {
-			shouldBreakBefore = true
-		}
-	}
-
-	if shouldBreakBefore {
-		f.g.Break()
-	}
-
-	ruleFormatter := newRuleFormatter(f.currentIndexChild.Rule)
-	f.LineAndComment(strings.TrimSpace(ruleFormatter.format().String()))
 }
 
 func (f *schemaFormatter) formatType() {

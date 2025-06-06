@@ -121,258 +121,6 @@ func TestParserVersion(t *testing.T) {
 	})
 }
 
-func TestParserRuleDecl(t *testing.T) {
-	t.Run("Minimum rule declaration parsing", func(t *testing.T) {
-		input := `
-				rule @myRule {
-					for: string
-				}
-			`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{
-									Type: "string",
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Rule with no body not allowed", func(t *testing.T) {
-		input := `rule @myRule`
-		_, err := ParserInstance.ParseString("schema.urpc", input)
-		require.Error(t, err)
-	})
-
-	t.Run("Rule with docstring", func(t *testing.T) {
-		input := `
-				"""
-				My rule description
-				"""
-				rule @myRule {
-					for: string
-				}
-			`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Docstring: &ast.Docstring{
-							Value: "\n\t\t\t\tMy rule description\n\t\t\t\t",
-						},
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{
-									Type: "string",
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Deprecated rule", func(t *testing.T) {
-		input := `
-			deprecated rule @myRule {
-				for: string
-			}
-		`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Deprecated: &ast.Deprecated{},
-						Name:       "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{
-									Type: "string",
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Deprecated with message rule", func(t *testing.T) {
-		input := `
-			deprecated("Use newRule instead")
-			rule @myRule {
-				for: string
-			}
-		`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Deprecated: &ast.Deprecated{
-							Message: testutil.Pointer("Use newRule instead"),
-						},
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{
-									Type: "string",
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Rule with array param", func(t *testing.T) {
-		input := `
-				rule @myRule {
-					for: string
-					param: string[]
-				}
-			`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{
-									Type: "string",
-								},
-							},
-							{
-								Param: &ast.RuleDeclChildParam{
-									Param:   "string",
-									IsArray: true,
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Rule with array for", func(t *testing.T) {
-		input := `
-				rule @myRule {
-					for: MyType[]
-				}
-			`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{
-									Type:    "MyType",
-									IsArray: true,
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Rule with all options", func(t *testing.T) {
-		input := `
-				""" My rule description """
-				deprecated("This rule is deprecated")
-				rule @myRule {
-					for: MyType[]
-					param: float[]
-					error: "My error message"
-				}
-			`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Docstring: &ast.Docstring{
-							Value: " My rule description ",
-						},
-						Deprecated: &ast.Deprecated{
-							Message: testutil.Pointer("This rule is deprecated"),
-						},
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{
-									Type:    "MyType",
-									IsArray: true,
-								},
-							},
-							{
-								Param: &ast.RuleDeclChildParam{
-									Param:   "float",
-									IsArray: true,
-								},
-							},
-							{
-								Error: &ast.RuleDeclChildError{
-									Error: "My error message",
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-}
-
 func TestParserTypeDecl(t *testing.T) {
 	t.Run("Minimum type declaration parsing", func(t *testing.T) {
 		input := `
@@ -851,123 +599,6 @@ func TestParserField(t *testing.T) {
 		}
 
 		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Field with rules", func(t *testing.T) {
-		input := `
-			type MyType {
-				field1: string
-					@uppercase
-					@uppercase()
-					@uppercase(error: "Field must be uppercase")
-					@contains("hello", error: "Field must contain 'hello'")
-					@enum(["hello", "world"], error: "Field must be 'hello' or 'world'")
-					@enum([1, 2, 3])
-					@enum([1.1, 2.2, 3.3])
-					@enum([true, false])
-			}
-		`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Type: &ast.TypeDecl{
-						Name: "MyType",
-						Children: []*ast.FieldOrComment{
-							{
-								Field: &ast.Field{
-									Name: "field1",
-									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
-									},
-									Children: []*ast.FieldChild{
-										{
-											Rule: &ast.FieldRule{
-												Name: "uppercase",
-											},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "uppercase",
-												Body: &ast.FieldRuleBody{},
-											},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "uppercase",
-												Body: &ast.FieldRuleBody{
-													Error: testutil.Pointer("Field must be uppercase"),
-												},
-											},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "contains",
-												Body: &ast.FieldRuleBody{
-													ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("hello")},
-													Error:       testutil.Pointer("Field must contain 'hello'"),
-												},
-											},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "enum",
-												Body: &ast.FieldRuleBody{
-													ParamListString: []string{"hello", "world"},
-													Error:           testutil.Pointer("Field must be 'hello' or 'world'"),
-												},
-											},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "enum",
-												Body: &ast.FieldRuleBody{
-													ParamListInt: []string{"1", "2", "3"},
-												},
-											},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "enum",
-												Body: &ast.FieldRuleBody{
-													ParamListFloat: []string{"1.1", "2.2", "3.3"},
-												},
-											},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "enum",
-												Body: &ast.FieldRuleBody{
-													ParamListBool: []string{"true", "false"},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Rules with array parameters of multiple types not allowed", func(t *testing.T) {
-		input := `
-			type MyType {
-				field1: string
-					@enum(["hello", 1])
-					@enum([1, 1.1])
-					@enum([1.1, true])
-			}
-		`
-
-		_, err := ParserInstance.ParseString("schema.urpc", input)
-		require.Error(t, err)
 	})
 }
 
@@ -1632,8 +1263,6 @@ func TestParserComments(t *testing.T) {
 		input := `
 			// Version comment
 			version 1
-			// Rule comment
-			rule @myRule { for: string }
 			/* Type comment */
 			type MyType { field: int }
 			// Proc comment
@@ -1652,19 +1281,6 @@ func TestParserComments(t *testing.T) {
 				},
 				{
 					Version: &ast.Version{Number: 1},
-				},
-				{
-					Comment: &ast.Comment{Simple: testutil.Pointer(" Rule comment")},
-				},
-				{
-					Rule: &ast.RuleDecl{
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								For: &ast.RuleDeclChildFor{Type: "string"},
-							},
-						},
-					},
 				},
 				{
 					Comment: &ast.Comment{Block: testutil.Pointer(" Type comment ")},
@@ -1698,56 +1314,6 @@ func TestParserComments(t *testing.T) {
 				},
 				{
 					Comment: &ast.Comment{Block: testutil.Pointer(" Trailing comment ")},
-				},
-			},
-		}
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
-	t.Run("Comments within RuleDecl", func(t *testing.T) {
-		input := `
-			rule @myRule {
-				// Before for
-				for: string
-				/* Between for and param */
-				param: int
-				// Before error
-				error: "msg"
-				// Trailing comment in rule
-			}
-		`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								Comment: &ast.Comment{Simple: testutil.Pointer(" Before for")},
-							},
-							{
-								For: &ast.RuleDeclChildFor{Type: "string"},
-							},
-							{
-								Comment: &ast.Comment{Block: testutil.Pointer(" Between for and param ")},
-							},
-							{
-								Param: &ast.RuleDeclChildParam{Param: "int"},
-							},
-							{
-								Comment: &ast.Comment{Simple: testutil.Pointer(" Before error")},
-							},
-							{
-								Error: &ast.RuleDeclChildError{Error: "msg"},
-							},
-							{
-								Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment in rule")},
-							},
-						},
-					},
 				},
 			},
 		}
@@ -2132,65 +1698,6 @@ func TestParserComments(t *testing.T) {
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
 
-	t.Run("Comments between Field rules (are part of the field children)", func(t *testing.T) {
-		input := `
-			type MyType {
-				field: string
-					// Before rule1
-					@rule1
-					/* Between rule1 and rule2 */
-					@rule2("param")
-
-				// Trailing comment after rules
-			}
-		`
-		parsed, err := ParserInstance.ParseString("schema.urpc", input)
-		require.NoError(t, err)
-
-		expected := &ast.Schema{
-			Children: []*ast.SchemaChild{
-				{
-					Type: &ast.TypeDecl{
-						Name: "MyType",
-						Children: []*ast.FieldOrComment{
-							{
-								Field: &ast.Field{
-									Name: "field",
-									Type: ast.FieldType{
-										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
-									},
-									Children: []*ast.FieldChild{
-										{
-											Comment: &ast.Comment{Simple: testutil.Pointer(" Before rule1")},
-										},
-										{
-											Rule: &ast.FieldRule{Name: "rule1"},
-										},
-										{
-											Comment: &ast.Comment{Block: testutil.Pointer(" Between rule1 and rule2 ")},
-										},
-										{
-											Rule: &ast.FieldRule{
-												Name: "rule2",
-												Body: &ast.FieldRuleBody{
-													ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("param")},
-												},
-											},
-										},
-									},
-								},
-							},
-							{
-								Comment: &ast.Comment{Simple: testutil.Pointer(" Trailing comment after rules")},
-							},
-						},
-					},
-				},
-			},
-		}
-		testutil.ASTEqualNoPos(t, expected, parsed)
-	})
-
 	t.Run("Comments within StreamDecl Input block", func(t *testing.T) {
 		input := `
 			stream MyStream {
@@ -2254,13 +1761,8 @@ func TestParserComments(t *testing.T) {
 	t.Run("End-of-line comments", func(t *testing.T) {
 		input := `
 			version 1 // EOL on version
-			rule @myRule { // EOL on rule start
-				for: string // EOL on for
-				param: int // EOL on param
-			} // EOL on rule end
 			type MyType { // EOL on type start
 				field: string // EOL on field
-					@rule1 // EOL on rule
 			} // EOL on type end
 			proc MyProc { // EOL on proc start
 				input { f: int } // EOL on input
@@ -2285,21 +1787,6 @@ func TestParserComments(t *testing.T) {
 					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on version")},
 				},
 				{
-					Rule: &ast.RuleDecl{
-						Name: "myRule",
-						Children: []*ast.RuleDeclChild{
-							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule start")}}, // Comment inside the block
-							{For: &ast.RuleDeclChildFor{Type: "string"}},
-							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on for")}},
-							{Param: &ast.RuleDeclChildParam{Param: "int"}},
-							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on param")}},
-						},
-					},
-				},
-				{
-					Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule end")},
-				}, // Comment after the block
-				{
 					Type: &ast.TypeDecl{
 						Name: "MyType",
 						Children: []*ast.FieldOrComment{
@@ -2310,13 +1797,9 @@ func TestParserComments(t *testing.T) {
 									Type: ast.FieldType{
 										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
 									},
-									Children: []*ast.FieldChild{
-										{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on field")}}, // Comment after type, before rule
-										{Rule: &ast.FieldRule{Name: "rule1"}},
-									},
 								},
 							},
-							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on rule")}}, // Comment after rule
+							{Comment: &ast.Comment{Simple: testutil.Pointer(" EOL on field")}},
 						},
 					},
 				},
@@ -2438,7 +1921,6 @@ func TestParserComments(t *testing.T) {
 
 	t.Run("Comments inside empty blocks", func(t *testing.T) {
 		input := `
-			rule @emptyRule { /* Rule Comment */ }
 			type EmptyType { // Type Comment
 			}
 			proc EmptyProc {
@@ -2457,16 +1939,6 @@ func TestParserComments(t *testing.T) {
 
 		expected := &ast.Schema{
 			Children: []*ast.SchemaChild{
-				{
-					Rule: &ast.RuleDecl{
-						Name: "emptyRule",
-						Children: []*ast.RuleDeclChild{
-							{
-								Comment: &ast.Comment{Block: testutil.Pointer(" Rule Comment ")},
-							},
-						},
-					},
-				},
 				{
 					Type: &ast.TypeDecl{
 						Name: "EmptyType",
@@ -2646,31 +2118,10 @@ func TestParserFullSchema(t *testing.T) {
 	input := `
 		version 1
 
-		// Custom rule declarations
-
-		"""
-		This rule validates if a string matches a regular expression pattern.
-		Useful for emails, URLs, and other formatted strings.
-		"""
-		deprecated rule @regex {
-			for: string
-			param: string
-			error: "Invalid format"
-		}
-
-		""" Validate "category" with custom logic """
-		deprecated("Deprecated")
-		rule @validateCategory {
-			for: Category
-			error: "Field \"category\" is not valid"
-		}
-
 		// Type declarations
 
 		type FirstDummyType {
 			dummyField: datetime
-				@min("1900-01-01T00:00:00Z")
-				@max("2100-01-01T00:00:00Z")
 		}
 
 		type SecondDummyType {
@@ -2688,16 +2139,10 @@ func TestParserFullSchema(t *testing.T) {
 		deprecated("Deprecated")
 		type Category {
 			id: string
-				@uuid(error: "Must be a valid UUID")
-				@minlen(36)
-				@maxlen(36, error: "UUID must be exactly 36 characters")
 			name: string
-				@minlen(3, error: "Name must be at least 3 characters long")
 			description?: string
 			isActive: bool
-				@equals(true)
 			parentId?: string
-				@uuid
 		}
 
 		"""
@@ -2707,32 +2152,20 @@ func TestParserFullSchema(t *testing.T) {
 		"""
 		type Product {
 			id: string
-				@uuid
 			name: string
-				@minlen(2)
-				@maxlen(100, error: "Name cannot exceed 100 characters")
 			price: float
-				@min(0.01, error: "Price must be greater than zero")
 			stock: int
-				@min(0)
-				@range([0, 1000], error: "Stock must be between 0 and 1000")
 			category: Category
-				@validateCategory(error: "Invalid category custom message")
 			tags?: string[]
-				@minlen(1, error: "At least one tag is required")
-				@maxlen(10)
 
 			details: {
 				dimensions: {
 					width: float
-						@min(0.0, error: "Width cannot be negative")
 					height: float
-						@min(0.0)
 					depth?: float
 				}
 				weight?: float
 				colors: string[]
-					@enum(["red", "green", "blue", "black", "white"], error: "Color must be one of the allowed values")
 				attributes?: {
 					name: string
 					value: string
@@ -2742,7 +2175,6 @@ func TestParserFullSchema(t *testing.T) {
 			variations: {
 				sku: string
 				price: float
-					@min(0.01, error: "Variation price must be greater than zero")
 				attributes: {
 					name: string
 					value: string
@@ -2759,7 +2191,6 @@ func TestParserFullSchema(t *testing.T) {
 		deprecated proc GetCategory {
 			input {
 				id: string
-					@uuid(error: "Category ID must be a valid UUID")
 			}
 
 			output {
@@ -2788,7 +2219,6 @@ func TestParserFullSchema(t *testing.T) {
 					draft: bool
 					notify: bool
 					scheduledFor?: string
-						@iso8601(error: "Must be a valid ISO8601 date")
 					tags?: string[]
 				}
 
@@ -2797,7 +2227,6 @@ func TestParserFullSchema(t *testing.T) {
 					customRules?: {
 						name: string
 						severity: int
-							@enum([1, 2, 3], error: "Severity must be 1, 2, or 3")
 						message: string
 					}[]
 				}
@@ -2806,7 +2235,6 @@ func TestParserFullSchema(t *testing.T) {
 			output {
 				success: bool
 				productId: string
-					@uuid(error: "Product ID must be a valid UUID")
 				errors?: {
 					code: int
 					message: string
@@ -2824,8 +2252,6 @@ func TestParserFullSchema(t *testing.T) {
 						id: string
 						region: string
 						load: float
-							@min(0.0)
-							@max(1.0, error: "Load factor cannot exceed 1.0")
 					}
 				}
 			}
@@ -2838,15 +2264,6 @@ func TestParserFullSchema(t *testing.T) {
 				audit: true
 				apiVersion: "1.2.0"
 			}
-		}
-
-		"""
-		Validates if a value is within a specified range.
-		"""
-		rule @range {
-			for: int
-			param: int[]
-			error: "Value out of range"
 		}
 
 		// Stream declarations
@@ -2876,60 +2293,6 @@ func TestParserFullSchema(t *testing.T) {
 			},
 			{
 				Comment: &ast.Comment{
-					Simple: testutil.Pointer(" Custom rule declarations"),
-				},
-			},
-			{
-				Rule: &ast.RuleDecl{
-					Docstring: &ast.Docstring{
-						Value: "\n\t\tThis rule validates if a string matches a regular expression pattern.\n\t\tUseful for emails, URLs, and other formatted strings.\n\t\t",
-					},
-					Deprecated: &ast.Deprecated{},
-					Name:       "regex",
-					Children: []*ast.RuleDeclChild{
-						{
-							For: &ast.RuleDeclChildFor{
-								Type: "string",
-							},
-						},
-						{
-							Param: &ast.RuleDeclChildParam{
-								Param: "string",
-							},
-						},
-						{
-							Error: &ast.RuleDeclChildError{
-								Error: "Invalid format",
-							},
-						},
-					},
-				},
-			},
-			{
-				Rule: &ast.RuleDecl{
-					Docstring: &ast.Docstring{
-						Value: " Validate \"category\" with custom logic ",
-					},
-					Deprecated: &ast.Deprecated{
-						Message: testutil.Pointer("Deprecated"),
-					},
-					Name: "validateCategory",
-					Children: []*ast.RuleDeclChild{
-						{
-							For: &ast.RuleDeclChildFor{
-								Type: "Category",
-							},
-						},
-						{
-							Error: &ast.RuleDeclChildError{
-								Error: "Field \"category\" is not valid",
-							},
-						},
-					},
-				},
-			},
-			{
-				Comment: &ast.Comment{
 					Simple: testutil.Pointer(" Type declarations"),
 				},
 			},
@@ -2943,24 +2306,6 @@ func TestParserFullSchema(t *testing.T) {
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
 										Named: testutil.Pointer("datetime"),
-									},
-								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "min",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("1900-01-01T00:00:00Z")},
-											},
-										},
-									},
-									{
-										Rule: &ast.FieldRule{
-											Name: "max",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Str: testutil.Pointer("2100-01-01T00:00:00Z")},
-											},
-										},
 									},
 								},
 							},
@@ -3021,33 +2366,6 @@ func TestParserFullSchema(t *testing.T) {
 										Named: testutil.Pointer("string"),
 									},
 								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "uuid",
-											Body: &ast.FieldRuleBody{
-												Error: testutil.Pointer("Must be a valid UUID"),
-											},
-										},
-									},
-									{
-										Rule: &ast.FieldRule{
-											Name: "minlen",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("36")},
-											},
-										},
-									},
-									{
-										Rule: &ast.FieldRule{
-											Name: "maxlen",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("36")},
-												Error:       testutil.Pointer("UUID must be exactly 36 characters"),
-											},
-										},
-									},
-								},
 							},
 						},
 						{
@@ -3056,17 +2374,6 @@ func TestParserFullSchema(t *testing.T) {
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
 										Named: testutil.Pointer("string"),
-									},
-								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "minlen",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("3")},
-												Error:       testutil.Pointer("Name must be at least 3 characters long"),
-											},
-										},
 									},
 								},
 							},
@@ -3090,16 +2397,6 @@ func TestParserFullSchema(t *testing.T) {
 										Named: testutil.Pointer("bool"),
 									},
 								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "equals",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{True: testutil.Pointer("true")},
-											},
-										},
-									},
-								},
 							},
 						},
 						{
@@ -3109,13 +2406,6 @@ func TestParserFullSchema(t *testing.T) {
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
 										Named: testutil.Pointer("string"),
-									},
-								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "uuid",
-										},
 									},
 								},
 							},
@@ -3138,13 +2428,6 @@ func TestParserFullSchema(t *testing.T) {
 										Named: testutil.Pointer("string"),
 									},
 								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "uuid",
-										},
-									},
-								},
 							},
 						},
 						{
@@ -3153,25 +2436,6 @@ func TestParserFullSchema(t *testing.T) {
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
 										Named: testutil.Pointer("string"),
-									},
-								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "minlen",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("2")},
-											},
-										},
-									},
-									{
-										Rule: &ast.FieldRule{
-											Name: "maxlen",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("100")},
-												Error:       testutil.Pointer("Name cannot exceed 100 characters"),
-											},
-										},
 									},
 								},
 							},
@@ -3184,17 +2448,6 @@ func TestParserFullSchema(t *testing.T) {
 										Named: testutil.Pointer("float"),
 									},
 								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "min",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.01")},
-												Error:       testutil.Pointer("Price must be greater than zero"),
-											},
-										},
-									},
-								},
 							},
 						},
 						{
@@ -3203,25 +2456,6 @@ func TestParserFullSchema(t *testing.T) {
 								Type: ast.FieldType{
 									Base: &ast.FieldTypeBase{
 										Named: testutil.Pointer("int"),
-									},
-								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "min",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("0")},
-											},
-										},
-									},
-									{
-										Rule: &ast.FieldRule{
-											Name: "range",
-											Body: &ast.FieldRuleBody{
-												ParamListInt: []string{"0", "1000"},
-												Error:        testutil.Pointer("Stock must be between 0 and 1000"),
-											},
-										},
 									},
 								},
 							},
@@ -3234,16 +2468,6 @@ func TestParserFullSchema(t *testing.T) {
 										Named: testutil.Pointer("Category"),
 									},
 								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "validateCategory",
-											Body: &ast.FieldRuleBody{
-												Error: testutil.Pointer("Invalid category custom message"),
-											},
-										},
-									},
-								},
 							},
 						},
 						{
@@ -3254,25 +2478,6 @@ func TestParserFullSchema(t *testing.T) {
 									IsArray: true,
 									Base: &ast.FieldTypeBase{
 										Named: testutil.Pointer("string"),
-									},
-								},
-								Children: []*ast.FieldChild{
-									{
-										Rule: &ast.FieldRule{
-											Name: "minlen",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("1")},
-												Error:       testutil.Pointer("At least one tag is required"),
-											},
-										},
-									},
-									{
-										Rule: &ast.FieldRule{
-											Name: "maxlen",
-											Body: &ast.FieldRuleBody{
-												ParamSingle: &ast.AnyLiteral{Int: testutil.Pointer("10")},
-											},
-										},
 									},
 								},
 							},
@@ -3299,17 +2504,6 @@ func TestParserFullSchema(t *testing.T) {
 																						Named: testutil.Pointer("float"),
 																					},
 																				},
-																				Children: []*ast.FieldChild{
-																					{
-																						Rule: &ast.FieldRule{
-																							Name: "min",
-																							Body: &ast.FieldRuleBody{
-																								ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.0")},
-																								Error:       testutil.Pointer("Width cannot be negative"),
-																							},
-																						},
-																					},
-																				},
 																			},
 																		},
 																		{
@@ -3318,16 +2512,6 @@ func TestParserFullSchema(t *testing.T) {
 																				Type: ast.FieldType{
 																					Base: &ast.FieldTypeBase{
 																						Named: testutil.Pointer("float"),
-																					},
-																				},
-																				Children: []*ast.FieldChild{
-																					{
-																						Rule: &ast.FieldRule{
-																							Name: "min",
-																							Body: &ast.FieldRuleBody{
-																								ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.0")},
-																							},
-																						},
 																					},
 																				},
 																			},
@@ -3367,23 +2551,6 @@ func TestParserFullSchema(t *testing.T) {
 															IsArray: true,
 															Base: &ast.FieldTypeBase{
 																Named: testutil.Pointer("string"),
-															},
-														},
-														Children: []*ast.FieldChild{
-															{
-																Rule: &ast.FieldRule{
-																	Name: "enum",
-																	Body: &ast.FieldRuleBody{
-																		ParamListString: []string{
-																			"red",
-																			"green",
-																			"blue",
-																			"black",
-																			"white",
-																		},
-																		Error: testutil.Pointer("Color must be one of the allowed values"),
-																	},
-																},
 															},
 														},
 													},
@@ -3455,17 +2622,6 @@ func TestParserFullSchema(t *testing.T) {
 																Named: testutil.Pointer("float"),
 															},
 														},
-														Children: []*ast.FieldChild{
-															{
-																Rule: &ast.FieldRule{
-																	Name: "min",
-																	Body: &ast.FieldRuleBody{
-																		ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.01")},
-																		Error:       testutil.Pointer("Variation price must be greater than zero"),
-																	},
-																},
-															},
-														},
 													},
 												},
 												{
@@ -3533,16 +2689,6 @@ func TestParserFullSchema(t *testing.T) {
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
 													Named: testutil.Pointer("string"),
-												},
-											},
-											Children: []*ast.FieldChild{
-												{
-													Rule: &ast.FieldRule{
-														Name: "uuid",
-														Body: &ast.FieldRuleBody{
-															Error: testutil.Pointer("Category ID must be a valid UUID"),
-														},
-													},
 												},
 											},
 										},
@@ -3669,16 +2815,6 @@ func TestParserFullSchema(t *testing.T) {
 																			Named: testutil.Pointer("string"),
 																		},
 																	},
-																	Children: []*ast.FieldChild{
-																		{
-																			Rule: &ast.FieldRule{
-																				Name: "iso8601",
-																				Body: &ast.FieldRuleBody{
-																					Error: testutil.Pointer("Must be a valid ISO8601 date"),
-																				},
-																			},
-																		},
-																	},
 																},
 															},
 															{
@@ -3744,21 +2880,6 @@ func TestParserFullSchema(t *testing.T) {
 																									Named: testutil.Pointer("int"),
 																								},
 																							},
-																							Children: []*ast.FieldChild{
-																								{
-																									Rule: &ast.FieldRule{
-																										Name: "enum",
-																										Body: &ast.FieldRuleBody{
-																											ParamListInt: []string{
-																												"1",
-																												"2",
-																												"3",
-																											},
-																											Error: testutil.Pointer("Severity must be 1, 2, or 3"),
-																										},
-																									},
-																								},
-																							},
 																						},
 																					},
 																					{
@@ -3805,16 +2926,6 @@ func TestParserFullSchema(t *testing.T) {
 											Type: ast.FieldType{
 												Base: &ast.FieldTypeBase{
 													Named: testutil.Pointer("string"),
-												},
-											},
-											Children: []*ast.FieldChild{
-												{
-													Rule: &ast.FieldRule{
-														Name: "uuid",
-														Body: &ast.FieldRuleBody{
-															Error: testutil.Pointer("Product ID must be a valid UUID"),
-														},
-													},
 												},
 											},
 										},
@@ -3961,25 +3072,6 @@ func TestParserFullSchema(t *testing.T) {
 																									Named: testutil.Pointer("float"),
 																								},
 																							},
-																							Children: []*ast.FieldChild{
-																								{
-																									Rule: &ast.FieldRule{
-																										Name: "min",
-																										Body: &ast.FieldRuleBody{
-																											ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("0.0")},
-																										},
-																									},
-																								},
-																								{
-																									Rule: &ast.FieldRule{
-																										Name: "max",
-																										Body: &ast.FieldRuleBody{
-																											ParamSingle: &ast.AnyLiteral{Float: testutil.Pointer("1.0")},
-																											Error:       testutil.Pointer("Load factor cannot exceed 1.0"),
-																										},
-																									},
-																								},
-																							},
 																						},
 																					},
 																				},
@@ -4037,32 +3129,6 @@ func TestParserFullSchema(t *testing.T) {
 										},
 									},
 								},
-							},
-						},
-					},
-				},
-			},
-			{
-				Rule: &ast.RuleDecl{
-					Docstring: &ast.Docstring{
-						Value: "\n\t\tValidates if a value is within a specified range.\n\t\t",
-					},
-					Name: "range",
-					Children: []*ast.RuleDeclChild{
-						{
-							For: &ast.RuleDeclChildFor{
-								Type: "int",
-							},
-						},
-						{
-							Param: &ast.RuleDeclChildParam{
-								Param:   "int",
-								IsArray: true,
-							},
-						},
-						{
-							Error: &ast.RuleDeclChildError{
-								Error: "Value out of range",
 							},
 						},
 					},

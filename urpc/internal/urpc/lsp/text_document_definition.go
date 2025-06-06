@@ -111,11 +111,6 @@ func (l *LSP) findDefinition(content string, position ast.Position, astSchema *a
 		return []Location{*location}
 	}
 
-	// Check if the tokenLiteral is a reference to a rule
-	if location := findRuleDefinition(tokenLiteral, astSchema); location != nil {
-		return []Location{*location}
-	}
-
 	return nil
 }
 
@@ -197,30 +192,6 @@ func findTypeDefinition(tokenLiteral string, astSchema *ast.Schema) *Location {
 		Range: TextDocumentRange{
 			Start: convertASTPositionToLSPPosition(typeDecl.Pos),
 			End:   convertASTPositionToLSPPosition(typeDecl.EndPos),
-		},
-	}
-}
-
-// findRuleDefinition finds the definition of a rule.
-func findRuleDefinition(tokenLiteral string, astSchema *ast.Schema) *Location {
-	// Check if the token is a rule name
-	ruleDecl, exists := astSchema.GetRulesMap()[tokenLiteral]
-	if !exists {
-		return nil
-	}
-
-	// Create a location for the rule definition
-	// Ensure the URI has the file:// prefix
-	uri := ruleDecl.Pos.Filename
-	if !strings.HasPrefix(uri, "file://") {
-		uri = "file://" + uri
-	}
-
-	return &Location{
-		URI: uri,
-		Range: TextDocumentRange{
-			Start: convertASTPositionToLSPPosition(ruleDecl.Pos),
-			End:   convertASTPositionToLSPPosition(ruleDecl.EndPos),
 		},
 	}
 }

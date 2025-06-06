@@ -5,14 +5,14 @@ Test   {
 
   field: {
     subfield:{
-      subsubfield: string[]@uppercase
+      subsubfield: string[]
   }
     }
   } output {
 
   field: {
     subfield:{
-      subsubfield: string[]@uppercase
+      subsubfield: string[]
   }
     }
   }
@@ -20,8 +20,8 @@ Test   {
 
 // Array fields
 proc Test {input{
-  field: string[]@minlen(3)
-}output{field:string[]@minlen(3)}
+  field: string[]
+}output{field:string[]}
 }
 
 // Nested array fields
@@ -31,14 +31,14 @@ Test   {
 
   field: {
     subfield:{
-      subsubfield: string[]@uppercase
+      subsubfield: string[]
   }[]
     }[]
   } output {
 
   field: {
     subfield:{
-      subsubfield: string[]@uppercase
+      subsubfield: string[]
   }[]
     }[]
   }
@@ -53,7 +53,6 @@ proc Test {
     field: {
       subfield: {
         subsubfield: string[]
-          @uppercase
       }
     }
   }
@@ -62,7 +61,6 @@ proc Test {
     field: {
       subfield: {
         subsubfield: string[]
-          @uppercase
       }
     }
   }
@@ -72,12 +70,10 @@ proc Test {
 proc Test {
   input {
     field: string[]
-      @minlen(3)
   }
 
   output {
     field: string[]
-      @minlen(3)
   }
 }
 
@@ -87,7 +83,6 @@ proc Test {
     field: {
       subfield: {
         subsubfield: string[]
-          @uppercase
       }[]
     }[]
   }
@@ -96,7 +91,6 @@ proc Test {
     field: {
       subfield: {
         subsubfield: string[]
-          @uppercase
       }[]
     }[]
   }

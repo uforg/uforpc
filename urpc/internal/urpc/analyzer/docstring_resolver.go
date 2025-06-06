@@ -36,12 +36,6 @@ func (r *docstringResolver) resolve(astSchema *ast.Schema) (*ast.Schema, []Diagn
 		diagnostics = r.resolveExternalDocstring(docstring, diagnostics)
 	}
 
-	for _, rule := range astSchema.GetRules() {
-		if rule.Docstring != nil {
-			diagnostics = r.resolveExternalDocstring(rule.Docstring, diagnostics)
-		}
-	}
-
 	for _, typeDecl := range astSchema.GetTypes() {
 		if typeDecl.Docstring != nil {
 			diagnostics = r.resolveExternalDocstring(typeDecl.Docstring, diagnostics)

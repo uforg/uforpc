@@ -34,77 +34,6 @@ func TestSemanalyzer_ValidVersion(t *testing.T) {
 	require.Empty(t, errors)
 }
 
-func TestSemanalyzer_ValidCustomRule(t *testing.T) {
-	input := `
-		version 1
-
-		rule @customStringRule {
-		  for: string
-		  error: "Invalid string format"
-		}
-
-		rule @customIntRule {
-		  for: int
-		  error: "Invalid int format"
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_DuplicateCustomRule(t *testing.T) {
-	input := `
-		version 1
-
-		rule @customStringRule {
-		  for: string
-		  error: "Invalid string format"
-		}
-
-		// Duplicate rule name
-		rule @customStringRule {
-		  for: string
-		  error: "Another invalid string format"
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "already declared")
-}
-
-func TestSemanalyzer_InvalidCustomRuleName(t *testing.T) {
-	input := `
-		version 1
-
-		// PascalCase, should be camelCase
-		rule @InvalidRuleName {
-		  for: string
-		  error: "Invalid string format"
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "must be in camelCase")
-}
-
 func TestSemanalyzer_ValidCustomType(t *testing.T) {
 	input := `
 		version 1
@@ -275,52 +204,6 @@ func TestSemanalyzer_InvalidProcedureName(t *testing.T) {
 	require.Contains(t, errors[0].Message, "must be in PascalCase")
 }
 
-func TestSemanalyzer_NonExistentRuleReference(t *testing.T) {
-	input := `
-		version 1
-
-		// This rule doesn't exist
-		type User {
-		  id: string
-		    @nonExistentRule
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "is not declared")
-}
-
-func TestSemanalyzer_RuleTypeMismatch(t *testing.T) {
-	input := `
-		version 1
-
-		rule @customStringRule {
-		  for: string
-		}
-
-		// Rule is for string, but field is int
-		type User {
-		  id: int
-		    @customStringRule
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "cannot be applied to type")
-}
-
 func TestSemanalyzer_NonExistentTypeReference(t *testing.T) {
 	input := `
 		version 1
@@ -341,83 +224,6 @@ func TestSemanalyzer_NonExistentTypeReference(t *testing.T) {
 	require.Error(t, err)
 	require.Len(t, errors, 1)
 	require.Contains(t, errors[0].Message, "is not declared")
-}
-
-func TestSemanalyzer_ValidArrayWithRules(t *testing.T) {
-	input := `
-		version 1
-
-		// Valid rule for arrays
-		type User {
-		  tags: string[]
-		    @minlen(1)
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_InvalidArrayRule(t *testing.T) {
-	input := `
-		version 1
-
-		// This rule is not valid for arrays (only for strings)
-		type User {
-		  tags: string[]
-		    @contains("tag")
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "cannot be applied to array type")
-}
-
-func TestSemanalyzer_BuiltInRuleValidation(t *testing.T) {
-	input := `
-		version 1
-
-		type Validation {
-		  email: string
-		    @minlen(3)
-		    @maxlen(100)
-		    @contains("@")
-
-		  age: int
-		    @min(18)
-		    @max(120)
-
-		  price: float
-		    @min(0.0)
-		    @max(999.99)
-
-		  isActive: bool
-		    @equals(true)
-
-		  tags: string[]
-		    @minlen(1)
-		    @maxlen(10)
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
 }
 
 func TestSemanalyzer_ValidProcedureMeta(t *testing.T) {
@@ -496,62 +302,12 @@ func TestSemanalyzer_ValidNestedInlineObject(t *testing.T) {
 	require.Empty(t, errors)
 }
 
-func TestSemanalyzer_ValidInlineObjectWithRules(t *testing.T) {
-	input := `
-		version 1
-
-		type User {
-		  id: string
-		  contact: {
-		    email: string
-		      @contains("@")
-		      @minlen(5)
-		    phone: string
-		      @minlen(10)
-		  }
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_InvalidRuleInInlineObject(t *testing.T) {
-	input := `
-		version 1
-
-		// This rule doesn't exist
-		type User {
-		  id: string
-		  contact: {
-		    email: string
-		      @invalidRule
-		  }
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "is not declared")
-}
-
 func TestSemanalyzer_ValidArray(t *testing.T) {
 	input := `
 		version 1
 
 		type Matrix {
 		  data: int[]
-		    @minlen(1)
 		}
 	`
 	combinedSchema, err := parseSchema(input)
@@ -574,57 +330,6 @@ func TestSemanalyzer_ValidArrayOfObjects(t *testing.T) {
 		    street: string
 		    city: string
 		  }[]
-		    @minlen(1)
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_CustomRuleWithParameters(t *testing.T) {
-	input := `
-		version 1
-
-		rule @regex {
-		  for: string
-		  param: string
-		  error: "Invalid format"
-		}
-
-		type User {
-		  email: string
-		    @regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", error: "Invalid email format")
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
-func TestSemanalyzer_CustomRuleWithArrayParameter(t *testing.T) {
-	input := `
-		version 1
-
-		rule @range {
-		  for: int
-		  param: int[]
-		  error: "Value out of range"
-		}
-
-		type Product {
-		  price: int
-		    @range([10, 1000], error: "Price must be between 10 and 1000")
 		}
 	`
 	combinedSchema, err := parseSchema(input)
@@ -643,10 +348,7 @@ func TestSemanalyzer_EnumValidation(t *testing.T) {
 
 		type Product {
 		  status: string
-		    @enum(["pending", "approved", "rejected"])
-
 		  priority: int
-		    @enum([1, 2, 3])
 		}
 	`
 	combinedSchema, err := parseSchema(input)
@@ -665,10 +367,7 @@ func TestSemanalyzer_DatetimeValidation(t *testing.T) {
 
 		type Event {
 		  startDate: datetime
-		    @min("2023-01-01T00:00:00Z")
-
 		  endDate: datetime
-		    @max("2030-12-31T23:59:59Z")
 		}
 	`
 	combinedSchema, err := parseSchema(input)
@@ -773,93 +472,6 @@ func TestSemanalyzer_CircularTypeDependencyWithOptionalField(t *testing.T) {
 		}
 	}
 	require.True(t, found, "Expected to find an error about circular dependency")
-}
-
-func TestSemanalyzer_RuleWithoutForClause(t *testing.T) {
-	input := `
-			version 1
-
-			// Rule without 'for' clause
-			rule @invalidRule {
-			  error: "Invalid value"
-			}
-		`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "must have exactly one 'for' clause")
-}
-
-func TestSemanalyzer_RuleWithMultipleForClauses(t *testing.T) {
-	input := `
-			version 1
-
-			// Rule with multiple 'for' clauses
-			rule @invalidRule {
-			  for: string
-			  for: int  // Duplicate 'for' clause
-			  error: "Invalid value"
-			}
-		`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "cannot have more than one 'for' clause")
-}
-
-func TestSemanalyzer_RuleWithMultipleParamClauses(t *testing.T) {
-	input := `
-			version 1
-
-			// Rule with multiple 'param' clauses
-			rule @invalidRule {
-			  for: string
-			  param: string
-			  param: int  // Duplicate 'param' clause
-			  error: "Invalid value"
-			}
-		`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "cannot have more than one 'param' clause")
-}
-
-func TestSemanalyzer_RuleWithMultipleErrorClauses(t *testing.T) {
-	input := `
-			version 1
-
-			// Rule with multiple 'error' clauses
-			rule @invalidRule {
-			  for: string
-			  error: "Invalid value"
-			  error: "Another error message"  // Duplicate 'error' clause
-			}
-		`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "cannot have more than one 'error' clause")
 }
 
 func TestSemanalyzer_ProcWithMultipleInputSections(t *testing.T) {
@@ -1022,57 +634,29 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 	input := `
 		version 1
 
-		rule @regex {
-		  for: string
-		  param: string
-		  error: "Invalid format"
-		}
-
-		rule @range {
-		  for: int
-		  param: int[]
-		  error: "Value out of range"
-		}
-
 		type Address {
 		  street: string
-		    @minlen(3)
 		  city: string
-		    @minlen(2)
 		  zipCode: string
-		    @regex("^\\d{5}$", error: "Zip code must be 5 digits")
 		}
 
 		type BaseUser {
 		  id: string
-		    @minlen(10)
 		  username: string
-		    @minlen(3)
-		    @maxlen(30)
-		    @regex("^[a-zA-Z0-9_]+$", error: "Username can only contain letters, numbers, and underscores")
 		}
 
 		type User {
 			user: BaseUser
 		  email: string
-		    @contains("@")
-		    @minlen(5)
 		  password: string
-		    @minlen(8)
 		  age: int
-		    @range([18, 120], error: "Age must be between 18 and 120")
 		  isActive: bool
-		    @equals(true)
 		  address: Address
 		  tags: string[]
-		    @minlen(1)
-		    @maxlen(10)
 		  metadata: {
 		    lastLogin: datetime
-		      @min("2020-01-01T00:00:00Z")
 		    preferences: {
 		      theme: string
-		        @enum(["light", "dark", "system"])
 		      notifications: bool
 		    }
 		  }
@@ -1099,7 +683,6 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		proc GetUser {
 		  input {
 		    userId: string
-		      @minlen(10)
 		  }
 
 		  output {
@@ -1116,7 +699,6 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		stream MyStream {
 		  input {
 		    userId: string
-		      @minlen(10)
 		  }
 
 		  output {

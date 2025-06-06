@@ -7,7 +7,7 @@ Test   {
 
 
 proc ProcWithInput {input{
-  field1: string@uppercase
+  field1: string
 }
 }
 
@@ -16,8 +16,7 @@ proc ProcWithOutput {
   output
   {  field1: datetime[
 
-  ]@min("2000-06-25T00:00:00Z"
-  )
+  ]
 }
 }
 
@@ -30,13 +29,12 @@ proc ProcWithMeta {
 
 // With input, output and meta
 proc ProcFull {input{
-  field1: string@uppercase
+  field1: string
 }
 output
   {  field1: datetime[
 
-  ]@min("2000-06-25T00:00:00Z"
-  )
+  ]
 }meta {
     field: "string"    field: 1
     field: 1.1field: 
@@ -55,7 +53,6 @@ proc Test {}
 deprecated proc ProcWithInput {
   input {
     field1: string
-      @uppercase
   }
 }
 
@@ -63,7 +60,6 @@ deprecated proc ProcWithInput {
 proc ProcWithOutput {
   output {
     field1: datetime[]
-      @min("2000-06-25T00:00:00Z")
   }
 }
 
@@ -82,12 +78,10 @@ proc ProcWithMeta {
 proc ProcFull {
   input {
     field1: string
-      @uppercase
   }
 
   output {
     field1: datetime[]
-      @min("2000-06-25T00:00:00Z")
   }
 
   meta {
