@@ -1,38 +1,56 @@
 package golang
 
 import (
+	_ "embed"
+	"fmt"
+
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
+
+//go:embed pieces/server.go
+var serverRawPiece string
 
 func generateServer(sch schema.Schema, config Config) (string, error) {
 	if !config.IncludeServer {
 		return "", nil
 	}
 
+	piece := strutil.GetStrAfter(serverRawPiece, "/** START FROM HERE **/")
+	if piece == "" {
+		return "", fmt.Errorf("server.go: could not find start delimiter")
+	}
+
 	g := genkit.NewGenKit().WithTabs()
 
+	g.Raw(piece)
+	g.Break()
+
 	g.Line("// -----------------------------------------------------------------------------")
-	g.Line("// Server Types")
+	g.Line("// Server Generated Implementation")
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Break()
 
 	g.Line("// Server handles RPC requests.")
 	g.Line("type Server[T any] struct {")
 	g.Block(func() {
-		g.Line("handlers          map[ProcedureName]func(context T, input json.RawMessage) (any, error)")
+		g.Line("procHandlers      map[ProcedureName]func(context T, input json.RawMessage) (any, error)")
+		g.Line("streamHandlers    map[StreamName]func(context T, input json.RawMessage) (any, error)")
 		g.Line("beforeMiddlewares []MiddlewareBefore[T]")
 		g.Line("afterMiddlewares  []MiddlewareAfter[T]")
 	})
 	g.Line("}")
 	g.Break()
 
-	g.Line("// ServerRequest represents an incoming RPC request")
-	g.Line("type ServerRequest[T any] struct {")
+	g.Line("// ServerRequestProvider provides the required methods to handle a request")
+	g.Line("type ServerRequestProvider[T any] interface {")
 	g.Block(func() {
-		g.Line("InitialContext	T")
-		g.Line("RequestBody			io.Reader")
+		g.Line("InitialContext() T")
+		g.Line("RequestBody() io.Reader")
+		g.Line("SetHeader(key, value string)")
+		g.Line("Write([]byte) (int, error)")
+		g.Line("Flush()")
 	})
 	g.Line("}")
 	g.Break()
@@ -54,7 +72,8 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Block(func() {
 		g.Line("return &Server[T]{")
 		g.Block(func() {
-			g.Line("handlers:         	map[ProcedureName]func(T, json.RawMessage) (any, error){},")
+			g.Line("procHandlers:     	map[ProcedureName]func(T, json.RawMessage) (any, error){},")
+			g.Line("streamHandlers:   	map[StreamName]func(T, json.RawMessage) (any, error){},")
 			g.Line("beforeMiddlewares: 	[]MiddlewareBefore[T]{},")
 			g.Line("afterMiddlewares:  	[]MiddlewareAfter[T]{},")
 		})
@@ -100,7 +119,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		})
 		g.Linef(") *Server[T] {")
 		g.Block(func() {
-			g.Linef("s.handlers[ProcedureNames.%s] = func(context T, input json.RawMessage) (any, error) {", namePascal)
+			g.Linef("s.procHandlers[ProcedureNames.%s] = func(context T, input json.RawMessage) (any, error) {", namePascal)
 			g.Block(func() {
 				g.Line("var preTypedInput pre" + namePascal + "Input")
 				g.Line("if err := json.Unmarshal(input, &preTypedInput); err != nil {")
@@ -128,7 +147,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	}
 
 	g.Line("// HandleRequest processes an incoming RPC request")
-	g.Line("func (s *Server[T]) HandleRequest(request ServerRequest[T]) Response[any] {")
+	g.Line("func (s *Server[T]) HandleRequest(request ServerRequestProvider[T]) Response[any] {")
 	g.Block(func() {
 		g.Line("var jsonBody struct {")
 		g.Block(func() {
@@ -136,7 +155,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 			g.Line("Input	json.RawMessage	`json:\"input\"`")
 		})
 		g.Line("}")
-		g.Line("if err := json.NewDecoder(request.RequestBody).Decode(&jsonBody); err != nil {")
+		g.Line("if err := json.NewDecoder(request.RequestBody()).Decode(&jsonBody); err != nil {")
 		g.Block(func() {
 			g.Line("return Response[any]{")
 			g.Block(func() {
@@ -171,7 +190,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 
 		g.Line("// Validate procedure implementation")
-		g.Line("if _, ok := s.handlers[jsonBody.Proc]; response.Ok && !ok {")
+		g.Line("if _, ok := s.procHandlers[jsonBody.Proc]; response.Ok && !ok {")
 		g.Block(func() {
 			g.Line("response = Response[any]{")
 			g.Block(func() {
