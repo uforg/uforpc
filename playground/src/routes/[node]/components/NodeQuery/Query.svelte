@@ -30,7 +30,8 @@
       const response = await fetch(store.endpoint, {
         method: "POST",
         body: JSON.stringify({
-          proc: proc.name,
+          type: "proc",
+          name: proc.name,
           input: value.root,
         }),
         headers: getHeadersObject(),

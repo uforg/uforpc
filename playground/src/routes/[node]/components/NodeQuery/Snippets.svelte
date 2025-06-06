@@ -34,7 +34,8 @@
 
   let curl = $derived.by(() => {
     const payload = {
-      proc: procName,
+      type: "proc",
+      name: procName,
       input: value.root ?? {},
     };
 
