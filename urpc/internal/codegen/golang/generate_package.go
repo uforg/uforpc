@@ -43,6 +43,7 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 		g.Line(`"fmt"`)
 		g.Line(`"io"`)
 		g.Line(`"time"`)
+		g.Line(`"net/http"`)
 		g.Line(`"slices"`)
 	})
 	g.Line(")")

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"slices"
 )
 
@@ -27,6 +28,44 @@ type ServerRequestResponseProvider[T any] interface {
 	ResponseWrite(data []byte) (int, error)
 	// ResponseFlush flushes the response to the client.
 	ResponseFlush()
+}
+
+// ServerNetHTTPRequestResponseProvider implements the ServerRequestResponseProvider interface for net/http.
+type ServerNetHTTPRequestResponseProvider[T any] struct {
+	initialContext T
+	responseWriter http.ResponseWriter
+	request        *http.Request
+}
+
+// NewServerNetHTTPRequestResponseProvider creates a new ServerNetHTTPRequestResponseProvider.
+func NewServerNetHTTPRequestResponseProvider[T any](initialContext T, w http.ResponseWriter, r *http.Request) ServerRequestResponseProvider[T] {
+	return &ServerNetHTTPRequestResponseProvider[T]{
+		initialContext: initialContext,
+		responseWriter: w,
+		request:        r,
+	}
+}
+
+func (r *ServerNetHTTPRequestResponseProvider[T]) RequestGetInitialContext() T {
+	return r.initialContext
+}
+
+func (r *ServerNetHTTPRequestResponseProvider[T]) RequestGetBodyReader() io.Reader {
+	return r.request.Body
+}
+
+func (r *ServerNetHTTPRequestResponseProvider[T]) ResponseSetHeader(key, value string) {
+	r.responseWriter.Header().Set(key, value)
+}
+
+func (r *ServerNetHTTPRequestResponseProvider[T]) ResponseWrite(data []byte) (int, error) {
+	return r.responseWriter.Write(data)
+}
+
+func (r *ServerNetHTTPRequestResponseProvider[T]) ResponseFlush() {
+	if f, ok := r.responseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
 }
 
 // MiddlewareBefore runs before request processing. Both for procedures and streams.
