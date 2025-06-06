@@ -68,6 +68,29 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		name := procNode.Name
 		namePascal := strutil.ToPascalCase(name)
 
+		g.Linef("// Set%sInputProcessor registers the input processor for the %s procedure", namePascal, name)
+		g.Linef("func (p *procRegistry[T]) Set%sInputProcessor(", namePascal)
+		g.Block(func() {
+			g.Linef("processor func(context T, input %sInput) (%sInput, error),", name, name)
+		})
+		g.Linef(") {")
+		g.Block(func() {
+			g.Linef("typedProcessor := func(context T, input any) (any, error) {")
+			g.Block(func() {
+				g.Linef("typedInput, ok := input.(%sInput)", name)
+				g.Line("if !ok {")
+				g.Block(func() {
+					g.Linef("return nil, fmt.Errorf(\"invalid input type for %s procedure, expected %sInput, got %%T\", input)", name, name)
+				})
+				g.Line("}")
+				g.Line("return processor(context, typedInput)")
+			})
+			g.Line("}")
+			g.Linef("p.intServer.setProcInputProcessor(\"%s\", typedProcessor)", namePascal)
+		})
+		g.Line("}")
+		g.Break()
+
 		g.Linef("// Set%sHandler registers the handler for the %s procedure", namePascal, name)
 		g.Linef("func (p *procRegistry[T]) Set%sHandler(", namePascal)
 		g.Block(func() {
@@ -93,6 +116,20 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Break()
 
 				g.Line("typedInput := preTypedInput.transform()")
+
+				g.Linef("if processor, ok := p.intServer.procInputProcessors[\"%s\"]; ok {", namePascal)
+				g.Block(func() {
+					g.Line("processedInput, err := processor(context, typedInput)")
+					g.Line("if err != nil {")
+					g.Block(func() {
+						g.Line("return nil, err")
+					})
+					g.Line("}")
+					g.Linef("typedInput = processedInput.(%sInput)", name)
+				})
+				g.Line("}")
+				g.Break()
+
 				g.Line("return handler(context, typedInput)")
 			})
 			g.Line("})")
@@ -112,6 +149,29 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	for _, streamNode := range sch.GetStreamNodes() {
 		name := streamNode.Name
 		namePascal := strutil.ToPascalCase(name)
+
+		g.Linef("// Set%sInputProcessor registers the input processor for the %s stream", namePascal, name)
+		g.Linef("func (s *streamRegistry[T]) Set%sInputProcessor(", namePascal)
+		g.Block(func() {
+			g.Linef("processor func(context T, input %sInput) (%sInput, error),", name, name)
+		})
+		g.Linef(") {")
+		g.Block(func() {
+			g.Linef("typedProcessor := func(context T, input any) (any, error) {")
+			g.Block(func() {
+				g.Linef("typedInput, ok := input.(%sInput)", name)
+				g.Line("if !ok {")
+				g.Block(func() {
+					g.Linef("return nil, fmt.Errorf(\"invalid input type for %s stream, expected %sInput, got %%T\", input)", name, name)
+				})
+				g.Line("}")
+				g.Line("return processor(context, typedInput)")
+			})
+			g.Line("}")
+			g.Linef("s.intServer.setStreamInputProcessor(\"%s\", typedProcessor)", namePascal)
+		})
+		g.Line("}")
+		g.Break()
 
 		g.Linef("// Set%sHandler registers the handler for the %s stream", namePascal, name)
 		g.Linef("func (s *streamRegistry[T]) Set%sHandler(", namePascal)
@@ -141,6 +201,19 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("typedEmit := func(output " + namePascal + "Output) error {")
 				g.Block(func() {
 					g.Line("return rawEmit(output)")
+				})
+				g.Line("}")
+				g.Break()
+
+				g.Linef("if processor, ok := s.intServer.streamInputProcessors[\"%s\"]; ok {", namePascal)
+				g.Block(func() {
+					g.Line("processedInput, err := processor(context, typedInput)")
+					g.Line("if err != nil {")
+					g.Block(func() {
+						g.Line("return err")
+					})
+					g.Line("}")
+					g.Linef("typedInput = processedInput.(%sInput)", name)
 				})
 				g.Line("}")
 				g.Break()

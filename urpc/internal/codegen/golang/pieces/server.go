@@ -41,12 +41,14 @@ type MiddlewareAfter[T any] func(requestType string, requestName string, context
 
 // internalServer handles RPC requests.
 type internalServer[T any] struct {
-	procNames         []string
-	streamNames       []string
-	procHandlers      map[string]func(context T, input json.RawMessage) (any, error)
-	streamHandlers    map[string]func(context T, input json.RawMessage, emit func(any) error) error
-	beforeMiddlewares []MiddlewareBefore[T]
-	afterMiddlewares  []MiddlewareAfter[T]
+	procNames             []string
+	streamNames           []string
+	procHandlers          map[string]func(context T, input json.RawMessage) (any, error)
+	procInputProcessors   map[string]func(context T, input any) (any, error)
+	streamHandlers        map[string]func(context T, input json.RawMessage, emit func(any) error) error
+	streamInputProcessors map[string]func(context T, input any) (any, error)
+	beforeMiddlewares     []MiddlewareBefore[T]
+	afterMiddlewares      []MiddlewareAfter[T]
 }
 
 // newInternalServer creates a new UFO RPC server
@@ -59,12 +61,14 @@ func newInternalServer[T any](
 	streamNames []string,
 ) *internalServer[T] {
 	return &internalServer[T]{
-		procNames:         procNames,
-		streamNames:       streamNames,
-		procHandlers:      map[string]func(T, json.RawMessage) (any, error){},
-		streamHandlers:    map[string]func(T, json.RawMessage, func(any) error) error{},
-		beforeMiddlewares: []MiddlewareBefore[T]{},
-		afterMiddlewares:  []MiddlewareAfter[T]{},
+		procNames:             procNames,
+		streamNames:           streamNames,
+		procHandlers:          map[string]func(T, json.RawMessage) (any, error){},
+		procInputProcessors:   map[string]func(T, any) (any, error){},
+		streamHandlers:        map[string]func(T, json.RawMessage, func(any) error) error{},
+		streamInputProcessors: map[string]func(T, any) (any, error){},
+		beforeMiddlewares:     []MiddlewareBefore[T]{},
+		afterMiddlewares:      []MiddlewareAfter[T]{},
 	}
 }
 
@@ -97,12 +101,30 @@ func (s *internalServer[T]) setProcHandler(
 	return s
 }
 
+// setProcInputProcessor registers the input processor for the provided procedure name
+func (s *internalServer[T]) setProcInputProcessor(
+	procName string,
+	processor func(context T, input any) (any, error),
+) *internalServer[T] {
+	s.procInputProcessors[procName] = processor
+	return s
+}
+
 // setStreamHandler registers the handler for the provided stream name
 func (s *internalServer[T]) setStreamHandler(
 	streamName string,
 	handler func(context T, input json.RawMessage, emit func(any) error) error,
 ) *internalServer[T] {
 	s.streamHandlers[streamName] = handler
+	return s
+}
+
+// setStreamInputProcessor registers the input processor for the provided stream name
+func (s *internalServer[T]) setStreamInputProcessor(
+	streamName string,
+	processor func(context T, input any) (any, error),
+) *internalServer[T] {
+	s.streamInputProcessors[streamName] = processor
 	return s
 }
 
