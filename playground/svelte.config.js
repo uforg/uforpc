@@ -14,6 +14,7 @@ const config = {
     }),
 
     paths: {
+      assets: "http://REPLACEME", // https://github.com/sveltejs/kit/issues/9569
       relative: true,
     },
 
