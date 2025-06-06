@@ -72,17 +72,6 @@
         <BookOpenText class="size-4" />
       </button>
     </Tooltip>
-    <Tooltip content={streamsTooltip} placement="bottom">
-      <button
-        class={[
-          "btn btn-sm join-item relative flex-none",
-          uiStore.asideHideStreams && "toggle-disabled",
-        ]}
-        onclick={toggleStreams}
-      >
-        <CornerRightDown class="size-4" />
-      </button>
-    </Tooltip>
     <Tooltip content={typesTooltip} placement="bottom">
       <button
         class={[
@@ -103,6 +92,17 @@
         onclick={toggleProcs}
       >
         <ArrowLeftRight class="size-4" />
+      </button>
+    </Tooltip>
+    <Tooltip content={streamsTooltip} placement="bottom">
+      <button
+        class={[
+          "btn btn-sm join-item relative flex-none",
+          uiStore.asideHideStreams && "toggle-disabled",
+        ]}
+        onclick={toggleStreams}
+      >
+        <CornerRightDown class="size-4" />
       </button>
     </Tooltip>
   </div>
