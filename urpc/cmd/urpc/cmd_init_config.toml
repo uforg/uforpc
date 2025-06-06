@@ -21,13 +21,9 @@ schema = "{{schema_path}}"
 # package_name = "ufogen"
 # include_server = true
 # include_client = true
-# omit_server_request_validation = false
-# omit_client_request_validation = false
 
 # [typescript]
 # output_dir = "./ufogen/typescript"
 # include_server = true
 # include_client = true
-# omit_server_request_validation = false
-# omit_client_request_validation = false
 # omit_client_default_fetch = false
