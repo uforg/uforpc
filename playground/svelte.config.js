@@ -10,7 +10,7 @@ const config = {
       pages: "build",
       assets: "build",
       strict: true,
-      precompress: true,
+      precompress: false,
     }),
 
     paths: {
