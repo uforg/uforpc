@@ -1,3 +1,4 @@
+//nolint:unused
 package pieces
 
 import (
@@ -142,7 +143,7 @@ func (e Error) ToJSON() string {
 //
 // This function ensures that all errors conform to the Error structure,
 // facilitating consistent error handling across the system.
-func asError(err error) Error { //nolint:unused
+func asError(err error) Error {
 	switch e := err.(type) {
 	case Error:
 		return e
@@ -157,7 +158,7 @@ func asError(err error) Error { //nolint:unused
 
 // errorMissingRequiredField creates a new Error for the case
 // where a required field is missing in the input.
-func errorMissingRequiredField(message string) Error { //nolint:unused
+func errorMissingRequiredField(message string) Error {
 	return Error{
 		Category: "ValidationError",
 		Code:     "MISSING_REQUIRED_FIELD",
