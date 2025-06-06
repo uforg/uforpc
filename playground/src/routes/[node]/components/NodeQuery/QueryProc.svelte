@@ -78,84 +78,88 @@
   }
 </script>
 
-{#if proc.input}
-  <div class="flex space-x-4" bind:this={wrapper}>
-    <div class="flex-grow space-y-2 rounded-t-none">
-      <div
-        class={[
-          "sticky top-[72px] z-10 flex w-full items-center justify-between",
-          "bg-base-100 -mt-4 space-x-2 pt-4 pb-2",
-        ]}
-      >
-        <H2 class="flex items-center space-x-2 break-all">
-          <Zap class="size-6 flex-none" />
-          <span>Try {proc.name}</span>
-        </H2>
-        <div class="join">
-          <button
-            class={[
-              "btn join-item border-base-content/20",
-              tab === "input" && "btn-primary btn-active",
-            ]}
-            onclick={() => openInput(false)}
-          >
-            <MoveUpRight class="size-4" />
-            Input
-          </button>
-          <button
-            class={[
-              "btn join-item border-base-content/20",
-              tab === "output" && "btn-primary btn-active",
-            ]}
-            onclick={() => openOutput(false)}
-          >
-            <MoveDownLeft class="size-4" />
-            <span>Output</span>
-          </button>
-        </div>
+<div class="flex space-x-4" bind:this={wrapper}>
+  <div class="flex-grow space-y-2 rounded-t-none">
+    <div
+      class={[
+        "sticky top-[72px] z-10 flex w-full items-center justify-between",
+        "bg-base-100 -mt-4 space-x-2 pt-4 pb-2",
+      ]}
+    >
+      <H2 class="flex items-center space-x-2 break-all">
+        <Zap class="size-6 flex-none" />
+        <span>Try {proc.name}</span>
+      </H2>
+      <div class="join">
+        <button
+          class={[
+            "btn join-item border-base-content/20",
+            tab === "input" && "btn-primary btn-active",
+          ]}
+          onclick={() => openInput(false)}
+        >
+          <MoveUpRight class="size-4" />
+          Input
+        </button>
+        <button
+          class={[
+            "btn join-item border-base-content/20",
+            tab === "output" && "btn-primary btn-active",
+          ]}
+          onclick={() => openOutput(false)}
+        >
+          <MoveDownLeft class="size-4" />
+          <span>Output</span>
+        </button>
       </div>
+    </div>
 
-      <div
-        class={{
-          "space-y-2": true,
-          hidden: tab === "output",
-          block: tab === "input",
-        }}
-      >
+    <div
+      class={{
+        "space-y-2": true,
+        hidden: tab === "output",
+        block: tab === "input",
+      }}
+    >
+      {#if proc.input}
         <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
           <Info class="size-4" />
           <span> All validations are performed on the server side </span>
         </div>
-
         <Field fields={proc.input} path="root" bind:value />
-
-        <div class="flex w-full justify-end pt-4">
-          <button
-            class="btn btn-primary"
-            disabled={isExecuting}
-            onclick={executeProcedure}
-          >
-            {#if isExecuting}
-              <Loader class="animate size-4 animate-spin" />
-            {:else}
-              <Zap class="size-4" />
-            {/if}
-            <span>Execute procedure</span>
-          </button>
+      {:else}
+        <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
+          <Info class="size-4" />
+          <span>This procedure does not require any input</span>
         </div>
-      </div>
+      {/if}
 
-      <div
-        class={{
-          "space-y-2": true,
-          hidden: tab === "input",
-          block: tab === "output",
-        }}
-      >
-        <Output {cancelRequest} {isExecuting} type="proc" {output} />
+      <div class="flex w-full justify-end pt-4">
+        <button
+          class="btn btn-primary"
+          disabled={isExecuting}
+          onclick={executeProcedure}
+        >
+          {#if isExecuting}
+            <Loader class="animate size-4 animate-spin" />
+          {:else}
+            <Zap class="size-4" />
+          {/if}
+          <span>Execute procedure</span>
+        </button>
       </div>
     </div>
 
-    <Snippets {value} type="proc" name={proc.name} />
+    <div
+      class={{
+        "space-y-2": true,
+        hidden: tab === "input",
+        block: tab === "output",
+      }}
+    >
+      <Output {cancelRequest} {isExecuting} type="proc" {output} />
+    </div>
   </div>
-{/if}
+
+  <Snippets {value} type="proc" name={proc.name} />
+</div>

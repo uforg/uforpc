@@ -135,84 +135,88 @@
   }
 </script>
 
-{#if stream.input}
-  <div class="flex space-x-4" bind:this={wrapper}>
-    <div class="flex-grow space-y-2 rounded-t-none">
-      <div
-        class={[
-          "sticky top-[72px] z-10 flex w-full items-center justify-between",
-          "bg-base-100 -mt-4 space-x-2 pt-4 pb-2",
-        ]}
-      >
-        <H2 class="flex items-center space-x-2 break-all">
-          <Zap class="size-6 flex-none" />
-          <span>Try {stream.name}</span>
-        </H2>
-        <div class="join">
-          <button
-            class={[
-              "btn join-item border-base-content/20",
-              tab === "input" && "btn-primary btn-active",
-            ]}
-            onclick={() => openInput(false)}
-          >
-            <MoveUpRight class="size-4" />
-            Input
-          </button>
-          <button
-            class={[
-              "btn join-item border-base-content/20",
-              tab === "output" && "btn-primary btn-active",
-            ]}
-            onclick={() => openOutput(false)}
-          >
-            <MoveDownLeft class="size-4" />
-            <span>Output</span>
-          </button>
-        </div>
-      </div>
-
-      <div
-        class={{
-          "space-y-2": true,
-          hidden: tab === "output",
-          block: tab === "input",
-        }}
-      >
-        <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
-          <Info class="size-4" />
-          <span> All validations are performed on the server side </span>
-        </div>
-
-        <Field fields={stream.input} path="root" bind:value />
-
-        <div class="flex w-full justify-end gap-2 pt-4">
-          <button
-            class="btn btn-primary"
-            disabled={isExecuting}
-            onclick={executeStream}
-          >
-            {#if isExecuting}
-              <Loader class="animate size-4 animate-spin" />
-            {:else}
-              <Zap class="size-4" />
-            {/if}
-            <span>Start stream</span>
-          </button>
-        </div>
-      </div>
-
-      <div
-        class={{
-          "space-y-2": true,
-          hidden: tab === "input",
-          block: tab === "output",
-        }}
-      >
-        <Output {cancelRequest} {isExecuting} type="stream" {output} />
+<div class="flex space-x-4" bind:this={wrapper}>
+  <div class="flex-grow space-y-2 rounded-t-none">
+    <div
+      class={[
+        "sticky top-[72px] z-10 flex w-full items-center justify-between",
+        "bg-base-100 -mt-4 space-x-2 pt-4 pb-2",
+      ]}
+    >
+      <H2 class="flex items-center space-x-2 break-all">
+        <Zap class="size-6 flex-none" />
+        <span>Try {stream.name}</span>
+      </H2>
+      <div class="join">
+        <button
+          class={[
+            "btn join-item border-base-content/20",
+            tab === "input" && "btn-primary btn-active",
+          ]}
+          onclick={() => openInput(false)}
+        >
+          <MoveUpRight class="size-4" />
+          Input
+        </button>
+        <button
+          class={[
+            "btn join-item border-base-content/20",
+            tab === "output" && "btn-primary btn-active",
+          ]}
+          onclick={() => openOutput(false)}
+        >
+          <MoveDownLeft class="size-4" />
+          <span>Output</span>
+        </button>
       </div>
     </div>
 
-    <Snippets {value} type="stream" name={stream.name} />
+    <div
+      class={{
+        "space-y-2": true,
+        hidden: tab === "output",
+        block: tab === "input",
+      }}
+    >
+      {#if stream.input}
+        <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
+          <Info class="size-4" />
+          <span>All validations are performed on the server side</span>
+        </div>
+        <Field fields={stream.input} path="root" bind:value />
+      {:else}
+        <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
+          <Info class="size-4" />
+          <span>This stream does not require any input</span>
+        </div>
+      {/if}
+
+      <div class="flex w-full justify-end gap-2 pt-4">
+        <button
+          class="btn btn-primary"
+          disabled={isExecuting}
+          onclick={executeStream}
+        >
+          {#if isExecuting}
+            <Loader class="animate size-4 animate-spin" />
+          {:else}
+            <Zap class="size-4" />
+          {/if}
+          <span>Start stream</span>
+        </button>
+      </div>
+    </div>
+
+    <div
+      class={{
+        "space-y-2": true,
+        hidden: tab === "input",
+        block: tab === "output",
+      }}
+    >
+      <Output {cancelRequest} {isExecuting} type="stream" {output} />
+    </div>
   </div>
-{/if}
+
+  <Snippets {value} type="stream" name={stream.name} />
+</div>
