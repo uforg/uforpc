@@ -108,6 +108,14 @@ func (s *internalServer[T]) setStreamHandler(
 
 // handleRequest processes an incoming RPC request
 func (s *internalServer[T]) handleRequest(reqResProvider ServerRequestResponseProvider[T]) error {
+	if reqResProvider == nil {
+		res := Response[any]{
+			Ok:    false,
+			Error: Error{Message: "ServerRequestResponseProvider is nil, please provide a valid provider"},
+		}
+		return s.writeProcResponse(reqResProvider, res)
+	}
+
 	var jsonBody struct {
 		Type  string          `json:"type"` // "proc" or "stream"
 		Name  string          `json:"name"`
