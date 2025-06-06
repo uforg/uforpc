@@ -5,17 +5,6 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-/**
- * Enumeration of allowed primitive type names.
- */
-export type PrimitiveTypeEnum = "string" | "int" | "float" | "bool" | "datetime";
-/**
- * The parameter value(s) passed to the rule instance (null if none).
- */
-export type AppliedParameterValue = {
-  [k: string]: unknown;
-};
-
 export interface Schema {
   /**
    * The version number of the URPC schema specification used.
@@ -24,13 +13,7 @@ export interface Schema {
   /**
    * An ordered array of all declared elements (nodes) in the URPC schema.
    */
-  nodes: (
-    | DocumentationNode
-    | RuleDefinitionNode
-    | TypeDefinitionNode
-    | ProcedureDefinitionNode
-    | StreamDefinitionNode
-  )[];
+  nodes: (DocumentationNode | TypeDefinitionNode | ProcedureDefinitionNode | StreamDefinitionNode)[];
 }
 /**
  * Represents a standalone documentation block.
@@ -44,59 +27,6 @@ export interface DocumentationNode {
    * The documentation content (Markdown or resolved external file).
    */
   content: string;
-}
-/**
- * Defines a custom validation rule.
- */
-export interface RuleDefinitionNode {
-  /**
-   * Node type identifier.
-   */
-  kind: "rule";
-  /**
-   * Name of the custom rule.
-   */
-  name: string;
-  /**
-   * Associated documentation string (optional).
-   */
-  doc?: string;
-  /**
-   * Indicates if the rule is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.
-   */
-  deprecated?: string;
-  for: ForDefinition;
-  paramDef?: ParameterDefinition;
-  /**
-   * Default error message for the rule (optional).
-   */
-  error?: string;
-}
-/**
- * The primitive or custom type name this rule applies to.
- */
-export interface ForDefinition {
-  /**
-   * The primitive or custom type name this rule applies to.
-   */
-  type: PrimitiveTypeEnum | string;
-  /**
-   * Indicates if the for clause is expected to be an array of the specified type.
-   */
-  isArray: boolean;
-}
-/**
- * Definition of the parameter this rule expects (null if none).
- */
-export interface ParameterDefinition {
-  /**
-   * The primitive type expected for the parameter (excluding datetime).
-   */
-  type: "string" | "int" | "float" | "bool";
-  /**
-   * Indicates if the parameter is expected to be an array of the specified type.
-   */
-  isArray: boolean;
 }
 /**
  * Defines a custom data type.
@@ -144,10 +74,6 @@ export interface FieldDefinition {
    * Indicates if the field is optional.
    */
   optional: boolean;
-  /**
-   * List of validation rules applied to this field.
-   */
-  rules?: AppliedRule[];
 }
 /**
  * Definition of the inline object type (used if the type is not named).
@@ -157,20 +83,6 @@ export interface InlineTypeDefinition {
    * Ordered list of fields within the inline type.
    */
   fields: FieldDefinition[];
-}
-/**
- * Represents a validation rule applied to a field, including its parameters.
- */
-export interface AppliedRule {
-  /**
-   * Name of the validation rule being applied.
-   */
-  rule: string;
-  param?: AppliedParameterValue;
-  /**
-   * Custom error message overriding the rule's default (optional).
-   */
-  error?: string;
 }
 /**
  * Defines an RPC procedure.
