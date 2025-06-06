@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from "$app/environment";
   import { onNavigate } from "$app/navigation";
   import { Loader } from "@lucide/svelte";
   import { onMount } from "svelte";
@@ -12,6 +13,7 @@
   } from "$lib/store.svelte";
   import {
     dimensionschangeAction,
+    initTheme,
     loadUiStore,
     uiStore,
   } from "$lib/uiStore.svelte";
@@ -23,6 +25,12 @@
   import LayoutHeader from "./components/LayoutHeader.svelte";
 
   let { children } = $props();
+
+  // Initialize theme
+  onMount(() => {
+    if (!browser) return;
+    initTheme();
+  });
 
   // Initialize the stores
   onMount(() => {
