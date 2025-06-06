@@ -17,13 +17,13 @@ schema = "{{schema_path}}"
 # ]
 
 # [golang]
-# output_dir = "./ufogen/golang"
+# output_file = "./ufogen/golang/ufogen.go"
 # package_name = "ufogen"
 # include_server = true
 # include_client = true
 
 # [typescript]
-# output_dir = "./ufogen/typescript"
+# output_file = "./ufogen/typescript/ufogen.ts"
 # include_server = true
 # include_client = true
 # omit_client_default_fetch = false

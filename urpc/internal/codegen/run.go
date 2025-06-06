@@ -102,7 +102,8 @@ func runPlayground(absConfigDir string, config *playground.Config, astSchema *as
 }
 
 func runGolang(absConfigDir string, config *golang.Config, schema schema.Schema) error {
-	outputDir := filepath.Join(absConfigDir, config.OutputDir)
+	outputFile := filepath.Join(absConfigDir, config.OutputFile)
+	outputDir := filepath.Dir(outputFile)
 
 	// Ensure output directory exists
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -115,9 +116,8 @@ func runGolang(absConfigDir string, config *golang.Config, schema schema.Schema)
 		return fmt.Errorf("failed to generate code: %w", err)
 	}
 
-	// Write the code to the output directory
-	filePath := filepath.Join(outputDir, "uforpc_gen.go")
-	if err := os.WriteFile(filePath, []byte(code), 0644); err != nil {
+	// Write the code to the output file
+	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
 		return fmt.Errorf("failed to write generated code to file: %w", err)
 	}
 
