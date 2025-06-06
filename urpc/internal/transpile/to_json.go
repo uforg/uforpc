@@ -41,13 +41,6 @@ func ToJSON(astSchema ast.Schema) (schema.Schema, error) {
 			}
 			result.Nodes = append(result.Nodes, docNode)
 
-		case child.Rule != nil:
-			ruleNode, err := convertRuleToJSON(child.Rule)
-			if err != nil {
-				return schema.Schema{}, fmt.Errorf("error converting rule '%s': %w", child.Rule.Name, err)
-			}
-			result.Nodes = append(result.Nodes, ruleNode)
-
 		case child.Type != nil:
 			typeNode, err := convertTypeToJSON(child.Type)
 			if err != nil {
@@ -72,73 +65,6 @@ func ToJSON(astSchema ast.Schema) (schema.Schema, error) {
 	}
 
 	return result, nil
-}
-
-// convertRuleToJSON converts an AST RuleDecl to a schema NodeRule
-func convertRuleToJSON(rule *ast.RuleDecl) (*schema.NodeRule, error) {
-	ruleNode := &schema.NodeRule{
-		Kind: "rule",
-		Name: rule.Name,
-	}
-
-	// Add docstring if available
-	if rule.Docstring != nil {
-		docValue := rule.Docstring.Value
-		ruleNode.Doc = &docValue
-	}
-
-	// Add deprecated if available
-	if rule.Deprecated != nil {
-		if rule.Deprecated.Message != nil {
-			ruleNode.Deprecated = rule.Deprecated.Message
-		} else {
-			empty := ""
-			ruleNode.Deprecated = &empty
-		}
-	}
-
-	// Process rule children
-	for _, child := range rule.Children {
-		if child.For != nil {
-			ruleNode.For = &schema.ForDefinition{
-				Type:    child.For.Type,
-				IsArray: child.For.IsArray,
-			}
-		}
-		if child.Param != nil {
-			paramType, err := convertParamTypeToJSON(child.Param.Param)
-			if err != nil {
-				return nil, fmt.Errorf("invalid parameter type: %w", err)
-			}
-
-			ruleNode.Param = &schema.ParamDefinition{
-				Type:    paramType,
-				IsArray: child.Param.IsArray,
-			}
-		}
-		if child.Error != nil {
-			errorMsg := child.Error.Error
-			ruleNode.Error = &errorMsg
-		}
-	}
-
-	return ruleNode, nil
-}
-
-// convertParamTypeToJSON converts a string parameter type to a schema ParamPrimitiveType
-func convertParamTypeToJSON(paramType string) (schema.ParamPrimitiveType, error) {
-	switch paramType {
-	case "string":
-		return schema.ParamPrimitiveTypeString, nil
-	case "int":
-		return schema.ParamPrimitiveTypeInt, nil
-	case "float":
-		return schema.ParamPrimitiveTypeFloat, nil
-	case "bool":
-		return schema.ParamPrimitiveTypeBool, nil
-	default:
-		return schema.ParamPrimitiveType{}, fmt.Errorf("invalid parameter type: %s", paramType)
-	}
 }
 
 // convertTypeToJSON converts an AST TypeDecl to a schema NodeType
@@ -209,104 +135,7 @@ func convertFieldToJSON(field *ast.Field) (schema.FieldDefinition, error) {
 		fieldDef.TypeInline = inlineType
 	}
 
-	// Process field rules
-	for _, child := range field.Children {
-		if child.Rule != nil {
-			rule, err := convertFieldRuleToJSON(child.Rule)
-			if err != nil {
-				return schema.FieldDefinition{}, fmt.Errorf("error converting rule '%s': %w", child.Rule.Name, err)
-			}
-			fieldDef.Rules = append(fieldDef.Rules, rule)
-		}
-	}
-
 	return fieldDef, nil
-}
-
-// convertFieldRuleToJSON converts an AST FieldRule to a schema AppliedRule
-func convertFieldRuleToJSON(fieldRule *ast.FieldRule) (schema.AppliedRule, error) {
-	rule := schema.AppliedRule{
-		Rule: fieldRule.Name,
-	}
-
-	// Early return if there's no rule body
-	if fieldRule.Body == nil {
-		return rule, nil
-	}
-
-	// Process error message if available
-	if fieldRule.Body.Error != nil {
-		errorMsg := *fieldRule.Body.Error
-		rule.Error = &errorMsg
-	}
-
-	// Process parameters
-	if fieldRule.Body.ParamSingle != nil ||
-		len(fieldRule.Body.ParamListString) > 0 ||
-		len(fieldRule.Body.ParamListInt) > 0 ||
-		len(fieldRule.Body.ParamListFloat) > 0 ||
-		len(fieldRule.Body.ParamListBool) > 0 {
-
-		param := &schema.AppliedParam{}
-
-		// Handle single parameter
-		if fieldRule.Body.ParamSingle != nil {
-			paramType, paramValue, err := extractParamValue(*fieldRule.Body.ParamSingle)
-			if err != nil {
-				return schema.AppliedRule{}, err
-			}
-			param.Type = paramType
-			param.IsArray = false
-			param.Value = paramValue
-		}
-
-		// Handle array parameters
-		if len(fieldRule.Body.ParamListString) > 0 {
-			param.Type = schema.ParamPrimitiveTypeString
-			param.IsArray = true
-			param.ArrayValues = fieldRule.Body.ParamListString
-		}
-		if len(fieldRule.Body.ParamListInt) > 0 {
-			param.Type = schema.ParamPrimitiveTypeInt
-			param.IsArray = true
-			param.ArrayValues = fieldRule.Body.ParamListInt
-		}
-		if len(fieldRule.Body.ParamListFloat) > 0 {
-			param.Type = schema.ParamPrimitiveTypeFloat
-			param.IsArray = true
-			param.ArrayValues = fieldRule.Body.ParamListFloat
-		}
-		if len(fieldRule.Body.ParamListBool) > 0 {
-			param.Type = schema.ParamPrimitiveTypeBool
-			param.IsArray = true
-			param.ArrayValues = fieldRule.Body.ParamListBool
-		}
-
-		rule.Param = param
-	}
-
-	return rule, nil
-}
-
-// extractParamValue extracts the parameter type and value from an AnyLiteral
-func extractParamValue(literal ast.AnyLiteral) (schema.ParamPrimitiveType, string, error) {
-	if literal.Str != nil {
-		return schema.ParamPrimitiveTypeString, *literal.Str, nil
-	}
-	if literal.Int != nil {
-		return schema.ParamPrimitiveTypeInt, *literal.Int, nil
-	}
-	if literal.Float != nil {
-		return schema.ParamPrimitiveTypeFloat, *literal.Float, nil
-	}
-	if literal.True != nil {
-		return schema.ParamPrimitiveTypeBool, "true", nil
-	}
-	if literal.False != nil {
-		return schema.ParamPrimitiveTypeBool, "false", nil
-	}
-
-	return schema.ParamPrimitiveType{}, "", fmt.Errorf("empty literal value")
 }
 
 // convertProcToJSON converts an AST ProcDecl to a schema NodeProc

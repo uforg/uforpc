@@ -36,14 +36,6 @@ func ToURPC(jsonSchema schema.Schema) (ast.Schema, error) {
 					Value: n.Content,
 				},
 			})
-		case *schema.NodeRule:
-			ruleDecl, err := convertRuleToURPC(n)
-			if err != nil {
-				return ast.Schema{}, fmt.Errorf("error converting rule '%s': %w", n.Name, err)
-			}
-			result.Children = append(result.Children, &ast.SchemaChild{
-				Rule: ruleDecl,
-			})
 		case *schema.NodeType:
 			typeDecl, err := convertTypeToURPC(n)
 			if err != nil {
@@ -72,81 +64,6 @@ func ToURPC(jsonSchema schema.Schema) (ast.Schema, error) {
 	}
 
 	return result, nil
-}
-
-// convertRuleToURPC converts a schema NodeRule to an AST RuleDecl
-func convertRuleToURPC(rule *schema.NodeRule) (*ast.RuleDecl, error) {
-	ruleDecl := &ast.RuleDecl{
-		Name: rule.Name,
-	}
-
-	// Add docstring if available
-	if rule.Doc != nil && *rule.Doc != "" {
-		ruleDecl.Docstring = &ast.Docstring{
-			Value: *rule.Doc,
-		}
-	}
-
-	// Add deprecated if available
-	if rule.Deprecated != nil {
-		deprecated := &ast.Deprecated{}
-		if *rule.Deprecated != "" {
-			deprecated.Message = rule.Deprecated
-		}
-		ruleDecl.Deprecated = deprecated
-	}
-
-	// Add 'for' clause
-	if rule.For != nil {
-		ruleDecl.Children = append(ruleDecl.Children, &ast.RuleDeclChild{
-			For: &ast.RuleDeclChildFor{
-				Type:    rule.For.Type,
-				IsArray: rule.For.IsArray,
-			},
-		})
-	}
-
-	// Add 'param' clause if available
-	if rule.Param != nil {
-		paramType, err := convertParamTypeToURPC(rule.Param.Type)
-		if err != nil {
-			return nil, fmt.Errorf("invalid parameter type: %w", err)
-		}
-
-		ruleDecl.Children = append(ruleDecl.Children, &ast.RuleDeclChild{
-			Param: &ast.RuleDeclChildParam{
-				Param:   paramType,
-				IsArray: rule.Param.IsArray,
-			},
-		})
-	}
-
-	// Add 'error' clause if available
-	if rule.Error != nil && *rule.Error != "" {
-		ruleDecl.Children = append(ruleDecl.Children, &ast.RuleDeclChild{
-			Error: &ast.RuleDeclChildError{
-				Error: *rule.Error,
-			},
-		})
-	}
-
-	return ruleDecl, nil
-}
-
-// convertParamTypeToURPC converts a schema ParamPrimitiveType to a string
-func convertParamTypeToURPC(paramType schema.ParamPrimitiveType) (string, error) {
-	switch paramType {
-	case schema.ParamPrimitiveTypeString:
-		return "string", nil
-	case schema.ParamPrimitiveTypeInt:
-		return "int", nil
-	case schema.ParamPrimitiveTypeFloat:
-		return "float", nil
-	case schema.ParamPrimitiveTypeBool:
-		return "bool", nil
-	default:
-		return "", fmt.Errorf("invalid parameter type: %s", paramType.Value)
-	}
 }
 
 // convertTypeToURPC converts a schema NodeType to an AST TypeDecl
@@ -223,97 +140,7 @@ func convertFieldToURPC(fieldDef schema.FieldDefinition) (*ast.Field, error) {
 
 	field.Type = fieldType
 
-	// Process field rules
-	if len(fieldDef.Rules) > 0 {
-		for _, rule := range fieldDef.Rules {
-			ruleNode, err := convertAppliedRuleToURPC(rule)
-			if err != nil {
-				return nil, fmt.Errorf("error converting rule '%s': %w", rule.Rule, err)
-			}
-
-			field.Children = append(field.Children, &ast.FieldChild{
-				Rule: ruleNode,
-			})
-		}
-	}
-
 	return field, nil
-}
-
-// convertAppliedRuleToURPC converts a schema AppliedRule to an AST FieldRule
-func convertAppliedRuleToURPC(rule schema.AppliedRule) (*ast.FieldRule, error) {
-	fieldRule := &ast.FieldRule{
-		Name: rule.Rule,
-	}
-
-	// Process rule parameters and error message if available
-	if rule.Param != nil || (rule.Error != nil && *rule.Error != "") {
-		body := &ast.FieldRuleBody{}
-
-		// Process error message
-		if rule.Error != nil && *rule.Error != "" {
-			body.Error = rule.Error
-		}
-
-		// Process parameters
-		if rule.Param != nil {
-			if !rule.Param.IsArray {
-				// Handle single parameter
-				literal, err := convertParamValueToURPC(rule.Param.Type, rule.Param.Value)
-				if err != nil {
-					return nil, err
-				}
-				body.ParamSingle = &literal
-			}
-
-			if rule.Param.IsArray {
-				// Handle array parameters
-				switch rule.Param.Type.Value {
-				case "string":
-					body.ParamListString = rule.Param.ArrayValues
-				case "int":
-					body.ParamListInt = rule.Param.ArrayValues
-				case "float":
-					body.ParamListFloat = rule.Param.ArrayValues
-				case "bool":
-					body.ParamListBool = rule.Param.ArrayValues
-				default:
-					return nil, fmt.Errorf("unsupported array parameter type: %s", rule.Param.Type.Value)
-				}
-			}
-		}
-
-		fieldRule.Body = body
-	}
-
-	return fieldRule, nil
-}
-
-// convertParamValueToURPC converts a parameter value to an AST AnyLiteral
-func convertParamValueToURPC(paramType schema.ParamPrimitiveType, value string) (ast.AnyLiteral, error) {
-	var literal ast.AnyLiteral
-
-	switch paramType.Value {
-	case "string":
-		literal.Str = &value
-	case "int":
-		literal.Int = &value
-	case "float":
-		literal.Float = &value
-	case "bool":
-		if value == "true" {
-			t := "true"
-			literal.True = &t
-		}
-		if value == "false" {
-			f := "false"
-			literal.False = &f
-		}
-	default:
-		return ast.AnyLiteral{}, fmt.Errorf("unsupported parameter type: %s", paramType.Value)
-	}
-
-	return literal, nil
 }
 
 // convertProcToURPC converts a schema NodeProc to an AST ProcDecl

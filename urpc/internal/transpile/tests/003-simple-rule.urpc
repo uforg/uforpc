@@ -1,7 +1,0 @@
-version 1
-
-rule @minLength {
-  for: string
-  param: int
-  error: "String must be at least the specified length"
-}

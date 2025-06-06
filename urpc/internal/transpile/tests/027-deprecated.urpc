@@ -1,14 +1,5 @@
 version 1
 
-deprecated rule @deprecatedRule {
-  for: string
-}
-
-deprecated("Deprecated")
-rule @deprecatedRuleWithMessage {
-  for: string
-}
-
 deprecated type DeprecatedType {
   field1: string
   field2: int

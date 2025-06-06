@@ -10,11 +10,6 @@ Authentication is required for most endpoints.
 Use JWT tokens for authentication.
 """
 
-rule @required {
-  for: string
-  error: "This field is required"
-}
-
 """
 Content types supported by the CMS.
 """
@@ -39,9 +34,7 @@ User account information.
 type User {
   id: string
   username: string
-    @required
   email: string
-    @required
   roles: Role[]
   createdAt: string
   updatedAt: string
@@ -53,7 +46,6 @@ Content item structure.
 type Content {
   id: string
   title: string
-    @required
   body: string
   contentType: ContentType
   author: User
@@ -69,10 +61,8 @@ Creates a new content item.
 proc CreateContent {
   input {
     title: string
-      @required
     body: string
     contentTypeId: string
-      @required
     tags: string[]
     publish: bool
   }

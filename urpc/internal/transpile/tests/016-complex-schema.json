@@ -6,58 +6,6 @@
       "content": "API for managing a blog platform"
     },
     {
-      "kind": "rule",
-      "name": "minLength",
-      "for": {
-        "type": "string",
-        "isArray": false
-      },
-      "paramDef": {
-        "type": "int",
-        "isArray": false
-      },
-      "error": "String must be at least the specified length"
-    },
-    {
-      "kind": "rule",
-      "name": "maxLength",
-      "for": {
-        "type": "string",
-        "isArray": false
-      },
-      "paramDef": {
-        "type": "int",
-        "isArray": false
-      },
-      "error": "String cannot exceed the specified length"
-    },
-    {
-      "kind": "rule",
-      "name": "slug",
-      "for": {
-        "type": "string",
-        "isArray": false
-      },
-      "paramDef": {
-        "type": "string",
-        "isArray": false
-      },
-      "error": "Invalid slug format"
-    },
-    {
-      "kind": "rule",
-      "name": "tags",
-      "for": {
-        "type": "string",
-        "isArray": false
-      },
-      "paramDef": {
-        "type": "int",
-        "isArray": false
-      },
-      "error": "Too many tags"
-    },
-    {
       "kind": "type",
       "name": "BlogPost",
       "doc": "Represents a blog post",
@@ -66,81 +14,25 @@
           "name": "id",
           "typeName": "string",
           "isArray": false,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "minLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "36"
-              }
-            },
-            {
-              "rule": "maxLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "36"
-              }
-            }
-          ]
+          "optional": false
         },
         {
           "name": "title",
           "typeName": "string",
           "isArray": false,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "minLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "5"
-              }
-            },
-            {
-              "rule": "maxLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "100"
-              }
-            }
-          ]
+          "optional": false
         },
         {
           "name": "slug",
           "typeName": "string",
           "isArray": false,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "slug",
-              "param": {
-                "type": "string",
-                "isArray": false,
-                "value": "^[a-z0-9-]+$"
-              }
-            }
-          ]
+          "optional": false
         },
         {
           "name": "content",
           "typeName": "string",
           "isArray": false,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "minLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "10"
-              }
-            }
-          ]
+          "optional": false
         },
         {
           "name": "publishedAt",
@@ -179,17 +71,7 @@
           "name": "tags",
           "typeName": "string",
           "isArray": true,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "tags",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "5"
-              }
-            }
-          ]
+          "optional": false
         },
         {
           "name": "isPublished",
@@ -208,57 +90,19 @@
           "name": "title",
           "typeName": "string",
           "isArray": false,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "minLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "5"
-              }
-            },
-            {
-              "rule": "maxLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "100"
-              }
-            }
-          ]
+          "optional": false
         },
         {
           "name": "content",
           "typeName": "string",
           "isArray": false,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "minLength",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "10"
-              }
-            }
-          ]
+          "optional": false
         },
         {
           "name": "tags",
           "typeName": "string",
           "isArray": true,
-          "optional": false,
-          "rules": [
-            {
-              "rule": "tags",
-              "param": {
-                "type": "int",
-                "isArray": false,
-                "value": "5"
-              }
-            }
-          ]
+          "optional": false
         }
       ],
       "output": [

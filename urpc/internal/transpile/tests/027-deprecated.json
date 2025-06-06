@@ -2,24 +2,6 @@
   "version": 1,
   "nodes": [
     {
-      "kind": "rule",
-      "name": "deprecatedRule",
-      "deprecated": "",
-      "for": {
-        "type": "string",
-        "isArray": false
-      }
-    },
-    {
-      "kind": "rule",
-      "name": "deprecatedRuleWithMessage",
-      "deprecated": "Deprecated",
-      "for": {
-        "type": "string",
-        "isArray": false
-      }
-    },
-    {
       "kind": "type",
       "name": "DeprecatedType",
       "deprecated": "",

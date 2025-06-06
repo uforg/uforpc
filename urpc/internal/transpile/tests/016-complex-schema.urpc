@@ -2,42 +2,12 @@ version 1
 
 """API for managing a blog platform"""
 
-rule @minLength {
-  for: string
-  param: int
-  error: "String must be at least the specified length"
-}
-
-rule @maxLength {
-  for: string
-  param: int
-  error: "String cannot exceed the specified length"
-}
-
-rule @slug {
-  for: string
-  param: string
-  error: "Invalid slug format"
-}
-
-rule @tags {
-  for: string
-  param: int
-  error: "Too many tags"
-}
-
 """Represents a blog post"""
 type BlogPost {
   id: string
-    @minLength(36)
-    @maxLength(36)
   title: string
-    @minLength(5)
-    @maxLength(100)
   slug: string
-    @slug("^[a-z0-9-]+$")
   content: string
-    @minLength(10)
   publishedAt: datetime
   author: {
     id: string
@@ -45,7 +15,6 @@ type BlogPost {
     email: string
   }
   tags: string[]
-    @tags(5)
   isPublished: bool
 }
 
@@ -53,12 +22,8 @@ type BlogPost {
 proc CreatePost {
   input {
     title: string
-      @minLength(5)
-      @maxLength(100)
     content: string
-      @minLength(10)
     tags: string[]
-      @tags(5)
   }
 
   output {

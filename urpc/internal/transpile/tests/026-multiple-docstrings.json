@@ -10,15 +10,6 @@
       "content": "\nAuthentication is required for most endpoints.\nUse JWT tokens for authentication.\n"
     },
     {
-      "kind": "rule",
-      "name": "required",
-      "for": {
-        "type": "string",
-        "isArray": false
-      },
-      "error": "This field is required"
-    },
-    {
       "kind": "type",
       "name": "ContentType",
       "doc": "\nContent types supported by the CMS.\n",
@@ -83,23 +74,13 @@
           "name": "username",
           "isArray": false,
           "optional": false,
-          "typeName": "string",
-          "rules": [
-            {
-              "rule": "required"
-            }
-          ]
+          "typeName": "string"
         },
         {
           "name": "email",
           "isArray": false,
           "optional": false,
-          "typeName": "string",
-          "rules": [
-            {
-              "rule": "required"
-            }
-          ]
+          "typeName": "string"
         },
         {
           "name": "roles",
@@ -136,12 +117,7 @@
           "name": "title",
           "isArray": false,
           "optional": false,
-          "typeName": "string",
-          "rules": [
-            {
-              "rule": "required"
-            }
-          ]
+          "typeName": "string"
         },
         {
           "name": "body",
@@ -196,12 +172,7 @@
           "name": "title",
           "isArray": false,
           "optional": false,
-          "typeName": "string",
-          "rules": [
-            {
-              "rule": "required"
-            }
-          ]
+          "typeName": "string"
         },
         {
           "name": "body",
@@ -213,12 +184,7 @@
           "name": "contentTypeId",
           "isArray": false,
           "optional": false,
-          "typeName": "string",
-          "rules": [
-            {
-              "rule": "required"
-            }
-          ]
+          "typeName": "string"
         },
         {
           "name": "tags",
