@@ -56,128 +56,6 @@ func TestParseSchema(t *testing.T) {
 
 }
 
-func TestParamDefinition(t *testing.T) {
-	t.Run("Unmarshal ParamDefinition", func(t *testing.T) {
-		input := `{
-			"type": "string",
-			"isArray": false
-		}`
-
-		var paramDef ParamDefinition
-		err := json.Unmarshal([]byte(input), &paramDef)
-		require.NoError(t, err)
-		require.Equal(t, ParamPrimitiveTypeString, paramDef.Type)
-		require.False(t, paramDef.IsArray)
-	})
-
-	t.Run("Unmarshal ParamDefinition with array", func(t *testing.T) {
-		input := `{
-			"type": "int",
-			"isArray": true
-		}`
-
-		var paramDef ParamDefinition
-		err := json.Unmarshal([]byte(input), &paramDef)
-		require.NoError(t, err)
-		require.Equal(t, ParamPrimitiveTypeInt, paramDef.Type)
-		require.True(t, paramDef.IsArray)
-	})
-
-	t.Run("Marshal ParamDefinition", func(t *testing.T) {
-		paramDef := ParamDefinition{
-			Type:    ParamPrimitiveTypeString,
-			IsArray: false,
-		}
-
-		data, err := json.Marshal(paramDef)
-		require.NoError(t, err)
-
-		var result map[string]any
-		err = json.Unmarshal(data, &result)
-		require.NoError(t, err)
-		require.Equal(t, "string", result["type"])
-		require.Equal(t, false, result["isArray"])
-	})
-}
-
-func TestAppliedParam(t *testing.T) {
-	t.Run("Unmarshal AppliedParam with single value", func(t *testing.T) {
-		input := `{
-			"type": "string",
-			"isArray": false,
-			"value": "test"
-		}`
-
-		var appliedParam AppliedParam
-		err := json.Unmarshal([]byte(input), &appliedParam)
-		require.NoError(t, err)
-		require.Equal(t, ParamPrimitiveTypeString, appliedParam.Type)
-		require.False(t, appliedParam.IsArray)
-		require.Equal(t, "test", appliedParam.Value)
-		require.Empty(t, appliedParam.ArrayValues)
-	})
-
-	t.Run("Unmarshal AppliedParam with array values", func(t *testing.T) {
-		input := `{
-			"type": "int",
-			"isArray": true,
-			"arrayValues": ["1", "2", "3"]
-		}`
-
-		var appliedParam AppliedParam
-		err := json.Unmarshal([]byte(input), &appliedParam)
-		require.NoError(t, err)
-		require.Equal(t, ParamPrimitiveTypeInt, appliedParam.Type)
-		require.True(t, appliedParam.IsArray)
-		require.Empty(t, appliedParam.Value)
-		require.Equal(t, []string{"1", "2", "3"}, appliedParam.ArrayValues)
-	})
-
-	t.Run("Marshal AppliedParam with single value", func(t *testing.T) {
-		appliedParam := AppliedParam{
-			Type:    ParamPrimitiveTypeString,
-			IsArray: false,
-			Value:   "test",
-		}
-
-		data, err := json.Marshal(appliedParam)
-		require.NoError(t, err)
-
-		var result map[string]any
-		err = json.Unmarshal(data, &result)
-		require.NoError(t, err)
-		require.Equal(t, "string", result["type"])
-		require.Equal(t, false, result["isArray"])
-		require.Equal(t, "test", result["value"])
-		require.Nil(t, result["arrayValues"])
-	})
-
-	t.Run("Marshal AppliedParam with array values", func(t *testing.T) {
-		appliedParam := AppliedParam{
-			Type:        ParamPrimitiveTypeInt,
-			IsArray:     true,
-			ArrayValues: []string{"1", "2", "3"},
-		}
-
-		data, err := json.Marshal(appliedParam)
-		require.NoError(t, err)
-
-		var result map[string]any
-		err = json.Unmarshal(data, &result)
-		require.NoError(t, err)
-		require.Equal(t, "int", result["type"])
-		require.Equal(t, true, result["isArray"])
-		require.Nil(t, result["value"])
-
-		arrayValues, ok := result["arrayValues"].([]any)
-		require.True(t, ok)
-		require.Len(t, arrayValues, 3)
-		require.Equal(t, "1", arrayValues[0])
-		require.Equal(t, "2", arrayValues[1])
-		require.Equal(t, "3", arrayValues[2])
-	})
-}
-
 func TestPrimitiveType(t *testing.T) {
 	t.Run("Marshal PrimitiveType", func(t *testing.T) {
 		primitiveType := PrimitiveTypeString
@@ -204,18 +82,6 @@ func TestNodeKind(t *testing.T) {
 			Content: "Documentation",
 		}
 		require.Equal(t, "doc", node.NodeKind())
-	})
-
-	t.Run("NodeRule.NodeKind", func(t *testing.T) {
-		node := NodeRule{
-			Kind: "rule",
-			Name: "required",
-			For: &ForDefinition{
-				Type:    "string",
-				IsArray: false,
-			},
-		}
-		require.Equal(t, "rule", node.NodeKind())
 	})
 
 	t.Run("NodeType.NodeKind", func(t *testing.T) {
@@ -272,40 +138,6 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.Equal(t, "This is documentation", docNode.Content)
 	})
 
-	t.Run("Schema with rule node", func(t *testing.T) {
-		input := `{
-			"version": 1,
-			"nodes": [
-				{
-					"kind": "rule",
-					"name": "required",
-					"for": {
-						"type": "string",
-						"isArray": false
-					},
-					"doc": "Required field rule",
-					"error": "Field is required"
-				}
-			]
-		}`
-
-		var schema Schema
-		err := json.Unmarshal([]byte(input), &schema)
-		require.NoError(t, err)
-		require.Equal(t, 1, schema.Version)
-		require.Len(t, schema.Nodes, 1)
-
-		ruleNode, ok := schema.Nodes[0].(*NodeRule)
-		require.True(t, ok, "Node should be a NodeRule")
-		require.Equal(t, "rule", ruleNode.Kind)
-		require.Equal(t, "required", ruleNode.Name)
-		require.Equal(t, "string", ruleNode.For.Type)
-		require.NotNil(t, ruleNode.Doc)
-		require.Equal(t, "Required field rule", *ruleNode.Doc)
-		require.NotNil(t, ruleNode.Error)
-		require.Equal(t, "Field is required", *ruleNode.Error)
-	})
-
 	t.Run("Schema with type node", func(t *testing.T) {
 		input := `{
 			"version": 1,
@@ -319,15 +151,13 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"name": "id",
 							"typeName": "string",
 							"isArray": false,
-							"optional": false,
-							"rules": []
+							"optional": false
 						},
 						{
 							"name": "name",
 							"typeName": "string",
 							"isArray": true,
-							"optional": false,
-							"rules": []
+							"optional": false
 						}
 					]
 				}
@@ -355,14 +185,12 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.Equal(t, "string", *typeNode.Fields[0].TypeName)
 		require.False(t, typeNode.Fields[0].IsArray)
 		require.False(t, typeNode.Fields[0].Optional)
-		require.Empty(t, typeNode.Fields[0].Rules)
 
 		require.Equal(t, "name", typeNode.Fields[1].Name)
 		require.NotNil(t, typeNode.Fields[1].TypeName)
 		require.Equal(t, "string", *typeNode.Fields[1].TypeName)
 		require.True(t, typeNode.Fields[1].IsArray)
 		require.False(t, typeNode.Fields[1].Optional)
-		require.Empty(t, typeNode.Fields[1].Rules)
 	})
 
 	t.Run("Schema with proc node", func(t *testing.T) {
@@ -378,8 +206,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"name": "id",
 							"typeName": "string",
 							"isArray": false,
-							"optional": false,
-							"rules": []
+							"optional": false
 						}
 					],
 					"output": [
@@ -387,8 +214,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"name": "user",
 							"typeName": "User",
 							"isArray": false,
-							"optional": false,
-							"rules": []
+							"optional": false
 						}
 					],
 					"meta": [
@@ -467,8 +293,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"name": "id",
 							"typeName": "string",
 							"isArray": false,
-							"optional": false,
-							"rules": []
+							"optional": false
 						}
 					],
 					"output": [
@@ -476,8 +301,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"name": "user",
 							"typeName": "User",
 							"isArray": false,
-							"optional": false,
-							"rules": []
+							"optional": false
 						}
 					],
 					"meta": [
@@ -553,14 +377,6 @@ func TestGetNodeMethods(t *testing.T) {
 				"content": "Documentation"
 			},
 			{
-				"kind": "rule",
-				"name": "required",
-				"for": {
-					"type": "string",
-					"isArray": false
-				}
-			},
-			{
 				"kind": "type",
 				"name": "User",
 				"fields": [
@@ -568,8 +384,7 @@ func TestGetNodeMethods(t *testing.T) {
 						"name": "id",
 						"typeName": "string",
 						"isArray": false,
-						"optional": false,
-						"rules": []
+						"optional": false
 					}
 				]
 			},
@@ -581,8 +396,7 @@ func TestGetNodeMethods(t *testing.T) {
 						"name": "id",
 						"typeName": "string",
 						"isArray": false,
-						"optional": false,
-						"rules": []
+						"optional": false
 					}
 				],
 				"output": [
@@ -590,8 +404,7 @@ func TestGetNodeMethods(t *testing.T) {
 						"name": "user",
 						"typeName": "User",
 						"isArray": false,
-						"optional": false,
-						"rules": []
+						"optional": false
 					}
 				],
 				"meta": []
@@ -607,11 +420,6 @@ func TestGetNodeMethods(t *testing.T) {
 	docNodes := schema.GetDocNodes()
 	require.Len(t, docNodes, 1)
 	require.Equal(t, "Documentation", docNodes[0].Content)
-
-	// Test GetRuleNodes
-	ruleNodes := schema.GetRuleNodes()
-	require.Len(t, ruleNodes, 1)
-	require.Equal(t, "required", ruleNodes[0].Name)
 
 	// Test GetTypeNodes
 	typeNodes := schema.GetTypeNodes()
@@ -721,15 +529,6 @@ func TestDeprecated(t *testing.T) {
 			"version": 1,
 			"nodes": [
 				{
-					"kind": "rule",
-					"name": "required",
-					"deprecated": "",
-					"for": {
-						"type": "string",
-						"isArray": false
-					}
-				},
-				{
 					"kind": "type",
 					"name": "User",
 					"deprecated": ""
@@ -749,20 +548,14 @@ func TestDeprecated(t *testing.T) {
 		err := json.Unmarshal([]byte(input), &schema)
 		require.NoError(t, err)
 
-		// Check rule node
-		ruleNode, ok := schema.Nodes[0].(*NodeRule)
-		require.True(t, ok, "Node should be a NodeRule")
-		require.NotNil(t, ruleNode.Deprecated)
-		require.Empty(t, *ruleNode.Deprecated)
-
 		// Check type node
-		typeNode, ok := schema.Nodes[1].(*NodeType)
+		typeNode, ok := schema.Nodes[0].(*NodeType)
 		require.True(t, ok, "Node should be a NodeType")
 		require.NotNil(t, typeNode.Deprecated)
 		require.Empty(t, *typeNode.Deprecated)
 
 		// Check proc node
-		procNode, ok := schema.Nodes[2].(*NodeProc)
+		procNode, ok := schema.Nodes[1].(*NodeProc)
 		require.True(t, ok, "Node should be a NodeProc")
 		require.NotNil(t, procNode.Deprecated)
 		require.Empty(t, *procNode.Deprecated)
@@ -772,15 +565,6 @@ func TestDeprecated(t *testing.T) {
 		input := `{
 			"version": 1,
 			"nodes": [
-				{
-					"kind": "rule",
-					"name": "required",
-					"deprecated": "Deprecation message",
-					"for": {
-						"type": "string",
-						"isArray": false
-					}
-				},
 				{
 					"kind": "type",
 					"name": "User",
@@ -801,20 +585,14 @@ func TestDeprecated(t *testing.T) {
 		err := json.Unmarshal([]byte(input), &schema)
 		require.NoError(t, err)
 
-		// Check rule node
-		ruleNode, ok := schema.Nodes[0].(*NodeRule)
-		require.True(t, ok, "Node should be a NodeRule")
-		require.NotNil(t, ruleNode.Deprecated)
-		require.Equal(t, "Deprecation message", *ruleNode.Deprecated)
-
 		// Check type node
-		typeNode, ok := schema.Nodes[1].(*NodeType)
+		typeNode, ok := schema.Nodes[0].(*NodeType)
 		require.True(t, ok, "Node should be a NodeType")
 		require.NotNil(t, typeNode.Deprecated)
 		require.Equal(t, "Deprecation message", *typeNode.Deprecated)
 
 		// Check proc node
-		procNode, ok := schema.Nodes[2].(*NodeProc)
+		procNode, ok := schema.Nodes[1].(*NodeProc)
 		require.True(t, ok, "Node should be a NodeProc")
 		require.NotNil(t, procNode.Deprecated)
 		require.Equal(t, "Deprecation message", *procNode.Deprecated)

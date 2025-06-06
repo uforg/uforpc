@@ -13,7 +13,6 @@
       "items": {
         "oneOf": [
           { "$ref": "#/$defs/docNode" },
-          { "$ref": "#/$defs/ruleNode" },
           { "$ref": "#/$defs/typeNode" },
           { "$ref": "#/$defs/procNode" },
           { "$ref": "#/$defs/streamNode" }
@@ -40,88 +39,6 @@
         }
       },
       "required": ["kind", "content"],
-      "additionalProperties": false
-    },
-
-    "ruleNode": {
-      "title": "Rule Definition Node",
-      "description": "Defines a custom validation rule.",
-      "type": "object",
-      "properties": {
-        "kind": {
-          "description": "Node type identifier.",
-          "const": "rule"
-        },
-        "name": {
-          "description": "Name of the custom rule.",
-          "type": "string",
-          "pattern": "^[a-z][a-zA-Z0-9]*$"
-        },
-        "doc": {
-          "description": "Associated documentation string (optional).",
-          "type": "string"
-        },
-        "deprecated": {
-          "description": "Indicates if the rule is deprecated and contains the message associated with the deprecation. Use an empty string to deprecate without a message.",
-          "type": "string"
-        },
-        "for": {
-          "description": "The primitive or custom type name this rule applies to.",
-          "$ref": "#/$defs/forDefinition"
-        },
-        "paramDef": {
-          "description": "Definition of the parameter this rule expects (null if none).",
-          "$ref": "#/$defs/paramDefinition"
-        },
-        "error": {
-          "description": "Default error message for the rule (optional).",
-          "type": "string"
-        }
-      },
-      "required": ["kind", "name", "for"],
-      "additionalProperties": false
-    },
-
-    "forDefinition": {
-      "title": "For Definition",
-      "description": "Describes the type and structure expected for a rule's for clause.",
-      "type": "object",
-      "properties": {
-        "type": {
-          "description": "The primitive or custom type name this rule applies to.",
-          "oneOf": [
-            { "$ref": "#/$defs/primitiveTypeEnum" },
-            {
-              "type": "string",
-              "description": "Custom type name",
-              "pattern": "^[A-Z][a-zA-Z0-9]*$"
-            }
-          ]
-        },
-        "isArray": {
-          "description": "Indicates if the for clause is expected to be an array of the specified type.",
-          "type": "boolean"
-        }
-      },
-      "required": ["type", "isArray"],
-      "additionalProperties": false
-    },
-
-    "paramDefinition": {
-      "title": "Parameter Definition",
-      "description": "Describes the type and structure expected for a rule's parameter.",
-      "type": "object",
-      "properties": {
-        "type": {
-          "description": "The primitive type expected for the parameter (excluding datetime).",
-          "$ref": "#/$defs/paramPrimitiveTypeEnum"
-        },
-        "isArray": {
-          "description": "Indicates if the parameter is expected to be an array of the specified type.",
-          "type": "boolean"
-        }
-      },
-      "required": ["type", "isArray"],
       "additionalProperties": false
     },
 
@@ -247,12 +164,6 @@
       "enum": ["string", "int", "float", "bool", "datetime"]
     },
 
-    "paramPrimitiveTypeEnum": {
-      "description": "Enumeration of allowed primitive type names for rule parameters.",
-      "type": "string",
-      "enum": ["string", "int", "float", "bool"]
-    },
-
     "fieldDefinition": {
       "title": "Field Definition",
       "description": "Defines a field within a type or procedure input/output.",
@@ -278,11 +189,6 @@
         "optional": {
           "description": "Indicates if the field is optional.",
           "type": "boolean"
-        },
-        "rules": {
-          "description": "List of validation rules applied to this field.",
-          "type": "array",
-          "items": { "$ref": "#/$defs/appliedRule" }
         }
       },
       "required": ["name", "isArray", "optional"],
@@ -320,76 +226,6 @@
         }
       },
       "required": ["fields"],
-      "additionalProperties": false
-    },
-
-    "appliedRule": {
-      "title": "Applied Rule",
-      "description": "Represents a validation rule applied to a field, including its parameters.",
-      "type": "object",
-      "properties": {
-        "rule": {
-          "description": "Name of the validation rule being applied.",
-          "type": "string",
-          "pattern": "^[a-zA-Z][a-zA-Z0-9]*$"
-        },
-        "param": {
-          "description": "The parameter value(s) passed to the rule instance (null if none).",
-          "$ref": "#/$defs/appliedParam"
-        },
-        "error": {
-          "description": "Custom error message overriding the rule's default (optional).",
-          "type": "string"
-        }
-      },
-      "required": ["rule"],
-      "additionalProperties": false
-    },
-
-    "appliedParam": {
-      "title": "Applied Parameter Value",
-      "description": "Holds the actual value(s) passed to a rule instance, represented as strings for precision.",
-      "type": "object",
-      "properties": {
-        "type": {
-          "description": "The primitive type of the parameter value(s) (inferred from rule definition).",
-          "$ref": "#/$defs/paramPrimitiveTypeEnum"
-        },
-        "isArray": {
-          "description": "Indicates if the parameter was passed as an array.",
-          "type": "boolean"
-        },
-        "value": {
-          "description": "The single parameter value, represented as a string.",
-          "type": "string"
-        },
-        "arrayValues": {
-          "description": "The parameter values for an array parameter, each represented as a string.",
-          "type": "array",
-          "items": { "type": "string" }
-        }
-      },
-      "required": ["type", "isArray"],
-      "allOf": [
-        {
-          "if": {
-            "properties": { "isArray": { "const": false } },
-            "required": ["isArray"]
-          },
-          "then": {
-            "required": ["value"]
-          }
-        },
-        {
-          "if": {
-            "properties": { "isArray": { "const": true } },
-            "required": ["isArray"]
-          },
-          "then": {
-            "required": ["arrayValues"]
-          }
-        }
-      ],
       "additionalProperties": false
     }
   }

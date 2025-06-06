@@ -32,24 +32,6 @@ var (
 	PrimitiveTypeDatetime = PrimitiveType{Value: "datetime"}
 )
 
-// ParamPrimitiveType represents the primitive type names allowed in rule parameters.
-type ParamPrimitiveType enum.Member[string]
-
-func (f ParamPrimitiveType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(f.Value)
-}
-
-func (f *ParamPrimitiveType) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &f.Value)
-}
-
-var (
-	ParamPrimitiveTypeString = ParamPrimitiveType{Value: "string"}
-	ParamPrimitiveTypeInt    = ParamPrimitiveType{Value: "int"}
-	ParamPrimitiveTypeFloat  = ParamPrimitiveType{Value: "float"}
-	ParamPrimitiveTypeBool   = ParamPrimitiveType{Value: "bool"}
-)
-
 ////////////////////
 // Main Structure //
 ////////////////////
@@ -105,10 +87,6 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 			var docNode NodeDoc
 			err = json.Unmarshal(rawNode, &docNode)
 			node = &docNode
-		case "rule":
-			var ruleNode NodeRule
-			err = json.Unmarshal(rawNode, &ruleNode)
-			node = &ruleNode
 		case "type":
 			var typeNode NodeType
 			err = json.Unmarshal(rawNode, &typeNode)
@@ -143,27 +121,6 @@ func (s *Schema) GetDocNodes() []*NodeDoc {
 		}
 	}
 	return docNodes
-}
-
-// GetRuleNodes returns all RuleNode instances from the schema.
-func (s *Schema) GetRuleNodes() []*NodeRule {
-	ruleNodes := []*NodeRule{}
-	for _, node := range s.Nodes {
-		if ruleNode, ok := node.(*NodeRule); ok {
-			ruleNodes = append(ruleNodes, ruleNode)
-		}
-	}
-	return ruleNodes
-}
-
-// GetRuleNodesMap returns a map of rule nodes by name.
-func (s *Schema) GetRuleNodesMap() map[string]*NodeRule {
-	ruleNodes := s.GetRuleNodes()
-	ruleNodesMap := make(map[string]*NodeRule)
-	for _, node := range ruleNodes {
-		ruleNodesMap[node.Name] = node
-	}
-	return ruleNodesMap
 }
 
 // GetTypeNodes returns all TypeNode instances from the schema.
@@ -241,25 +198,6 @@ type NodeDoc struct {
 }
 
 func (n *NodeDoc) NodeKind() string { return n.Kind }
-
-// NodeRule represents the definition of a custom validation rule.
-type NodeRule struct {
-	Kind string `json:"kind"` // Always "rule"
-	Name string `json:"name"`
-	// Doc is the associated documentation string (optional).
-	Doc *string `json:"doc,omitempty"`
-	// Deprecated indicates if the rule is deprecated and contains the message
-	// associated with the deprecation.
-	Deprecated *string `json:"deprecated,omitempty"`
-	// For indicates the primitive or custom type name this rule applies to.
-	For *ForDefinition `json:"for"`
-	// Param defines the parameter structure expected by this rule (null if none).
-	Param *ParamDefinition `json:"paramDef,omitempty"` // Pointer handles null
-	// Error is the default error message for the rule (optional).
-	Error *string `json:"error,omitempty"`
-}
-
-func (n *NodeRule) NodeKind() string { return n.Kind }
 
 // NodeType represents the definition of a custom data type.
 type NodeType struct {
@@ -385,18 +323,6 @@ func (mv MetaValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nil)
 }
 
-// ForDefinition describes the type and structure expected for a rule's for clause.
-type ForDefinition struct {
-	Type    string `json:"type"`
-	IsArray bool   `json:"isArray"`
-}
-
-// ParamDefinition describes the parameter structure expected by a rule.
-type ParamDefinition struct {
-	Type    ParamPrimitiveType `json:"type"`
-	IsArray bool               `json:"isArray"`
-}
-
 // FieldDefinition defines a field within a type or procedure input/output.
 type FieldDefinition struct {
 	Name string `json:"name"`
@@ -408,8 +334,6 @@ type FieldDefinition struct {
 	IsArray bool `json:"isArray"`
 	// Optional indicates if the field is optional.
 	Optional bool `json:"optional"`
-	// Rules is the list of validation rules applied to this field.
-	Rules []AppliedRule `json:"rules"`
 }
 
 // IsNamed checks if the field definition uses a named type.
@@ -437,24 +361,4 @@ func (fd *FieldDefinition) IsCustomType() bool {
 type InlineTypeDefinition struct {
 	// Fields is the ordered list of fields within the inline type.
 	Fields []FieldDefinition `json:"fields"`
-}
-
-// AppliedRule represents a validation rule applied to a field.
-type AppliedRule struct {
-	Rule string `json:"rule"`
-	// Param holds the parameter value(s) passed to the rule instance (null if none).
-	Param *AppliedParam `json:"param,omitempty"` // Pointer handles null
-	// Error is the custom error message overriding the rule's default (optional).
-	Error *string `json:"error,omitempty"`
-}
-
-// AppliedParam holds the actual value(s) passed to a rule instance, represented as strings.
-type AppliedParam struct {
-	Type ParamPrimitiveType `json:"type"`
-	// IsArray indicates if the parameter was passed as an array.
-	IsArray bool `json:"isArray"`
-	// Value holds the single parameter value as a string (used if IsArray is false).
-	Value string `json:"value,omitempty,omitzero"`
-	// ArrayValues holds array parameter values as strings (used if IsArray is true).
-	ArrayValues []string `json:"arrayValues,omitempty"`
 }

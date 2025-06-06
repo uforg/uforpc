@@ -16,9 +16,22 @@ func ParseSchema(schemaStr string) (Schema, error) {
 		return Schema{}, fmt.Errorf("error decoding schema: %w", err)
 	}
 
-	if err := validateStructure(schema); err != nil {
-		return Schema{}, fmt.Errorf("error validating schema structure: %w", err)
-	}
+	// TODO: Resolve the circular dependency and run the semantic analyzer
+
+	// astSchema, err := transpile.ToURPC(schema)
+	// if err != nil {
+	// 	return Schema{}, fmt.Errorf("error transpiling to URPC: %w", err)
+	// }
+
+	// analyzer, err := analyzer.NewAnalyzer(docstore.NewDocstore())
+	// if err != nil {
+	// 	return Schema{}, fmt.Errorf("error creating analyzer: %w", err)
+	// }
+
+	// _, err = analyzer.AnalyzeAstSchema(&astSchema)
+	// if err != nil {
+	// 	return Schema{}, fmt.Errorf("error analyzing URPC schema: %w", err)
+	// }
 
 	return schema, nil
 }
