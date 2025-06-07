@@ -1,6 +1,9 @@
 import adapter from "@sveltejs/adapter-static";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
+// https://github.com/sveltejs/kit/issues/9569
+const replaceAssets = process.env.REPLACE_ASSETS === "true";
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   preprocess: vitePreprocess(),
@@ -14,8 +17,8 @@ const config = {
     }),
 
     paths: {
-      assets: "http://REPLACEME", // https://github.com/sveltejs/kit/issues/9569
       relative: true,
+      assets: replaceAssets ? "http://REPLACEME" : undefined,
     },
 
     router: {

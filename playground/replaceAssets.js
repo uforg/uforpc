@@ -34,19 +34,16 @@ for (const file of files) {
 
   let data = await fs.promises.readFile(file, "utf8");
 
+  // Check if the file contains the string "REPLACEME"
+  if (!data.includes("http://REPLACEME")) {
+    continue;
+  }
+
   // Replace to relative paths
   data = data.replaceAll("http://REPLACEME", ".");
-
-  // Replace /tree-sitter.wasm to ./tree-sitter.wasm
-  data = data.replaceAll("/tree-sitter.wasm", "./tree-sitter.wasm");
-  data = data.replaceAll('"/tree-sitter.wasm', '"./tree-sitter.wasm');
-
-  // Replace /tree-sitter-bash.wasm to ./tree-sitter-bash.wasm
-  data = data.replaceAll("/tree-sitter-bash.wasm", "./tree-sitter-bash.wasm");
-  data = data.replaceAll('"/tree-sitter-bash.wasm', '"./tree-sitter-bash.wasm');
 
   // Write the new file
   await fs.promises.writeFile(file, data, "utf8");
 
-  console.log(`Wrote file '${file}'`);
+  console.log(`Patched relative assets in ${file}`);
 }
