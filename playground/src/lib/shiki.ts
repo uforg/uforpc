@@ -70,7 +70,7 @@ export const getHighlighter = async (): Promise<Highlighter> => {
 
   highlighterPromise = (async () => {
     const urpcSyntaxUrl =
-      "https://cdn.jsdelivr.net/gh/uforg/uforpc-vscode/syntaxes/urpc.tmLanguage.json";
+      "https://cdn.jsdelivr.net/gh/uforg/uforpc-vscode@0.1.7/syntaxes/urpc.tmLanguage.json";
     const urpcSyntax = await fetch(urpcSyntaxUrl);
     const urpcSyntaxJson = await urpcSyntax.json();
     urpcSyntaxJson.name = "urpc";
