@@ -116,7 +116,7 @@
 
     <div
       class={{
-        "space-y-2": true,
+        "space-y-4": true,
         hidden: tab === "output",
         block: tab === "input",
       }}
