@@ -95,7 +95,6 @@ func (l *LSP) findHoverInfo(content string, position ast.Position, astSchema *as
 	// Find the tokenLiteral at the position
 	tokenLiteral, err := findTokenAtPosition(content, position)
 	if err != nil {
-		l.logger.Error("failed to find token at position", "position", position, "error", err)
 		return nil
 	}
 
@@ -118,7 +117,6 @@ func (l *LSP) findTypeHoverInfo(tokenLiteral string, astSchema *ast.Schema) *Hov
 	// Get the source code of the type definition
 	sourceCode, err := l.getTypeSourceCode(typeDecl)
 	if err != nil {
-		l.logger.Error("failed to get type source code", "type", tokenLiteral, "error", err)
 		return nil
 	}
 

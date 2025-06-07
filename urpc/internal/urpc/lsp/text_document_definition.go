@@ -62,7 +62,13 @@ func (l *LSP) handleTextDocumentDefinition(rawMessage []byte) (any, error) {
 	// Run the analyzer to get the combined schema
 	astSchema, _, err := l.analyzer.Analyze(filePath)
 	if err != nil {
-		l.logger.Error("failed to analyze document", "uri", filePath, "error", err)
+		return ResponseMessageTextDocumentDefinition{
+			ResponseMessage: ResponseMessage{
+				Message: DefaultMessage,
+				ID:      request.ID,
+			},
+			Result: nil,
+		}, nil
 	}
 
 	// Convert LSP position (0-based) to AST position (1-based)
@@ -94,7 +100,6 @@ func (l *LSP) findDefinition(content string, position ast.Position, astSchema *a
 	// Find the tokenLiteral at the position
 	tokenLiteral, err := findTokenAtPosition(content, position)
 	if err != nil {
-		l.logger.Error("failed to find token at position", "position", position, "error", err)
 		return nil
 	}
 
