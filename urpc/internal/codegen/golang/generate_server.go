@@ -262,6 +262,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// It handles all the processing of the request and response, the only thing")
 	g.Line("// you need to do is implement the ServerRequestResponseProvider interface")
 	g.Line("// that allows UFO RPC to access the request and response resources it needs")
+	g.Line("//")
+	g.Line("// If you are using the stdlib net/http package, you can use the NewServerNetHTTPRequestResponseProvider")
+	g.Line("// function to create a request response provider, otherwise you should implement the provider by yourself")
 	g.Line("func (s *Server[T]) HandleRequest(requestResponseProvider ServerRequestResponseProvider[T]) error {")
 	g.Block(func() {
 		g.Line("return s.intServer.handleRequest(requestResponseProvider)")
