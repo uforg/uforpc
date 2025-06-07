@@ -11,7 +11,6 @@
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
   import type { store } from "$lib/store.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
