@@ -45,6 +45,7 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 		g.Line(`"time"`)
 		g.Line(`"net/http"`)
 		g.Line(`"slices"`)
+		g.Line(`"sync"`)
 	})
 	g.Line(")")
 	g.Break()

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"slices"
+	"sync"
 )
 
 /** START FROM HERE **/
@@ -86,6 +87,7 @@ type internalServer[T any] struct {
 	procInputProcessors   map[string]func(context T, input any) (any, error)
 	streamHandlers        map[string]func(context T, input json.RawMessage, emit func(any) error) error
 	streamInputProcessors map[string]func(context T, input any) (any, error)
+	handlersMu            sync.RWMutex
 	beforeMiddlewares     []MiddlewareBefore[T]
 	afterMiddlewares      []MiddlewareAfter[T]
 }
@@ -106,6 +108,7 @@ func newInternalServer[T any](
 		procInputProcessors:   map[string]func(T, any) (any, error){},
 		streamHandlers:        map[string]func(T, json.RawMessage, func(any) error) error{},
 		streamInputProcessors: map[string]func(T, any) (any, error){},
+		handlersMu:            sync.RWMutex{},
 		beforeMiddlewares:     []MiddlewareBefore[T]{},
 		afterMiddlewares:      []MiddlewareAfter[T]{},
 	}
@@ -117,6 +120,8 @@ func newInternalServer[T any](
 //
 // Multiple MiddlewareBefore can be added and are processed in order.
 func (s *internalServer[T]) addMiddlewareBefore(fn MiddlewareBefore[T]) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
 	s.beforeMiddlewares = append(s.beforeMiddlewares, fn)
 	return s
 }
@@ -127,6 +132,8 @@ func (s *internalServer[T]) addMiddlewareBefore(fn MiddlewareBefore[T]) *interna
 //
 // Multiple MiddlewareAfter can be added and are processed in order.
 func (s *internalServer[T]) addMiddlewareAfter(fn MiddlewareAfter[T]) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
 	s.afterMiddlewares = append(s.afterMiddlewares, fn)
 	return s
 }
@@ -136,6 +143,8 @@ func (s *internalServer[T]) setProcHandler(
 	procName string,
 	handler func(context T, input json.RawMessage) (any, error),
 ) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
 	s.procHandlers[procName] = handler
 	return s
 }
@@ -145,6 +154,8 @@ func (s *internalServer[T]) setProcInputProcessor(
 	procName string,
 	processor func(context T, input any) (any, error),
 ) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
 	s.procInputProcessors[procName] = processor
 	return s
 }
@@ -154,6 +165,8 @@ func (s *internalServer[T]) setStreamHandler(
 	streamName string,
 	handler func(context T, input json.RawMessage, emit func(any) error) error,
 ) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
 	s.streamHandlers[streamName] = handler
 	return s
 }
@@ -163,6 +176,8 @@ func (s *internalServer[T]) setStreamInputProcessor(
 	streamName string,
 	processor func(context T, input any) (any, error),
 ) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
 	s.streamInputProcessors[streamName] = processor
 	return s
 }
@@ -170,11 +185,7 @@ func (s *internalServer[T]) setStreamInputProcessor(
 // handleRequest processes an incoming RPC request
 func (s *internalServer[T]) handleRequest(reqResProvider ServerRequestResponseProvider[T]) error {
 	if reqResProvider == nil {
-		res := Response[any]{
-			Ok:    false,
-			Error: Error{Message: "ServerRequestResponseProvider is nil, please provide a valid provider"},
-		}
-		return s.writeProcResponse(reqResProvider, res)
+		return fmt.Errorf("ServerRequestResponseProvider is nil, please provide a valid provider")
 	}
 
 	var jsonBody struct {
@@ -199,6 +210,10 @@ func (s *internalServer[T]) handleRequest(reqResProvider ServerRequestResponsePr
 		}
 		return s.writeProcResponse(reqResProvider, res)
 	}
+
+	// Lock the handlers map for reading
+	s.handlersMu.RLock()
+	defer s.handlersMu.RUnlock()
 
 	if isStream {
 		return s.handleStreamRequest(jsonBody.Name, jsonBody.Input, reqResProvider)
@@ -241,7 +256,8 @@ func (s *internalServer[T]) handleProcRequest(
 	}
 
 	// Validate procedure implementation
-	if _, ok := s.procHandlers[procName]; response.Ok && !ok {
+	proc, found := s.procHandlers[procName]
+	if response.Ok && !found {
 		response = Response[any]{
 			Ok: false,
 			Error: Error{
@@ -267,7 +283,7 @@ func (s *internalServer[T]) handleProcRequest(
 
 	// Run handler if no errors have occurred
 	if response.Ok {
-		if output, err := s.procHandlers[procName](currentContext, rawInput); err != nil {
+		if output, err := proc(currentContext, rawInput); err != nil {
 			response = Response[any]{
 				Ok:    false,
 				Error: asError(err),
@@ -306,14 +322,9 @@ func (s *internalServer[T]) handleStreamRequest(
 	// emit sends a response event to the client.
 	// If the client disconnects, it returns an error.
 	emit := func(data any) error {
-		response := Response[any]{
-			Ok:     true,
-			Output: data,
-		}
-
-		jsonData, err := json.Marshal(response)
+		jsonData, err := json.Marshal(data)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to marshal stream data: %w", err)
 		}
 
 		resPayload := fmt.Sprintf("data: %s\n\n", jsonData)
@@ -326,6 +337,22 @@ func (s *internalServer[T]) handleStreamRequest(
 		return nil
 	}
 
+	emitSuccess := func(data any) error {
+		response := Response[any]{
+			Ok:     true,
+			Output: data,
+		}
+		return emit(response)
+	}
+
+	emitError := func(err error) error {
+		response := Response[any]{
+			Ok:    false,
+			Error: asError(err),
+		}
+		return emit(response)
+	}
+
 	// Upgrade the request to a stream
 	reqResProvider.ResponseSetHeader("Content-Type", "text/event-stream")
 	reqResProvider.ResponseSetHeader("Cache-Control", "no-cache")
@@ -333,48 +360,33 @@ func (s *internalServer[T]) handleStreamRequest(
 
 	// Validate stream name
 	if !slices.Contains(s.streamNames, streamName) {
-		response := Response[any]{
-			Ok: false,
-			Error: Error{
-				Message: streamName + " stream not found",
-				Details: map[string]any{"stream": streamName},
-			},
-		}
-		return emit(response)
+		return emitError(Error{
+			Message: streamName + " stream not found",
+			Details: map[string]any{"stream": streamName},
+		})
 	}
 
 	// Validate stream implementation
-	if _, ok := s.streamHandlers[streamName]; !ok {
-		response := Response[any]{
-			Ok: false,
-			Error: Error{
-				Message: streamName + " stream not implemented",
-				Details: map[string]any{"stream": streamName},
-			},
-		}
-		return emit(response)
+	stream, found := s.streamHandlers[streamName]
+	if !found {
+		return emitError(Error{
+			Message: streamName + " stream not implemented",
+			Details: map[string]any{"stream": streamName},
+		})
 	}
 
 	// Execute Before middlewares
 	for _, fn := range s.beforeMiddlewares {
 		var err error
 		if currentContext, err = fn("stream", streamName, currentContext); err != nil {
-			response := Response[any]{
-				Ok:    false,
-				Error: asError(err),
-			}
-			return emit(response)
+			return emitError(err)
 		}
 	}
 
 	// Run the stream handler and wait for it to finish
-	err := s.streamHandlers[streamName](currentContext, rawInput, emit)
+	err := stream(currentContext, rawInput, emitSuccess)
 	if err != nil {
-		response := Response[any]{
-			Ok:    false,
-			Error: asError(err),
-		}
-		return emit(response)
+		return emitError(err)
 	}
 
 	return nil
