@@ -149,4 +149,123 @@ describe("extractNodeFromSchema", () => {
     const result = extractNodeFromSchema(schema, "proc", "VerifyUser");
     expect(result).toBe(expected);
   });
+
+  it("should extract deprecated node with message on separate line", () => {
+    const schema = `
+    deprecated("This is deprecated")
+    type One {
+      two: Two
+    }
+    
+    type User {
+      name: string
+    }
+  `;
+
+    const expected = `    deprecated("This is deprecated")
+    type One {
+      two: Two
+    }`;
+
+    const result = extractNodeFromSchema(schema, "type", "One");
+    expect(result).toBe(expected);
+  });
+
+  it("should extract deprecated node with keyword on same line", () => {
+    const schema = `
+    deprecated type OldUser {
+      name: string
+      email: string
+    }
+    
+    type User {
+      name: string
+    }
+  `;
+
+    const expected = `    deprecated type OldUser {
+      name: string
+      email: string
+    }`;
+
+    const result = extractNodeFromSchema(schema, "type", "OldUser");
+    expect(result).toBe(expected);
+  });
+
+  it("should extract deprecated proc with message", () => {
+    const schema = `
+    deprecated("Use NewGetUser instead")
+    proc GetUser {
+      input {
+        id: string
+      }
+      output {
+        user: User
+      }
+    }
+  `;
+
+    const expected = `    deprecated("Use NewGetUser instead")
+    proc GetUser {
+      input {
+        id: string
+      }
+      output {
+        user: User
+      }
+    }`;
+
+    const result = extractNodeFromSchema(schema, "proc", "GetUser");
+    expect(result).toBe(expected);
+  });
+
+  it("should extract deprecated stream with same line format", () => {
+    const schema = `
+    deprecated stream OldEvents {
+      event: Event
+    }
+  `;
+
+    const expected = `    deprecated stream OldEvents {
+      event: Event
+    }`;
+
+    const result = extractNodeFromSchema(schema, "stream", "OldEvents");
+    expect(result).toBe(expected);
+  });
+
+  it("should handle deprecated with empty braces", () => {
+    const schema = `
+    deprecated("No longer used")
+    type Empty {}
+  `;
+
+    const expected = `    deprecated("No longer used")
+    type Empty {}`;
+
+    const result = extractNodeFromSchema(schema, "type", "Empty");
+    expect(result).toBe(expected);
+  });
+
+  it("should not confuse deprecated with regular nodes", () => {
+    const schema = `
+    deprecated("Old version")
+    type UserV1 {
+      name: string
+    }
+    
+    type User {
+      name: string
+      email: string
+    }
+  `;
+
+    const expected = `    type User {
+      name: string
+      email: string
+    }`;
+
+    const result = extractNodeFromSchema(schema, "type", "User");
+    expect(result).toBe(expected);
+  });
 });
