@@ -2,8 +2,8 @@
   import {
     ArrowLeftRight,
     BookOpenText,
+    CornerRightDown,
     FileX,
-    Scale,
     Search,
     Type,
     X,
@@ -98,14 +98,14 @@
             {#if result.kind === "doc"}
               <BookOpenText class="mr-2 size-4 flex-none" />
             {/if}
-            {#if result.kind === "rule"}
-              <Scale class="mr-2 size-4 flex-none" />
-            {/if}
             {#if result.kind === "type"}
               <Type class="mr-2 size-4 flex-none" />
             {/if}
             {#if result.kind === "proc"}
               <ArrowLeftRight class="mr-2 size-4 flex-none" />
+            {/if}
+            {#if result.kind === "stream"}
+              <CornerRightDown class="mr-2 size-4 flex-none" />
             {/if}
             {@html markSearchHints(result, result.name)}
           </span>
