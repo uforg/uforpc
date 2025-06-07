@@ -28,13 +28,12 @@ _Example:_
 ```urpc
 type Example {
   field: string
-    @rule
 }
 ```
 
 ## 3. Top-Level Elements
 
-Top-level elements include `version`, `rule`, `type`, `proc`, `stream`, and
+Top-level elements include `version`, `type`, `proc`, `stream`, and
 standalone comments.
 
 - **Default:** Separate each top-level element with one blank line.
@@ -72,10 +71,8 @@ procedure's input, output, meta, or inline object, and stream's input, output,
 meta.
 
 - Each field is placed on its own line.
-- **Field Separation:** It is recommended to leave one blank line between fields
-  that include validation rules or complex formatting, to visually separate
-  them. For simpler fields (with no rules or extra comments), fields may be
-  placed consecutively without a blank line.
+- **Field Separation:** For simple fields without complex formatting, fields may
+  be placed consecutively without blank lines.
 
 _Recommended for simple fields:_
 
@@ -86,26 +83,6 @@ address: {
   street: string
   city: string
   zip: string
-}
-```
-
-_Recommended for fields with rules or comments:_
-
-Use blank lines between fields to visually separate them.
-
-```urpc
-address: {
-  street: string // Inline comment
-    @rule1
-    @rule2(error: "Invalid street")
-
-  city: string
-    @rule3
-    @rule4(error: "Invalid city") // Other comment
-
-  zip: string
-    @rule5
-    @rule6(error: "Invalid zip")
 }
 ```
 
@@ -128,7 +105,6 @@ address: {
 - **Brackets (`[]`):** No spaces for array types (e.g. `string[]`); no extra
   interior spacing.
 - **Parentheses (`()`):** No extra spaces inside the parentheses.
-- **At Symbol (`@`):** Immediately followed by the rule name (e.g. `@minlen`).
 - **Optional Marker (`?`):** Immediately follows the field name (e.g.
   `email?: string`).
 
@@ -148,13 +124,12 @@ version 1 // EOL comment
 
 type Example {
   field: string // Inline comment for field
-    @rule /* Inline rule comment */
 }
 ```
 
 ## 7. Docstrings
 
-- Place docstrings immediately above the `rule`, `type`, `proc`, or `stream` they
+- Place docstrings immediately above the `type`, `proc`, or `stream` they
   document.
 - They are enclosed in triple quotes (`"""`), preserving internal newlines and
   formatting.
@@ -177,25 +152,9 @@ stream MyStream {
 }
 ```
 
-## 8. Rules on Fields
+## 8. Deprecation
 
-Field validation rules are indented one level deeper than the field they apply
-to and are placed immediately after the field definition. Each rule begins on a
-new line within the field block.
-
-_Example:_
-
-```urpc
-type User {
-  name: string
-    @minlen(3)
-    @maxlen(50, error: "Name too long")
-}
-```
-
-## 9. Deprecation
-
-The `deprecated` keyword is used to mark rules, types, procedures, or streams as
+The `deprecated` keyword is used to mark types, procedures, or streams as
 deprecated.
 
 - Place the `deprecated` keyword on its own line immediately before the element
@@ -204,15 +163,11 @@ deprecated.
   and the element definition
 - For deprecation with a message, use parentheses with the message in quotes
 
-### 9.1 Basic Deprecation
+### 8.1 Basic Deprecation
 
 _Example:_
 
 ```urpc
-deprecated rule @myRule {
-  // rule definition
-}
-
 deprecated type MyType {
   // type definition
 }
@@ -229,16 +184,11 @@ deprecated stream MyStream {
 }
 ```
 
-### 9.2 Deprecation with Message
+### 8.2 Deprecation with Message
 
 _Example:_
 
 ```urpc
-deprecated("Use newRule instead")
-rule @myRule {
-  // rule definition
-}
-
 """
 Documentation for MyType
 """
