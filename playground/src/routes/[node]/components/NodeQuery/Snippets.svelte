@@ -8,8 +8,6 @@
   import CodeComponent from "$lib/components/Code.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
-  import SnippetsCode from "./SnippetsCode.svelte";
-
   interface Props {
     // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
     value: any;
@@ -124,27 +122,35 @@
       out:slide={{ duration: 100, axis: "x" }}
     >
       {#if type === "stream"}
-        <p class="p-4 text-sm">
-          Streams are handled with Server Sent Events and only Curl snippets are
-          available. If you want to use a different language, you can implement
-          the client side by yourself or use an UFO RPC client.
-          <br />
+        <p class="p-4">
+          Streams are handled using Server Sent Events (SSE).
           <a href="https://uforpc.uforg.dev/r/sse" target="_blank" class="link">
-            Learn more here
+            Learn more here.
           </a>
         </p>
-
-        <CodeComponent
-          rounded={false}
-          withBorder={false}
-          code={curl}
-          lang="bash"
-        />
       {/if}
 
       {#if type === "proc"}
-        <SnippetsCode {curl} />
+        <p class="p-4">
+          You can convert the Curl snippet to your preferred language using the
+          free and open source
+          <a
+            href="https://uforpc.uforg.dev/r/curlconverter"
+            target="_blank"
+            class="link"
+          >
+            curlconverter
+          </a>
+          tool.
+        </p>
       {/if}
+
+      <CodeComponent
+        rounded={false}
+        withBorder={false}
+        code={curl}
+        lang="bash"
+      />
     </div>
   {/if}
 </div>

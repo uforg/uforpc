@@ -96,7 +96,6 @@ export interface UiStore {
   loaded: boolean;
   theme: Theme;
   codeSnippetsOpen: boolean;
-  codeSnippetsLang: string;
   asideHideDocs: boolean;
   asideHideTypes: boolean;
   asideHideProcs: boolean;
@@ -111,7 +110,6 @@ export interface UiStore {
 const localStorageKeys = {
   theme: "theme",
   codeSnippetsOpen: "codeSnippetsOpen",
-  codeSnippetsLang: "codeSnippetsLang",
   asideHideDocs: "asideHideDocs",
   asideHideTypes: "asideHideTypes",
   asideHideProcs: "asideHideProcs",
@@ -122,7 +120,6 @@ export const uiStore = $state<UiStore>({
   loaded: false,
   theme: "dark",
   codeSnippetsOpen: false,
-  codeSnippetsLang: "curl",
   asideHideDocs: false,
   asideHideStreams: false,
   asideHideTypes: false,
@@ -160,12 +157,6 @@ export const loadUiStore = () => {
   uiStore.codeSnippetsOpen = codeSnippetsOpen
     ? codeSnippetsOpen === "true"
     : true;
-
-  // Load code snippets lang from local storage
-  const codeSnippetsLang = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsLang,
-  );
-  uiStore.codeSnippetsLang = codeSnippetsLang ?? "Curl";
 
   // Load aside hide docs from local storage
   const asideHideDocs = globalThis.localStorage.getItem(
@@ -208,12 +199,6 @@ export const saveUiStore = () => {
   globalThis.localStorage.setItem(
     localStorageKeys.codeSnippetsOpen,
     uiStore.codeSnippetsOpen.toString(),
-  );
-
-  // Save code snippets lang to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsLang,
-    uiStore.codeSnippetsLang,
   );
 
   // Save aside hide docs to local storage

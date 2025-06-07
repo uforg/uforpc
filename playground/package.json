@@ -27,7 +27,6 @@
     "@tailwindcss/vite": "4.1.4",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "clsx": "2.1.1",
-    "curlconverter": "4.12.0",
     "daisyui": "5.0.27",
     "flatpickr": "4.6.13",
     "json-schema-to-typescript": "15.0.4",
