@@ -17,46 +17,51 @@ import (
 // Server Types
 // -----------------------------------------------------------------------------
 
-// ServerRequestResponseProvider provides the required methods for UFO RPC server
-// to handle a request and write a response to the client.
-type ServerRequestResponseProvider interface {
-	// RequestGetBodyReader returns the body reader for the request.
-	RequestGetBodyReader() io.Reader
-	// ResponseSetHeader sets a header in the response.
-	ResponseSetHeader(key, value string)
-	// ResponseWrite writes data to the response.
-	ResponseWrite(data []byte) (int, error)
-	// ResponseFlush flushes the response to the client.
-	ResponseFlush() error
+// ServerHTTPAdapter provides the required methods for UFO RPC server
+// to handle an incoming HTTP request and write a response to the client.
+type ServerHTTPAdapter interface {
+	// RequestBody returns the body reader for the request.
+	RequestBody() io.Reader
+	// SetHeader sets a header in the response.
+	SetHeader(key, value string)
+	// Write writes data to the response.
+	Write(data []byte) (int, error)
+	// Flush flushes (sends) the current response in the buffer to the client.
+	Flush() error
 }
 
-// ServerNetHTTPRequestResponseProvider implements the ServerRequestResponseProvider interface for net/http.
-type ServerNetHTTPRequestResponseProvider struct {
+// ServerNetHTTPAdapter implements the ServerHTTPAdapter interface for net/http.
+type ServerNetHTTPAdapter struct {
 	responseWriter http.ResponseWriter
 	request        *http.Request
 }
 
-// NewServerNetHTTPRequestResponseProvider creates a new ServerNetHTTPRequestResponseProvider.
-func NewServerNetHTTPRequestResponseProvider[T any](initialUFOCtx T, w http.ResponseWriter, r *http.Request) ServerRequestResponseProvider {
-	return &ServerNetHTTPRequestResponseProvider{
+// NewServerNetHTTPAdapter creates a new ServerNetHTTPAdapter that implements the
+// ServerHTTPAdapter interface for net/http.
+func NewServerNetHTTPAdapter[T any](w http.ResponseWriter, r *http.Request) ServerHTTPAdapter {
+	return &ServerNetHTTPAdapter{
 		responseWriter: w,
 		request:        r,
 	}
 }
 
-func (r *ServerNetHTTPRequestResponseProvider) RequestGetBodyReader() io.Reader {
+// RequestBody returns the body reader for the request.
+func (r *ServerNetHTTPAdapter) RequestBody() io.Reader {
 	return r.request.Body
 }
 
-func (r *ServerNetHTTPRequestResponseProvider) ResponseSetHeader(key, value string) {
+// SetHeader sets a header in the response.
+func (r *ServerNetHTTPAdapter) SetHeader(key, value string) {
 	r.responseWriter.Header().Set(key, value)
 }
 
-func (r *ServerNetHTTPRequestResponseProvider) ResponseWrite(data []byte) (int, error) {
+// Write writes data to the response.
+func (r *ServerNetHTTPAdapter) Write(data []byte) (int, error) {
 	return r.responseWriter.Write(data)
 }
 
-func (r *ServerNetHTTPRequestResponseProvider) ResponseFlush() error {
+// Flush flushes (sends) the current response in the buffer to the client.
+func (r *ServerNetHTTPAdapter) Flush() error {
 	if f, ok := r.responseWriter.(http.Flusher); ok {
 		f.Flush()
 	}
@@ -253,7 +258,7 @@ func (s *internalServer[T]) setStreamInputHandler(
 func (s *internalServer[T]) handleRequest(
 	ctx context.Context,
 	ufoCtx T,
-	reqResProvider ServerRequestResponseProvider,
+	reqResProvider ServerHTTPAdapter,
 ) error {
 	if reqResProvider == nil {
 		return fmt.Errorf("ServerRequestResponseProvider is nil, please provide a valid provider")
@@ -264,7 +269,7 @@ func (s *internalServer[T]) handleRequest(
 		Name  string          `json:"name"`
 		Input json.RawMessage `json:"input"`
 	}
-	if err := json.NewDecoder(reqResProvider.RequestGetBodyReader()).Decode(&jsonBody); err != nil {
+	if err := json.NewDecoder(reqResProvider.RequestBody()).Decode(&jsonBody); err != nil {
 		res := Response[any]{
 			Ok:    false,
 			Error: Error{Message: "Invalid request body"},
@@ -295,11 +300,11 @@ func (s *internalServer[T]) handleRequest(
 
 // writeProcResponse writes a procedure response to the client
 func (s *internalServer[T]) writeProcResponse(
-	reqResProvider ServerRequestResponseProvider,
+	reqResProvider ServerHTTPAdapter,
 	response Response[any],
 ) error {
-	reqResProvider.ResponseSetHeader("Content-Type", "application/json")
-	_, err := reqResProvider.ResponseWrite(response.Bytes())
+	reqResProvider.SetHeader("Content-Type", "application/json")
+	_, err := reqResProvider.Write(response.Bytes())
 	if err != nil {
 		return err
 	}
@@ -312,7 +317,7 @@ func (s *internalServer[T]) handleProcRequest(
 	ufoCtx T,
 	procName string,
 	rawInput json.RawMessage,
-	reqResProvider ServerRequestResponseProvider,
+	reqResProvider ServerHTTPAdapter,
 ) error {
 	response := Response[any]{Ok: true}
 
@@ -374,8 +379,8 @@ func (s *internalServer[T]) handleProcRequest(
 	}
 
 	// Write the response to the client
-	reqResProvider.ResponseSetHeader("Content-Type", "application/json")
-	_, err := reqResProvider.ResponseWrite(response.Bytes())
+	reqResProvider.SetHeader("Content-Type", "application/json")
+	_, err := reqResProvider.Write(response.Bytes())
 	if err != nil {
 		return err
 	}
@@ -389,7 +394,7 @@ func (s *internalServer[T]) handleStreamRequest(
 	ufoCtx T,
 	streamName string,
 	rawInput json.RawMessage,
-	reqResProvider ServerRequestResponseProvider,
+	reqResProvider ServerHTTPAdapter,
 ) error {
 	// emit sends a response event to the client.
 	// If the client disconnects, it returns an error.
@@ -405,12 +410,12 @@ func (s *internalServer[T]) handleStreamRequest(
 		}
 
 		resPayload := fmt.Sprintf("data: %s\n\n", jsonData)
-		_, err = reqResProvider.ResponseWrite([]byte(resPayload))
+		_, err = reqResProvider.Write([]byte(resPayload))
 		if err != nil {
 			return err
 		}
 
-		if err := reqResProvider.ResponseFlush(); err != nil {
+		if err := reqResProvider.Flush(); err != nil {
 			return err
 		}
 
@@ -439,9 +444,9 @@ func (s *internalServer[T]) handleStreamRequest(
 	}
 
 	// Upgrade the request to a stream
-	reqResProvider.ResponseSetHeader("Content-Type", "text/event-stream")
-	reqResProvider.ResponseSetHeader("Cache-Control", "no-cache")
-	reqResProvider.ResponseSetHeader("Connection", "keep-alive")
+	reqResProvider.SetHeader("Content-Type", "text/event-stream")
+	reqResProvider.SetHeader("Cache-Control", "no-cache")
+	reqResProvider.SetHeader("Connection", "keep-alive")
 
 	// Validate stream name
 	if !slices.Contains(s.streamNames, streamName) {
