@@ -113,9 +113,9 @@ type internalServer[T any] struct {
 	streamNames                 []string
 	handlersMu                  sync.RWMutex
 	procHandlers                map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error)
-	procInputProcessors         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
+	procInputHandlers           map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
 	streamHandlers              map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error
-	streamInputProcessors       map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
+	streamInputHandlers         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
 	beforeHandlerMiddlewares    []MiddlewareBeforeHandler[T]
 	beforeStreamEmitMiddlewares []MiddlewareBeforeStreamEmit[T]
 	afterProcMiddlewares        []MiddlewareAfterProc[T]
@@ -137,9 +137,9 @@ func newInternalServer[T any](
 		streamNames:                 streamNames,
 		handlersMu:                  sync.RWMutex{},
 		procHandlers:                map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error){},
-		procInputProcessors:         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
+		procInputHandlers:           map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
 		streamHandlers:              map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error{},
-		streamInputProcessors:       map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
+		streamInputHandlers:         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
 		beforeHandlerMiddlewares:    []MiddlewareBeforeHandler[T]{},
 		beforeStreamEmitMiddlewares: []MiddlewareBeforeStreamEmit[T]{},
 		afterProcMiddlewares:        []MiddlewareAfterProc[T]{},
@@ -203,10 +203,10 @@ func (s *internalServer[T]) setProcHandler(
 	return s
 }
 
-// setProcInputProcessor registers the input processor for the provided procedure name
-func (s *internalServer[T]) setProcInputProcessor(
+// setProcInputHandler registers the input handler for the provided procedure name
+func (s *internalServer[T]) setProcInputHandler(
 	procName string,
-	processor func(
+	inputHandler func(
 		ctx context.Context,
 		ufoCtx T,
 		input any,
@@ -214,7 +214,7 @@ func (s *internalServer[T]) setProcInputProcessor(
 ) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.procInputProcessors[procName] = processor
+	s.procInputHandlers[procName] = inputHandler
 	return s
 }
 
@@ -234,10 +234,10 @@ func (s *internalServer[T]) setStreamHandler(
 	return s
 }
 
-// setStreamInputProcessor registers the input processor for the provided stream name
-func (s *internalServer[T]) setStreamInputProcessor(
+// setStreamInputHandler registers the input handler for the provided stream name
+func (s *internalServer[T]) setStreamInputHandler(
 	streamName string,
-	processor func(
+	inputHandler func(
 		ctx context.Context,
 		ufoCtx T,
 		input any,
@@ -245,7 +245,7 @@ func (s *internalServer[T]) setStreamInputProcessor(
 ) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.streamInputProcessors[streamName] = processor
+	s.streamInputHandlers[streamName] = inputHandler
 	return s
 }
 

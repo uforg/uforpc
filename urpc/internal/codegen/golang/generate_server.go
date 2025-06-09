@@ -92,14 +92,14 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		name := procNode.Name
 		namePascal := strutil.ToPascalCase(name)
 
-		g.Linef("// Set%sInputProcessor registers the input processor for the %s procedure", namePascal, name)
-		g.Linef("func (p *procRegistry[T]) Set%sInputProcessor(", namePascal)
+		g.Linef("// Set%sInputHandler registers the input handler for the %s procedure", namePascal, name)
+		g.Linef("func (p *procRegistry[T]) Set%sInputHandler(", namePascal)
 		g.Block(func() {
-			g.Linef("processor func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
+			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef("typedProcessor := func(ctx context.Context, ufoCtx T, input any) (any, error) {")
+			g.Linef("typedInputHandler := func(ctx context.Context, ufoCtx T, input any) (any, error) {")
 			g.Block(func() {
 				g.Linef("typedInput, ok := input.(%sInput)", name)
 				g.Line("if !ok {")
@@ -107,10 +107,10 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					g.Linef("return nil, fmt.Errorf(\"invalid input type for %s procedure, expected %sInput, got %%T\", input)", name, name)
 				})
 				g.Line("}")
-				g.Line("return processor(ctx, ufoCtx, typedInput)")
+				g.Line("return inputHandler(ctx, ufoCtx, typedInput)")
 			})
 			g.Line("}")
-			g.Linef("p.intServer.setProcInputProcessor(\"%s\", typedProcessor)", namePascal)
+			g.Linef("p.intServer.setProcInputHandler(\"%s\", typedInputHandler)", namePascal)
 		})
 		g.Line("}")
 		g.Break()
@@ -141,9 +141,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 
 				g.Line("typedInput := preTypedInput.transform()")
 
-				g.Linef("if processor, ok := p.intServer.procInputProcessors[\"%s\"]; ok {", namePascal)
+				g.Linef("if inputHandler, ok := p.intServer.procInputHandlers[\"%s\"]; ok {", namePascal)
 				g.Block(func() {
-					g.Line("processedInput, err := processor(ctx, ufoCtx, typedInput)")
+					g.Line("processedInput, err := inputHandler(ctx, ufoCtx, typedInput)")
 					g.Line("if err != nil {")
 					g.Block(func() {
 						g.Line("return nil, err")
@@ -174,14 +174,14 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		name := streamNode.Name
 		namePascal := strutil.ToPascalCase(name)
 
-		g.Linef("// Set%sInputProcessor registers the input processor for the %s stream", namePascal, name)
-		g.Linef("func (s *streamRegistry[T]) Set%sInputProcessor(", namePascal)
+		g.Linef("// Set%sInputHandler registers the input handler for the %s stream", namePascal, name)
+		g.Linef("func (s *streamRegistry[T]) Set%sInputHandler(", namePascal)
 		g.Block(func() {
-			g.Linef("processor func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
+			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef("typedProcessor := func(ctx context.Context, ufoCtx T, input any) (any, error) {")
+			g.Linef("typedInputHandler := func(ctx context.Context, ufoCtx T, input any) (any, error) {")
 			g.Block(func() {
 				g.Linef("typedInput, ok := input.(%sInput)", name)
 				g.Line("if !ok {")
@@ -189,10 +189,10 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					g.Linef("return nil, fmt.Errorf(\"invalid input type for %s stream, expected %sInput, got %%T\", input)", name, name)
 				})
 				g.Line("}")
-				g.Line("return processor(ctx, ufoCtx, typedInput)")
+				g.Line("return inputHandler(ctx, ufoCtx, typedInput)")
 			})
 			g.Line("}")
-			g.Linef("s.intServer.setStreamInputProcessor(\"%s\", typedProcessor)", namePascal)
+			g.Linef("s.intServer.setStreamInputHandler(\"%s\", typedInputHandler)", namePascal)
 		})
 		g.Line("}")
 		g.Break()
@@ -229,9 +229,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("}")
 				g.Break()
 
-				g.Linef("if processor, ok := s.intServer.streamInputProcessors[\"%s\"]; ok {", namePascal)
+				g.Linef("if inputHandler, ok := s.intServer.streamInputHandlers[\"%s\"]; ok {", namePascal)
 				g.Block(func() {
-					g.Line("processedInput, err := processor(ctx, ufoCtx, typedInput)")
+					g.Line("processedInput, err := inputHandler(ctx, ufoCtx, typedInput)")
 					g.Line("if err != nil {")
 					g.Block(func() {
 						g.Line("return err")
