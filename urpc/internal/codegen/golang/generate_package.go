@@ -39,6 +39,7 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 
 	g.Line("import (")
 	g.Block(func() {
+		g.Line(`"context"`)
 		g.Line(`"encoding/json"`)
 		g.Line(`"fmt"`)
 		g.Line(`"io"`)

@@ -2,6 +2,7 @@
 package pieces
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,9 +19,7 @@ import (
 
 // ServerRequestResponseProvider provides the required methods for UFO RPC server
 // to handle a request and write a response to the client.
-type ServerRequestResponseProvider[T any] interface {
-	// RequestGetInitialContext returns the initial context for the request.
-	RequestGetInitialContext() T
+type ServerRequestResponseProvider interface {
 	// RequestGetBodyReader returns the body reader for the request.
 	RequestGetBodyReader() io.Reader
 	// ResponseSetHeader sets a header in the response.
@@ -28,52 +27,81 @@ type ServerRequestResponseProvider[T any] interface {
 	// ResponseWrite writes data to the response.
 	ResponseWrite(data []byte) (int, error)
 	// ResponseFlush flushes the response to the client.
-	ResponseFlush()
+	ResponseFlush() error
 }
 
 // ServerNetHTTPRequestResponseProvider implements the ServerRequestResponseProvider interface for net/http.
-type ServerNetHTTPRequestResponseProvider[T any] struct {
-	initialContext T
+type ServerNetHTTPRequestResponseProvider struct {
 	responseWriter http.ResponseWriter
 	request        *http.Request
 }
 
 // NewServerNetHTTPRequestResponseProvider creates a new ServerNetHTTPRequestResponseProvider.
-func NewServerNetHTTPRequestResponseProvider[T any](initialContext T, w http.ResponseWriter, r *http.Request) ServerRequestResponseProvider[T] {
-	return &ServerNetHTTPRequestResponseProvider[T]{
-		initialContext: initialContext,
+func NewServerNetHTTPRequestResponseProvider[T any](initialUFOCtx T, w http.ResponseWriter, r *http.Request) ServerRequestResponseProvider {
+	return &ServerNetHTTPRequestResponseProvider{
 		responseWriter: w,
 		request:        r,
 	}
 }
 
-func (r *ServerNetHTTPRequestResponseProvider[T]) RequestGetInitialContext() T {
-	return r.initialContext
-}
-
-func (r *ServerNetHTTPRequestResponseProvider[T]) RequestGetBodyReader() io.Reader {
+func (r *ServerNetHTTPRequestResponseProvider) RequestGetBodyReader() io.Reader {
 	return r.request.Body
 }
 
-func (r *ServerNetHTTPRequestResponseProvider[T]) ResponseSetHeader(key, value string) {
+func (r *ServerNetHTTPRequestResponseProvider) ResponseSetHeader(key, value string) {
 	r.responseWriter.Header().Set(key, value)
 }
 
-func (r *ServerNetHTTPRequestResponseProvider[T]) ResponseWrite(data []byte) (int, error) {
+func (r *ServerNetHTTPRequestResponseProvider) ResponseWrite(data []byte) (int, error) {
 	return r.responseWriter.Write(data)
 }
 
-func (r *ServerNetHTTPRequestResponseProvider[T]) ResponseFlush() {
+func (r *ServerNetHTTPRequestResponseProvider) ResponseFlush() error {
 	if f, ok := r.responseWriter.(http.Flusher); ok {
 		f.Flush()
 	}
+	return nil
 }
 
-// MiddlewareBefore runs before request processing. Both for procedures and streams.
-type MiddlewareBefore[T any] func(requestType string, requestName string, context T) (T, error)
+// MiddlewareBeforeHandler runs before procedure and stream handler is executed.
+type MiddlewareBeforeHandler[T any] func(
+	ctx context.Context,
+	ufoCtx T,
+	handlerType string,
+	handlerName string,
+) (context.Context, T, error)
 
-// MiddlewareAfter runs after request processing. Only supports procedures, not streams.
-type MiddlewareAfter[T any] func(requestType string, requestName string, context T, response Response[any]) Response[any]
+// MiddlewareBeforeStreamEmit runs before stream event is emitted.
+type MiddlewareBeforeStreamEmit[T any] func(
+	ctx context.Context,
+	ufoCtx T,
+	streamName string,
+	response Response[any],
+) Response[any]
+
+// MiddlewareAfterProc runs after procedure request processing.
+type MiddlewareAfterProc[T any] func(
+	ctx context.Context,
+	ufoCtx T,
+	procName string,
+	response Response[any],
+) (context.Context, T, Response[any])
+
+// MiddlewareAfterStream runs after stream request processing ends.
+type MiddlewareAfterStream[T any] func(
+	ctx context.Context,
+	ufoCtx T,
+	streamName string,
+	err error,
+)
+
+// MiddlewareAfterStreamEmit runs after stream event is emitted.
+type MiddlewareAfterStreamEmit[T any] func(
+	ctx context.Context,
+	ufoCtx T,
+	streamName string,
+	response Response[any],
+)
 
 // -----------------------------------------------------------------------------
 // Server Internal Implementation
@@ -81,15 +109,18 @@ type MiddlewareAfter[T any] func(requestType string, requestName string, context
 
 // internalServer handles RPC requests.
 type internalServer[T any] struct {
-	procNames             []string
-	streamNames           []string
-	procHandlers          map[string]func(context T, input json.RawMessage) (any, error)
-	procInputProcessors   map[string]func(context T, input any) (any, error)
-	streamHandlers        map[string]func(context T, input json.RawMessage, emit func(any) error) error
-	streamInputProcessors map[string]func(context T, input any) (any, error)
-	handlersMu            sync.RWMutex
-	beforeMiddlewares     []MiddlewareBefore[T]
-	afterMiddlewares      []MiddlewareAfter[T]
+	procNames                   []string
+	streamNames                 []string
+	handlersMu                  sync.RWMutex
+	procHandlers                map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error)
+	procInputProcessors         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
+	streamHandlers              map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error
+	streamInputProcessors       map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
+	beforeHandlerMiddlewares    []MiddlewareBeforeHandler[T]
+	beforeStreamEmitMiddlewares []MiddlewareBeforeStreamEmit[T]
+	afterProcMiddlewares        []MiddlewareAfterProc[T]
+	afterStreamMiddlewares      []MiddlewareAfterStream[T]
+	afterStreamEmitMiddlewares  []MiddlewareAfterStreamEmit[T]
 }
 
 // newInternalServer creates a new UFO RPC server
@@ -102,46 +133,69 @@ func newInternalServer[T any](
 	streamNames []string,
 ) *internalServer[T] {
 	return &internalServer[T]{
-		procNames:             procNames,
-		streamNames:           streamNames,
-		procHandlers:          map[string]func(T, json.RawMessage) (any, error){},
-		procInputProcessors:   map[string]func(T, any) (any, error){},
-		streamHandlers:        map[string]func(T, json.RawMessage, func(any) error) error{},
-		streamInputProcessors: map[string]func(T, any) (any, error){},
-		handlersMu:            sync.RWMutex{},
-		beforeMiddlewares:     []MiddlewareBefore[T]{},
-		afterMiddlewares:      []MiddlewareAfter[T]{},
+		procNames:                   procNames,
+		streamNames:                 streamNames,
+		handlersMu:                  sync.RWMutex{},
+		procHandlers:                map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error){},
+		procInputProcessors:         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
+		streamHandlers:              map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error{},
+		streamInputProcessors:       map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
+		beforeHandlerMiddlewares:    []MiddlewareBeforeHandler[T]{},
+		beforeStreamEmitMiddlewares: []MiddlewareBeforeStreamEmit[T]{},
+		afterProcMiddlewares:        []MiddlewareAfterProc[T]{},
+		afterStreamMiddlewares:      []MiddlewareAfterStream[T]{},
+		afterStreamEmitMiddlewares:  []MiddlewareAfterStreamEmit[T]{},
 	}
 }
 
-// addMiddlewareBefore adds a middleware function that runs before the handler.
-//
-// It modifies the request context before it reaches the main procedure.
-//
-// Multiple MiddlewareBefore can be added and are processed in order.
-func (s *internalServer[T]) addMiddlewareBefore(fn MiddlewareBefore[T]) *internalServer[T] {
+// addMiddlewareBeforeHandler adds a middleware function that runs before the handler. Both for procedures and streams.
+func (s *internalServer[T]) addMiddlewareBeforeHandler(fn MiddlewareBeforeHandler[T]) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.beforeMiddlewares = append(s.beforeMiddlewares, fn)
+	s.beforeHandlerMiddlewares = append(s.beforeHandlerMiddlewares, fn)
 	return s
 }
 
-// addMiddlewareAfter adds a middleware function that runs after the handler.
-//
-// It modifies the response before it is sent back to the client.
-//
-// Multiple MiddlewareAfter can be added and are processed in order.
-func (s *internalServer[T]) addMiddlewareAfter(fn MiddlewareAfter[T]) *internalServer[T] {
+// addMiddlewareBeforeStreamEmit adds a middleware function that runs before the stream event is emitted.
+func (s *internalServer[T]) addMiddlewareBeforeStreamEmit(fn MiddlewareBeforeStreamEmit[T]) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.afterMiddlewares = append(s.afterMiddlewares, fn)
+	s.beforeStreamEmitMiddlewares = append(s.beforeStreamEmitMiddlewares, fn)
+	return s
+}
+
+// addMiddlewareAfterProc adds a middleware function that runs after the handler. Only for procedures, not for streams.
+func (s *internalServer[T]) addMiddlewareAfterProc(fn MiddlewareAfterProc[T]) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
+	s.afterProcMiddlewares = append(s.afterProcMiddlewares, fn)
+	return s
+}
+
+// addMiddlewareAfterStream adds a middleware function that runs after the stream handler.
+func (s *internalServer[T]) addMiddlewareAfterStream(fn MiddlewareAfterStream[T]) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
+	s.afterStreamMiddlewares = append(s.afterStreamMiddlewares, fn)
+	return s
+}
+
+// addMiddlewareAfterStreamEmit adds a middleware function that runs after the stream event is emitted.
+func (s *internalServer[T]) addMiddlewareAfterStreamEmit(fn MiddlewareAfterStreamEmit[T]) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
+	s.afterStreamEmitMiddlewares = append(s.afterStreamEmitMiddlewares, fn)
 	return s
 }
 
 // setProcHandler registers the handler for the provided procedure name
 func (s *internalServer[T]) setProcHandler(
 	procName string,
-	handler func(context T, input json.RawMessage) (any, error),
+	handler func(
+		ctx context.Context,
+		ufoCtx T,
+		input json.RawMessage,
+	) (any, error),
 ) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
@@ -152,7 +206,11 @@ func (s *internalServer[T]) setProcHandler(
 // setProcInputProcessor registers the input processor for the provided procedure name
 func (s *internalServer[T]) setProcInputProcessor(
 	procName string,
-	processor func(context T, input any) (any, error),
+	processor func(
+		ctx context.Context,
+		ufoCtx T,
+		input any,
+	) (any, error),
 ) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
@@ -163,7 +221,12 @@ func (s *internalServer[T]) setProcInputProcessor(
 // setStreamHandler registers the handler for the provided stream name
 func (s *internalServer[T]) setStreamHandler(
 	streamName string,
-	handler func(context T, input json.RawMessage, emit func(any) error) error,
+	handler func(
+		ctx context.Context,
+		ufoCtx T,
+		input json.RawMessage,
+		emit func(any) error,
+	) error,
 ) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
@@ -174,7 +237,11 @@ func (s *internalServer[T]) setStreamHandler(
 // setStreamInputProcessor registers the input processor for the provided stream name
 func (s *internalServer[T]) setStreamInputProcessor(
 	streamName string,
-	processor func(context T, input any) (any, error),
+	processor func(
+		ctx context.Context,
+		ufoCtx T,
+		input any,
+	) (any, error),
 ) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
@@ -183,7 +250,11 @@ func (s *internalServer[T]) setStreamInputProcessor(
 }
 
 // handleRequest processes an incoming RPC request
-func (s *internalServer[T]) handleRequest(reqResProvider ServerRequestResponseProvider[T]) error {
+func (s *internalServer[T]) handleRequest(
+	ctx context.Context,
+	ufoCtx T,
+	reqResProvider ServerRequestResponseProvider,
+) error {
 	if reqResProvider == nil {
 		return fmt.Errorf("ServerRequestResponseProvider is nil, please provide a valid provider")
 	}
@@ -216,15 +287,15 @@ func (s *internalServer[T]) handleRequest(reqResProvider ServerRequestResponsePr
 	defer s.handlersMu.RUnlock()
 
 	if isStream {
-		return s.handleStreamRequest(jsonBody.Name, jsonBody.Input, reqResProvider)
+		return s.handleStreamRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, reqResProvider)
 	}
 
-	return s.handleProcRequest(jsonBody.Name, jsonBody.Input, reqResProvider)
+	return s.handleProcRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, reqResProvider)
 }
 
 // writeProcResponse writes a procedure response to the client
 func (s *internalServer[T]) writeProcResponse(
-	reqResProvider ServerRequestResponseProvider[T],
+	reqResProvider ServerRequestResponseProvider,
 	response Response[any],
 ) error {
 	reqResProvider.ResponseSetHeader("Content-Type", "application/json")
@@ -237,11 +308,12 @@ func (s *internalServer[T]) writeProcResponse(
 
 // handleProcRequest processes a procedure request
 func (s *internalServer[T]) handleProcRequest(
+	ctx context.Context,
+	ufoCtx T,
 	procName string,
 	rawInput json.RawMessage,
-	reqResProvider ServerRequestResponseProvider[T],
+	reqResProvider ServerRequestResponseProvider,
 ) error {
-	currentContext := reqResProvider.RequestGetInitialContext()
 	response := Response[any]{Ok: true}
 
 	// Validate procedure name
@@ -269,9 +341,9 @@ func (s *internalServer[T]) handleProcRequest(
 
 	// Execute Before middlewares if we haven't encountered an error yet
 	if response.Ok {
-		for _, fn := range s.beforeMiddlewares {
+		for _, fn := range s.beforeHandlerMiddlewares {
 			var err error
-			if currentContext, err = fn("proc", procName, currentContext); err != nil {
+			if ctx, ufoCtx, err = fn(ctx, ufoCtx, "proc", procName); err != nil {
 				response = Response[any]{
 					Ok:    false,
 					Error: asError(err),
@@ -283,7 +355,7 @@ func (s *internalServer[T]) handleProcRequest(
 
 	// Run handler if no errors have occurred
 	if response.Ok {
-		if output, err := proc(currentContext, rawInput); err != nil {
+		if output, err := proc(ctx, ufoCtx, rawInput); err != nil {
 			response = Response[any]{
 				Ok:    false,
 				Error: asError(err),
@@ -297,8 +369,8 @@ func (s *internalServer[T]) handleProcRequest(
 	}
 
 	// Always execute After middlewares, regardless of any previous errors
-	for _, fn := range s.afterMiddlewares {
-		response = fn("proc", procName, currentContext, response)
+	for _, fn := range s.afterProcMiddlewares {
+		ctx, ufoCtx, response = fn(ctx, ufoCtx, procName, response)
 	}
 
 	// Write the response to the client
@@ -313,15 +385,20 @@ func (s *internalServer[T]) handleProcRequest(
 
 // handleStreamRequest processes a stream request
 func (s *internalServer[T]) handleStreamRequest(
+	ctx context.Context,
+	ufoCtx T,
 	streamName string,
 	rawInput json.RawMessage,
-	reqResProvider ServerRequestResponseProvider[T],
+	reqResProvider ServerRequestResponseProvider,
 ) error {
-	currentContext := reqResProvider.RequestGetInitialContext()
-
 	// emit sends a response event to the client.
 	// If the client disconnects, it returns an error.
-	emit := func(data any) error {
+	emit := func(data Response[any]) error {
+		// execute before emit middlewares
+		for _, fn := range s.beforeStreamEmitMiddlewares {
+			data = fn(ctx, ufoCtx, streamName, data)
+		}
+
 		jsonData, err := json.Marshal(data)
 		if err != nil {
 			return fmt.Errorf("failed to marshal stream data: %w", err)
@@ -333,7 +410,15 @@ func (s *internalServer[T]) handleStreamRequest(
 			return err
 		}
 
-		reqResProvider.ResponseFlush()
+		if err := reqResProvider.ResponseFlush(); err != nil {
+			return err
+		}
+
+		// execute after emit middlewares
+		for _, fn := range s.afterStreamEmitMiddlewares {
+			fn(ctx, ufoCtx, streamName, data)
+		}
+
 		return nil
 	}
 
@@ -376,17 +461,27 @@ func (s *internalServer[T]) handleStreamRequest(
 	}
 
 	// Execute Before middlewares
-	for _, fn := range s.beforeMiddlewares {
+	for _, fn := range s.beforeHandlerMiddlewares {
 		var err error
-		if currentContext, err = fn("stream", streamName, currentContext); err != nil {
+		if ctx, ufoCtx, err = fn(ctx, ufoCtx, "stream", streamName); err != nil {
 			return emitError(err)
 		}
 	}
 
 	// Run the stream handler and wait for it to finish
-	err := stream(currentContext, rawInput, emitSuccess)
+	err := stream(ctx, ufoCtx, rawInput, emitSuccess)
 	if err != nil {
+		// execute after stream middlewares
+		for _, fn := range s.afterStreamMiddlewares {
+			fn(ctx, ufoCtx, streamName, err)
+		}
+
 		return emitError(err)
+	}
+
+	// execute after stream middlewares
+	for _, fn := range s.afterStreamMiddlewares {
+		fn(ctx, ufoCtx, streamName, nil)
 	}
 
 	return nil

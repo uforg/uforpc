@@ -40,18 +40,42 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	g.Line("// AddBefore adds a middleware function that runs before the handler. Both for procedures and streams.")
-	g.Line("func (m *middlewareRegistry[T]) AddBefore(fn MiddlewareBefore[T]) {")
+	g.Line("// AddBeforeHandler adds a middleware function that runs before the handler. Both for procedures and streams.")
+	g.Line("func (m *middlewareRegistry[T]) AddBeforeHandler(fn MiddlewareBeforeHandler[T]) {")
 	g.Block(func() {
-		g.Line("m.intServer.addMiddlewareBefore(fn)")
+		g.Line("m.intServer.addMiddlewareBeforeHandler(fn)")
 	})
 	g.Line("}")
 	g.Break()
 
-	g.Line("// AddAfter adds a middleware function that runs after the handler. Only for procedures, not for streams.")
-	g.Line("func (m *middlewareRegistry[T]) AddAfter(fn MiddlewareAfter[T]) {")
+	g.Line("// AddBeforeStreamEmit adds a middleware function that runs before the stream event is emitted.")
+	g.Line("func (m *middlewareRegistry[T]) AddBeforeStreamEmit(fn MiddlewareBeforeStreamEmit[T]) {")
 	g.Block(func() {
-		g.Line("m.intServer.addMiddlewareAfter(fn)")
+		g.Line("m.intServer.addMiddlewareBeforeStreamEmit(fn)")
+	})
+	g.Line("}")
+	g.Break()
+
+	g.Line("// AddAfterProc adds a middleware function that runs after the handler. Only for procedures, not for streams.")
+	g.Line("func (m *middlewareRegistry[T]) AddAfterProc(fn MiddlewareAfterProc[T]) {")
+	g.Block(func() {
+		g.Line("m.intServer.addMiddlewareAfterProc(fn)")
+	})
+	g.Line("}")
+	g.Break()
+
+	g.Line("// AddAfterStream adds a middleware function that runs after the stream handler is executed.")
+	g.Line("func (m *middlewareRegistry[T]) AddAfterStream(fn MiddlewareAfterStream[T]) {")
+	g.Block(func() {
+		g.Line("m.intServer.addMiddlewareAfterStream(fn)")
+	})
+	g.Line("}")
+	g.Break()
+
+	g.Line("// AddAfterStreamEmit adds a middleware function that runs after the stream event is emitted.")
+	g.Line("func (m *middlewareRegistry[T]) AddAfterStreamEmit(fn MiddlewareAfterStreamEmit[T]) {")
+	g.Block(func() {
+		g.Line("m.intServer.addMiddlewareAfterStreamEmit(fn)")
 	})
 	g.Line("}")
 	g.Break()
@@ -71,11 +95,11 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Set%sInputProcessor registers the input processor for the %s procedure", namePascal, name)
 		g.Linef("func (p *procRegistry[T]) Set%sInputProcessor(", namePascal)
 		g.Block(func() {
-			g.Linef("processor func(context T, input %sInput) (%sInput, error),", name, name)
+			g.Linef("processor func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef("typedProcessor := func(context T, input any) (any, error) {")
+			g.Linef("typedProcessor := func(ctx context.Context, ufoCtx T, input any) (any, error) {")
 			g.Block(func() {
 				g.Linef("typedInput, ok := input.(%sInput)", name)
 				g.Line("if !ok {")
@@ -83,7 +107,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					g.Linef("return nil, fmt.Errorf(\"invalid input type for %s procedure, expected %sInput, got %%T\", input)", name, name)
 				})
 				g.Line("}")
-				g.Line("return processor(context, typedInput)")
+				g.Line("return processor(ctx, ufoCtx, typedInput)")
 			})
 			g.Line("}")
 			g.Linef("p.intServer.setProcInputProcessor(\"%s\", typedProcessor)", namePascal)
@@ -94,11 +118,11 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Set%sHandler registers the handler for the %s procedure", namePascal, name)
 		g.Linef("func (p *procRegistry[T]) Set%sHandler(", namePascal)
 		g.Block(func() {
-			g.Linef("handler func(context T, input %sInput) (%sOutput, error),", name, name)
+			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput) (%sOutput, error),", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef(" p.intServer.setProcHandler(\"%s\", func(context T, rawInput json.RawMessage) (any, error) {", namePascal)
+			g.Linef(" p.intServer.setProcHandler(\"%s\", func(ctx context.Context, ufoCtx T, rawInput json.RawMessage) (any, error) {", namePascal)
 			g.Block(func() {
 				g.Line("var preTypedInput pre" + namePascal + "Input")
 				g.Line("if err := json.Unmarshal(rawInput, &preTypedInput); err != nil {")
@@ -119,7 +143,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 
 				g.Linef("if processor, ok := p.intServer.procInputProcessors[\"%s\"]; ok {", namePascal)
 				g.Block(func() {
-					g.Line("processedInput, err := processor(context, typedInput)")
+					g.Line("processedInput, err := processor(ctx, ufoCtx, typedInput)")
 					g.Line("if err != nil {")
 					g.Block(func() {
 						g.Line("return nil, err")
@@ -130,7 +154,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("}")
 				g.Break()
 
-				g.Line("return handler(context, typedInput)")
+				g.Line("return handler(ctx, ufoCtx, typedInput)")
 			})
 			g.Line("})")
 		})
@@ -153,11 +177,11 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Set%sInputProcessor registers the input processor for the %s stream", namePascal, name)
 		g.Linef("func (s *streamRegistry[T]) Set%sInputProcessor(", namePascal)
 		g.Block(func() {
-			g.Linef("processor func(context T, input %sInput) (%sInput, error),", name, name)
+			g.Linef("processor func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef("typedProcessor := func(context T, input any) (any, error) {")
+			g.Linef("typedProcessor := func(ctx context.Context, ufoCtx T, input any) (any, error) {")
 			g.Block(func() {
 				g.Linef("typedInput, ok := input.(%sInput)", name)
 				g.Line("if !ok {")
@@ -165,7 +189,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					g.Linef("return nil, fmt.Errorf(\"invalid input type for %s stream, expected %sInput, got %%T\", input)", name, name)
 				})
 				g.Line("}")
-				g.Line("return processor(context, typedInput)")
+				g.Line("return processor(ctx, ufoCtx, typedInput)")
 			})
 			g.Line("}")
 			g.Linef("s.intServer.setStreamInputProcessor(\"%s\", typedProcessor)", namePascal)
@@ -176,11 +200,11 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Set%sHandler registers the handler for the %s stream", namePascal, name)
 		g.Linef("func (s *streamRegistry[T]) Set%sHandler(", namePascal)
 		g.Block(func() {
-			g.Linef("handler func(context T, input %sInput, emit func(%sOutput) error) error,", name, name)
+			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput, emit func(%sOutput) error) error,", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef("s.intServer.setStreamHandler(\"%s\", func(context T, rawInput json.RawMessage, rawEmit func(any) error) error {", namePascal)
+			g.Linef("s.intServer.setStreamHandler(\"%s\", func(ctx context.Context, ufoCtx T, rawInput json.RawMessage, rawEmit func(any) error) error {", namePascal)
 			g.Block(func() {
 				g.Line("var preTypedInput pre" + namePascal + "Input")
 				g.Line("if err := json.Unmarshal(rawInput, &preTypedInput); err != nil {")
@@ -207,7 +231,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 
 				g.Linef("if processor, ok := s.intServer.streamInputProcessors[\"%s\"]; ok {", namePascal)
 				g.Block(func() {
-					g.Line("processedInput, err := processor(context, typedInput)")
+					g.Line("processedInput, err := processor(ctx, ufoCtx, typedInput)")
 					g.Line("if err != nil {")
 					g.Block(func() {
 						g.Line("return err")
@@ -218,7 +242,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("}")
 				g.Break()
 
-				g.Line("return handler(context, typedInput, typedEmit)")
+				g.Line("return handler(ctx, ufoCtx, typedInput, typedEmit)")
 			})
 			g.Line("})")
 		})
@@ -265,9 +289,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// If you are using the stdlib net/http package, you can use the NewServerNetHTTPRequestResponseProvider")
 	g.Line("// function to create a request response provider, otherwise you should implement the provider by yourself")
-	g.Line("func (s *Server[T]) HandleRequest(requestResponseProvider ServerRequestResponseProvider[T]) error {")
+	g.Line("func (s *Server[T]) HandleRequest(ctx context.Context, ufoCtx T, requestResponseProvider ServerRequestResponseProvider) error {")
 	g.Block(func() {
-		g.Line("return s.intServer.handleRequest(requestResponseProvider)")
+		g.Line("return s.intServer.handleRequest(ctx, ufoCtx, requestResponseProvider)")
 	})
 	g.Line("}")
 	g.Break()
