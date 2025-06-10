@@ -17,20 +17,40 @@ import (
 // Server Types
 // -----------------------------------------------------------------------------
 
-// ServerHTTPAdapter provides the required methods for UFO RPC server
-// to handle an incoming HTTP request and write a response to the client.
+// ServerHTTPAdapter defines the interface required by UFO RPC server to handle
+// incoming HTTP requests and write responses to clients. This abstraction allows
+// the server to work with different HTTP frameworks while maintaining the same
+// core functionality.
+//
+// Implementations must provide methods to read request bodies, set response headers,
+// write response data, and flush the response buffer to ensure immediate delivery
+// to the client.
 type ServerHTTPAdapter interface {
-	// RequestBody returns the body reader for the request.
+	// RequestBody returns the body reader for the incoming HTTP request.
+	// The returned io.Reader allows the server to read the request payload
+	// containing RPC call data.
 	RequestBody() io.Reader
-	// SetHeader sets a header in the response.
+
+	// SetHeader sets a response header with the specified key-value pair.
+	// This is used to configure response headers like Content-Type and
+	// caching directives for both procedure and stream responses.
 	SetHeader(key, value string)
-	// Write writes data to the response.
+
+	// Write writes the provided data to the response body.
+	// Returns the number of bytes written and any error encountered.
+	// For procedures, this writes the complete JSON response. For streams,
+	// this writes individual Server-Sent Events data chunks.
 	Write(data []byte) (int, error)
-	// Flush flushes (sends) the current response in the buffer to the client.
+
+	// Flush immediately sends any buffered response data to the client.
+	// This is crucial for streaming responses to ensure real-time delivery
+	// of events. Returns an error if the flush operation fails.
 	Flush() error
 }
 
-// ServerNetHTTPAdapter implements the ServerHTTPAdapter interface for net/http.
+// ServerNetHTTPAdapter implements ServerHTTPAdapter for Go's standard net/http package.
+// This adapter bridges the UFO RPC server with the standard HTTP library, allowing
+// seamless integration with existing HTTP servers and middleware.
 type ServerNetHTTPAdapter struct {
 	responseWriter http.ResponseWriter
 	request        *http.Request
@@ -38,29 +58,41 @@ type ServerNetHTTPAdapter struct {
 
 // NewServerNetHTTPAdapter creates a new ServerNetHTTPAdapter that implements the
 // ServerHTTPAdapter interface for net/http.
-func NewServerNetHTTPAdapter[T any](w http.ResponseWriter, r *http.Request) ServerHTTPAdapter {
+//
+// Parameters:
+//   - w: The http.ResponseWriter to write responses to
+//   - r: The http.Request containing the incoming request data
+//
+// Returns a ServerHTTPAdapter implementation ready for use with UFO RPC server.
+func NewServerNetHTTPAdapter(w http.ResponseWriter, r *http.Request) ServerHTTPAdapter {
 	return &ServerNetHTTPAdapter{
 		responseWriter: w,
 		request:        r,
 	}
 }
 
-// RequestBody returns the body reader for the request.
+// RequestBody returns the body reader for the HTTP request.
+// This provides access to the request payload containing the RPC call data.
 func (r *ServerNetHTTPAdapter) RequestBody() io.Reader {
 	return r.request.Body
 }
 
-// SetHeader sets a header in the response.
+// SetHeader sets a response header with the specified key-value pair.
+// This configures headers for the HTTP response, such as Content-Type
+// for JSON responses or streaming-specific headers.
 func (r *ServerNetHTTPAdapter) SetHeader(key, value string) {
 	r.responseWriter.Header().Set(key, value)
 }
 
-// Write writes data to the response.
+// Write writes the provided data to the HTTP response body.
+// Returns the number of bytes written and any error encountered during writing.
 func (r *ServerNetHTTPAdapter) Write(data []byte) (int, error) {
 	return r.responseWriter.Write(data)
 }
 
-// Flush flushes (sends) the current response in the buffer to the client.
+// Flush immediately sends any buffered response data to the client.
+// For streaming responses, this ensures real-time delivery of events.
+// If the underlying ResponseWriter doesn't support flushing, this is a no-op.
 func (r *ServerNetHTTPAdapter) Flush() error {
 	if f, ok := r.responseWriter.(http.Flusher); ok {
 		f.Flush()
@@ -68,40 +100,89 @@ func (r *ServerNetHTTPAdapter) Flush() error {
 	return nil
 }
 
-// MiddlewareBeforeHandler runs before procedure and stream handler is executed.
-type MiddlewareBeforeHandler[T any] func(
+// ServerHookBeforeHandler defines a hook function that executes before
+// any procedure or stream handler is invoked. This allows for cross-cutting
+// concerns like authentication, logging, rate limiting, etc.
+//
+// The hook receives the current context, UFO context, handler type
+// ("proc" or "stream"), and handler name. It must return the potentially
+// modified context and UFO context, or an error to abort the request.
+//
+// If an error is returned, the request is terminated and an error response
+// is sent to the client.
+type ServerHookBeforeHandler[T any] func(
 	ctx context.Context,
 	ufoCtx T,
 	handlerType string,
 	handlerName string,
 ) (context.Context, T, error)
 
-// MiddlewareBeforeStreamEmit runs before stream event is emitted.
-type MiddlewareBeforeStreamEmit[T any] func(
+// ServerHookBeforeProcRespond defines a hook function that executes before
+// the procedure handler responds to the client. This hook can modify the response
+// that will be sent to the client, allowing for response transformation, filtering,
+// or adding metadata.
+//
+// The hook receives the current context, UFO context, procedure name, and
+// the response about to be sent. It must return the potentially modified
+// response that will be delivered to the client.
+type ServerHookBeforeProcRespond[T any] func(
+	ctx context.Context,
+	ufoCtx T,
+	procName string,
+	response Response[any],
+) Response[any]
+
+// ServerHookBeforeStreamEmit defines a hook function that executes before
+// each stream event is emitted to the client. This hook can modify the response
+// that will be sent as part of the Server-Sent Events stream.
+//
+// The hook receives the current context, UFO context, stream name, and
+// the response about to be emitted. It must return the potentially modified
+// response that will be sent to the client.
+type ServerHookBeforeStreamEmit[T any] func(
 	ctx context.Context,
 	ufoCtx T,
 	streamName string,
 	response Response[any],
 ) Response[any]
 
-// MiddlewareAfterProc runs after procedure request processing.
-type MiddlewareAfterProc[T any] func(
+// ServerHookAfterProc defines a hook function that executes after
+// a procedure request has been processed, regardless of success or failure.
+// This allows for logging, metrics collection, or cleanup operations.
+// This hook cannot modify the response as it has already been sent to the client.
+//
+// The hook receives the current context, UFO context, procedure name,
+// and the response that was generated by the handler.
+type ServerHookAfterProc[T any] func(
 	ctx context.Context,
 	ufoCtx T,
 	procName string,
 	response Response[any],
-) (context.Context, T, Response[any])
+)
 
-// MiddlewareAfterStream runs after stream request processing ends.
-type MiddlewareAfterStream[T any] func(
+// ServerHookAfterStream defines a hook function that executes after
+// a stream request processing ends, either successfully or with an error.
+// This allows for cleanup operations, logging, metrics collection, or
+// resource deallocation. This hook cannot modify anything as the stream
+// has already completed.
+//
+// The hook receives the current context, UFO context, stream name,
+// and any error that occurred during stream processing (nil if successful).
+type ServerHookAfterStream[T any] func(
 	ctx context.Context,
 	ufoCtx T,
 	streamName string,
 	err error,
 )
 
-// MiddlewareAfterStreamEmit runs after stream event is emitted.
-type MiddlewareAfterStreamEmit[T any] func(
+// ServerHookAfterStreamEmit defines a hook function that executes after
+// each stream event has been successfully emitted to the client.
+// This allows for logging, metrics collection, or post-emission cleanup operations.
+// This hook cannot modify anything as the event has already been sent.
+//
+// The hook receives the current context, UFO context, stream name,
+// and the response that was sent to the client.
+type ServerHookAfterStreamEmit[T any] func(
 	ctx context.Context,
 	ufoCtx T,
 	streamName string,
@@ -112,88 +193,199 @@ type MiddlewareAfterStreamEmit[T any] func(
 // Server Internal Implementation
 // -----------------------------------------------------------------------------
 
-// internalServer handles RPC requests.
+// internalServer manages RPC request handling and hook execution for
+// both procedures and streams. It maintains handler registrations, hook
+// chains, and coordinates the complete request lifecycle.
+//
+// The generic type T represents the UFO context type, allowing users to pass
+// custom data (authentication info, user sessions, etc.) through the entire
+// request processing pipeline.
 type internalServer[T any] struct {
-	procNames                   []string
-	streamNames                 []string
-	handlersMu                  sync.RWMutex
-	procHandlers                map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error)
-	procInputHandlers           map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
-	streamHandlers              map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error
-	streamInputHandlers         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
-	beforeHandlerMiddlewares    []MiddlewareBeforeHandler[T]
-	beforeStreamEmitMiddlewares []MiddlewareBeforeStreamEmit[T]
-	afterProcMiddlewares        []MiddlewareAfterProc[T]
-	afterStreamMiddlewares      []MiddlewareAfterStream[T]
-	afterStreamEmitMiddlewares  []MiddlewareAfterStreamEmit[T]
+	// procNames contains the list of all registered procedure names
+	procNames []string
+	// streamNames contains the list of all registered stream names
+	streamNames []string
+	// handlersMu protects all handler maps and hook slices from concurrent access
+	handlersMu sync.RWMutex
+	// procHandlers maps procedure names to their implementation functions
+	procHandlers map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error)
+	// procInputHandlers maps procedure names to their input processing functions
+	procInputHandlers map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
+	// streamHandlers maps stream names to their implementation functions
+	streamHandlers map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error
+	// streamInputHandlers maps stream names to their input processing functions
+	streamInputHandlers map[string]func(ctx context.Context, ufoCtx T, input any) (any, error)
+	// hooksBeforeHandler contains hooks that run before any handler execution
+	hooksBeforeHandler []ServerHookBeforeHandler[T]
+	// hooksBeforeProcRespond contains hooks that run before procedure response is sent
+	hooksBeforeProcRespond []ServerHookBeforeProcRespond[T]
+	// hooksBeforeStreamEmit contains hooks that run before each stream event emission
+	hooksBeforeStreamEmit []ServerHookBeforeStreamEmit[T]
+	// hooksAfterProc contains hooks that run after procedure completion
+	hooksAfterProc []ServerHookAfterProc[T]
+	// hooksAfterStream contains hooks that run after stream completion
+	hooksAfterStream []ServerHookAfterStream[T]
+	// hooksAfterStreamEmit contains hooks that run after each stream event emission
+	hooksAfterStreamEmit []ServerHookAfterStreamEmit[T]
 }
 
-// newInternalServer creates a new UFO RPC server
+// newInternalServer creates a new UFO RPC server instance with the specified
+// procedure and stream names. The server is initialized with empty handler
+// maps and hook slices, ready for registration.
 //
-// The generic type T represents the context type, used to pass additional data
-// to procedures, such as authentication information, user session or any
-// other data you want to pass to procedures before they are executed.
+// The generic type T represents the UFO context type, used to pass additional
+// data to handlers, such as authentication information, user sessions, or any
+// other request-scoped data.
+//
+// Parameters:
+//   - procNames: List of procedure names that this server will handle
+//   - streamNames: List of stream names that this server will handle
+//
+// Returns a new internalServer instance ready for handler and hook registration.
 func newInternalServer[T any](
 	procNames []string,
 	streamNames []string,
 ) *internalServer[T] {
 	return &internalServer[T]{
-		procNames:                   procNames,
-		streamNames:                 streamNames,
-		handlersMu:                  sync.RWMutex{},
-		procHandlers:                map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error){},
-		procInputHandlers:           map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
-		streamHandlers:              map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error{},
-		streamInputHandlers:         map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
-		beforeHandlerMiddlewares:    []MiddlewareBeforeHandler[T]{},
-		beforeStreamEmitMiddlewares: []MiddlewareBeforeStreamEmit[T]{},
-		afterProcMiddlewares:        []MiddlewareAfterProc[T]{},
-		afterStreamMiddlewares:      []MiddlewareAfterStream[T]{},
-		afterStreamEmitMiddlewares:  []MiddlewareAfterStreamEmit[T]{},
+		procNames:              procNames,
+		streamNames:            streamNames,
+		handlersMu:             sync.RWMutex{},
+		procHandlers:           map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error){},
+		procInputHandlers:      map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
+		streamHandlers:         map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage, emit func(any) error) error{},
+		streamInputHandlers:    map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
+		hooksBeforeHandler:     []ServerHookBeforeHandler[T]{},
+		hooksBeforeProcRespond: []ServerHookBeforeProcRespond[T]{},
+		hooksBeforeStreamEmit:  []ServerHookBeforeStreamEmit[T]{},
+		hooksAfterProc:         []ServerHookAfterProc[T]{},
+		hooksAfterStream:       []ServerHookAfterStream[T]{},
+		hooksAfterStreamEmit:   []ServerHookAfterStreamEmit[T]{},
 	}
 }
 
-// addMiddlewareBeforeHandler adds a middleware function that runs before the handler. Both for procedures and streams.
-func (s *internalServer[T]) addMiddlewareBeforeHandler(fn MiddlewareBeforeHandler[T]) *internalServer[T] {
+// addHookBeforeHandler registers a hook function that executes before
+// any handler (both procedures and streams) is invoked. Hook functions are
+// executed in the order they were registered.
+//
+// This hook is useful for cross-cutting concerns like authentication,
+// authorization, logging, or request validation that apply to all handlers.
+//
+// Parameters:
+//   - hook: The hook function to register
+//
+// Returns the server instance for method chaining.
+func (s *internalServer[T]) addHookBeforeHandler(hook ServerHookBeforeHandler[T]) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.beforeHandlerMiddlewares = append(s.beforeHandlerMiddlewares, fn)
+	s.hooksBeforeHandler = append(s.hooksBeforeHandler, hook)
 	return s
 }
 
-// addMiddlewareBeforeStreamEmit adds a middleware function that runs before the stream event is emitted.
-func (s *internalServer[T]) addMiddlewareBeforeStreamEmit(fn MiddlewareBeforeStreamEmit[T]) *internalServer[T] {
+// addHookBeforeProcRespond registers a hook function that executes before
+// the procedure response is sent to the client. Hook functions are executed
+// in the order they were registered.
+//
+// This hook is useful for response transformation, filtering, adding metadata,
+// or modifying the response data before it reaches the client.
+//
+// Parameters:
+//   - hook: The hook function to register
+//
+// Returns the server instance for method chaining.
+func (s *internalServer[T]) addHookBeforeProcRespond(hook ServerHookBeforeProcRespond[T]) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.beforeStreamEmitMiddlewares = append(s.beforeStreamEmitMiddlewares, fn)
+	s.hooksBeforeProcRespond = append(s.hooksBeforeProcRespond, hook)
 	return s
 }
 
-// addMiddlewareAfterProc adds a middleware function that runs after the handler. Only for procedures, not for streams.
-func (s *internalServer[T]) addMiddlewareAfterProc(fn MiddlewareAfterProc[T]) *internalServer[T] {
+// addHookBeforeStreamEmit registers a hook function that executes before
+// each stream event is emitted to the client. Hook functions are executed
+// in the order they were registered.
+//
+// This hook is useful for response transformation, filtering, adding metadata,
+// or logging stream events before they reach the client.
+//
+// Parameters:
+//   - hook: The hook function to register
+//
+// Returns the server instance for method chaining.
+func (s *internalServer[T]) addHookBeforeStreamEmit(hook ServerHookBeforeStreamEmit[T]) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.afterProcMiddlewares = append(s.afterProcMiddlewares, fn)
+	s.hooksBeforeStreamEmit = append(s.hooksBeforeStreamEmit, hook)
 	return s
 }
 
-// addMiddlewareAfterStream adds a middleware function that runs after the stream handler.
-func (s *internalServer[T]) addMiddlewareAfterStream(fn MiddlewareAfterStream[T]) *internalServer[T] {
+// addHookAfterProc registers a hook function that executes after
+// procedure request processing, regardless of success or failure. Hook
+// functions are executed in the order they were registered.
+//
+// This hook is useful for logging, metrics collection, or cleanup
+// operations specific to procedure calls. This hook cannot modify
+// the response as it has already been sent to the client.
+//
+// Parameters:
+//   - hook: The hook function to register
+//
+// Returns the server instance for method chaining.
+func (s *internalServer[T]) addHookAfterProc(hook ServerHookAfterProc[T]) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.afterStreamMiddlewares = append(s.afterStreamMiddlewares, fn)
+	s.hooksAfterProc = append(s.hooksAfterProc, hook)
 	return s
 }
 
-// addMiddlewareAfterStreamEmit adds a middleware function that runs after the stream event is emitted.
-func (s *internalServer[T]) addMiddlewareAfterStreamEmit(fn MiddlewareAfterStreamEmit[T]) *internalServer[T] {
+// addHookAfterStream registers a hook function that executes after
+// stream request processing ends, either successfully or with an error.
+// Hook functions are executed in the order they were registered.
+//
+// This hook is useful for cleanup operations, logging, metrics collection,
+// or resource deallocation specific to stream handling. This hook cannot
+// modify anything as the stream has already completed.
+//
+// Parameters:
+//   - hook: The hook function to register
+//
+// Returns the server instance for method chaining.
+func (s *internalServer[T]) addHookAfterStream(hook ServerHookAfterStream[T]) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
-	s.afterStreamEmitMiddlewares = append(s.afterStreamEmitMiddlewares, fn)
+	s.hooksAfterStream = append(s.hooksAfterStream, hook)
 	return s
 }
 
-// setProcHandler registers the handler for the provided procedure name
+// addHookAfterStreamEmit registers a hook function that executes after
+// each stream event has been successfully emitted to the client. Hook
+// functions are executed in the order they were registered.
+//
+// This hook is useful for logging, metrics collection, or post-emission
+// cleanup operations for individual stream events. This hook cannot modify
+// anything as the event has already been sent to the client.
+//
+// Parameters:
+//   - hook: The hook function to register
+//
+// Returns the server instance for method chaining.
+func (s *internalServer[T]) addHookAfterStreamEmit(hook ServerHookAfterStreamEmit[T]) *internalServer[T] {
+	s.handlersMu.Lock()
+	defer s.handlersMu.Unlock()
+	s.hooksAfterStreamEmit = append(s.hooksAfterStreamEmit, hook)
+	return s
+}
+
+// setProcHandler registers the implementation function for the specified procedure name.
+// The handler function will be called when a client invokes the procedure via RPC.
+//
+// The handler receives the current context, UFO context, and raw JSON input,
+// and must return the response data or an error. The input is provided as
+// json.RawMessage to allow for flexible input processing.
+//
+// Parameters:
+//   - procName: The name of the procedure to register
+//   - handler: The function that implements the procedure logic
+//
+// Returns the server instance for method chaining.
 func (s *internalServer[T]) setProcHandler(
 	procName string,
 	handler func(
@@ -208,7 +400,18 @@ func (s *internalServer[T]) setProcHandler(
 	return s
 }
 
-// setProcInputHandler registers the input handler for the provided procedure name
+// setProcInputHandler registers the input processing function for the specified
+// procedure name. This handler is responsible for validating and transforming
+// the input data before it reaches the main procedure handler.
+//
+// The input handler receives the current context, UFO context, and processed input,
+// and must return the validated/transformed input or an error.
+//
+// Parameters:
+//   - procName: The name of the procedure to register the input handler for
+//   - inputHandler: The function that processes and validates procedure input
+//
+// Returns the server instance for method chaining.
 func (s *internalServer[T]) setProcInputHandler(
 	procName string,
 	inputHandler func(
@@ -223,7 +426,18 @@ func (s *internalServer[T]) setProcInputHandler(
 	return s
 }
 
-// setStreamHandler registers the handler for the provided stream name
+// setStreamHandler registers the implementation function for the specified stream name.
+// The handler function will be called when a client initiates a stream via RPC.
+//
+// The handler receives the current context, UFO context, raw JSON input, and an
+// emit function for sending events to the client. The handler should call emit
+// for each event and return when the stream is complete or an error occurs.
+//
+// Parameters:
+//   - streamName: The name of the stream to register
+//   - handler: The function that implements the stream logic
+//
+// Returns the server instance for method chaining.
 func (s *internalServer[T]) setStreamHandler(
 	streamName string,
 	handler func(
@@ -239,7 +453,18 @@ func (s *internalServer[T]) setStreamHandler(
 	return s
 }
 
-// setStreamInputHandler registers the input handler for the provided stream name
+// setStreamInputHandler registers the input processing function for the specified
+// stream name. This handler is responsible for validating and transforming
+// the input data before the stream begins.
+//
+// The input handler receives the current context, UFO context, and processed input,
+// and must return the validated/transformed input or an error.
+//
+// Parameters:
+//   - streamName: The name of the stream to register the input handler for
+//   - inputHandler: The function that processes and validates stream input
+//
+// Returns the server instance for method chaining.
 func (s *internalServer[T]) setStreamInputHandler(
 	streamName string,
 	inputHandler func(
@@ -254,13 +479,27 @@ func (s *internalServer[T]) setStreamInputHandler(
 	return s
 }
 
-// handleRequest processes an incoming RPC request
+// handleRequest processes an incoming RPC request by parsing the request body,
+// determining the request type (procedure or stream), and dispatching to the
+// appropriate handler. This is the main entry point for all RPC requests.
+//
+// The request body must contain JSON with the following structure:
+//   - type: "proc" for procedures or "stream" for streams
+//   - name: The name of the procedure or stream to invoke
+//   - input: The input data for the handler (can be any JSON value)
+//
+// Parameters:
+//   - ctx: The request context
+//   - ufoCtx: The UFO context containing user-defined data
+//   - httpAdapter: The HTTP adapter for reading requests and writing responses
+//
+// Returns an error if request processing fails at the transport level.
 func (s *internalServer[T]) handleRequest(
 	ctx context.Context,
 	ufoCtx T,
-	reqResProvider ServerHTTPAdapter,
+	httpAdapter ServerHTTPAdapter,
 ) error {
-	if reqResProvider == nil {
+	if httpAdapter == nil {
 		return fmt.Errorf("ServerRequestResponseProvider is nil, please provide a valid provider")
 	}
 
@@ -269,12 +508,12 @@ func (s *internalServer[T]) handleRequest(
 		Name  string          `json:"name"`
 		Input json.RawMessage `json:"input"`
 	}
-	if err := json.NewDecoder(reqResProvider.RequestBody()).Decode(&jsonBody); err != nil {
+	if err := json.NewDecoder(httpAdapter.RequestBody()).Decode(&jsonBody); err != nil {
 		res := Response[any]{
 			Ok:    false,
 			Error: Error{Message: "Invalid request body"},
 		}
-		return s.writeProcResponse(reqResProvider, res)
+		return s.writeProcResponse(httpAdapter, res)
 	}
 
 	isProc := jsonBody.Type == "proc"
@@ -284,7 +523,7 @@ func (s *internalServer[T]) handleRequest(
 			Ok:    false,
 			Error: Error{Message: "Invalid request body, type must be 'proc' or 'stream'"},
 		}
-		return s.writeProcResponse(reqResProvider, res)
+		return s.writeProcResponse(httpAdapter, res)
 	}
 
 	// Lock the handlers map for reading
@@ -292,32 +531,59 @@ func (s *internalServer[T]) handleRequest(
 	defer s.handlersMu.RUnlock()
 
 	if isStream {
-		return s.handleStreamRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, reqResProvider)
+		return s.handleStreamRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, httpAdapter)
 	}
 
-	return s.handleProcRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, reqResProvider)
+	return s.handleProcRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, httpAdapter)
 }
 
-// writeProcResponse writes a procedure response to the client
+// writeProcResponse writes a procedure response to the client as JSON.
+// This helper method sets the appropriate Content-Type header and marshals
+// the response data before sending it to the client.
+//
+// Parameters:
+//   - httpAdapter: The HTTP adapter for writing the response
+//   - response: The response data to send to the client
+//
+// Returns an error if writing the response fails.
 func (s *internalServer[T]) writeProcResponse(
-	reqResProvider ServerHTTPAdapter,
+	httpAdapter ServerHTTPAdapter,
 	response Response[any],
 ) error {
-	reqResProvider.SetHeader("Content-Type", "application/json")
-	_, err := reqResProvider.Write(response.Bytes())
+	httpAdapter.SetHeader("Content-Type", "application/json")
+	_, err := httpAdapter.Write(response.Bytes())
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// handleProcRequest processes a procedure request
+// handleProcRequest processes a procedure RPC request through the complete
+// hook chain and handler execution. This includes validation, hook
+// execution, handler invocation, and response generation.
+//
+// The processing flow is:
+// 1. Validate procedure name and implementation
+// 2. Execute before-handler hooks
+// 3. Invoke the procedure handler
+// 4. Execute before-response hooks (can modify response)
+// 5. Send the response to the client
+// 6. Execute after-procedure hooks (for cleanup/logging)
+//
+// Parameters:
+//   - ctx: The request context
+//   - ufoCtx: The UFO context containing user-defined data
+//   - procName: The name of the procedure to invoke
+//   - rawInput: The raw JSON input for the procedure
+//   - httpAdapter: The HTTP adapter for writing the response
+//
+// Returns an error if the response cannot be written to the client.
 func (s *internalServer[T]) handleProcRequest(
 	ctx context.Context,
 	ufoCtx T,
 	procName string,
 	rawInput json.RawMessage,
-	reqResProvider ServerHTTPAdapter,
+	httpAdapter ServerHTTPAdapter,
 ) error {
 	response := Response[any]{Ok: true}
 
@@ -346,9 +612,9 @@ func (s *internalServer[T]) handleProcRequest(
 
 	// Execute Before middlewares if we haven't encountered an error yet
 	if response.Ok {
-		for _, fn := range s.beforeHandlerMiddlewares {
+		for _, hook := range s.hooksBeforeHandler {
 			var err error
-			if ctx, ufoCtx, err = fn(ctx, ufoCtx, "proc", procName); err != nil {
+			if ctx, ufoCtx, err = hook(ctx, ufoCtx, "proc", procName); err != nil {
 				response = Response[any]{
 					Ok:    false,
 					Error: asError(err),
@@ -373,35 +639,61 @@ func (s *internalServer[T]) handleProcRequest(
 		}
 	}
 
-	// Always execute After middlewares, regardless of any previous errors
-	for _, fn := range s.afterProcMiddlewares {
-		ctx, ufoCtx, response = fn(ctx, ufoCtx, procName, response)
+	// Execute before proc respond hooks
+	for _, hook := range s.hooksBeforeProcRespond {
+		response = hook(ctx, ufoCtx, procName, response)
 	}
 
 	// Write the response to the client
-	reqResProvider.SetHeader("Content-Type", "application/json")
-	_, err := reqResProvider.Write(response.Bytes())
+	httpAdapter.SetHeader("Content-Type", "application/json")
+	_, err := httpAdapter.Write(response.Bytes())
 	if err != nil {
 		return err
+	}
+
+	// Execute after proc hooks
+	for _, hook := range s.hooksAfterProc {
+		hook(ctx, ufoCtx, procName, response)
 	}
 
 	return nil
 }
 
-// handleStreamRequest processes a stream request
+// handleStreamRequest processes a stream RPC request by setting up Server-Sent Events,
+// executing the hook chain, and managing the stream lifecycle. This includes
+// validation, hook execution, stream handler invocation, and event emission.
+//
+// The processing flow is:
+// 1. Set up SSE headers and emit functions
+// 2. Validate stream name and implementation
+// 3. Execute before-handler hooks
+// 4. Invoke the stream handler with emit capability
+// 5. Execute after-stream hooks
+//
+// Stream handlers receive an emit function that allows them to send events to the client
+// in real-time. Each emitted event goes through before-emit and after-emit hooks.
+//
+// Parameters:
+//   - ctx: The request context
+//   - ufoCtx: The UFO context containing user-defined data
+//   - streamName: The name of the stream to invoke
+//   - rawInput: The raw JSON input for the stream
+//   - httpAdapter: The HTTP adapter for writing SSE responses
+//
+// Returns an error if the stream setup or emission fails.
 func (s *internalServer[T]) handleStreamRequest(
 	ctx context.Context,
 	ufoCtx T,
 	streamName string,
 	rawInput json.RawMessage,
-	reqResProvider ServerHTTPAdapter,
+	httpAdapter ServerHTTPAdapter,
 ) error {
 	// emit sends a response event to the client.
 	// If the client disconnects, it returns an error.
 	emit := func(data Response[any]) error {
 		// execute before emit middlewares
-		for _, fn := range s.beforeStreamEmitMiddlewares {
-			data = fn(ctx, ufoCtx, streamName, data)
+		for _, hook := range s.hooksBeforeStreamEmit {
+			data = hook(ctx, ufoCtx, streamName, data)
 		}
 
 		jsonData, err := json.Marshal(data)
@@ -410,18 +702,18 @@ func (s *internalServer[T]) handleStreamRequest(
 		}
 
 		resPayload := fmt.Sprintf("data: %s\n\n", jsonData)
-		_, err = reqResProvider.Write([]byte(resPayload))
+		_, err = httpAdapter.Write([]byte(resPayload))
 		if err != nil {
 			return err
 		}
 
-		if err := reqResProvider.Flush(); err != nil {
+		if err := httpAdapter.Flush(); err != nil {
 			return err
 		}
 
 		// execute after emit middlewares
-		for _, fn := range s.afterStreamEmitMiddlewares {
-			fn(ctx, ufoCtx, streamName, data)
+		for _, hook := range s.hooksAfterStreamEmit {
+			hook(ctx, ufoCtx, streamName, data)
 		}
 
 		return nil
@@ -444,9 +736,9 @@ func (s *internalServer[T]) handleStreamRequest(
 	}
 
 	// Upgrade the request to a stream
-	reqResProvider.SetHeader("Content-Type", "text/event-stream")
-	reqResProvider.SetHeader("Cache-Control", "no-cache")
-	reqResProvider.SetHeader("Connection", "keep-alive")
+	httpAdapter.SetHeader("Content-Type", "text/event-stream")
+	httpAdapter.SetHeader("Cache-Control", "no-cache")
+	httpAdapter.SetHeader("Connection", "keep-alive")
 
 	// Validate stream name
 	if !slices.Contains(s.streamNames, streamName) {
@@ -466,9 +758,9 @@ func (s *internalServer[T]) handleStreamRequest(
 	}
 
 	// Execute Before middlewares
-	for _, fn := range s.beforeHandlerMiddlewares {
+	for _, hook := range s.hooksBeforeHandler {
 		var err error
-		if ctx, ufoCtx, err = fn(ctx, ufoCtx, "stream", streamName); err != nil {
+		if ctx, ufoCtx, err = hook(ctx, ufoCtx, "stream", streamName); err != nil {
 			return emitError(err)
 		}
 	}
@@ -477,16 +769,16 @@ func (s *internalServer[T]) handleStreamRequest(
 	err := stream(ctx, ufoCtx, rawInput, emitSuccess)
 	if err != nil {
 		// execute after stream middlewares
-		for _, fn := range s.afterStreamMiddlewares {
-			fn(ctx, ufoCtx, streamName, err)
+		for _, hook := range s.hooksAfterStream {
+			hook(ctx, ufoCtx, streamName, err)
 		}
 
 		return emitError(err)
 	}
 
 	// execute after stream middlewares
-	for _, fn := range s.afterStreamMiddlewares {
-		fn(ctx, ufoCtx, streamName, nil)
+	for _, hook := range s.hooksAfterStream {
+		hook(ctx, ufoCtx, streamName, nil)
 	}
 
 	return nil
