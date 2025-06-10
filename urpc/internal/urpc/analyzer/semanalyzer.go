@@ -42,8 +42,7 @@ func newSemanalyzer(astSchema *ast.Schema) *semanalyzer {
 //   - A list of diagnostics that occurred during the analysis.
 //   - The first diagnostic converted to Error interface if any.
 func (a *semanalyzer) analyze() ([]Diagnostic, error) {
-	a.validateCustomTypeNames()
-	a.validateProcAndStreamNames()
+	a.validateUniqueResourceNames()
 	a.validateCustomTypeReferences()
 	a.validateTypeFieldUniqueness()
 	a.validateTypeCircularDependencies()
@@ -56,8 +55,9 @@ func (a *semanalyzer) analyze() ([]Diagnostic, error) {
 	return nil, nil
 }
 
-// validateCustomTypeNames validates the custom type names and detects duplicates.
-func (a *semanalyzer) validateCustomTypeNames() {
+// validateUniqueResourceNames validates the types, procedures and streams names and detects duplicates
+// between them.
+func (a *semanalyzer) validateUniqueResourceNames() {
 	visited := map[string]Positions{}
 
 	for _, typeDecl := range a.astSchema.GetTypes() {
@@ -67,7 +67,7 @@ func (a *semanalyzer) validateCustomTypeNames() {
 		if decl, isDecl := visited[typeName]; isDecl {
 			a.diagnostics = append(a.diagnostics, Diagnostic{
 				Positions: positions,
-				Message:   fmt.Sprintf("custom type \"%s\" is already declared at %s", typeName, decl.Pos.String()),
+				Message:   fmt.Sprintf("type name \"%s\" is not unique, it is already declared at %s", typeName, decl.Pos.String()),
 			})
 			continue
 		}
@@ -76,16 +76,11 @@ func (a *semanalyzer) validateCustomTypeNames() {
 		if !strutil.IsPascalCase(typeName) {
 			a.diagnostics = append(a.diagnostics, Diagnostic{
 				Positions: positions,
-				Message:   fmt.Sprintf("custom type name \"%s\" must be in PascalCase", typeName),
+				Message:   fmt.Sprintf("type name \"%s\" must be in PascalCase", typeName),
 			})
 			continue
 		}
 	}
-}
-
-// validateProcAndStreamNames validates the procedure names and detects duplicates.
-func (a *semanalyzer) validateProcAndStreamNames() {
-	visited := map[string]Positions{}
 
 	for _, procDecl := range a.astSchema.GetProcs() {
 		positions := Positions(procDecl.Positions)
@@ -94,7 +89,7 @@ func (a *semanalyzer) validateProcAndStreamNames() {
 		if decl, isDecl := visited[procName]; isDecl {
 			a.diagnostics = append(a.diagnostics, Diagnostic{
 				Positions: positions,
-				Message:   fmt.Sprintf("procedure \"%s\" is already declared at %s", procName, decl.Pos.String()),
+				Message:   fmt.Sprintf("procedure name \"%s\" is not unique, it is already declared at %s", procName, decl.Pos.String()),
 			})
 			continue
 		}
@@ -116,7 +111,7 @@ func (a *semanalyzer) validateProcAndStreamNames() {
 		if decl, isDecl := visited[streamName]; isDecl {
 			a.diagnostics = append(a.diagnostics, Diagnostic{
 				Positions: positions,
-				Message:   fmt.Sprintf("stream \"%s\" is already declared at %s", streamName, decl.Pos.String()),
+				Message:   fmt.Sprintf("stream name \"%s\" is not unique, it is already declared at %s", streamName, decl.Pos.String()),
 			})
 			continue
 		}
