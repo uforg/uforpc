@@ -17,6 +17,11 @@ import (
 // Server Types
 // -----------------------------------------------------------------------------
 
+const (
+	ServerHandlerTypeProc   = "proc"
+	ServerHandlerTypeStream = "stream"
+)
+
 // ServerHTTPAdapter defines the interface required by UFO RPC server to handle
 // incoming HTTP requests and write responses to clients. This abstraction allows
 // the server to work with different HTTP frameworks while maintaining the same
@@ -105,8 +110,9 @@ func (r *ServerNetHTTPAdapter) Flush() error {
 // concerns like authentication, logging, rate limiting, etc.
 //
 // The hook receives the current context, UFO context, handler type
-// ("proc" or "stream"), and handler name. It must return the potentially
-// modified context and UFO context, or an error to abort the request.
+// (ServerHandlerTypeProc or ServerHandlerTypeStream), and handler name.
+// It must return the potentially modified context and UFO context, or an
+// error to abort the request.
 //
 // If an error is returned, the request is terminated and an error response
 // is sent to the client.
@@ -516,8 +522,8 @@ func (s *internalServer[T]) handleRequest(
 		return s.writeProcResponse(httpAdapter, res)
 	}
 
-	isProc := jsonBody.Type == "proc"
-	isStream := jsonBody.Type == "stream"
+	isProc := jsonBody.Type == ServerHandlerTypeProc
+	isStream := jsonBody.Type == ServerHandlerTypeStream
 	if !isProc && !isStream {
 		res := Response[any]{
 			Ok:    false,
@@ -614,7 +620,7 @@ func (s *internalServer[T]) handleProcRequest(
 	if response.Ok {
 		for _, hook := range s.hooksBeforeHandler {
 			var err error
-			if ctx, ufoCtx, err = hook(ctx, ufoCtx, "proc", procName); err != nil {
+			if ctx, ufoCtx, err = hook(ctx, ufoCtx, ServerHandlerTypeProc, procName); err != nil {
 				response = Response[any]{
 					Ok:    false,
 					Error: asError(err),
@@ -760,7 +766,7 @@ func (s *internalServer[T]) handleStreamRequest(
 	// Execute Before middlewares
 	for _, hook := range s.hooksBeforeHandler {
 		var err error
-		if ctx, ufoCtx, err = hook(ctx, ufoCtx, "stream", streamName); err != nil {
+		if ctx, ufoCtx, err = hook(ctx, ufoCtx, ServerHandlerTypeStream, streamName); err != nil {
 			return emitError(err)
 		}
 	}
