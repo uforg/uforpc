@@ -40,22 +40,6 @@ func generateStreamTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Break()
 	}
 
-	g.Line("// StreamTypes defines the interface for all stream types.")
-	g.Line("type StreamTypes interface {")
-	g.Block(func() {
-		for _, streamNode := range sch.GetStreamNodes() {
-			name := streamNode.Name
-
-			inputName := fmt.Sprintf("%sInput", strutil.ToPascalCase(name))
-			responseName := fmt.Sprintf("%sResponse", strutil.ToPascalCase(name))
-
-			g.Linef("// %s implements the %s stream.", name, name)
-			g.Linef("%s(input %s) %s", name, inputName, responseName)
-		}
-	})
-	g.Line("}")
-	g.Break()
-
 	g.Line("// ufoStreamNames is a list of all stream names.")
 	g.Line("var ufoStreamNames = []string{")
 	g.Block(func() {

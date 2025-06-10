@@ -40,22 +40,6 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Break()
 	}
 
-	g.Line("// ProcedureTypes defines the interface for all procedure types.")
-	g.Line("type ProcedureTypes interface {")
-	g.Block(func() {
-		for _, procNode := range sch.GetProcNodes() {
-			name := procNode.Name
-
-			inputName := fmt.Sprintf("%sInput", strutil.ToPascalCase(name))
-			responseName := fmt.Sprintf("%sResponse", strutil.ToPascalCase(name))
-
-			g.Linef("// %s implements the %s procedure.", name, name)
-			g.Linef("%s(input %s) %s", name, inputName, responseName)
-		}
-	})
-	g.Line("}")
-	g.Break()
-
 	g.Line("// ufoProcedureNames is a list of all procedure names.")
 	g.Line("var ufoProcedureNames = []string{")
 	g.Block(func() {
