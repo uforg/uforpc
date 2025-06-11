@@ -12,8 +12,8 @@ type Config struct {
 	// OutputDir is the directory to output the generated playground to.
 	OutputDir string `toml:"output_dir"`
 
-	// DefaultEndpoint is the default urpc endpoint to use.
-	DefaultEndpoint string `toml:"default_endpoint"`
+	// DefaultBaseURL is the default urpc base URL to use.
+	DefaultBaseURL string `toml:"default_base_url"`
 
 	// DefaultHeaders is the default headers to use.
 	DefaultHeaders []Header `toml:"default_headers"`

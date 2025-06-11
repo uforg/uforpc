@@ -28,7 +28,7 @@ func Generate(absConfigDir string, sch *ast.Schema, config Config) error {
 		return fmt.Errorf("error writing formatted schema to %s: %w", formattedSchemaPath, err)
 	}
 
-	hasConfig := config.DefaultEndpoint != "" || len(config.DefaultHeaders) > 0
+	hasConfig := config.DefaultBaseURL != "" || len(config.DefaultHeaders) > 0
 	if hasConfig {
 		type jsonConfigHeader struct {
 			Key   string `json:"key"`
@@ -36,8 +36,8 @@ func Generate(absConfigDir string, sch *ast.Schema, config Config) error {
 		}
 
 		type jsonConfig struct {
-			Endpoint string             `json:"endpoint,omitempty,omitzero"`
-			Headers  []jsonConfigHeader `json:"headers,omitempty,omitzero"`
+			BaseURL string             `json:"baseUrl,omitempty,omitzero"`
+			Headers []jsonConfigHeader `json:"headers,omitempty,omitzero"`
 		}
 
 		jsonConfigHeaders := make([]jsonConfigHeader, len(config.DefaultHeaders))
@@ -46,8 +46,8 @@ func Generate(absConfigDir string, sch *ast.Schema, config Config) error {
 		}
 
 		jsonConf := jsonConfig{
-			Endpoint: config.DefaultEndpoint,
-			Headers:  jsonConfigHeaders,
+			BaseURL: config.DefaultBaseURL,
+			Headers: jsonConfigHeaders,
 		}
 
 		jsonConfigBytes, err := json.Marshal(jsonConf)

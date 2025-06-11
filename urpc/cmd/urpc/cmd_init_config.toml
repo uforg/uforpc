@@ -10,7 +10,7 @@ schema = "{{schema_path}}"
 
 # [playground]
 # output_dir = "./ufogen/playground"
-# default_endpoint = "http://example.com/api/v1/urpc"
+# default_base_url = "http://example.com/api/v1/urpc"
 # default_headers = [
 #   { key = "X-Foo", value = "bar" },
 #   { key = "X-Baz", value = "qux" },
