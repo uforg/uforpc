@@ -1,5 +1,6 @@
 # UFO RPC Code generator config file
-# Read more at https://github.com/uforg/uforpc
+# Star the repo at https://github.com/uforg/uforpc
+# Read more about this file at https://uforpc.uforg.dev/r/configfile
 
 version = 1
 
