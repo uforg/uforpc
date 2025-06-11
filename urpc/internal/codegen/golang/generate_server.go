@@ -417,7 +417,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//   http.HandleFunc(\"POST /api/v1/urpc/{operationName}\", func(w http.ResponseWriter, r *http.Request) {")
 	g.Line("//       ctx := r.Context()")
 	g.Line("//       ufoCtx := AppContext{DB: db, Foo: \"bar\"}")
-	g.Line("//       operationName := req.PathValue(\"operationName\")")
+	g.Line("//       operationName := r.PathValue(\"operationName\")")
 	g.Line("//       httpAdapter := NewServerNetHTTPAdapter(w, r)")
 	g.Line("//       server.HandleRequest(ctx, ufoCtx, operationName, httpAdapter)")
 	g.Line("//   })")
