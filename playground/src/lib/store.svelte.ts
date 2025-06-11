@@ -47,7 +47,7 @@ export interface Header {
 
 export interface Store {
   loaded: boolean;
-  endpoint: string;
+  baseUrl: string;
   headers: Header[];
   urpcSchema: string;
   jsonSchema: Schema;
@@ -55,7 +55,7 @@ export interface Store {
 
 export const store: Store = $state({
   loaded: false,
-  endpoint: "",
+  baseUrl: "",
   headers: [],
   urpcSchema: "version 1",
   jsonSchema: { version: 1, nodes: [] },
@@ -77,9 +77,9 @@ export const loadStore = async () => {
   // Prioritize the config stored in the browser's local storage
   await loadDefaultConfig();
 
-  const endpoint = localStorage.getItem("endpoint");
-  if (endpoint) {
-    store.endpoint = endpoint;
+  const baseUrl = localStorage.getItem("baseUrl");
+  if (baseUrl) {
+    store.baseUrl = baseUrl;
   }
 
   const headers = localStorage.getItem("headers");
@@ -96,7 +96,7 @@ export const loadStore = async () => {
  * Should be called when the store is updated.
  */
 export const saveStore = () => {
-  localStorage.setItem("endpoint", store.endpoint);
+  localStorage.setItem("baseUrl", store.baseUrl);
   localStorage.setItem("headers", JSON.stringify(store.headers));
 };
 
@@ -147,10 +147,10 @@ export const loadDefaultConfig = async () => {
   }
   const config = await response.json();
 
-  if (typeof config.endpoint === "string" && config.endpoint.trim() !== "") {
-    store.endpoint = config.endpoint;
+  if (typeof config.baseUrl === "string" && config.baseUrl.trim() !== "") {
+    store.baseUrl = config.baseUrl;
   } else {
-    store.endpoint = `${getCurrentHost()}/api/v1/urpc`;
+    store.baseUrl = `${getCurrentHost()}/api/v1/urpc`;
   }
 
   if (Array.isArray(config.headers)) {

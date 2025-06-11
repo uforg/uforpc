@@ -38,7 +38,7 @@
         toast.info("Stream stopped");
       };
 
-      const endpoint = joinPath([store.endpoint, stream.name]);
+      const endpoint = joinPath([store.baseUrl, stream.name]);
       const response = await fetch(endpoint, {
         method: "POST",
         body: JSON.stringify(value.root ?? {}),

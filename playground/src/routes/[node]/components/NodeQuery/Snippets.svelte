@@ -34,7 +34,7 @@
   });
 
   let curl = $derived.by(() => {
-    const endpoint = joinPath([store.endpoint, name]);
+    const endpoint = joinPath([store.baseUrl, name]);
     const payload = value.root ?? {};
     let payloadStr = JSON.stringify(payload, null, 2);
     payloadStr = payloadStr.replace(/'/g, "'\\''");

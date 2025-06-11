@@ -38,7 +38,7 @@
         toast.info("Procedure call cancelled");
       };
 
-      const endpoint = joinPath([store.endpoint, proc.name]);
+      const endpoint = joinPath([store.baseUrl, proc.name]);
       const response = await fetch(endpoint, {
         method: "POST",
         body: JSON.stringify(value.root ?? {}),

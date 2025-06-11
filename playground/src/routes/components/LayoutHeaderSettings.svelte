@@ -59,7 +59,7 @@
 
   <div class="mt-4 space-y-4">
     <fieldset class="fieldset">
-      <legend class="fieldset-legend">Endpoint</legend>
+      <legend class="fieldset-legend">Base URL</legend>
       <label class="input w-full">
         <Link class="size-4" />
         <input
@@ -67,10 +67,15 @@
           class="grow"
           spellcheck="false"
           placeholder="https://example.com/api/v1/urpc"
-          bind:value={store.endpoint}
+          bind:value={store.baseUrl}
         />
       </label>
-      <p class="label">The endpoint where the UFO RPC server is running.</p>
+      <p class="label text-wrap">
+        This is the base URL where the UFO RPC server is running, all requests
+        will be sent to {`<base-url>/{operationName}`}
+        where {`{operationName}`} is the name of the procedure or stream you want
+        to call.
+      </p>
     </fieldset>
 
     <fieldset class="fieldset">
