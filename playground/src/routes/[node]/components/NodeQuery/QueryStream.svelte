@@ -2,6 +2,7 @@
   import { Info, Loader, MoveDownLeft, MoveUpRight, Zap } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
 
+  import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
   import type { StreamDefinitionNode } from "$lib/urpcTypes";
 
@@ -37,13 +38,10 @@
         toast.info("Stream stopped");
       };
 
-      const response = await fetch(store.endpoint, {
+      const endpoint = joinPath([store.endpoint, stream.name]);
+      const response = await fetch(endpoint, {
         method: "POST",
-        body: JSON.stringify({
-          type: "stream",
-          name: stream.name,
-          input: value.root,
-        }),
+        body: JSON.stringify(value.root ?? {}),
         headers: {
           ...getHeadersObject(),
           Accept: "text/event-stream",

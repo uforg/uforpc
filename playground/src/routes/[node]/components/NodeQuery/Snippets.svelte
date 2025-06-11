@@ -2,6 +2,7 @@
   import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
   import { fade, slide } from "svelte/transition";
 
+  import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
@@ -33,16 +34,12 @@
   });
 
   let curl = $derived.by(() => {
-    const payload = {
-      type: type,
-      name: name,
-      input: value.root ?? {},
-    };
-
+    const endpoint = joinPath([store.endpoint, name]);
+    const payload = value.root ?? {};
     let payloadStr = JSON.stringify(payload, null, 2);
     payloadStr = payloadStr.replace(/'/g, "'\\''");
 
-    let c = `curl -X POST ${store.endpoint} \\\n`;
+    let c = `curl -X POST ${endpoint} \\\n`;
 
     if (type === "stream") {
       c += "-N \\\n";

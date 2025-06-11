@@ -2,6 +2,7 @@
   import { Info, Loader, MoveDownLeft, MoveUpRight, Zap } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
 
+  import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
 
@@ -37,13 +38,10 @@
         toast.info("Procedure call cancelled");
       };
 
-      const response = await fetch(store.endpoint, {
+      const endpoint = joinPath([store.endpoint, proc.name]);
+      const response = await fetch(endpoint, {
         method: "POST",
-        body: JSON.stringify({
-          type: "proc",
-          name: proc.name,
-          input: value.root,
-        }),
+        body: JSON.stringify(value.root ?? {}),
         headers: getHeadersObject(),
         signal: signal,
       });
