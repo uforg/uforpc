@@ -18,8 +18,8 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	ServerHandlerTypeProc   = "proc"
-	ServerHandlerTypeStream = "stream"
+	ServerOperationTypeProc   = "proc"
+	ServerOperationTypeStream = "stream"
 )
 
 // ServerHTTPAdapter defines the interface required by UFO RPC server to handle
@@ -109,8 +109,8 @@ func (r *ServerNetHTTPAdapter) Flush() error {
 // any procedure or stream handler is invoked. This allows for cross-cutting
 // concerns like authentication, logging, rate limiting, etc.
 //
-// The hook receives the current context, UFO context, handler type
-// (ServerHandlerTypeProc or ServerHandlerTypeStream), and handler name.
+// The hook receives the current context, UFO context, operation type
+// (ServerOperationTypeProc or ServerOperationTypeStream), and operation name.
 // It must return the potentially modified context and UFO context, or an
 // error to abort the request.
 //
@@ -119,8 +119,8 @@ func (r *ServerNetHTTPAdapter) Flush() error {
 type ServerHookBeforeHandler[T any] func(
 	ctx context.Context,
 	ufoCtx T,
-	handlerType string,
-	handlerName string,
+	operationType string,
+	operationName string,
 ) (context.Context, T, error)
 
 // ServerHookBeforeProcRespond defines a hook function that executes before
@@ -209,8 +209,15 @@ type ServerHookAfterStreamEmit[T any] func(
 type internalServer[T any] struct {
 	// procNames contains the list of all registered procedure names
 	procNames []string
+	// procNamesMap contains the list of all registered procedure names
+	procNamesMap map[string]bool
 	// streamNames contains the list of all registered stream names
 	streamNames []string
+	// streamNamesMap contains the list of all registered stream names
+	streamNamesMap map[string]bool
+	// operationNamesMap contains the list of all registered operation names
+	// and its corresponding type
+	operationNamesMap map[string]string
 	// handlersMu protects all handler maps and hook slices from concurrent access
 	handlersMu sync.RWMutex
 	// procHandlers maps procedure names to their implementation functions
@@ -252,9 +259,24 @@ func newInternalServer[T any](
 	procNames []string,
 	streamNames []string,
 ) *internalServer[T] {
+	procNamesMap := make(map[string]bool)
+	streamNamesMap := make(map[string]bool)
+	operationNames := make(map[string]string)
+	for _, procName := range procNames {
+		procNamesMap[procName] = true
+		operationNames[procName] = ServerOperationTypeProc
+	}
+	for _, streamName := range streamNames {
+		streamNamesMap[streamName] = true
+		operationNames[streamName] = ServerOperationTypeStream
+	}
+
 	return &internalServer[T]{
 		procNames:              procNames,
+		procNamesMap:           procNamesMap,
 		streamNames:            streamNames,
+		streamNamesMap:         streamNamesMap,
+		operationNamesMap:      operationNames,
 		handlersMu:             sync.RWMutex{},
 		procHandlers:           map[string]func(ctx context.Context, ufoCtx T, input json.RawMessage) (any, error){},
 		procInputHandlers:      map[string]func(ctx context.Context, ufoCtx T, input any) (any, error){},
@@ -489,32 +511,27 @@ func (s *internalServer[T]) setStreamInputHandler(
 // determining the request type (procedure or stream), and dispatching to the
 // appropriate handler. This is the main entry point for all RPC requests.
 //
-// The request body must contain JSON with the following structure:
-//   - type: "proc" for procedures or "stream" for streams
-//   - name: The name of the procedure or stream to invoke
-//   - input: The input data for the handler (can be any JSON value)
+// The request body can contain JSON with the input data for the handler.
 //
 // Parameters:
 //   - ctx: The request context
 //   - ufoCtx: The UFO context containing user-defined data
+//   - operationName: The name of the procedure or stream to invoke
 //   - httpAdapter: The HTTP adapter for reading requests and writing responses
 //
 // Returns an error if request processing fails at the transport level.
 func (s *internalServer[T]) handleRequest(
 	ctx context.Context,
 	ufoCtx T,
+	operationName string,
 	httpAdapter ServerHTTPAdapter,
 ) error {
 	if httpAdapter == nil {
 		return fmt.Errorf("ServerRequestResponseProvider is nil, please provide a valid provider")
 	}
 
-	var jsonBody struct {
-		Type  string          `json:"type"` // "proc" or "stream"
-		Name  string          `json:"name"`
-		Input json.RawMessage `json:"input"`
-	}
-	if err := json.NewDecoder(httpAdapter.RequestBody()).Decode(&jsonBody); err != nil {
+	var input json.RawMessage
+	if err := json.NewDecoder(httpAdapter.RequestBody()).Decode(&input); err != nil {
 		res := Response[any]{
 			Ok:    false,
 			Error: Error{Message: "Invalid request body"},
@@ -522,12 +539,12 @@ func (s *internalServer[T]) handleRequest(
 		return s.writeProcResponse(httpAdapter, res)
 	}
 
-	isProc := jsonBody.Type == ServerHandlerTypeProc
-	isStream := jsonBody.Type == ServerHandlerTypeStream
-	if !isProc && !isStream {
+	operationType, operationExists := s.operationNamesMap[operationName]
+	isStream := operationType == ServerOperationTypeStream
+	if !operationExists {
 		res := Response[any]{
 			Ok:    false,
-			Error: Error{Message: "Invalid request body, type must be 'proc' or 'stream'"},
+			Error: Error{Message: "Invalid operation name"},
 		}
 		return s.writeProcResponse(httpAdapter, res)
 	}
@@ -537,10 +554,10 @@ func (s *internalServer[T]) handleRequest(
 	defer s.handlersMu.RUnlock()
 
 	if isStream {
-		return s.handleStreamRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, httpAdapter)
+		return s.handleStreamRequest(ctx, ufoCtx, operationName, input, httpAdapter)
 	}
 
-	return s.handleProcRequest(ctx, ufoCtx, jsonBody.Name, jsonBody.Input, httpAdapter)
+	return s.handleProcRequest(ctx, ufoCtx, operationName, input, httpAdapter)
 }
 
 // writeProcResponse writes a procedure response to the client as JSON.
@@ -620,7 +637,7 @@ func (s *internalServer[T]) handleProcRequest(
 	if response.Ok {
 		for _, hook := range s.hooksBeforeHandler {
 			var err error
-			if ctx, ufoCtx, err = hook(ctx, ufoCtx, ServerHandlerTypeProc, procName); err != nil {
+			if ctx, ufoCtx, err = hook(ctx, ufoCtx, ServerOperationTypeProc, procName); err != nil {
 				response = Response[any]{
 					Ok:    false,
 					Error: asError(err),
@@ -766,7 +783,7 @@ func (s *internalServer[T]) handleStreamRequest(
 	// Execute Before middlewares
 	for _, hook := range s.hooksBeforeHandler {
 		var err error
-		if ctx, ufoCtx, err = hook(ctx, ufoCtx, ServerHandlerTypeStream, streamName); err != nil {
+		if ctx, ufoCtx, err = hook(ctx, ufoCtx, ServerOperationTypeStream, streamName); err != nil {
 			return emitError(err)
 		}
 	}
