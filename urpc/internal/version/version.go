@@ -2,7 +2,7 @@ package version
 
 import "strings"
 
-const Version = "0.1.4"
+const Version = "0.2.0"
 const VersionWithPrefix = "v" + Version
 
 var AsciiArt = strings.TrimSpace(`
