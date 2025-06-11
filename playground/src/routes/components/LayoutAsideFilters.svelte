@@ -5,13 +5,18 @@
     CornerRightDown,
     Funnel,
     FunnelX,
+    Search,
     Type,
+    X,
   } from "@lucide/svelte";
 
   import { uiStore } from "$lib/uiStore.svelte";
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
+  const searchTooltip = $derived(
+    uiStore.asideSearchOpen ? "Close search" : "Open search",
+  );
   const docsTooltip = $derived(
     uiStore.asideHideDocs ? "Show documentation" : "Hide documentation",
   );
@@ -24,6 +29,22 @@
   const streamsTooltip = $derived(
     uiStore.asideHideStreams ? "Show streams" : "Hide streams",
   );
+
+  let searchInput: HTMLInputElement | null = $state(null);
+
+  function openSearch() {
+    uiStore.asideSearchOpen = true;
+    uiStore.asideSearchQuery = "";
+
+    setTimeout(() => {
+      searchInput?.focus();
+    }, 100);
+  }
+
+  function closeSearch() {
+    uiStore.asideSearchOpen = false;
+    uiStore.asideSearchQuery = "";
+  }
 
   function toggleDocs() {
     uiStore.asideHideDocs = !uiStore.asideHideDocs;
@@ -42,6 +63,8 @@
   }
 
   function resetFilters() {
+    uiStore.asideSearchOpen = false;
+    uiStore.asideSearchQuery = "";
     uiStore.asideHideDocs = false;
     uiStore.asideHideTypes = true;
     uiStore.asideHideProcs = false;
@@ -49,22 +72,40 @@
   }
 </script>
 
-<div class="w-full px-4 py-2">
-  <div class="join flex">
-    <Tooltip content="Reset filters to default" placement="bottom">
-      <button
-        class="btn btn-sm join-item group rounded-l-field flex-grow"
-        onclick={resetFilters}
-      >
-        <Funnel class="size-4 group-hover:hidden" />
-        <FunnelX class="hidden size-4 group-hover:inline" />
-        <span>Filters</span>
+<div class="flex w-full justify-between space-x-[5px] px-4 py-2">
+  <Tooltip content="Reset filters to default" placement="bottom">
+    <button class="btn btn-sm btn-square group" onclick={resetFilters}>
+      <Funnel class="size-4 group-hover:hidden" />
+      <FunnelX class="hidden size-4 group-hover:inline" />
+    </button>
+  </Tooltip>
+
+  {#if uiStore.asideSearchOpen}
+    <input
+      type="text"
+      class="input input-sm flex-grow"
+      placeholder="Search..."
+      bind:this={searchInput}
+      bind:value={uiStore.asideSearchQuery}
+    />
+
+    <Tooltip content={searchTooltip} placement="bottom">
+      <button class={["btn btn-sm btn-square relative"]} onclick={closeSearch}>
+        <X class="size-4" />
+      </button>
+    </Tooltip>
+  {/if}
+
+  {#if !uiStore.asideSearchOpen}
+    <Tooltip content={searchTooltip} placement="bottom">
+      <button class={["btn btn-sm btn-square relative"]} onclick={openSearch}>
+        <Search class="size-4" />
       </button>
     </Tooltip>
     <Tooltip content={docsTooltip} placement="bottom">
       <button
         class={[
-          "btn btn-sm join-item relative flex-none",
+          "btn btn-sm btn-square relative",
           uiStore.asideHideDocs && "toggle-disabled",
         ]}
         onclick={toggleDocs}
@@ -75,7 +116,7 @@
     <Tooltip content={typesTooltip} placement="bottom">
       <button
         class={[
-          "btn btn-sm join-item relative flex-none",
+          "btn btn-sm btn-square relative",
           uiStore.asideHideTypes && "toggle-disabled",
         ]}
         onclick={toggleTypes}
@@ -86,7 +127,7 @@
     <Tooltip content={procsTooltip} placement="bottom">
       <button
         class={[
-          "btn btn-sm join-item rounded-r-field relative flex-none",
+          "btn btn-sm btn-square relative",
           uiStore.asideHideProcs && "toggle-disabled",
         ]}
         onclick={toggleProcs}
@@ -97,7 +138,7 @@
     <Tooltip content={streamsTooltip} placement="bottom">
       <button
         class={[
-          "btn btn-sm join-item relative flex-none",
+          "btn btn-sm btn-square relative",
           uiStore.asideHideStreams && "toggle-disabled",
         ]}
         onclick={toggleStreams}
@@ -105,7 +146,7 @@
         <CornerRightDown class="size-4" />
       </button>
     </Tooltip>
-  </div>
+  {/if}
 </div>
 
 <style lang="postcss">

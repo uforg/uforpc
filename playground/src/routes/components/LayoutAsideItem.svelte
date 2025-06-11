@@ -9,8 +9,10 @@
   } from "@lucide/svelte";
 
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
+  import { markSearchHints } from "$lib/helpers/markSearchHints";
   import { slugify } from "$lib/helpers/slugify";
   import type { store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
@@ -24,11 +26,16 @@
     if (node.kind === "type") return node.name;
     if (node.kind === "proc") return node.name;
     if (node.kind === "stream") return node.name;
-    if (node.kind === "doc") {
-      return getMarkdownTitle(node.content);
+    if (node.kind === "doc") return getMarkdownTitle(node.content);
+    return "unknown";
+  });
+
+  let nameHtml = $derived.by(() => {
+    if (!uiStore.asideSearchOpen || !uiStore.asideSearchQuery) {
+      return name;
     }
 
-    return "unknown";
+    return markSearchHints([uiStore.asideSearchQuery], name);
   });
 
   let title = $derived.by(() => {
@@ -106,7 +113,7 @@
         },
       ]}
     >
-      {name}
+      {@html nameHtml}
     </span>
 
     {#if isDeprecated}

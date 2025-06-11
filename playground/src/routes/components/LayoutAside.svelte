@@ -3,8 +3,10 @@
   import { Home } from "@lucide/svelte";
   import { onMount } from "svelte";
 
+  import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { store } from "$lib/store.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+  import type { Schema } from "$lib/urpcTypes";
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
@@ -28,6 +30,37 @@
   });
 
   let isHome = $derived(page.url.hash === "" || page.url.hash === "#/");
+
+  function getNodeName(node: Schema["nodes"][number]) {
+    if (node.kind === "type") return node.name;
+    if (node.kind === "proc") return node.name;
+    if (node.kind === "stream") return node.name;
+    if (node.kind === "doc") return getMarkdownTitle(node.content);
+    return "unknown";
+  }
+
+  function shouldShowNode(
+    kind: string,
+    node: Schema["nodes"][number],
+  ): boolean {
+    if (node.kind !== kind) return false;
+
+    if (uiStore.asideSearchOpen) {
+      if (uiStore.asideSearchQuery === "") return true;
+
+      // Do the search
+      const name = getNodeName(node).toLowerCase();
+      const query = uiStore.asideSearchQuery.toLowerCase();
+      return name.includes(query);
+    }
+
+    if (node.kind === "doc") return !uiStore.asideHideDocs;
+    if (node.kind === "type") return !uiStore.asideHideTypes;
+    if (node.kind === "proc") return !uiStore.asideHideProcs;
+    if (node.kind === "stream") return !uiStore.asideHideStreams;
+
+    return false;
+  }
 </script>
 
 <aside
@@ -82,16 +115,16 @@
     </Tooltip>
 
     {#each store.jsonSchema.nodes as node}
-      {#if node.kind === "doc" && !uiStore.asideHideDocs}
+      {#if shouldShowNode("doc", node)}
         <LayoutAsideItem {node} />
       {/if}
-      {#if node.kind === "type" && !uiStore.asideHideTypes}
+      {#if shouldShowNode("type", node)}
         <LayoutAsideItem {node} />
       {/if}
-      {#if node.kind === "proc" && !uiStore.asideHideProcs}
+      {#if shouldShowNode("proc", node)}
         <LayoutAsideItem {node} />
       {/if}
-      {#if node.kind === "stream" && !uiStore.asideHideStreams}
+      {#if shouldShowNode("stream", node)}
         <LayoutAsideItem {node} />
       {/if}
     {/each}

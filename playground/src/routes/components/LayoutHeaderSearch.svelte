@@ -10,8 +10,8 @@
   } from "@lucide/svelte";
 
   import {
-    markSearchHints,
-    truncateWithMark,
+    markSearchHintsMinisearch,
+    truncateWithMarkMinisearch,
   } from "$lib/helpers/markSearchHints";
   import { miniSearch } from "$lib/store.svelte";
 
@@ -107,10 +107,10 @@
             {#if result.kind === "stream"}
               <CornerRightDown class="mr-2 size-4 flex-none" />
             {/if}
-            {@html markSearchHints(result, result.name)}
+            {@html markSearchHintsMinisearch(result, result.name)}
           </span>
           <p class="truncate text-sm">
-            {@html truncateWithMark(result, result.doc)}
+            {@html truncateWithMarkMinisearch(result, result.doc)}
           </p>
         </a>
       {/each}

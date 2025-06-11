@@ -7,11 +7,8 @@ import type { SearchResult } from "minisearch";
  * @param textToMark - The text string where terms should be highlighted
  * @returns The text string with matching terms wrapped in <mark> tags
  */
-export function markSearchHints(
-  searchResult: SearchResult,
-  textToMark: string,
-) {
-  const regexp = new RegExp(`(${searchResult.terms.join("|")})`, "gi");
+export function markSearchHints(searchResult: string[], textToMark: string) {
+  const regexp = new RegExp(`(${searchResult.join("|")})`, "gi");
   return textToMark.replace(regexp, "<mark>$1</mark>");
 }
 
@@ -24,10 +21,7 @@ export function markSearchHints(
  *          the first 3 words, returns the full text. Otherwise, shows 3 words before
  *          the match and everything after, with an ellipsis prefix.
  */
-export function truncateWithMark(
-  searchResult: SearchResult,
-  textToMark: string,
-) {
+export function truncateWithMark(searchResult: string[], textToMark: string) {
   // First mark the text
   const markedText = markSearchHints(searchResult, textToMark);
 
@@ -57,4 +51,34 @@ export function truncateWithMark(
   const truncatedWords = words.slice(startIndex);
 
   return `... ${truncatedWords.join(" ")}`;
+}
+
+/**
+ * Same as markSearchHints but for minisearch
+ *
+ * @param searchResult - The search result containing the terms to highlight
+ * @param textToMark - The text string where terms should be highlighted
+ * @returns The text string with matching terms wrapped in <mark> tags
+ */
+export function markSearchHintsMinisearch(
+  searchResult: SearchResult,
+  textToMark: string,
+) {
+  return markSearchHints(searchResult.terms, textToMark);
+}
+
+/**
+ * Same as truncateWithMark but for minisearch
+ *
+ * @param searchResult - The search result containing the terms to highlight
+ * @param textToMark - The text string to truncate and highlight
+ * @returns The truncated text with matching terms highlighted. If the match is within
+ *          the first 3 words, returns the full text. Otherwise, shows 3 words before
+ *          the match and everything after, with an ellipsis prefix.
+ */
+export function truncateWithMarkMinisearch(
+  searchResult: SearchResult,
+  textToMark: string,
+) {
+  return truncateWithMark(searchResult.terms, textToMark);
 }

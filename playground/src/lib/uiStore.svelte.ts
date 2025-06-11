@@ -96,6 +96,8 @@ export interface UiStore {
   loaded: boolean;
   theme: Theme;
   codeSnippetsOpen: boolean;
+  asideSearchOpen: boolean;
+  asideSearchQuery: string;
   asideHideDocs: boolean;
   asideHideTypes: boolean;
   asideHideProcs: boolean;
@@ -110,6 +112,8 @@ export interface UiStore {
 const localStorageKeys = {
   theme: "theme",
   codeSnippetsOpen: "codeSnippetsOpen",
+  asideSearchOpen: "asideSearchOpen",
+  asideSearchQuery: "asideSearchQuery",
   asideHideDocs: "asideHideDocs",
   asideHideTypes: "asideHideTypes",
   asideHideProcs: "asideHideProcs",
@@ -120,6 +124,8 @@ export const uiStore = $state<UiStore>({
   loaded: false,
   theme: "dark",
   codeSnippetsOpen: false,
+  asideSearchOpen: false,
+  asideSearchQuery: "",
   asideHideDocs: false,
   asideHideTypes: true,
   asideHideProcs: false,
@@ -157,6 +163,18 @@ export const loadUiStore = () => {
   uiStore.codeSnippetsOpen = codeSnippetsOpen
     ? codeSnippetsOpen === "true"
     : true;
+
+  // Load aside search open state from local storage
+  const asideSearchOpen = globalThis.localStorage.getItem(
+    localStorageKeys.asideSearchOpen,
+  );
+  uiStore.asideSearchOpen = asideSearchOpen === "true";
+
+  // Load aside search query from local storage
+  const asideSearchQuery = globalThis.localStorage.getItem(
+    localStorageKeys.asideSearchQuery,
+  );
+  uiStore.asideSearchQuery = asideSearchQuery ?? "";
 
   // Load aside hide docs from local storage
   const asideHideDocs = globalThis.localStorage.getItem(
@@ -201,16 +219,22 @@ export const saveUiStore = () => {
     uiStore.codeSnippetsOpen.toString(),
   );
 
+  // Save aside search open state to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.asideSearchOpen,
+    uiStore.asideSearchOpen.toString(),
+  );
+
+  // Save aside search query to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.asideSearchQuery,
+    uiStore.asideSearchQuery,
+  );
+
   // Save aside hide docs to local storage
   globalThis.localStorage.setItem(
     localStorageKeys.asideHideDocs,
     uiStore.asideHideDocs.toString(),
-  );
-
-  // Save aside hide streams to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.asideHideStreams,
-    uiStore.asideHideStreams.toString(),
   );
 
   // Save aside hide types to local storage
@@ -223,6 +247,12 @@ export const saveUiStore = () => {
   globalThis.localStorage.setItem(
     localStorageKeys.asideHideProcs,
     uiStore.asideHideProcs.toString(),
+  );
+
+  // Save aside hide streams to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.asideHideStreams,
+    uiStore.asideHideStreams.toString(),
   );
 };
 
