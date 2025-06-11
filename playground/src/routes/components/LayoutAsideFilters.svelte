@@ -43,7 +43,7 @@
 
   function resetFilters() {
     uiStore.asideHideDocs = false;
-    uiStore.asideHideTypes = false;
+    uiStore.asideHideTypes = true;
     uiStore.asideHideProcs = false;
     uiStore.asideHideStreams = false;
   }
@@ -51,7 +51,7 @@
 
 <div class="w-full px-4 py-2">
   <div class="join flex">
-    <Tooltip content="Reset filters" placement="bottom">
+    <Tooltip content="Reset filters to default" placement="bottom">
       <button
         class="btn btn-sm join-item group rounded-l-field flex-grow"
         onclick={resetFilters}

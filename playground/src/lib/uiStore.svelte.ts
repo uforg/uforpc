@@ -121,9 +121,9 @@ export const uiStore = $state<UiStore>({
   theme: "dark",
   codeSnippetsOpen: false,
   asideHideDocs: false,
-  asideHideStreams: false,
-  asideHideTypes: false,
+  asideHideTypes: true,
   asideHideProcs: false,
+  asideHideStreams: false,
   app: { ...defaultUiStoreDimensions },
   aside: { ...defaultUiStoreDimensions },
   contentWrapper: { ...defaultUiStoreDimensions },
@@ -168,7 +168,7 @@ export const loadUiStore = () => {
   const asideHideTypes = globalThis.localStorage.getItem(
     localStorageKeys.asideHideTypes,
   );
-  uiStore.asideHideTypes = asideHideTypes === "true";
+  uiStore.asideHideTypes = asideHideTypes ? asideHideTypes === "true" : true;
 
   // Load aside hide procs from local storage
   const asideHideProcs = globalThis.localStorage.getItem(
