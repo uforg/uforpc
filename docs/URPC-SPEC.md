@@ -41,10 +41,6 @@ proc <ProcedureName> {
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
   }
-
-  meta {
-    <key>: <value>
-  }
 }
 
 """
@@ -57,10 +53,6 @@ stream <StreamName> {
 
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
-  }
-
-  meta {
-    <key>: <value>
   }
 }
 ```
@@ -164,10 +156,6 @@ proc <ProcedureName> {
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
   }
-
-  meta {
-    <key>: <value>
-  }
 }
 ```
 
@@ -181,35 +169,6 @@ generated documentation.
 
 The input of a procedure defines the parameters that are sent to the server for
 processing. The output defines the structure of the response data.
-
-### 4.3 Procedure metadata
-
-The metadata of a procedure is a map of key-value pairs that can be used to
-provide additional information about the procedure.
-
-This information will be available in the generated code and can be used for any
-purpose you want.
-
-There is no built-in metadata, it's completely up to you to define it.
-
-You can only define values of the following types:
-
-- string
-- int
-- float
-- bool
-
-```urpc
-meta {
-  // Allowed values
-  <key>: string|int|float|bool
-
-  // Examples
-  cache: true
-  ttl: 300
-  auth: "required"
-}
-```
 
 ## 5. Defining Streams
 
@@ -229,10 +188,6 @@ stream <StreamName> {
   output {
     <field>[?]: <PrimitiveType> | <CustomType>
   }
-
-  meta {
-    <key>: <value>
-  }
 }
 ```
 
@@ -251,11 +206,6 @@ subscription. These parameters determine what data the client wants to receive.
 The output section defines the structure of events that will be emitted through
 the stream. Each event sent to the client will conform to this structure.
 
-### 5.4 Stream metadata
-
-Stream metadata works the same way as procedure metadata, allowing you to attach
-additional information to the stream definition.
-
 ### 5.5 Example
 
 ```urpc
@@ -272,10 +222,6 @@ stream NewMessage {
     message: string
     userId: string
     timestamp: datetime
-  }
-
-  meta {
-    auth: "required"
   }
 }
 ```
@@ -464,11 +410,6 @@ proc CreateProduct {
     success: bool
     productId: string
   }
-
-  meta {
-    requiresAuth: true
-    maxRetries: 3
-  }
 }
 
 """
@@ -513,10 +454,6 @@ stream NewMessage {
     message: string
     userId: string
     timestamp: datetime
-  }
-
-  meta {
-    auth: "required"
   }
 }
 ```

@@ -67,8 +67,7 @@ type TypeB {
 ### 4.1 Fields in a Type
 
 This section applies to fields in a type block, as well as fields in a
-procedure's input, output, meta, or inline object, and stream's input, output,
-meta.
+procedure's input, output, or inline object, and stream's input, output.
 
 - Each field is placed on its own line.
 - **Field Separation:** For simple fields without complex formatting, fields may
@@ -86,14 +85,14 @@ address: {
 }
 ```
 
-### 4.2 Blocks (Type, Input/Output, Meta)
+### 4.2 Blocks (Type, Input/Output)
 
 - Opening braces (`{`) are on the same line as the declaration header (preceded
   by one space).
 - Contents inside non-empty blocks always start on a new, indented line.
 - The closing brace (`}`) is placed on its own line, aligned with the opening
   line.
-- In procedure and stream bodies, separate the `input`, `output`, and `meta` blocks with
+- In procedure and stream bodies, separate the `input`, and `output` blocks with
   one blank line.
 
 ## 5. Spacing
