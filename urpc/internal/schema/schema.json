@@ -105,11 +105,6 @@
           "description": "Ordered list of output fields for the procedure.",
           "type": "array",
           "items": { "$ref": "#/$defs/fieldDefinition" }
-        },
-        "meta": {
-          "description": "Optional key-value metadata associated with the procedure (null if none).",
-          "type": "array",
-          "items": { "$ref": "#/$defs/metaDefinition" }
         }
       },
       "required": ["kind", "name"],
@@ -147,11 +142,6 @@
           "description": "Ordered list of output fields for the stream.",
           "type": "array",
           "items": { "$ref": "#/$defs/fieldDefinition" }
-        },
-        "meta": {
-          "description": "Optional key-value metadata associated with the stream (null if none).",
-          "type": "array",
-          "items": { "$ref": "#/$defs/metaDefinition" }
         }
       },
       "required": ["kind", "name"],
@@ -192,25 +182,6 @@
         }
       },
       "required": ["name", "isArray", "optional"],
-      "additionalProperties": false
-    },
-
-    "metaDefinition": {
-      "title": "Meta Definition Item",
-      "description": "Defines a meta within a procedure or stream.",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "Key of the meta.",
-          "type": "string",
-          "pattern": "^[a-zA-Z0-9]*$"
-        },
-        "value": {
-          "description": "Value of the meta.",
-          "type": ["string", "integer", "number", "boolean"]
-        }
-      },
-      "required": ["key", "value"],
       "additionalProperties": false
     },
 

@@ -3,7 +3,6 @@ package schema
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"slices"
 
 	"github.com/orsinium-labs/enum"
@@ -227,8 +226,6 @@ type NodeProc struct {
 	Input []FieldDefinition `json:"input"`
 	// Output is the ordered list of output fields for the procedure.
 	Output []FieldDefinition `json:"output"`
-	// Meta contains optional key-value metadata.
-	Meta []MetaKeyValue `json:"meta,omitempty"`
 }
 
 func (n *NodeProc) NodeKind() string { return n.Kind }
@@ -246,8 +243,6 @@ type NodeStream struct {
 	Input []FieldDefinition `json:"input"`
 	// Output is the ordered list of output fields for the stream.
 	Output []FieldDefinition `json:"output"`
-	// Meta contains optional key-value metadata.
-	Meta []MetaKeyValue `json:"meta,omitempty"`
 }
 
 func (n *NodeStream) NodeKind() string { return n.Kind }
@@ -255,73 +250,6 @@ func (n *NodeStream) NodeKind() string { return n.Kind }
 //////////////////////////
 // Auxiliary Structures //
 //////////////////////////
-
-// MetaKeyValue represents a key-value pair within the NodeProc.Meta array.
-type MetaKeyValue struct {
-	Key   string    `json:"key"`
-	Value MetaValue `json:"value"`
-}
-
-// MetaValue holds a metadata value, using mutually exclusive fields for type safety.
-type MetaValue struct {
-	StringVal *string  `json:"-"` // Ignored by standard JSON marshalling/unmarshalling
-	IntVal    *int64   `json:"-"`
-	FloatVal  *float64 `json:"-"`
-	BoolVal   *bool    `json:"-"`
-}
-
-// UnmarshalJSON implements custom unmarshalling for MetaValue.
-// It validates the incoming JSON type and stores it in the corresponding field.
-func (mv *MetaValue) UnmarshalJSON(data []byte) error {
-	var rawValue any
-	if err := json.Unmarshal(data, &rawValue); err != nil {
-		return fmt.Errorf("failed to unmarshal meta value: %w", err)
-	}
-
-	// Reset fields before assigning
-	mv.StringVal = nil
-	mv.IntVal = nil
-	mv.FloatVal = nil
-	mv.BoolVal = nil
-
-	switch v := rawValue.(type) {
-	case string:
-		mv.StringVal = &v
-	case float64: // JSON numbers are float64
-		// Check if it's an integer without loss of precision
-		if math.Trunc(v) == v {
-			intVal := int64(v)
-			mv.IntVal = &intVal
-		} else {
-			mv.FloatVal = &v
-		}
-	case bool:
-		mv.BoolVal = &v
-	default:
-		return fmt.Errorf("invalid meta value type: expected string, number, or bool, got %T", v)
-	}
-	return nil
-}
-
-// MarshalJSON implements custom marshalling for MetaValue.
-// It marshals the non-nil field back to its original JSON type.
-func (mv MetaValue) MarshalJSON() ([]byte, error) {
-	if mv.StringVal != nil {
-		return json.Marshal(mv.StringVal)
-	}
-	if mv.IntVal != nil {
-		return json.Marshal(mv.IntVal)
-	}
-	if mv.FloatVal != nil {
-		return json.Marshal(mv.FloatVal)
-	}
-	if mv.BoolVal != nil {
-		return json.Marshal(mv.BoolVal)
-	}
-	// Should ideally not happen if unmarshalling is correct,
-	// but marshal as null if no value is set.
-	return json.Marshal(nil)
-}
 
 // FieldDefinition defines a field within a type or procedure input/output.
 type FieldDefinition struct {

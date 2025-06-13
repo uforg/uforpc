@@ -216,20 +216,6 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"isArray": false,
 							"optional": false
 						}
-					],
-					"meta": [
-						{
-							"key": "http.method",
-							"value": "GET"
-						},
-						{
-							"key": "http.path",
-							"value": "/users/{id}"
-						},
-						{
-							"key": "auth",
-							"value": true
-						}
 					]
 				}
 			]
@@ -260,24 +246,6 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.Equal(t, "user", procNode.Output[0].Name)
 		require.NotNil(t, procNode.Output[0].TypeName)
 		require.Equal(t, "User", *procNode.Output[0].TypeName)
-
-		// Check metadata
-		require.Len(t, procNode.Meta, 3)
-
-		// Check http.method
-		meta0 := procNode.Meta[0]
-		require.Equal(t, "http.method", meta0.Key)
-		require.Equal(t, "GET", *meta0.Value.StringVal)
-
-		// Check http.path
-		meta1 := procNode.Meta[1]
-		require.Equal(t, "http.path", meta1.Key)
-		require.Equal(t, "/users/{id}", *meta1.Value.StringVal)
-
-		// Check auth
-		meta2 := procNode.Meta[2]
-		require.Equal(t, "auth", meta2.Key)
-		require.True(t, *meta2.Value.BoolVal)
 	})
 
 	t.Run("Schema with stream node", func(t *testing.T) {
@@ -302,20 +270,6 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 							"typeName": "User",
 							"isArray": false,
 							"optional": false
-						}
-					],
-					"meta": [
-						{
-							"key": "http.method",
-							"value": "GET"
-						},
-						{
-							"key": "http.path",
-							"value": "/users/{id}"
-						},
-						{
-							"key": "auth",
-							"value": true
 						}
 					]
 				}
@@ -347,24 +301,6 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		require.Equal(t, "user", streamNode.Output[0].Name)
 		require.NotNil(t, streamNode.Output[0].TypeName)
 		require.Equal(t, "User", *streamNode.Output[0].TypeName)
-
-		// Check metadata
-		require.Len(t, streamNode.Meta, 3)
-
-		// Check http.method
-		meta0 := streamNode.Meta[0]
-		require.Equal(t, "http.method", meta0.Key)
-		require.Equal(t, "GET", *meta0.Value.StringVal)
-
-		// Check http.path
-		meta1 := streamNode.Meta[1]
-		require.Equal(t, "http.path", meta1.Key)
-		require.Equal(t, "/users/{id}", *meta1.Value.StringVal)
-
-		// Check auth
-		meta2 := streamNode.Meta[2]
-		require.Equal(t, "auth", meta2.Key)
-		require.True(t, *meta2.Value.BoolVal)
 	})
 }
 
@@ -406,8 +342,7 @@ func TestGetNodeMethods(t *testing.T) {
 						"isArray": false,
 						"optional": false
 					}
-				],
-				"meta": []
+				]
 			}
 		]
 	}`
@@ -459,70 +394,6 @@ func TestFieldDefinitionHelperMethods(t *testing.T) {
 	require.False(t, emptyField.IsInline())
 }
 
-func TestBasicMetaValue(t *testing.T) {
-	// Test string value
-	t.Run("String value", func(t *testing.T) {
-		strVal := "test"
-		mv := MetaValue{StringVal: &strVal}
-
-		data, err := mv.MarshalJSON()
-		require.NoError(t, err)
-		require.Equal(t, `"test"`, string(data))
-
-		var newMV MetaValue
-		err = newMV.UnmarshalJSON(data)
-		require.NoError(t, err)
-		require.NotNil(t, newMV.StringVal)
-		require.Equal(t, strVal, *newMV.StringVal)
-	})
-
-	// Test integer value
-	t.Run("Integer value", func(t *testing.T) {
-		intVal := int64(42)
-		mv := MetaValue{IntVal: &intVal}
-
-		data, err := mv.MarshalJSON()
-		require.NoError(t, err)
-		require.Equal(t, `42`, string(data))
-
-		var newMV MetaValue
-		err = newMV.UnmarshalJSON(data)
-		require.NoError(t, err)
-		require.NotNil(t, newMV.IntVal)
-		require.Equal(t, intVal, *newMV.IntVal)
-	})
-
-	t.Run("Float value", func(t *testing.T) {
-		floatVal := 3.14
-		mv := MetaValue{FloatVal: &floatVal}
-
-		data, err := mv.MarshalJSON()
-		require.NoError(t, err)
-		require.Equal(t, `3.14`, string(data))
-
-		var newMV MetaValue
-		err = newMV.UnmarshalJSON(data)
-		require.NoError(t, err)
-		require.NotNil(t, newMV.FloatVal)
-		require.Equal(t, floatVal, *newMV.FloatVal)
-	})
-
-	t.Run("Bool value", func(t *testing.T) {
-		boolVal := true
-		mv := MetaValue{BoolVal: &boolVal}
-
-		data, err := mv.MarshalJSON()
-		require.NoError(t, err)
-		require.Equal(t, `true`, string(data))
-
-		var newMV MetaValue
-		err = newMV.UnmarshalJSON(data)
-		require.NoError(t, err)
-		require.NotNil(t, newMV.BoolVal)
-		require.Equal(t, boolVal, *newMV.BoolVal)
-	})
-}
-
 func TestDeprecated(t *testing.T) {
 	t.Run("Without message", func(t *testing.T) {
 		input := `{
@@ -538,8 +409,7 @@ func TestDeprecated(t *testing.T) {
 					"name": "GetUser",
 					"deprecated": "",
 					"input": [],
-					"output": [],
-					"meta": []
+					"output": []
 				}
 			]
 		}`
@@ -575,8 +445,7 @@ func TestDeprecated(t *testing.T) {
 					"name": "GetUser",
 					"deprecated": "Deprecation message",
 					"input": [],
-					"output": [],
-					"meta": []
+					"output": []
 				}
 			]
 		}`
