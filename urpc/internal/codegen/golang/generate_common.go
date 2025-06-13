@@ -58,7 +58,11 @@ func renderField(parentTypeName string, field schema.FieldDefinition) string {
 		typeLiteral = fmt.Sprintf("Optional[%s]", typeLiteral)
 	}
 
-	jsonTag := fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
+	jsonTag := fmt.Sprintf(" `json:\"%s\"`", nameCamel)
+	if isOptional {
+		jsonTag = fmt.Sprintf(" `json:\"%s,omitempty\"`", nameCamel)
+	}
+
 	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
 	return result + jsonTag
 }
@@ -144,7 +148,7 @@ func renderPreField(parentTypeName string, field schema.FieldDefinition) string 
 
 	typeLiteral = fmt.Sprintf("Optional[%s]", typeLiteral)
 
-	jsonTag := fmt.Sprintf(" `json:\"%s,omitempty,omitzero\"`", nameCamel)
+	jsonTag := fmt.Sprintf(" `json:\"%s,omitempty\"`", nameCamel)
 	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
 	return result + jsonTag
 }
