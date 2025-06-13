@@ -112,23 +112,6 @@ export interface ProcedureDefinitionNode {
    * Ordered list of output fields for the procedure.
    */
   output?: FieldDefinition[];
-  /**
-   * Optional key-value metadata associated with the procedure (null if none).
-   */
-  meta?: MetaDefinitionItem[];
-}
-/**
- * Defines a meta within a procedure or stream.
- */
-export interface MetaDefinitionItem {
-  /**
-   * Key of the meta.
-   */
-  key: string;
-  /**
-   * Value of the meta.
-   */
-  value: string | number | boolean;
 }
 /**
  * Defines an RPC stream.
@@ -158,8 +141,4 @@ export interface StreamDefinitionNode {
    * Ordered list of output fields for the stream.
    */
   output?: FieldDefinition[];
-  /**
-   * Optional key-value metadata associated with the stream (null if none).
-   */
-  meta?: MetaDefinitionItem[];
 }
