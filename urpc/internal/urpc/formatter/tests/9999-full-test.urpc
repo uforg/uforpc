@@ -79,12 +79,7 @@ deprecated("Deprecated")
         category: Category
         exists: bool
       }
-      meta {
-        cache: true
-        cacheTime: 300
-        requiresAuth: false
-        apiVersion: "1.0.0"
-      }
+
     }
 
       """
@@ -134,16 +129,7 @@ deprecated("Deprecated")
             load: float
           }
         }
-      }
-
-      meta {
-        auth: "required"
-        roles: "admin,product-manager"
-        rateLimit: 100
-        timeout: 30.5
-        audit: true
-        apiVersion: "1.2.0"
-      }
+      } 
     }
                """ MyStream """deprecated
     stream MyStream{
@@ -240,13 +226,6 @@ proc GetCategory {
     category: Category
     exists: bool
   }
-
-  meta {
-    cache: true
-    cacheTime: 300
-    requiresAuth: false
-    apiVersion: "1.0.0"
-  }
 }
 
 """
@@ -296,15 +275,6 @@ proc CreateProduct {
         load: float
       }
     }
-  }
-
-  meta {
-    auth: "required"
-    roles: "admin,product-manager"
-    rateLimit: 100
-    timeout: 30.5
-    audit: true
-    apiVersion: "1.2.0"
   }
 }
 

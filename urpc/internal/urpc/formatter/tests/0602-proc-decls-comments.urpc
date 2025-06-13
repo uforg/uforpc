@@ -23,18 +23,6 @@ proc Test {// Comment
   /* Comment */
   // Comment
   // Comment
-  meta { // Comment
-    field: "string" // Comment
-    // Comment
-    field: 1
-    field: 1.1
-
-    // Comment
-
-    field: true
-    /* Comment */
-    field: false
-  }
 }
 
 // >>>>
@@ -65,16 +53,4 @@ proc Test { // Comment
   /* Comment */
   // Comment
   // Comment
-  meta { // Comment
-    field: "string" // Comment
-    // Comment
-    field: 1
-    field: 1.1
-
-    // Comment
-
-    field: true
-    /* Comment */
-    field: false
-  }
 }

@@ -316,12 +316,10 @@ func validateTypeCircularDependenciesCheckField(fieldType ast.FieldType, types m
 // validateProcStructure validates that procedure declarations have the correct structure:
 // - At most one 'input' section
 // - At most one 'output' section
-// - At most one 'meta' section
 func (a *semanalyzer) validateProcStructure() {
 	for _, procDecl := range a.astSchema.GetProcs() {
 		inputCount := 0
 		outputCount := 0
-		metaCount := 0
 
 		// Count the number of each section
 		for _, child := range procDecl.Children {
@@ -330,9 +328,6 @@ func (a *semanalyzer) validateProcStructure() {
 			}
 			if child.Output != nil {
 				outputCount++
-			}
-			if child.Meta != nil {
-				metaCount++
 			}
 		}
 
@@ -357,29 +352,16 @@ func (a *semanalyzer) validateProcStructure() {
 				Message: fmt.Sprintf("procedure \"%s\" cannot have more than one 'output' section", procDecl.Name),
 			})
 		}
-
-		// Validate 'meta' section
-		if metaCount > 1 {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: Positions{
-					Pos:    procDecl.Pos,
-					EndPos: procDecl.EndPos,
-				},
-				Message: fmt.Sprintf("procedure \"%s\" cannot have more than one 'meta' section", procDecl.Name),
-			})
-		}
 	}
 }
 
 // validateStreamStructure validates that stream declarations have the correct structure:
 // - At most one 'input' section
 // - At most one 'output' section
-// - At most one 'meta' section
 func (a *semanalyzer) validateStreamStructure() {
 	for _, streamDecl := range a.astSchema.GetStreams() {
 		inputCount := 0
 		outputCount := 0
-		metaCount := 0
 
 		// Count the number of each section
 		for _, child := range streamDecl.Children {
@@ -388,9 +370,6 @@ func (a *semanalyzer) validateStreamStructure() {
 			}
 			if child.Output != nil {
 				outputCount++
-			}
-			if child.Meta != nil {
-				metaCount++
 			}
 		}
 
@@ -413,17 +392,6 @@ func (a *semanalyzer) validateStreamStructure() {
 					EndPos: streamDecl.EndPos,
 				},
 				Message: fmt.Sprintf("stream \"%s\" cannot have more than one 'output' section", streamDecl.Name),
-			})
-		}
-
-		// Validate 'meta' section
-		if metaCount > 1 {
-			a.diagnostics = append(a.diagnostics, Diagnostic{
-				Positions: Positions{
-					Pos:    streamDecl.Pos,
-					EndPos: streamDecl.EndPos,
-				},
-				Message: fmt.Sprintf("stream \"%s\" cannot have more than one 'meta' section", streamDecl.Name),
 			})
 		}
 	}

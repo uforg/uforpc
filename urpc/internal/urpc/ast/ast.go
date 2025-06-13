@@ -199,13 +199,12 @@ type StreamDecl struct {
 	Children   []*ProcOrStreamDeclChild `parser:"LBrace @@* RBrace"`
 }
 
-// ProcOrStreamDeclChild represents a child node within a ProcDecl or StreamDecl block (Comment, Input, Output, or Meta).
+// ProcOrStreamDeclChild represents a child node within a ProcDecl or StreamDecl block (Comment, Input, or Output).
 type ProcOrStreamDeclChild struct {
 	Positions
 	Comment *Comment                     `parser:"  @@"`
 	Input   *ProcOrStreamDeclChildInput  `parser:"| @@"`
 	Output  *ProcOrStreamDeclChildOutput `parser:"| @@"`
-	Meta    *ProcOrStreamDeclChildMeta   `parser:"| @@"`
 }
 
 // ProcOrStreamDeclChildInput represents the Input{...} block within a ProcDecl or StreamDecl.
@@ -218,26 +217,6 @@ type ProcOrStreamDeclChildInput struct {
 type ProcOrStreamDeclChildOutput struct {
 	Positions
 	Children []*FieldOrComment `parser:"Output LBrace @@* RBrace"`
-}
-
-// ProcOrStreamDeclChildMeta represents the Meta{...} block within a ProcDecl or StreamDecl.
-type ProcOrStreamDeclChildMeta struct {
-	Positions
-	Children []*ProcOrStreamDeclChildMetaChild `parser:"Meta LBrace @@* RBrace"`
-}
-
-// ProcOrStreamDeclChildMetaChild represents a child node within a MetaBlock (either a Comment or a Key-Value pair).
-type ProcOrStreamDeclChildMetaChild struct {
-	Positions
-	Comment *Comment                     `parser:"  @@"`
-	KV      *ProcOrStreamDeclChildMetaKV `parser:"| @@"`
-}
-
-// ProcOrStreamDeclChildMetaKV represents a key-value pair within a MetaBlock.
-type ProcOrStreamDeclChildMetaKV struct {
-	Positions
-	Key   string     `parser:"@Ident"`
-	Value AnyLiteral `parser:"Colon @@"`
 }
 
 //////////////////

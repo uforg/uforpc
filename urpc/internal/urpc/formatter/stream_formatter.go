@@ -134,10 +134,6 @@ func (f *streamFormatter) format() *genkit.GenKit {
 				f.formatOutput()
 			}
 
-			if f.currentIndexChild.Meta != nil {
-				f.formatMeta()
-			}
-
 			f.loadNextChild()
 		}
 	})
@@ -201,11 +197,4 @@ func (f *streamFormatter) formatOutput() {
 	f.g.Inline("output ")
 	fieldsFormatter := newFieldsFormatter(f.currentIndexChild, f.currentIndexChild.Output.Children)
 	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
-}
-
-func (f *streamFormatter) formatMeta() {
-	f.breakBeforeBlock()
-	f.g.Inline("meta ")
-	metaFormatter := newProcOrStreamMetaFormatter(f.currentIndexChild.Meta)
-	f.g.Line(strings.TrimSpace(metaFormatter.format().String()))
 }

@@ -226,33 +226,6 @@ func TestSemanalyzer_NonExistentTypeReference(t *testing.T) {
 	require.Contains(t, errors[0].Message, "is not declared")
 }
 
-func TestSemanalyzer_ValidProcedureMeta(t *testing.T) {
-	input := `
-		version 1
-
-		proc DoSomething {
-		  input {
-		    data: string
-		  }
-
-		  meta {
-		    requiresAuth: true
-		    maxRetries: 3
-		    timeout: 60
-		    description: "This is a test procedure"
-		  }
-		}
-	`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.NoError(t, err)
-	require.Empty(t, errors)
-}
-
 func TestSemanalyzer_ValidInlineObject(t *testing.T) {
 	input := `
 		version 1
@@ -526,32 +499,6 @@ func TestSemanalyzer_ProcWithMultipleOutputSections(t *testing.T) {
 	require.Contains(t, errors[0].Message, "cannot have more than one 'output' section")
 }
 
-func TestSemanalyzer_ProcWithMultipleMetaSections(t *testing.T) {
-	input := `
-			version 1
-
-			// Procedure with multiple 'meta' sections
-			proc InvalidProc {
-			  meta {
-			    requiresAuth: true
-			  }
-
-			  meta {  // Duplicate 'meta' section
-			    timeout: 30
-			  }
-			}
-		`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "cannot have more than one 'meta' section")
-}
-
 func TestSemanalyzer_StreamWithMultipleInputSections(t *testing.T) {
 	input := `
 			version 1
@@ -604,32 +551,6 @@ func TestSemanalyzer_StreamWithMultipleOutputSections(t *testing.T) {
 	require.Contains(t, errors[0].Message, "cannot have more than one 'output' section")
 }
 
-func TestSemanalyzer_StreamWithMultipleMetaSections(t *testing.T) {
-	input := `
-			version 1
-
-			// Stream with multiple 'meta' sections
-			stream InvalidStream {
-			  meta {
-			    requiresAuth: true
-			  }
-
-			  meta {  // Duplicate 'meta' section
-			    timeout: 30
-			  }
-			}
-		`
-	combinedSchema, err := parseSchema(input)
-	require.NoError(t, err)
-
-	analyzer := newSemanalyzer(combinedSchema)
-	errors, err := analyzer.analyze()
-
-	require.Error(t, err)
-	require.Len(t, errors, 1)
-	require.Contains(t, errors[0].Message, "cannot have more than one 'meta' section")
-}
-
 func TestSemanalyzer_CompleteSchema(t *testing.T) {
 	input := `
 		version 1
@@ -653,7 +574,7 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		  isActive: bool
 		  address: Address
 		  tags: string[]
-		  metadata: {
+		  other: {
 		    lastLogin: datetime
 		    preferences: {
 		      theme: string
@@ -672,12 +593,6 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		    userId: string
 		    errors: string[]
 		  }
-
-		  meta {
-		    requiresAuth: false
-		    rateLimit: 10
-		    description: "Creates a new user in the system"
-		  }
 		}
 
 		proc GetUser {
@@ -688,12 +603,6 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 		  output {
 		    user: User
 		  }
-
-		  meta {
-		    requiresAuth: true
-		    cacheTTL: 300
-		    description: "Retrieves a user by ID"
-		  }
 		}
 
 		stream MyStream {
@@ -703,11 +612,6 @@ func TestSemanalyzer_CompleteSchema(t *testing.T) {
 
 		  output {
 		    user: User
-		  }
-
-		  meta {
-		    requiresAuth: true
-		    cacheTTL: 300
 		  }
 		}
 	`

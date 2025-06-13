@@ -20,14 +20,8 @@ stream ProcWithOutput {
 }
 }
 
-// With meta
-stream ProcWithMeta {
-  meta {
-    field: "string"    field: 1
-    field: 1.1field: 
-    true field: false  }}
 
-// With input, output and meta
+// With input and output
 stream ProcFull {input{
   field1: string
 }
@@ -35,11 +29,7 @@ output
   {  field1: datetime[
 
   ]
-}meta {
-    field: "string"    field: 1
-    field: 1.1field: 
-    true field: false  }
-}
+}         }
 
 // >>>>
 
@@ -63,18 +53,7 @@ stream ProcWithOutput {
   }
 }
 
-// With meta
-stream ProcWithMeta {
-  meta {
-    field: "string"
-    field: 1
-    field: 1.1
-    field: true
-    field: false
-  }
-}
-
-// With input, output and meta
+// With input and output
 stream ProcFull {
   input {
     field1: string
@@ -82,13 +61,5 @@ stream ProcFull {
 
   output {
     field1: datetime[]
-  }
-
-  meta {
-    field: "string"
-    field: 1
-    field: 1.1
-    field: true
-    field: false
   }
 }

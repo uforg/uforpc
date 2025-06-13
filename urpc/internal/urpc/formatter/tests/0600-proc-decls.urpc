@@ -20,14 +20,9 @@ proc ProcWithOutput {
 }
 }
 
-// With meta
-proc ProcWithMeta {
-  meta {
-    field: "string"    field: 1
-    field: 1.1field: 
-    true field: false  }}
 
-// With input, output and meta
+
+// With input and output
 proc ProcFull {input{
   field1: string
 }
@@ -35,11 +30,7 @@ output
   {  field1: datetime[
 
   ]
-}meta {
-    field: "string"    field: 1
-    field: 1.1field: 
-    true field: false  }
-}
+}      }
 
 // >>>>
 
@@ -63,18 +54,7 @@ proc ProcWithOutput {
   }
 }
 
-// With meta
-proc ProcWithMeta {
-  meta {
-    field: "string"
-    field: 1
-    field: 1.1
-    field: true
-    field: false
-  }
-}
-
-// With input, output and meta
+// With input and output
 proc ProcFull {
   input {
     field1: string
@@ -82,13 +62,5 @@ proc ProcFull {
 
   output {
     field1: datetime[]
-  }
-
-  meta {
-    field: "string"
-    field: 1
-    field: 1.1
-    field: true
-    field: false
   }
 }
