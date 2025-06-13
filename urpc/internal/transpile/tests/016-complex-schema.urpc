@@ -30,11 +30,6 @@ proc CreatePost {
     post: BlogPost
     success: bool
   }
-
-  meta {
-    auth: true
-    role: "author"
-  }
 }
 
 """Retrieves a blog post by its ID or slug"""

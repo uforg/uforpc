@@ -185,20 +185,6 @@ func convertProcToJSON(procDecl *ast.ProcDecl) (*schema.NodeProc, error) {
 				}
 			}
 		}
-		if child.Meta != nil {
-			for _, metaChild := range child.Meta.Children {
-				if metaChild.KV != nil {
-					metaValue, err := convertMetaValueToJSON(metaChild.KV.Value)
-					if err != nil {
-						return nil, fmt.Errorf("error converting meta value for key '%s': %w", metaChild.KV.Key, err)
-					}
-					procNode.Meta = append(procNode.Meta, schema.MetaKeyValue{
-						Key:   metaChild.KV.Key,
-						Value: metaValue,
-					})
-				}
-			}
-		}
 	}
 
 	return procNode, nil
@@ -251,59 +237,7 @@ func convertStreamToJSON(streamDecl *ast.StreamDecl) (*schema.NodeStream, error)
 				}
 			}
 		}
-		if child.Meta != nil {
-			for _, metaChild := range child.Meta.Children {
-				if metaChild.KV != nil {
-					metaValue, err := convertMetaValueToJSON(metaChild.KV.Value)
-					if err != nil {
-						return nil, fmt.Errorf("error converting meta value for key '%s': %w", metaChild.KV.Key, err)
-					}
-					streamNode.Meta = append(streamNode.Meta, schema.MetaKeyValue{
-						Key:   metaChild.KV.Key,
-						Value: metaValue,
-					})
-				}
-			}
-		}
 	}
 
 	return streamNode, nil
-}
-
-// convertMetaValueToJSON converts an AST AnyLiteral to a schema MetaValue
-func convertMetaValueToJSON(literal ast.AnyLiteral) (schema.MetaValue, error) {
-	var metaValue schema.MetaValue
-
-	if literal.Str == nil && literal.Int == nil && literal.Float == nil && literal.True == nil && literal.False == nil {
-		return schema.MetaValue{}, fmt.Errorf("empty meta value")
-	}
-
-	if literal.Str != nil {
-		strValue := *literal.Str
-		metaValue.StringVal = &strValue
-	}
-	if literal.Int != nil {
-		var intValue int64
-		if _, err := fmt.Sscanf(*literal.Int, "%d", &intValue); err != nil {
-			return schema.MetaValue{}, fmt.Errorf("invalid integer value: %s", *literal.Int)
-		}
-		metaValue.IntVal = &intValue
-	}
-	if literal.Float != nil {
-		var floatValue float64
-		if _, err := fmt.Sscanf(*literal.Float, "%f", &floatValue); err != nil {
-			return schema.MetaValue{}, fmt.Errorf("invalid float value: %s", *literal.Float)
-		}
-		metaValue.FloatVal = &floatValue
-	}
-	if literal.True != nil {
-		boolValue := true
-		metaValue.BoolVal = &boolValue
-	}
-	if literal.False != nil {
-		boolValue := false
-		metaValue.BoolVal = &boolValue
-	}
-
-	return metaValue, nil
 }

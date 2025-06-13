@@ -12,7 +12,7 @@ type DeepNestedType {
       }
       enabled: bool
     }
-    metadata: string
+    otherstring: string
   }
   summary: string
 }

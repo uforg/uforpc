@@ -118,16 +118,6 @@
           "isArray": false,
           "optional": false
         }
-      ],
-      "meta": [
-        {
-          "key": "auth",
-          "value": true
-        },
-        {
-          "key": "role",
-          "value": "author"
-        }
       ]
     },
     {

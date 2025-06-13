@@ -63,7 +63,7 @@
                 }
               },
               {
-                "name": "metadata",
+                "name": "otherstring",
                 "optional": false,
                 "isArray": false,
                 "typeName": "string"

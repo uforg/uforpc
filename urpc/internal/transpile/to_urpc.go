@@ -205,33 +205,6 @@ func convertProcToURPC(procNode *schema.NodeProc) (*ast.ProcDecl, error) {
 		})
 	}
 
-	// Process meta fields if any
-	if len(procNode.Meta) > 0 {
-		metaChild := &ast.ProcOrStreamDeclChildMeta{}
-
-		// Process any remaining keys that weren't in the predefined order
-		for _, metaKV := range procNode.Meta {
-			key := metaKV.Key
-			value := metaKV.Value
-
-			literal, err := convertMetaValueToURPC(value)
-			if err != nil {
-				return nil, fmt.Errorf("error converting meta value for key '%s': %w", key, err)
-			}
-
-			metaChild.Children = append(metaChild.Children, &ast.ProcOrStreamDeclChildMetaChild{
-				KV: &ast.ProcOrStreamDeclChildMetaKV{
-					Key:   key,
-					Value: literal,
-				},
-			})
-		}
-
-		procDecl.Children = append(procDecl.Children, &ast.ProcOrStreamDeclChild{
-			Meta: metaChild,
-		})
-	}
-
 	return procDecl, nil
 }
 
@@ -297,60 +270,5 @@ func convertStreamToURPC(streamNode *schema.NodeStream) (*ast.StreamDecl, error)
 		})
 	}
 
-	// Process meta fields if any
-	if len(streamNode.Meta) > 0 {
-		metaChild := &ast.ProcOrStreamDeclChildMeta{}
-
-		// Process any remaining keys that weren't in the predefined order
-		for _, metaKV := range streamNode.Meta {
-			key := metaKV.Key
-			value := metaKV.Value
-
-			literal, err := convertMetaValueToURPC(value)
-			if err != nil {
-				return nil, fmt.Errorf("error converting meta value for key '%s': %w", key, err)
-			}
-
-			metaChild.Children = append(metaChild.Children, &ast.ProcOrStreamDeclChildMetaChild{
-				KV: &ast.ProcOrStreamDeclChildMetaKV{
-					Key:   key,
-					Value: literal,
-				},
-			})
-		}
-
-		streamDecl.Children = append(streamDecl.Children, &ast.ProcOrStreamDeclChild{
-			Meta: metaChild,
-		})
-	}
-
 	return streamDecl, nil
-}
-
-// convertMetaValueToURPC converts a schema MetaValue to an AST AnyLiteral
-func convertMetaValueToURPC(value schema.MetaValue) (ast.AnyLiteral, error) {
-	var literal ast.AnyLiteral
-
-	if value.StringVal != nil {
-		quoted := *value.StringVal
-		literal.Str = &quoted
-	} else if value.IntVal != nil {
-		intStr := fmt.Sprintf("%d", *value.IntVal)
-		literal.Int = &intStr
-	} else if value.FloatVal != nil {
-		floatStr := fmt.Sprintf("%g", *value.FloatVal)
-		literal.Float = &floatStr
-	} else if value.BoolVal != nil {
-		if *value.BoolVal {
-			t := "true"
-			literal.True = &t
-		} else {
-			f := "false"
-			literal.False = &f
-		}
-	} else {
-		return ast.AnyLiteral{}, fmt.Errorf("empty meta value")
-	}
-
-	return literal, nil
 }
