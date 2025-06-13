@@ -17,7 +17,7 @@ import (
 type Response[T any] struct {
 	Ok     bool  `json:"ok"`
 	Output T     `json:"output,omitempty,omitzero"`
-	Error  Error `json:"error,omitempty,omitzero"`
+	Error  Error `json:"error,omitzero"`
 }
 
 // Write writes the response as a JSON-formatted string to the given writer.
@@ -73,7 +73,7 @@ type Error struct {
 	//      For instance, you might log "InternalError" types and return a generic message to the client.
 	//   2. Clients can inspect the Category to decide whether to prompt the user for action,
 	//      such as re-authentication if the Category is "AuthenticationError".
-	Category string `json:"category,omitempty,omitzero"`
+	Category string `json:"category,omitzero"`
 
 	// Code is a machine-readable identifier for the specific error condition.
 	//
@@ -87,7 +87,7 @@ type Error struct {
 	//      displaying appropriate messages based on the user's language settings.
 	//   2. Clients or middleware can implement specific logic based on the Code,
 	//      such as retry mechanisms for "TEMPORARY_FAILURE" or showing captcha for "RATE_LIMIT_EXCEEDED".
-	Code string `json:"code,omitempty,omitzero"`
+	Code string `json:"code,omitzero"`
 
 	// Details contains optional additional information about the error.
 	//
@@ -99,7 +99,7 @@ type Error struct {
 	//      {"fields": {"email": "Email is invalid", "password": "Password is too short"}}
 	//   2. Including diagnostic information such as timestamps, request IDs, or stack traces
 	//      (ensure sensitive information is not exposed to clients).
-	Details map[string]any `json:"details,omitempty,omitzero"`
+	Details map[string]any `json:"details,omitempty"`
 }
 
 // Error implements the error interface, returning the error message.
