@@ -10,14 +10,6 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
-var primitiveTypes = map[string]bool{
-	"string":   true,
-	"int":      true,
-	"float":    true,
-	"bool":     true,
-	"datetime": true,
-}
-
 // semanalyzer is the semantic alyzer phase for the URPC schema analyzer.
 //
 // It performs the following checks:
@@ -132,7 +124,7 @@ func (a *semanalyzer) validateUniqueResourceNames() {
 // validateCustomTypeReferences validates that all referenced custom types exist.
 func (a *semanalyzer) validateCustomTypeReferences() {
 	isValidType := func(typeName string) bool {
-		if primitiveTypes[typeName] {
+		if ast.IsPrimitiveType(typeName) {
 			return true
 		}
 
@@ -302,7 +294,7 @@ func validateTypeCircularDependenciesCheckField(fieldType ast.FieldType, types m
 	// If it's a custom named type, check it
 	if fieldType.Base.Named != nil {
 		typeName := *fieldType.Base.Named
-		if !primitiveTypes[typeName] {
+		if !ast.IsPrimitiveType(typeName) {
 			return validateTypeCircularDependenciesCheckType(typeName, types, stack)
 		}
 	}
