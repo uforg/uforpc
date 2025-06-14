@@ -14,7 +14,7 @@ type allArgs struct {
 	Fmt       *cmdFmtArgs       `arg:"subcommand:fmt" help:"Format the URPC schema in the specified path"`
 	Transpile *cmdTranspileArgs `arg:"subcommand:transpile" help:"Transpile a URPC schema to JSON and vice versa, the result will be printed to stdout"`
 	Generate  *cmdGenerateArgs  `arg:"subcommand:generate" help:"Generate code from the URPC schema"`
-	LSP       *cmdLSPArgs       `arg:"subcommand:lsp" help:"Start the LSP server"`
+	LSP       *cmdLSPArgs       `arg:"subcommand:lsp" help:"Start the UFO RPC Language Server"`
 	Version   *cmdVersionArgs   `arg:"subcommand:version" help:"Show urpc version information"`
 }
 
