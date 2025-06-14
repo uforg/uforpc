@@ -136,6 +136,8 @@ func (l *LSP) handleMessage(rawBytes []byte) (bool, error) {
 		response, err = l.handleTextDocumentDocumentLink(rawBytes)
 	case "textDocument/references":
 		response, err = l.handleTextDocumentReferences(rawBytes)
+	case "textDocument/documentSymbol":
+		response, err = l.handleTextDocumentDocumentSymbol(rawBytes)
 	}
 
 	if err != nil {

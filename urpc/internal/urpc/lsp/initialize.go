@@ -48,6 +48,8 @@ type ResponseMessageInitializeResultCapabilities struct {
 	DocumentLinkProvider bool `json:"documentLinkProvider,omitempty"`
 	// Advertise references capabilities
 	ReferencesProvider bool `json:"referencesProvider,omitempty"`
+	// Advertise document symbol capabilities
+	DocumentSymbolProvider bool `json:"documentSymbolProvider,omitempty"`
 }
 
 func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
@@ -91,6 +93,8 @@ func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
 				DocumentLinkProvider: l.analyzer != nil,
 				// References are supported if analyzer is available
 				ReferencesProvider: l.analyzer != nil,
+				// Document symbol capabilities
+				DocumentSymbolProvider: l.analyzer != nil,
 			},
 		},
 	}
