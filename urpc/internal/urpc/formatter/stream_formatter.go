@@ -99,7 +99,8 @@ func (f *streamFormatter) format() *genkit.GenKit {
 		}
 	}
 
-	f.g.Inlinef(`stream %s `, f.streamDecl.Name)
+	// Force strict pascal case
+	f.g.Inlinef(`stream %s `, strutil.ToPascalCase(f.streamDecl.Name))
 
 	if len(f.streamDecl.Children) < 1 {
 		f.g.Inline("{}")

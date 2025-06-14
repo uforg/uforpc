@@ -99,7 +99,8 @@ func (f *procFormatter) format() *genkit.GenKit {
 		}
 	}
 
-	f.g.Inlinef(`proc %s `, f.procDecl.Name)
+	// Force strict pascal case
+	f.g.Inlinef(`proc %s `, strutil.ToPascalCase(f.procDecl.Name))
 
 	if len(f.procDecl.Children) < 1 {
 		f.g.Inline("{}")

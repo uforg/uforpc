@@ -6,6 +6,7 @@ import (
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 type fieldsFormatter struct {
@@ -186,16 +187,21 @@ func (f *fieldsFormatter) formatField() {
 		f.g.Break()
 	}
 
+	// Force strict camel case
 	if f.currentIndexChild.Field.Optional {
-		f.g.Inlinef("%s?: ", f.currentIndexChild.Field.Name)
+		f.g.Inlinef("%s?: ", strutil.ToCamelCase(f.currentIndexChild.Field.Name))
 	} else {
-		f.g.Inlinef("%s: ", f.currentIndexChild.Field.Name)
+		f.g.Inlinef("%s: ", strutil.ToCamelCase(f.currentIndexChild.Field.Name))
 	}
 
 	typeLiteral := ""
 
 	if f.currentIndexChild.Field.Type.Base.Named != nil {
 		typeLiteral = *f.currentIndexChild.Field.Type.Base.Named
+		// Force strict pascal case for non primitive types
+		if !ast.IsPrimitiveType(typeLiteral) {
+			typeLiteral = strutil.ToPascalCase(typeLiteral)
+		}
 	}
 
 	if f.currentIndexChild.Field.Type.Base.Object != nil {

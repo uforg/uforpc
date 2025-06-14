@@ -41,7 +41,8 @@ func (f *typeFormatter) format() *genkit.GenKit {
 		}
 	}
 
-	f.g.Inlinef(`type %s `, f.typeDecl.Name)
+	// Force strict pascal case
+	f.g.Inlinef(`type %s `, strutil.ToPascalCase(f.typeDecl.Name))
 
 	fieldsFormatter := newFieldsFormatter(f.typeDecl, f.typeDecl.Children)
 	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
