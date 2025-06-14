@@ -130,6 +130,8 @@ func (l *LSP) handleMessage(rawBytes []byte) (bool, error) {
 		response, err = l.handleTextDocumentDefinition(rawBytes)
 	case "textDocument/hover":
 		response, err = l.handleTextDocumentHover(rawBytes)
+	case "textDocument/rename":
+		response, err = l.handleTextDocumentRename(rawBytes)
 	}
 
 	if err != nil {

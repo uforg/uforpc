@@ -42,6 +42,8 @@ type ResponseMessageInitializeResultCapabilities struct {
 	DefinitionProvider bool `json:"definitionProvider,omitempty"`
 	// Advertise hover capabilities
 	HoverProvider bool `json:"hoverProvider,omitempty"`
+	// Advertise rename capabilities
+	RenameProvider bool `json:"renameProvider,omitempty"`
 }
 
 func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
@@ -79,6 +81,8 @@ func (l *LSP) handleInitialize(rawMessage []byte) (any, error) {
 				DefinitionProvider: l.analyzer != nil,
 				// Hover is supported if analyzer is available
 				HoverProvider: l.analyzer != nil,
+				// Rename is supported if analyzer is available
+				RenameProvider: l.analyzer != nil,
 			},
 		},
 	}

@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+const (
+	ErrorCodeInvalidParams = -32602
+)
+
 var (
 	DefaultMessage = Message{
 		JSONRPC: "2.0",
