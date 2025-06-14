@@ -3,6 +3,7 @@ package golang
 import (
 	_ "embed"
 	"fmt"
+	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
@@ -154,6 +155,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("//")
 		g.Line("// This is useful for implementing custom validation logic, input sanitization,")
 		g.Line("// or data transformation that goes beyond the default required fields validation.")
+		renderDeprecated(g, procNode.Deprecated)
 		g.Linef("func (p *procRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
 			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
@@ -185,6 +187,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// The handler is executed after all before-handler hooks and input processing.")
 		g.Line("// If an input handler is registered, the input will be processed through that")
 		g.Line("// handler before reaching this main handler.")
+		renderDeprecated(g, procNode.Deprecated)
 		g.Linef("func (p *procRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {
 			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput) (%sOutput, error),", name, name)
@@ -254,6 +257,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// This is useful for implementing custom validation logic, input sanitization,")
 		g.Line("// or data transformation specific to stream initialization that goes beyond")
 		g.Line("// the default required fields validation.")
+		renderDeprecated(g, streamNode.Deprecated)
 		g.Linef("func (s *streamRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
 			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
@@ -286,6 +290,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// The handler is executed after all before-handler hooks and input processing.")
 		g.Line("//")
 		g.Line("// Each emitted event goes through before-emit and after-emit hooks.")
+		renderDeprecated(g, streamNode.Deprecated)
 		g.Linef("func (s *streamRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {
 			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput, emit func(%sOutput) error) error,", name, name)
@@ -427,4 +432,24 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Break()
 
 	return g.String(), nil
+}
+
+// renderDeprecated receives a pointer to a string and if it is not nil, it will
+// render a comment with the deprecated message to the given genkit.GenKit.
+func renderDeprecated(g *genkit.GenKit, deprecated *string) {
+	if deprecated == nil {
+		return
+	}
+
+	desc := "Deprecated: "
+	if *deprecated == "" {
+		desc += "This is deprecated and should not be used in new code."
+	} else {
+		desc += *deprecated
+	}
+
+	g.Line("//")
+	for line := range strings.SplitSeq(desc, "\n") {
+		g.Linef("// %s", line)
+	}
 }
