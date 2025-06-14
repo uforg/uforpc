@@ -144,10 +144,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Break()
 
 	for _, procNode := range sch.GetProcNodes() {
-		name := procNode.Name
-		namePascal := strutil.ToPascalCase(name)
+		name := strutil.ToPascalCase(procNode.Name)
 
-		g.Linef("// Set%sInputHandler registers an input processor for the %s procedure.", namePascal, name)
+		g.Linef("// Set%sInputHandler registers an input processor for the %s procedure.", name, name)
 		g.Line("//")
 		g.Line("// This handler is responsible for validating and transforming the input data")
 		g.Line("// before it reaches the main procedure handler. It receives the typed input")
@@ -155,7 +154,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("//")
 		g.Line("// This is useful for implementing custom validation logic, input sanitization,")
 		g.Line("// or data transformation that goes beyond the default required fields validation.")
-		g.Linef("func (p *procRegistry[T]) Set%sInputHandler(", namePascal)
+		g.Linef("func (p *procRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
 			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
@@ -172,12 +171,12 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("return inputHandler(ctx, ufoCtx, typedInput)")
 			})
 			g.Line("}")
-			g.Linef("p.intServer.setProcInputHandler(\"%s\", typedInputHandler)", namePascal)
+			g.Linef("p.intServer.setProcInputHandler(\"%s\", typedInputHandler)", name)
 		})
 		g.Line("}")
 		g.Break()
 
-		g.Linef("// Set%sHandler registers the main implementation for the %s procedure.", namePascal, name)
+		g.Linef("// Set%sHandler registers the main implementation for the %s procedure.", name, name)
 		g.Line("//")
 		g.Line("// The handler function will be called when a client invokes this procedure")
 		g.Line("// via RPC. It receives the typed input data and must return the typed output")
@@ -186,18 +185,18 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// The handler is executed after all before-handler hooks and input processing.")
 		g.Line("// If an input handler is registered, the input will be processed through that")
 		g.Line("// handler before reaching this main handler.")
-		g.Linef("func (p *procRegistry[T]) Set%sHandler(", namePascal)
+		g.Linef("func (p *procRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {
 			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput) (%sOutput, error),", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef(" p.intServer.setProcHandler(\"%s\", func(ctx context.Context, ufoCtx T, rawInput json.RawMessage) (any, error) {", namePascal)
+			g.Linef(" p.intServer.setProcHandler(\"%s\", func(ctx context.Context, ufoCtx T, rawInput json.RawMessage) (any, error) {", name)
 			g.Block(func() {
-				g.Line("var preTypedInput pre" + namePascal + "Input")
+				g.Line("var preTypedInput pre" + name + "Input")
 				g.Line("if err := json.Unmarshal(rawInput, &preTypedInput); err != nil {")
 				g.Block(func() {
-					g.Linef(`return nil, fmt.Errorf("failed to unmarshal %s input: %%w", err)`, namePascal)
+					g.Linef(`return nil, fmt.Errorf("failed to unmarshal %s input: %%w", err)`, name)
 				})
 				g.Line("}")
 				g.Break()
@@ -211,7 +210,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 
 				g.Line("typedInput := preTypedInput.transform()")
 
-				g.Linef("if inputHandler, ok := p.intServer.procInputHandlers[\"%s\"]; ok {", namePascal)
+				g.Linef("if inputHandler, ok := p.intServer.procInputHandlers[\"%s\"]; ok {", name)
 				g.Block(func() {
 					g.Line("processedInput, err := inputHandler(ctx, ufoCtx, typedInput)")
 					g.Line("if err != nil {")
@@ -244,10 +243,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Break()
 
 	for _, streamNode := range sch.GetStreamNodes() {
-		name := streamNode.Name
-		namePascal := strutil.ToPascalCase(name)
+		name := strutil.ToPascalCase(streamNode.Name)
 
-		g.Linef("// Set%sInputHandler registers an input processor for the %s stream.", namePascal, name)
+		g.Linef("// Set%sInputHandler registers an input processor for the %s stream.", name, name)
 		g.Line("//")
 		g.Line("// This handler is responsible for validating and transforming the input data")
 		g.Line("// before the stream begins. It receives the typed input and must return")
@@ -256,7 +254,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// This is useful for implementing custom validation logic, input sanitization,")
 		g.Line("// or data transformation specific to stream initialization that goes beyond")
 		g.Line("// the default required fields validation.")
-		g.Linef("func (s *streamRegistry[T]) Set%sInputHandler(", namePascal)
+		g.Linef("func (s *streamRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
 			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
@@ -273,12 +271,12 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("return inputHandler(ctx, ufoCtx, typedInput)")
 			})
 			g.Line("}")
-			g.Linef("s.intServer.setStreamInputHandler(\"%s\", typedInputHandler)", namePascal)
+			g.Linef("s.intServer.setStreamInputHandler(\"%s\", typedInputHandler)", name)
 		})
 		g.Line("}")
 		g.Break()
 
-		g.Linef("// Set%sHandler registers the main implementation for the %s stream.", namePascal, name)
+		g.Linef("// Set%sHandler registers the main implementation for the %s stream.", name, name)
 		g.Line("//")
 		g.Line("// The handler function will be called when a client initiates this stream")
 		g.Line("// via RPC. It receives the typed input data and an emit function for sending")
@@ -288,18 +286,18 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// The handler is executed after all before-handler hooks and input processing.")
 		g.Line("//")
 		g.Line("// Each emitted event goes through before-emit and after-emit hooks.")
-		g.Linef("func (s *streamRegistry[T]) Set%sHandler(", namePascal)
+		g.Linef("func (s *streamRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {
 			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput, emit func(%sOutput) error) error,", name, name)
 		})
 		g.Linef(") {")
 		g.Block(func() {
-			g.Linef("s.intServer.setStreamHandler(\"%s\", func(ctx context.Context, ufoCtx T, rawInput json.RawMessage, rawEmit func(any) error) error {", namePascal)
+			g.Linef("s.intServer.setStreamHandler(\"%s\", func(ctx context.Context, ufoCtx T, rawInput json.RawMessage, rawEmit func(any) error) error {", name)
 			g.Block(func() {
-				g.Line("var preTypedInput pre" + namePascal + "Input")
+				g.Line("var preTypedInput pre" + name + "Input")
 				g.Line("if err := json.Unmarshal(rawInput, &preTypedInput); err != nil {")
 				g.Block(func() {
-					g.Linef(`return fmt.Errorf("failed to unmarshal %s input: %%w", err)`, namePascal)
+					g.Linef(`return fmt.Errorf("failed to unmarshal %s input: %%w", err)`, name)
 				})
 				g.Line("}")
 				g.Break()
@@ -312,14 +310,14 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Break()
 
 				g.Line("typedInput := preTypedInput.transform()")
-				g.Line("typedEmit := func(output " + namePascal + "Output) error {")
+				g.Line("typedEmit := func(output " + name + "Output) error {")
 				g.Block(func() {
 					g.Line("return rawEmit(output)")
 				})
 				g.Line("}")
 				g.Break()
 
-				g.Linef("if inputHandler, ok := s.intServer.streamInputHandlers[\"%s\"]; ok {", namePascal)
+				g.Linef("if inputHandler, ok := s.intServer.streamInputHandlers[\"%s\"]; ok {", name)
 				g.Block(func() {
 					g.Line("processedInput, err := inputHandler(ctx, ufoCtx, typedInput)")
 					g.Line("if err != nil {")
