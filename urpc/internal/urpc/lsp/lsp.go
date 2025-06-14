@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -75,6 +76,13 @@ func (l *LSP) Run() error {
 }
 
 func (l *LSP) handleMessage(rawBytes []byte) (bool, error) {
+	// Add panic recovery to prevent crashes. Instead of crashing, log the panic.
+	defer func() {
+		if r := recover(); r != nil {
+			l.logger.Error("panic while handling message", "panic", r, "stack", string(debug.Stack()))
+		}
+	}()
+
 	l.handlerMu.Lock()
 	defer l.handlerMu.Unlock()
 
@@ -95,7 +103,7 @@ func (l *LSP) handleMessage(rawBytes []byte) (bool, error) {
 		l.logger.Info("notification received", "method", messageMethod, "raw", rawMessage)
 	}
 
-	var response any = nil
+	var response any
 	var shouldExit bool
 
 	switch messageMethod {

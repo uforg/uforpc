@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"runtime/debug"
 	"time"
 
 	"github.com/uforg/uforpc/urpc/internal/urpc/analyzer"
@@ -140,6 +141,13 @@ func (l *LSP) analyzeAndPublishDiagnosticsDebounced(uri string) {
 
 	// Schedule a new analysis
 	l.analysisTimer = time.AfterFunc(debounceTime, func() {
+		// Recover from any panic inside the goroutine so the server keeps running
+		defer func() {
+			if r := recover(); r != nil {
+				l.logger.Error("panic during diagnostics analysis", "panic", r, "stack", string(debug.Stack()))
+			}
+		}()
+
 		// Check if another analysis is already in progress
 		l.analysisInProgressMu.Lock()
 		if l.analysisInProgress {
