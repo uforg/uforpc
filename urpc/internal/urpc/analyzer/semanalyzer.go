@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"slices"
+
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
@@ -270,17 +272,22 @@ func (a *semanalyzer) validateTypeCircularDependencies() {
 // validateTypeCircularDependenciesCheckType checks if a type has a circular dependency.
 func validateTypeCircularDependenciesCheckType(name string, types map[string]*ast.TypeDecl, stack []string) error {
 	// Is it already in the stack (cycle)?
-	for _, stackItem := range stack {
-		if stackItem == name {
-			return fmt.Errorf("circular dependency detected between types: %s", strings.Join(stack, " -> "))
-		}
+	if slices.Contains(stack, name) {
+		return fmt.Errorf("circular dependency detected between types: %s", strings.Join(stack, " -> "))
+	}
+
+	// Ensure the type exists before proceeding to avoid nil pointer dereference.
+	typ, ok := types[name]
+	if !ok || typ == nil {
+		// The existence of the type is validated elsewhere, so we silently skip
+		// it here to prevent a crash.
+		return nil
 	}
 
 	// Add it to the stack
 	stack = append(stack, name)
 
 	// Check every field in the type (including nested types)
-	typ := types[name]
 	for _, field := range extractFields(typ.Children) {
 		if err := validateTypeCircularDependenciesCheckField(field.Type, types, stack); err != nil {
 			return err
