@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
@@ -14,6 +15,15 @@ import (
 // later in the analyzer and LSP to give useful error messages
 // and auto-completion. Those positions are automatically populated
 // by the participle library.
+
+// PrimitiveTypes is a list of primitive types that are not
+// considered as custom types.
+var PrimitiveTypes = []string{"string", "int", "float", "bool", "datetime"}
+
+// IsPrimitiveType checks if a type is a primitive type.
+func IsPrimitiveType(name string) bool {
+	return slices.Contains(PrimitiveTypes, name)
+}
 
 // Schema is the root of the URPC schema AST.
 type Schema struct {
