@@ -5,13 +5,9 @@ This document specifies the standard formatting rules for the UFO-RPC DSL
 collaboration. The primary goal is to produce clean, predictable, and
 aesthetically pleasing URPC code.
 
-This specification is enforced by the official URPC formatter.
+> **⚠️ Reference Only:** All style conventions are automatically enforced by the official URPC formatter. Run it manually with `urpc fmt ./schema.urpc`, or let the built-in LSP formatter (bundled with the VS Code extension and configurable for other editors) format files on save.
 
 ## 1. General Principles
-
-This guide is for reference only. All the formatting rules are enforced by the
-official URPC formatter included in the UFO-RPC CLI so you don't have to worry
-about it, continue reading for reference only.
 
 - **Encoding:** UTF-8.
 - **Line Endings:** Use newline characters (`\n`).
@@ -200,4 +196,41 @@ deprecated("Use NewStream instead")
 stream MyStream {
   // stream definition
 }
+```
+
+## 9. Naming Conventions
+
+### 9.1 Type, Procedure, and Stream Names
+
+- Use **strict PascalCase** (also known as UpperCamelCase). Each word starts with an uppercase letter with no underscores or consecutive capital letters.
+- Acronyms longer than two letters should be treated as regular words (e.g. `HttpRequest`, not `HTTPRequest`).
+
+_Example:_
+
+```urpc
+// Correct
+type FooBar {
+  myField: string
+}
+
+// Incorrect
+type FooBAR {
+  myField: string
+}
+```
+
+### 9.2 Field Names
+
+- Use **strict camelCase**. The first word is lowercase and each subsequent word starts with an uppercase letter. Do not use underscores or all-caps abbreviations.
+
+_Example:_
+
+```urpc
+// Correct
+myInput: FooBar
+zipCode: string
+
+// Incorrect
+MyINPUT: FooBar
+zip_code: string
 ```
