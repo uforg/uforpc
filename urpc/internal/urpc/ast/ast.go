@@ -2,7 +2,6 @@ package ast
 
 import (
 	"slices"
-	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
@@ -242,20 +241,7 @@ type Docstring struct {
 // GetExternal returns a path and a bool indicating if the docstring
 // references an external Markdown file.
 func (d Docstring) GetExternal() (string, bool) {
-	trimmed := strings.TrimSpace(d.Value)
-	if strings.ContainsAny(trimmed, "\r\n") {
-		return "", false
-	}
-
-	if strings.TrimSuffix(".md", trimmed) == "" {
-		return "", false
-	}
-
-	if !strings.HasSuffix(trimmed, ".md") {
-		return "", false
-	}
-
-	return trimmed, true
+	return DocstringIsExternal(d.Value)
 }
 
 // Deprecated represents a deprecated declaration.

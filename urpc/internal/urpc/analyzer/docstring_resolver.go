@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 )
@@ -66,16 +65,6 @@ func (r *docstringResolver) resolveExternalDocstring(docstring *ast.Docstring, d
 	externalPath, isExternal := docstring.GetExternal()
 	if !isExternal {
 		return diagnostics
-	}
-
-	if !strings.HasSuffix(externalPath, ".md") {
-		return append(diagnostics, Diagnostic{
-			Positions: Positions{
-				Pos:    docstring.Pos,
-				EndPos: docstring.EndPos,
-			},
-			Message: fmt.Sprintf("external markdown file must end with .md: %s", externalPath),
-		})
 	}
 
 	content, _, err := r.fileProvider.GetFileAndHash(docstring.Pos.Filename, externalPath)

@@ -136,9 +136,8 @@ func findTokenAtPosition(content string, position ast.Position) (string, error) 
 
 		// Skip docstrings that are not markdown files
 		if tok.Type == token.Docstring {
-			literal := strings.TrimSpace(tok.Literal)
-			linesLen := len(strings.Split(literal, "\n"))
-			if linesLen > 1 || !strings.HasSuffix(literal, ".md") {
+			_, isExternal := ast.DocstringIsExternal(tok.Literal)
+			if !isExternal {
 				continue
 			}
 		}
