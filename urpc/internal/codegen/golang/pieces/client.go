@@ -56,7 +56,7 @@ type internalClient struct {
 	streamNamesMap map[string]bool
 
 	// header configuration (global on every request)
-	globalHeaders http.Header
+	globalHeaders map[string]string
 
 	// SSE data size configuration in bytes
 	maxStreamEventDataSize int
@@ -76,15 +76,10 @@ func withHTTPClient(hc *http.Client) internalClientOption {
 	}
 }
 
-// withGlobalHeaders sets headers that will be attached to every request.
-// The provided header map is copied, so further mutations will not affect the
-// client after construction.
-func withGlobalHeaders(h http.Header) internalClientOption {
+// withGlobalHeader sets a header that will be attached to every request.
+func withGlobalHeader(key string, value string) internalClientOption {
 	return func(c *internalClient) {
-		if h == nil {
-			return
-		}
-		c.globalHeaders = clientHelperCloneHeader(h)
+		c.globalHeaders[key] = value
 	}
 }
 
@@ -166,9 +161,9 @@ func (b *internalClientBuilder) withHTTPClient(hc *http.Client) *internalClientB
 	return b
 }
 
-// withGlobalHeaders adds global headers that will be sent with every request.
-func (b *internalClientBuilder) withGlobalHeaders(h http.Header) *internalClientBuilder {
-	b.opts = append(b.opts, withGlobalHeaders(h))
+// withGlobalHeader adds a global header that will be sent with every request.
+func (b *internalClientBuilder) withGlobalHeader(key, value string) *internalClientBuilder {
+	b.opts = append(b.opts, withGlobalHeader(key, value))
 	return b
 }
 
@@ -195,7 +190,7 @@ func (c *internalClient) callProc(
 	ctx context.Context,
 	procName string,
 	input any,
-	extraHeaders http.Header,
+	extraHeaders map[string]string,
 ) Response[json.RawMessage] {
 	if !c.procNamesMap[procName] {
 		return Response[json.RawMessage]{
@@ -242,9 +237,13 @@ func (c *internalClient) callProc(
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	// Apply configured headers (global headers + per-call extras overriding).
-	clientHelperAddHeaders(req.Header, c.globalHeaders)
-	clientHelperAddHeaders(req.Header, extraHeaders)
+	// Apply headers: global + per-call extras.
+	for key, value := range c.globalHeaders {
+		req.Header.Set(key, value)
+	}
+	for key, value := range extraHeaders {
+		req.Header.Set(key, value)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -299,18 +298,12 @@ type procCallBuilder struct {
 	client  *internalClient
 	name    string
 	input   any
-	headers http.Header
+	headers map[string]string
 }
 
 // withHeader adds a header to this procedure invocation.
 func (p *procCallBuilder) withHeader(key, value string) *procCallBuilder {
-	p.headers.Add(key, value)
-	return p
-}
-
-// withHeaders adds all headers h to this invocation (merged).
-func (p *procCallBuilder) withHeaders(h http.Header) *procCallBuilder {
-	clientHelperAddHeaders(p.headers, h)
+	p.headers[key] = value
 	return p
 }
 
@@ -325,7 +318,7 @@ func (c *internalClient) newProcCallBuilder(name string, input any) *procCallBui
 		client:  c,
 		name:    name,
 		input:   input,
-		headers: http.Header{},
+		headers: map[string]string{},
 	}
 }
 
@@ -341,7 +334,7 @@ func (c *internalClient) stream(
 	ctx context.Context,
 	streamName string,
 	input any,
-	extraHeaders http.Header,
+	extraHeaders map[string]string,
 	maxEventDataSize int,
 ) <-chan Response[json.RawMessage] {
 	if !c.streamNamesMap[streamName] {
@@ -395,8 +388,12 @@ func (c *internalClient) stream(
 	req.Header.Set("Accept", "text/event-stream")
 
 	// Apply headers: global + per-call extras.
-	clientHelperAddHeaders(req.Header, c.globalHeaders)
-	clientHelperAddHeaders(req.Header, extraHeaders)
+	for key, value := range c.globalHeaders {
+		req.Header.Set(key, value)
+	}
+	for key, value := range extraHeaders {
+		req.Header.Set(key, value)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -497,19 +494,13 @@ type streamCall struct {
 	client           *internalClient
 	name             string
 	input            any
-	headers          http.Header
+	headers          map[string]string
 	maxEventDataSize int
 }
 
 // withHeader adds a header to this stream invocation.
 func (s *streamCall) withHeader(key, value string) *streamCall {
-	s.headers.Add(key, value)
-	return s
-}
-
-// withHeaders adds multiple headers.
-func (s *streamCall) withHeaders(h http.Header) *streamCall {
-	clientHelperAddHeaders(s.headers, h)
+	s.headers[key] = value
 	return s
 }
 
@@ -530,32 +521,7 @@ func (c *internalClient) newStreamCallBuilder(name string, input any) *streamCal
 		client:           c,
 		name:             name,
 		input:            input,
-		headers:          http.Header{},
+		headers:          map[string]string{},
 		maxEventDataSize: 0,
 	}
-}
-
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-// clientHelperAddHeaders copies all headers from src into dst. Duplicate keys are appended
-// (preserving existing entries).
-func clientHelperAddHeaders(dst, src http.Header) {
-	for k, vs := range src {
-		for _, v := range vs {
-			dst.Add(k, v)
-		}
-	}
-}
-
-// clientHelperCloneHeader returns a deep copy of h.
-func clientHelperCloneHeader(h http.Header) http.Header {
-	out := make(http.Header, len(h))
-	for k, vs := range h {
-		cpy := make([]string, len(vs))
-		copy(cpy, vs)
-		out[k] = cpy
-	}
-	return out
 }

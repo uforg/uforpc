@@ -44,23 +44,13 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	g.Line("// NewClient creates a new clientBuilder instance. The baseURL parameter is mandatory and")
-	g.Line("// should contain the root URL of your UFO RPC server (e.g., \"https://api.example.com/urpc\").")
+	g.Line("// NewClient creates a new client builder instance.")
 	g.Line("//")
 	g.Line("// Example usage:")
-	g.Line("//   cli := NewClient(\"https://api.example.com\").WithHTTPClient(myHTTP).Build()")
+	g.Line("//   client := NewClient(\"https://api.example.com/v1/urpc\").Build()")
 	g.Line("func NewClient(baseURL string) *clientBuilder {")
 	g.Block(func() {
 		g.Line("return &clientBuilder{baseURL: baseURL, opts: []internalClientOption{}}")
-	})
-	g.Line("}")
-	g.Break()
-
-	g.Line("// WithBaseURL sets the server base URL used for every request.")
-	g.Line("func (b *clientBuilder) WithBaseURL(u string) *clientBuilder {")
-	g.Block(func() {
-		g.Line("b.baseURL = u")
-		g.Line("return b")
 	})
 	g.Line("}")
 	g.Break()
@@ -74,10 +64,10 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	g.Line("// WithGlobalHeaders sets HTTP headers that will be sent with every request.")
-	g.Line("func (b *clientBuilder) WithGlobalHeaders(h http.Header) *clientBuilder {")
+	g.Line("// WithGlobalHeader sets a header that will be sent with every request.")
+	g.Line("func (b *clientBuilder) WithGlobalHeader(key, value string) *clientBuilder {")
 	g.Block(func() {
-		g.Line("b.opts = append(b.opts, withGlobalHeaders(h))")
+		g.Line("b.opts = append(b.opts, withGlobalHeader(key, value))")
 		g.Line("return b")
 	})
 	g.Line("}")
@@ -129,7 +119,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// %s creates a call builder for the %s procedure.", name, name)
 		g.Linef("func (registry *clientProcRegistry) %s() *%s {", name, builderName)
 		g.Block(func() {
-			g.Linef("return &%s{client: registry.intClient, headers: http.Header{}, name: \"%s\"}", builderName, name)
+			g.Linef("return &%s{client: registry.intClient, headers: map[string]string{}, name: \"%s\"}", builderName, name)
 		})
 		g.Line("}")
 		g.Break()
@@ -139,7 +129,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("type %s struct {", builderName)
 		g.Block(func() {
 			g.Line("client  *internalClient")
-			g.Line("headers http.Header")
+			g.Line("headers map[string]string")
 			g.Line("name    string")
 		})
 		g.Line("}")
@@ -149,17 +139,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// WithHeader adds a single HTTP header to the %s invocation.", name)
 		g.Linef("func (b *%s) WithHeader(key, value string) *%s {", builderName, builderName)
 		g.Block(func() {
-			g.Line("b.headers.Add(key, value)")
-			g.Line("return b")
-		})
-		g.Line("}")
-		g.Break()
-
-		// WithHeaders method
-		g.Linef("// WithHeaders merges the provided headers into the %s invocation.", name)
-		g.Linef("func (b *%s) WithHeaders(h http.Header) *%s {", builderName, builderName)
-		g.Block(func() {
-			g.Line("clientHelperAddHeaders(b.headers, h)")
+			g.Line("b.headers[key] = value")
 			g.Line("return b")
 		})
 		g.Line("}")
@@ -209,7 +189,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// %s creates a stream builder for the %s stream.", name, name)
 		g.Linef("func (registry *clientStreamRegistry) %s() *%s {", name, builderStream)
 		g.Block(func() {
-			g.Linef("return &%s{client: registry.intClient, headers: http.Header{}, name: \"%s\"}", builderStream, name)
+			g.Linef("return &%s{client: registry.intClient, headers: map[string]string{}, name: \"%s\"}", builderStream, name)
 		})
 		g.Line("}")
 		g.Break()
@@ -218,7 +198,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("type %s struct {", builderStream)
 		g.Block(func() {
 			g.Line("client  *internalClient")
-			g.Line("headers http.Header")
+			g.Line("headers map[string]string")
 			g.Line("name    string")
 			g.Line("maxEvt  int")
 		})
@@ -229,17 +209,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// WithHeader adds a single HTTP header to the %s stream subscription.", name)
 		g.Linef("func (b *%s) WithHeader(key, value string) *%s {", builderStream, builderStream)
 		g.Block(func() {
-			g.Line("b.headers.Add(key, value)")
-			g.Line("return b")
-		})
-		g.Line("}")
-		g.Break()
-
-		// WithHeaders
-		g.Linef("// WithHeaders merges the provided headers into the %s stream subscription.", name)
-		g.Linef("func (b *%s) WithHeaders(h http.Header) *%s {", builderStream, builderStream)
-		g.Block(func() {
-			g.Line("clientHelperAddHeaders(b.headers, h)")
+			g.Line("b.headers[key] = value")
 			g.Line("return b")
 		})
 		g.Line("}")
