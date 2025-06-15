@@ -29,7 +29,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Break()
 
 	g.Line("// -----------------------------------------------------------------------------")
-	g.Line("// Server Generated Implementation")
+	g.Line("// Server generated implementation")
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Break()
 
