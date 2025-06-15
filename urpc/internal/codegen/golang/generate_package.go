@@ -37,16 +37,25 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 	g.Linef("package %s", config.PackageName)
 	g.Break()
 
+	imports := []string{
+		"bufio",
+		"bytes",
+		"context",
+		"encoding/json",
+		"fmt",
+		"io",
+		"net/http",
+		"slices",
+		"strings",
+		"sync",
+		"time",
+	}
+
 	g.Line("import (")
 	g.Block(func() {
-		g.Line(`"context"`)
-		g.Line(`"encoding/json"`)
-		g.Line(`"fmt"`)
-		g.Line(`"io"`)
-		g.Line(`"time"`)
-		g.Line(`"net/http"`)
-		g.Line(`"slices"`)
-		g.Line(`"sync"`)
+		for _, imp := range imports {
+			g.Linef(`"%s"`, imp)
+		}
 	})
 	g.Line(")")
 	g.Break()
