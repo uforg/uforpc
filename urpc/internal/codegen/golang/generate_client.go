@@ -44,7 +44,10 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	g.Line("// NewClient creates a new client builder instance.")
+	g.Line("// NewClient instantiates a fluent builder for the UFO RPC client.")
+	g.Line("//")
+	g.Line("// The baseURL argument must point to the HTTP endpoint that handles UFO RPC")
+	g.Line("// requests, for example: \"https://api.example.com/v1/urpc\".")
 	g.Line("//")
 	g.Line("// Example usage:")
 	g.Line("//   client := NewClient(\"https://api.example.com/v1/urpc\").Build()")
@@ -147,7 +150,11 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 
 		// Execute method
-		g.Linef("// Execute performs the %s RPC call.", name)
+		g.Linef("// Execute sends a request to the %s procedure.", name)
+		g.Line("//")
+		g.Line("// Returns:")
+		g.Linef("//   1. The parsed %sOutput value on success.", name)
+		g.Line("//   2. The error when the server responds with Ok=false or a transport/JSON error occurs.")
 		g.Linef("func (b *%s) Execute(ctx context.Context, input %sInput) (%sOutput, error) {", builderName, name, name)
 		g.Block(func() {
 			g.Line("raw := b.client.callProc(ctx, b.name, input, b.headers)")
@@ -229,7 +236,16 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 
 		// Execute
-		g.Linef("// Execute opens the %s stream and returns a typed event channel.", name)
+		g.Linef("// Execute opens the %s Server-Sent Events stream.", name)
+		g.Line("//")
+		g.Linef("// It returns a read-only channel of Response[%sOutput].", name)
+		g.Line("//")
+		g.Line("// Each event on the channel follows these rules:")
+		g.Linef("//   - Ok=true  ⇒ Output contains a %sOutput value.", name)
+		g.Line("//   - Ok=false ⇒ Error describes either a server sent or transport error.")
+		g.Line("//")
+		g.Line("// The caller should cancel the supplied context to terminate the stream and must")
+		g.Line("// drain the channel until it is closed.")
 		g.Linef("func (b *%s) Execute(ctx context.Context, input %sInput) <-chan Response[%sOutput] {", builderStream, name, name)
 		g.Block(func() {
 			g.Line("rawCh := b.client.stream(ctx, b.name, input, b.headers, b.maxEvt)")
