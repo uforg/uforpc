@@ -1,8 +1,29 @@
 package typescript
 
-import "github.com/uforg/uforpc/urpc/internal/schema"
+import (
+	"strings"
+
+	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/uforpc/urpc/internal/schema"
+)
 
 // Generate takes a schema and a config and generates the TypeScript code for the schema.
-func Generate(sch schema.Schema, config Config) error {
-	return nil
+func Generate(sch schema.Schema, config Config) (string, error) {
+	subGenerators := []func(schema.Schema, Config) (string, error){}
+
+	g := genkit.NewGenKit().WithTabs()
+	for _, generator := range subGenerators {
+		codeChunk, err := generator(sch, config)
+		if err != nil {
+			return "", err
+		}
+
+		codeChunk = strings.TrimSpace(codeChunk)
+		g.Raw(codeChunk)
+		g.Break()
+		g.Break()
+	}
+
+	generatedCode := g.String()
+	return generatedCode, nil
 }

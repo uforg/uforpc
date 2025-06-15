@@ -124,6 +124,25 @@ func runGolang(absConfigDir string, config *golang.Config, schema schema.Schema)
 	return nil
 }
 
-func runTypescript(_ string, _ *typescript.Config, _ schema.Schema) error {
+func runTypescript(absConfigDir string, config *typescript.Config, schema schema.Schema) error {
+	outputFile := filepath.Join(absConfigDir, config.OutputFile)
+	outputDir := filepath.Dir(outputFile)
+
+	// Ensure output directory exists
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Generate the code
+	code, err := typescript.Generate(schema, *config)
+	if err != nil {
+		return fmt.Errorf("failed to generate code: %w", err)
+	}
+
+	// Write the code to the output file
+	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
+		return fmt.Errorf("failed to write generated code to file: %w", err)
+	}
+
 	return nil
 }
