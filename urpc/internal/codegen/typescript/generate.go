@@ -11,6 +11,7 @@ import (
 func Generate(sch schema.Schema, config Config) (string, error) {
 	subGenerators := []func(schema.Schema, Config) (string, error){
 		generateCoreTypes,
+		generateDomainTypes,
 	}
 
 	g := genkit.NewGenKit().WithTabs()
