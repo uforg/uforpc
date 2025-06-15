@@ -167,16 +167,24 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 
 		// Execute method
 		g.Linef("// Execute performs the %s RPC call.", name)
-		g.Linef("func (b *%s) Execute(ctx context.Context, input %sInput) Response[%sOutput] {", builderName, name, name)
+		g.Linef("func (b *%s) Execute(ctx context.Context, input %sInput) (%sOutput, error) {", builderName, name, name)
 		g.Block(func() {
 			g.Line("raw := b.client.callProc(ctx, b.name, input, b.headers)")
+
+			g.Line("if !raw.Ok {")
+			g.Block(func() {
+				g.Linef("return %sOutput{}, raw.Error", name)
+			})
+			g.Line("}")
+
 			g.Linef("var out %sOutput", name)
 			g.Line("if err := json.Unmarshal(raw.Output, &out); err != nil {")
 			g.Block(func() {
-				g.Linef("return Response[%sOutput]{Ok: false, Error: Error{Message: fmt.Sprintf(\"failed to decode %s output: %%v\", err)}}", name, name)
+				g.Linef("return %sOutput{}, Error{Message: fmt.Sprintf(\"failed to decode %s output: %%v\", err)}", name, name)
 			})
 			g.Line("}")
-			g.Linef("return Response[%sOutput]{Ok: true, Output: out}", name)
+
+			g.Line("return out, nil")
 		})
 		g.Line("}")
 		g.Break()
