@@ -2,6 +2,7 @@ package typescript
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
@@ -73,7 +74,12 @@ func renderType(
 
 	og := genkit.NewGenKit().WithTabs()
 	if desc != "" {
-		og.Linef("/** %s %s */", name, desc)
+		og.Linef("/**")
+		lines := strings.SplitSeq(fmt.Sprintf("%s %s", name, desc), "\n")
+		for line := range lines {
+			og.Linef(" * %s", line)
+		}
+		og.Linef(" */")
 	}
 	og.Linef("export interface %s {", name)
 	og.Block(func() {
