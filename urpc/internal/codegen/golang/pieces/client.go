@@ -160,21 +160,21 @@ func newClientBuilder(baseURL string, procNames, streamNames []string) *internal
 	}
 }
 
-// WithHTTPClient sets a custom *http.Client.
-func (b *internalClientBuilder) WithHTTPClient(hc *http.Client) *internalClientBuilder {
+// withHTTPClient sets a custom *http.Client.
+func (b *internalClientBuilder) withHTTPClient(hc *http.Client) *internalClientBuilder {
 	b.opts = append(b.opts, withHTTPClient(hc))
 	return b
 }
 
-// WithGlobalHeaders adds global headers that will be sent with every request.
-func (b *internalClientBuilder) WithGlobalHeaders(h http.Header) *internalClientBuilder {
+// withGlobalHeaders adds global headers that will be sent with every request.
+func (b *internalClientBuilder) withGlobalHeaders(h http.Header) *internalClientBuilder {
 	b.opts = append(b.opts, withGlobalHeaders(h))
 	return b
 }
 
-// WithMaxStreamEventDataSize overrides the default maximum SSE payload size in
+// withMaxStreamEventDataSize overrides the default maximum SSE payload size in
 // bytes.
-func (b *internalClientBuilder) WithMaxStreamEventDataSize(size int) *internalClientBuilder {
+func (b *internalClientBuilder) withMaxStreamEventDataSize(size int) *internalClientBuilder {
 	b.opts = append(b.opts, withMaxStreamEventDataSize(size))
 	return b
 }
@@ -302,20 +302,20 @@ type procCallBuilder struct {
 	headers http.Header
 }
 
-// WithHeader adds a header to this procedure invocation.
-func (p *procCallBuilder) WithHeader(key, value string) *procCallBuilder {
+// withHeader adds a header to this procedure invocation.
+func (p *procCallBuilder) withHeader(key, value string) *procCallBuilder {
 	p.headers.Add(key, value)
 	return p
 }
 
-// WithHeaders adds all headers h to this invocation (merged).
-func (p *procCallBuilder) WithHeaders(h http.Header) *procCallBuilder {
+// withHeaders adds all headers h to this invocation (merged).
+func (p *procCallBuilder) withHeaders(h http.Header) *procCallBuilder {
 	clientHelperAddHeaders(p.headers, h)
 	return p
 }
 
-// Execute performs the RPC call and returns the Response.
-func (p *procCallBuilder) Execute(ctx context.Context) Response[json.RawMessage] {
+// execute performs the RPC call and returns the Response.
+func (p *procCallBuilder) execute(ctx context.Context) Response[json.RawMessage] {
 	return p.client.callProc(ctx, p.name, p.input, p.headers)
 }
 
@@ -501,26 +501,26 @@ type streamCall struct {
 	maxEventDataSize int
 }
 
-// WithHeader adds a header to this stream invocation.
-func (s *streamCall) WithHeader(key, value string) *streamCall {
+// withHeader adds a header to this stream invocation.
+func (s *streamCall) withHeader(key, value string) *streamCall {
 	s.headers.Add(key, value)
 	return s
 }
 
-// WithHeaders adds multiple headers.
-func (s *streamCall) WithHeaders(h http.Header) *streamCall {
+// withHeaders adds multiple headers.
+func (s *streamCall) withHeaders(h http.Header) *streamCall {
 	clientHelperAddHeaders(s.headers, h)
 	return s
 }
 
-// WithMaxEventDataSize sets the maximum event data size.
-func (s *streamCall) WithMaxEventDataSize(size int) *streamCall {
+// withMaxEventDataSize sets the maximum event data size.
+func (s *streamCall) withMaxEventDataSize(size int) *streamCall {
 	s.maxEventDataSize = size
 	return s
 }
 
-// Execute starts the stream and returns the channel of events.
-func (s *streamCall) Execute(ctx context.Context) <-chan Response[json.RawMessage] {
+// execute starts the stream and returns the channel of events.
+func (s *streamCall) execute(ctx context.Context) <-chan Response[json.RawMessage] {
 	return s.client.stream(ctx, s.name, s.input, s.headers, s.maxEventDataSize)
 }
 
