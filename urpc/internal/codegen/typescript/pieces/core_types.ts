@@ -141,7 +141,7 @@ export class UfoError extends Error {
 /**
  * Normalises arbitrary error inputs into a `UfoError` instance.
  */
-export function asError(err: unknown): UfoError {
+function asError(err: unknown): UfoError {
   if (err instanceof UfoError) {
     return err;
   }
@@ -157,7 +157,7 @@ export function asError(err: unknown): UfoError {
 /**
  * Convenience helper for missing-field validation errors.
  */
-export function errorMissingRequiredField(message: string): UfoError {
+function errorMissingRequiredField(message: string): UfoError {
   return new UfoError({
     message,
     category: "ValidationError",
