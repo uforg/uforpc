@@ -13,6 +13,8 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 	subGenerators := []func(schema.Schema, Config) (string, error){
 		generateCoreTypes,
 		generateDomainTypes,
+		generateProcedureTypes,
+		generateStreamTypes,
 	}
 
 	g := genkit.NewGenKit().WithTabs()
