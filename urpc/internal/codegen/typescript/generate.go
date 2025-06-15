@@ -5,6 +5,7 @@ import (
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 // Generate takes a schema and a config and generates the TypeScript code for the schema.
@@ -28,5 +29,6 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 	}
 
 	generatedCode := g.String()
+	generatedCode = strutil.LimitConsecutiveNewlines(generatedCode, 2)
 	return generatedCode, nil
 }
