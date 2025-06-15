@@ -33,10 +33,10 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Break()
 
-	g.Line("// hookRegistry provides a type-safe interface for registering server hooks")
+	g.Line("// serverHookRegistry provides a type-safe interface for registering server hooks")
 	g.Line("// that execute at different stages of request processing. Hooks allow for")
 	g.Line("// cross-cutting concerns like authentication, logging, and response transformation.")
-	g.Line("type hookRegistry[T any] struct {")
+	g.Line("type serverHookRegistry[T any] struct {")
 	g.Block(func() {
 		g.Line("intServer *internalServer[T]")
 	})
@@ -52,7 +52,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// The hook can modify the context and UFO context, or return an error to")
 	g.Line("// abort the request with an error response.")
-	g.Line("func (m *hookRegistry[T]) AddBeforeHandler(hook ServerHookBeforeHandler[T]) {")
+	g.Line("func (m *serverHookRegistry[T]) AddBeforeHandler(hook ServerHookBeforeHandler[T]) {")
 	g.Block(func() {
 		g.Line("m.intServer.addHookBeforeHandler(hook)")
 	})
@@ -67,7 +67,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// This hook is useful for standardizing response formats, adding data,")
 	g.Line("// or implementing response logic.")
-	g.Line("func (m *hookRegistry[T]) AddBeforeProcRespond(hook ServerHookBeforeProcRespond[T]) {")
+	g.Line("func (m *serverHookRegistry[T]) AddBeforeProcRespond(hook ServerHookBeforeProcRespond[T]) {")
 	g.Block(func() {
 		g.Line("m.intServer.addHookBeforeProcRespond(hook)")
 	})
@@ -82,7 +82,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// This hook is useful for adding metadata to stream events, implementing")
 	g.Line("// event filtering logic, or transforming event data before transmission.")
-	g.Line("func (m *hookRegistry[T]) AddBeforeStreamEmit(hook ServerHookBeforeStreamEmit[T]) {")
+	g.Line("func (m *serverHookRegistry[T]) AddBeforeStreamEmit(hook ServerHookBeforeStreamEmit[T]) {")
 	g.Block(func() {
 		g.Line("m.intServer.addHookBeforeStreamEmit(hook)")
 	})
@@ -97,7 +97,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// This hook is useful for logging, metrics collection, cleanup operations,")
 	g.Line("// or audit trails specific to procedure calls.")
-	g.Line("func (m *hookRegistry[T]) AddAfterProc(hook ServerHookAfterProc[T]) {")
+	g.Line("func (m *serverHookRegistry[T]) AddAfterProc(hook ServerHookAfterProc[T]) {")
 	g.Block(func() {
 		g.Line("m.intServer.addHookAfterProc(hook)")
 	})
@@ -112,7 +112,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// This hook is useful for cleanup operations, logging, metrics collection,")
 	g.Line("// or resource deallocation specific to stream handling.")
-	g.Line("func (m *hookRegistry[T]) AddAfterStream(hook ServerHookAfterStream[T]) {")
+	g.Line("func (m *serverHookRegistry[T]) AddAfterStream(hook ServerHookAfterStream[T]) {")
 	g.Block(func() {
 		g.Line("m.intServer.addHookAfterStream(hook)")
 	})
@@ -127,17 +127,17 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// This hook is useful for logging individual stream events, metrics")
 	g.Line("// collection, or post-emission cleanup operations.")
-	g.Line("func (m *hookRegistry[T]) AddAfterStreamEmit(hook ServerHookAfterStreamEmit[T]) {")
+	g.Line("func (m *serverHookRegistry[T]) AddAfterStreamEmit(hook ServerHookAfterStreamEmit[T]) {")
 	g.Block(func() {
 		g.Line("m.intServer.addHookAfterStreamEmit(hook)")
 	})
 	g.Line("}")
 	g.Break()
 
-	g.Line("// procRegistry provides a type-safe interface for registering procedure")
+	g.Line("// serverProcRegistry provides a type-safe interface for registering procedure")
 	g.Line("// handlers and input processors. It handles the marshaling and validation")
 	g.Line("// of procedure inputs and manages the procedure execution lifecycle.")
-	g.Line("type procRegistry[T any] struct {")
+	g.Line("type serverProcRegistry[T any] struct {")
 	g.Block(func() {
 		g.Line("intServer *internalServer[T]")
 	})
@@ -156,7 +156,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// This is useful for implementing custom validation logic, input sanitization,")
 		g.Line("// or data transformation that goes beyond the default required fields validation.")
 		renderDeprecated(g, procNode.Deprecated)
-		g.Linef("func (p *procRegistry[T]) Set%sInputHandler(", name)
+		g.Linef("func (p *serverProcRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
 			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
@@ -188,7 +188,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// If an input handler is registered, the input will be processed through that")
 		g.Line("// handler before reaching this main handler.")
 		renderDeprecated(g, procNode.Deprecated)
-		g.Linef("func (p *procRegistry[T]) Set%sHandler(", name)
+		g.Linef("func (p *serverProcRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {
 			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput) (%sOutput, error),", name, name)
 		})
@@ -234,11 +234,11 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Break()
 	}
 
-	g.Line("// streamRegistry provides a type-safe interface for registering stream")
+	g.Line("// serverStreamRegistry provides a type-safe interface for registering stream")
 	g.Line("// handlers and input processors. It handles the marshaling and validation")
 	g.Line("// of stream inputs and manages the stream execution lifecycle with")
 	g.Line("// Server-Sent Events delivery.")
-	g.Line("type streamRegistry[T any] struct {")
+	g.Line("type serverStreamRegistry[T any] struct {")
 	g.Block(func() {
 		g.Line("intServer *internalServer[T]")
 	})
@@ -258,7 +258,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// or data transformation specific to stream initialization that goes beyond")
 		g.Line("// the default required fields validation.")
 		renderDeprecated(g, streamNode.Deprecated)
-		g.Linef("func (s *streamRegistry[T]) Set%sInputHandler(", name)
+		g.Linef("func (s *serverStreamRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
 			g.Linef("inputHandler func(ctx context.Context, ufoCtx T, input %sInput) (%sInput, error),", name, name)
 		})
@@ -291,7 +291,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("//")
 		g.Line("// Each emitted event goes through before-emit and after-emit hooks.")
 		renderDeprecated(g, streamNode.Deprecated)
-		g.Linef("func (s *streamRegistry[T]) Set%sHandler(", name)
+		g.Linef("func (s *serverStreamRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {
 			g.Linef("handler func(ctx context.Context, ufoCtx T, input %sInput, emit func(%sOutput) error) error,", name, name)
 		})
@@ -353,9 +353,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("type Server[T any] struct {")
 	g.Block(func() {
 		g.Line("intServer  *internalServer[T]")
-		g.Line("Hooks      *hookRegistry[T]")
-		g.Line("Procs      *procRegistry[T]")
-		g.Line("Streams    *streamRegistry[T]")
+		g.Line("Hooks      *serverHookRegistry[T]")
+		g.Line("Procs      *serverProcRegistry[T]")
+		g.Line("Streams    *serverStreamRegistry[T]")
 	})
 	g.Line("}")
 	g.Break()
@@ -383,9 +383,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("return &Server[T]{")
 		g.Block(func() {
 			g.Line("intServer:  intServer,")
-			g.Line("Hooks:      &hookRegistry[T]{intServer: intServer},")
-			g.Line("Procs:      &procRegistry[T]{intServer: intServer},")
-			g.Line("Streams:    &streamRegistry[T]{intServer: intServer},")
+			g.Line("Hooks:      &serverHookRegistry[T]{intServer: intServer},")
+			g.Line("Procs:      &serverProcRegistry[T]{intServer: intServer},")
+			g.Line("Streams:    &serverStreamRegistry[T]{intServer: intServer},")
 		})
 		g.Line("}")
 	})

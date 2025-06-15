@@ -96,7 +96,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	g.Line("func (b *clientBuilder) Build() *Client {")
 	g.Block(func() {
 		g.Line("intClient := newInternalClient(b.baseURL, ufoProcedureNames, ufoStreamNames, b.opts...)")
-		g.Line("return &Client{Procs: &procsRegistry{intClient: intClient}, Streams: &streamsRegistry{intClient: intClient}}")
+		g.Line("return &Client{Procs: &clientProcRegistry{intClient: intClient}, Streams: &clientStreamRegistry{intClient: intClient}}")
 	})
 	g.Line("}")
 	g.Break()
@@ -104,8 +104,8 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	g.Line("// Client provides a high-level, type-safe interface for invoking RPC procedures and streams.")
 	g.Line("type Client struct {")
 	g.Block(func() {
-		g.Line("Procs     *procsRegistry")
-		g.Line("Streams   *streamsRegistry")
+		g.Line("Procs     *clientProcRegistry")
+		g.Line("Streams   *clientStreamRegistry")
 	})
 	g.Line("}")
 	g.Break()
@@ -114,7 +114,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	// Generate procedure wrappers
 	// -----------------------------------------------------------------------------
 
-	g.Line("type procsRegistry struct {")
+	g.Line("type clientProcRegistry struct {")
 	g.Block(func() {
 		g.Line("intClient *internalClient")
 	})
@@ -123,11 +123,11 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 
 	for _, procNode := range sch.GetProcNodes() {
 		name := strutil.ToPascalCase(procNode.Name)
-		builderName := "builder" + name
+		builderName := "clientBuilder" + name
 
 		// Client method to create builder
 		g.Linef("// %s creates a call builder for the %s procedure.", name, name)
-		g.Linef("func (registry *procsRegistry) %s() *%s {", name, builderName)
+		g.Linef("func (registry *clientProcRegistry) %s() *%s {", name, builderName)
 		g.Block(func() {
 			g.Linef("return &%s{client: registry.intClient, headers: http.Header{}, name: \"%s\"}", builderName, name)
 		})
@@ -194,7 +194,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	// Generate stream wrappers
 	// -----------------------------------------------------------------------------
 
-	g.Line("type streamsRegistry struct {")
+	g.Line("type clientStreamRegistry struct {")
 	g.Block(func() {
 		g.Line("intClient *internalClient")
 	})
@@ -203,11 +203,11 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 
 	for _, streamNode := range sch.GetStreamNodes() {
 		name := strutil.ToPascalCase(streamNode.Name)
-		builderStream := "builder" + name + "Stream"
+		builderStream := "clientBuilder" + name + "Stream"
 
 		// Client method to create stream builder
 		g.Linef("// %s creates a stream builder for the %s stream.", name, name)
-		g.Linef("func (registry *streamsRegistry) %s() *%s {", name, builderStream)
+		g.Linef("func (registry *clientStreamRegistry) %s() *%s {", name, builderStream)
 		g.Block(func() {
 			g.Linef("return &%s{client: registry.intClient, headers: http.Header{}, name: \"%s\"}", builderStream, name)
 		})
