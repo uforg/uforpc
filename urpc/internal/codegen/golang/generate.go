@@ -19,6 +19,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generateStreamTypes,
 		generateOptional,
 		generateServer,
+		generateClient,
 	}
 
 	g := genkit.NewGenKit().WithTabs()
