@@ -9,7 +9,9 @@ import (
 
 // Generate takes a schema and a config and generates the TypeScript code for the schema.
 func Generate(sch schema.Schema, config Config) (string, error) {
-	subGenerators := []func(schema.Schema, Config) (string, error){}
+	subGenerators := []func(schema.Schema, Config) (string, error){
+		generateCoreTypes,
+	}
 
 	g := genkit.NewGenKit().WithTabs()
 	for _, generator := range subGenerators {
