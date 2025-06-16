@@ -76,15 +76,6 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 	g.Line("}")
 	g.Break()
 
-	g.Line("// WithMaxStreamEventDataSize overrides the default maximum size (bytes) for SSE event payloads.")
-	g.Line("func (b *clientBuilder) WithMaxStreamEventDataSize(size int) *clientBuilder {")
-	g.Block(func() {
-		g.Line("b.opts = append(b.opts, withMaxStreamEventDataSize(size))")
-		g.Line("return b")
-	})
-	g.Line("}")
-	g.Break()
-
 	g.Line("// Build constructs the *Client using the configured options.")
 	g.Line("func (b *clientBuilder) Build() *Client {")
 	g.Block(func() {
@@ -132,9 +123,11 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// %s represents a fluent call builder for the %s procedure.", builderName, name)
 		g.Linef("type %s struct {", builderName)
 		g.Block(func() {
-			g.Line("client  *internalClient")
-			g.Line("headers map[string]string")
-			g.Line("name    string")
+			g.Line("name        string")
+			g.Line("client      *internalClient")
+			g.Line("headers     map[string]string")
+			g.Line("retryConf   *RetryConfig")
+			g.Line("timeoutConf *TimeoutConfig")
 		})
 		g.Line("}")
 		g.Break()
@@ -149,6 +142,35 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Line("}")
 		g.Break()
 
+		// WithRetryConfig method
+		g.Linef("// WithRetryConfig sets the retry configuration for the %s procedure.", name)
+		g.Line("//")
+		g.Line("// Parameters:")
+		g.Line("//   - retryConfig.maxAttempts: Maximum number of retry attempts (default: 3)")
+		g.Line("//   - retryConfig.initialDelay: Initial delay between retries (default: 1 second)")
+		g.Line("//   - retryConfig.maxDelay: Maximum delay between retries (default: 5 seconds)")
+		g.Line("//   - retryConfig.delayMultiplier: Cumulative multiplier applied to initialDelay on each retry (default: 2.0)")
+		g.Linef("func (b *%s) WithRetryConfig(retryConfig RetryConfig) *%s {", builderName, builderName)
+		g.Block(func() {
+			g.Line("b.retryConf = &retryConfig")
+			g.Line("return b")
+		})
+		g.Line("}")
+		g.Break()
+
+		// WithTimeoutConfig method
+		g.Linef("// WithTimeoutConfig sets the timeout configuration for the %s procedure.", name)
+		g.Line("//")
+		g.Line("// Parameters:")
+		g.Line("//   - timeoutConfig.timeout: Request timeout (default: 30 seconds)")
+		g.Linef("func (b *%s) WithTimeoutConfig(timeoutConfig TimeoutConfig) *%s {", builderName, builderName)
+		g.Block(func() {
+			g.Line("b.timeoutConf = &timeoutConfig")
+			g.Line("return b")
+		})
+		g.Line("}")
+		g.Break()
+
 		// Execute method
 		g.Linef("// Execute sends a request to the %s procedure.", name)
 		g.Line("//")
@@ -157,7 +179,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Line("//   2. The error when the server responds with Ok=false or a transport/JSON error occurs.")
 		g.Linef("func (b *%s) Execute(ctx context.Context, input %sInput) (%sOutput, error) {", builderName, name, name)
 		g.Block(func() {
-			g.Line("raw := b.client.callProc(ctx, b.name, input, b.headers)")
+			g.Line("raw := b.client.proc(ctx, b.name, input, b.headers, b.retryConf, b.timeoutConf)")
 
 			g.Line("if !raw.Ok {")
 			g.Block(func() {
@@ -207,10 +229,10 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// %s represents a fluent call builder for the %s stream.", builderStream, name)
 		g.Linef("type %s struct {", builderStream)
 		g.Block(func() {
-			g.Line("client  *internalClient")
-			g.Line("headers map[string]string")
-			g.Line("name    string")
-			g.Line("maxEvt  int")
+			g.Line("name          string")
+			g.Line("client        *internalClient")
+			g.Line("headers       map[string]string")
+			g.Line("reconnectConf *ReconnectConfig")
 		})
 		g.Line("}")
 		g.Break()
@@ -225,11 +247,17 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Line("}")
 		g.Break()
 
-		// WithMaxEventDataSize
-		g.Linef("// WithMaxEventDataSize sets the max allowed SSE payload size for this subscription.")
-		g.Linef("func (b *%s) WithMaxEventDataSize(size int) *%s {", builderStream, builderStream)
+		// WithReconnectConfig method
+		g.Linef("// WithReconnectConfig sets the reconnection configuration for the %s stream.", name)
+		g.Line("//")
+		g.Line("// Parameters:")
+		g.Line("//   - reconnectConfig.maxAttempts: Maximum number of reconnection attempts (default: 5)")
+		g.Line("//   - reconnectConfig.initialDelay: Initial delay between reconnection attempts (default: 1 second)")
+		g.Line("//   - reconnectConfig.maxDelay: Maximum delay between reconnection attempts (default: 5 seconds)")
+		g.Line("//   - reconnectConfig.delayMultiplier: Cumulative multiplier applied to initialDelay on each retry (default: 2.0)")
+		g.Linef("func (b *%s) WithReconnectConfig(reconnectConfig ReconnectConfig) *%s {", builderStream, builderStream)
 		g.Block(func() {
-			g.Line("b.maxEvt = size")
+			g.Line("b.reconnectConf = &reconnectConfig")
 			g.Line("return b")
 		})
 		g.Line("}")
@@ -248,7 +276,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		g.Line("// drain the channel until it is closed.")
 		g.Linef("func (b *%s) Execute(ctx context.Context, input %sInput) <-chan Response[%sOutput] {", builderStream, name, name)
 		g.Block(func() {
-			g.Line("rawCh := b.client.stream(ctx, b.name, input, b.headers, b.maxEvt)")
+			g.Line("rawCh := b.client.stream(ctx, b.name, input, b.headers, b.reconnectConf)")
 			g.Linef("outCh := make(chan Response[%sOutput])", name)
 			g.Line("go func() {")
 			g.Block(func() {
