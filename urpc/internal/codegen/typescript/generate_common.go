@@ -78,7 +78,7 @@ func renderType(
 		renderPartialMultilineComment(og, fmt.Sprintf("%s %s", name, desc))
 		og.Linef(" */")
 	}
-	og.Linef("export interface %s {", name)
+	og.Linef("export type %s = {", name)
 	og.Block(func() {
 		for _, fieldDef := range fields {
 			og.Line(renderField(name, fieldDef))
