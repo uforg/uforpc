@@ -105,16 +105,17 @@ class internalClient {
     }
   }
 
-  stream(
+  callStream(
     name: string,
     input: unknown,
     headers: Record<string, string>
   ): {
-    generator: AsyncGenerator<Response<any>, void, unknown>;
-    abortController: AbortController;
+    stream: AsyncGenerator<Response<any>, void, unknown>;
+    cancel: () => void;
   } {
     const self = this;
     const abortController = new AbortController();
+    const cancel = () => abortController.abort();
 
     async function* generator() {
       if (!self.streamSet.has(name)) {
@@ -204,7 +205,7 @@ class internalClient {
       }
     }
 
-    return { generator: generator(), abortController };
+    return { stream: generator(), cancel };
   }
 
   // Exposed mutators from builder
