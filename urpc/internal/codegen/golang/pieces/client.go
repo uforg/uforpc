@@ -281,8 +281,8 @@ func (c *internalClient) proc(
 
 			// Retry on timeout or network errors if we have attempts left
 			if attempt < retryConf.MaxAttempts {
-				backoffMs := calculateBackoff(retryConf, attempt)
-				time.Sleep(backoffMs)
+				backoff := calculateBackoff(retryConf, attempt)
+				time.Sleep(backoff)
 				continue
 			}
 
@@ -302,8 +302,8 @@ func (c *internalClient) proc(
 				Message:  fmt.Sprintf("unexpected HTTP status: %s", resp.Status),
 				Details:  map[string]any{"status": resp.StatusCode},
 			}
-			backoffMs := calculateBackoff(retryConf, attempt)
-			time.Sleep(backoffMs)
+			backoff := calculateBackoff(retryConf, attempt)
+			time.Sleep(backoff)
 			continue
 		}
 
@@ -534,8 +534,8 @@ func (c *internalClient) stream(
 						},
 					}
 					reconnectAttempt++
-					backoffMs := calculateReconnectBackoff(reconnectConf, reconnectAttempt)
-					time.Sleep(backoffMs)
+					backoff := calculateReconnectBackoff(reconnectConf, reconnectAttempt)
+					time.Sleep(backoff)
 					continue
 				}
 
@@ -561,8 +561,8 @@ func (c *internalClient) stream(
 						},
 					}
 					reconnectAttempt++
-					backoffMs := calculateReconnectBackoff(reconnectConf, reconnectAttempt)
-					time.Sleep(backoffMs)
+					backoff := calculateReconnectBackoff(reconnectConf, reconnectAttempt)
+					time.Sleep(backoff)
 					continue
 				}
 
@@ -597,8 +597,8 @@ func (c *internalClient) stream(
 					},
 				}
 				reconnectAttempt++
-				backoffMs := calculateReconnectBackoff(reconnectConf, reconnectAttempt)
-				time.Sleep(backoffMs)
+				backoff := calculateReconnectBackoff(reconnectConf, reconnectAttempt)
+				time.Sleep(backoff)
 				continue
 			}
 
