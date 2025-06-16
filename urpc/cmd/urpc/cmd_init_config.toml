@@ -27,4 +27,3 @@ schema = "{{schema_path}}"
 # output_file = "./ufogen/typescript/ufogen.ts"
 # include_server = true
 # include_client = true
-# omit_client_default_fetch = false

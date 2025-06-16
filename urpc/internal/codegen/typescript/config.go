@@ -13,8 +13,6 @@ type Config struct {
 	IncludeServer bool `toml:"include_server"`
 	// IncludeClient enables client code generation.
 	IncludeClient bool `toml:"include_client"`
-	// OmitClientDefaultFetch disables the default fetch implementation in the generated client code.
-	OmitClientDefaultFetch bool `toml:"omit_client_default_fetch"`
 }
 
 func (c Config) Validate() error {
