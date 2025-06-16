@@ -75,10 +75,7 @@ func renderType(
 	og := genkit.NewGenKit().WithTabs()
 	if desc != "" {
 		og.Linef("/**")
-		lines := strings.SplitSeq(fmt.Sprintf("%s %s", name, desc), "\n")
-		for line := range lines {
-			og.Linef(" * %s", line)
-		}
+		renderPartialMultilineComment(og, fmt.Sprintf("%s %s", name, desc))
 		og.Linef(" */")
 	}
 	og.Linef("export interface %s {", name)
@@ -100,4 +97,30 @@ func renderType(
 	}
 
 	return og.String()
+}
+
+// renderPartialMultilineComment receives a text and renders it to the given genkit.GenKit
+// as a partial multiline comment.
+func renderPartialMultilineComment(g *genkit.GenKit, text string) {
+	for line := range strings.SplitSeq(text, "\n") {
+		g.Linef(" * %s", line)
+	}
+}
+
+// renderDeprecated receives a pointer to a string and if it is not nil, it will
+// render a comment with the deprecated message to the given genkit.GenKit.
+func renderDeprecated(g *genkit.GenKit, deprecated *string) {
+	if deprecated == nil {
+		return
+	}
+
+	desc := "@deprecated "
+	if *deprecated == "" {
+		desc += "This is deprecated and should not be used in new code."
+	} else {
+		desc += *deprecated
+	}
+
+	g.Line(" *")
+	renderPartialMultilineComment(g, desc)
 }
