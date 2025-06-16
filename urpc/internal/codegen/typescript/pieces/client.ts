@@ -270,9 +270,7 @@ class internalClient {
 
     const cancel = () => {
       isCancelled = true;
-      if (!isCancelled && currentAbortController) {
-        currentAbortController.abort();
-      }
+      currentAbortController?.abort();
     };
 
     async function* generator() {
