@@ -164,3 +164,10 @@ function errorMissingRequiredField(message: string): UfoError {
     code: "MISSING_REQUIRED_FIELD",
   });
 }
+
+/**
+ * Sleep for the given number of milliseconds.
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

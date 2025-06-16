@@ -8,7 +8,51 @@ function asError(err: unknown): UfoError {
   return err as UfoError;
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /** START FROM HERE **/
+
+// -----------------------------------------------------------------------------
+// Configuration Types
+// -----------------------------------------------------------------------------
+
+/**
+ * Configuration for automatic retry behavior in procedures.
+ */
+interface RetryConfig {
+  /** Maximum number of retry attempts (default: 3) */
+  maxAttempts: number;
+  /** Initial delay between retries in milliseconds (default: 1000) */
+  initialDelayMs: number;
+  /** Maximum delay between retries in milliseconds (default: 5000) */
+  maxDelayMs: number;
+  /** Multiplier for exponential backoff (default: 2.0) */
+  delayMultiplier: number;
+}
+
+/**
+ * Configuration for timeout behavior in procedures.
+ */
+interface TimeoutConfig {
+  /** Timeout for each individual attempt in milliseconds (default: 30000) */
+  timeoutMs: number;
+}
+
+/**
+ * Configuration for automatic reconnection behavior in streams.
+ */
+interface ReconnectConfig {
+  /** Maximum number of reconnection attempts (default: 5) */
+  maxAttempts: number;
+  /** Initial delay between reconnection attempts in milliseconds (default: 1000) */
+  initialDelayMs: number;
+  /** Maximum delay between reconnection attempts in milliseconds (default: 5000) */
+  maxDelayMs: number;
+  /** Multiplier for exponential backoff (default: 2.0) */
+  delayMultiplier: number;
+}
 
 // -----------------------------------------------------------------------------
 // Internal Client
@@ -49,8 +93,21 @@ class internalClient {
   async callProc(
     name: string,
     input: unknown,
-    headers: Record<string, string>
+    headers: Record<string, string>,
+    retryConfig?: RetryConfig,
+    timeoutConfig?: TimeoutConfig
   ): Promise<Response<any>> {
+    const retryConf = retryConfig ?? {
+      maxAttempts: 3,
+      initialDelayMs: 1000,
+      maxDelayMs: 5000,
+      delayMultiplier: 2.0,
+    };
+
+    const timeoutConf = timeoutConfig ?? {
+      timeoutMs: 30000,
+    };
+
     if (!this.procSet.has(name)) {
       return {
         ok: false,
@@ -80,42 +137,143 @@ class internalClient {
       ...headers,
     };
 
-    try {
-      const fetchResp = await this.fetchFn(url, {
-        method: "POST",
-        headers: hdrs,
-        body: payload,
-      });
+    let lastError: UfoError | null = null;
+    for (let attempt = 1; attempt <= retryConf.maxAttempts; attempt++) {
+      // Create AbortController for this attempt's timeout
+      const abortController = new AbortController();
+      let timeoutId: ReturnType<typeof setTimeout> | undefined = undefined;
 
-      if (!fetchResp.ok) {
-        return {
-          ok: false,
-          error: new UfoError({
+      try {
+        // Set up timeout if configured
+        if (timeoutConf?.timeoutMs) {
+          timeoutId = setTimeout(() => {
+            abortController.abort();
+          }, timeoutConf.timeoutMs);
+        }
+
+        const fetchResp = await this.fetchFn(url, {
+          method: "POST",
+          headers: hdrs,
+          body: payload,
+          signal: abortController.signal,
+        });
+
+        // Clear timeout on successful response
+        if (timeoutId !== undefined) {
+          clearTimeout(timeoutId);
+        }
+
+        if (!fetchResp.ok) {
+          const error = new UfoError({
             message: `Unexpected HTTP status: ${fetchResp.status}`,
             category: "HTTPError",
             code: "BAD_STATUS",
-            details: { status: fetchResp.status },
-          }),
-        };
-      }
+            details: { status: fetchResp.status, attempt },
+          });
 
-      return await fetchResp.json();
-    } catch (err) {
-      return { ok: false, error: asError(err) };
+          // Only retry on 5xx errors or network issues
+          if (fetchResp.status >= 500 && attempt < retryConf.maxAttempts) {
+            lastError = error;
+            const backoffMs = Math.min(
+              retryConf.initialDelayMs *
+                Math.pow(retryConf.delayMultiplier, attempt - 1),
+              retryConf.maxDelayMs
+            );
+            await sleep(backoffMs);
+            continue;
+          }
+
+          return { ok: false, error };
+        }
+
+        return await fetchResp.json();
+      } catch (err) {
+        // Clear timeout on error
+        if (timeoutId !== undefined) {
+          clearTimeout(timeoutId);
+        }
+
+        const error = asError(err);
+
+        // Check if this was a timeout error
+        if (abortController.signal.aborted && timeoutConf?.timeoutMs) {
+          const timeoutError = new UfoError({
+            message: `Request timeout after ${timeoutConf.timeoutMs}ms`,
+            category: "TimeoutError",
+            code: "REQUEST_TIMEOUT",
+            details: { timeoutMs: timeoutConf.timeoutMs, attempt },
+          });
+
+          // Retry on timeout if we have attempts left
+          if (attempt < retryConf.maxAttempts) {
+            lastError = timeoutError;
+            const backoffMs = Math.min(
+              retryConf.initialDelayMs *
+                Math.pow(retryConf.delayMultiplier, attempt - 1),
+              retryConf.maxDelayMs
+            );
+            await sleep(backoffMs);
+            continue;
+          }
+
+          return { ok: false, error: timeoutError };
+        }
+
+        // Retry on network errors
+        if (attempt < retryConf.maxAttempts) {
+          lastError = error;
+          const backoffMs = Math.min(
+            retryConf.initialDelayMs *
+              Math.pow(retryConf.delayMultiplier, attempt - 1),
+            retryConf.maxDelayMs
+          );
+          await sleep(backoffMs);
+          continue;
+        }
+
+        return { ok: false, error };
+      }
     }
+
+    // This should never be reached, but just in case
+    return {
+      ok: false,
+      error:
+        lastError ||
+        new UfoError({
+          message: "Unknown error",
+          category: "ClientError",
+          code: "UNKNOWN",
+        }),
+    };
   }
 
   callStream(
     name: string,
     input: unknown,
-    headers: Record<string, string>
+    headers: Record<string, string>,
+    reconnectConfig?: ReconnectConfig
   ): {
     stream: AsyncGenerator<Response<any>, void, unknown>;
     cancel: () => void;
   } {
+    const reconnectConf = reconnectConfig ?? {
+      maxAttempts: 5,
+      initialDelayMs: 1000,
+      maxDelayMs: 5000,
+      delayMultiplier: 2.0,
+    };
+
     const self = this;
-    const abortController = new AbortController();
-    const cancel = () => abortController.abort();
+    let isCancelled = false;
+    let currentAbortController: AbortController | null = null;
+
+    const cancel = () => {
+      isCancelled = true;
+      if (!isCancelled && currentAbortController) {
+        currentAbortController.abort();
+      }
+    };
 
     async function* generator() {
       if (!self.streamSet.has(name)) {
@@ -146,61 +304,160 @@ class internalClient {
         ...headers,
       };
 
-      let fetchResp: globalThis.Response;
-      try {
-        fetchResp = await self.fetchFn(url, {
-          method: "POST",
-          headers: hdrs,
-          body: payload,
-          signal: abortController.signal,
-        });
-      } catch (err) {
-        yield { ok: false, error: asError(err) } as Response<any>;
-        return;
-      }
+      let reconnectAttempt = 0;
+      while (!isCancelled) {
+        currentAbortController = new AbortController();
 
-      if (!fetchResp.ok || !fetchResp.body) {
-        yield {
-          ok: false,
-          error: new UfoError({
-            message: `Unexpected HTTP status: ${fetchResp.status}`,
-            category: "HTTPError",
-            code: "BAD_STATUS",
-            details: { status: fetchResp.status },
-          }),
-        } as Response<any>;
-        return;
-      }
+        try {
+          const fetchResp = await self.fetchFn(url, {
+            method: "POST",
+            headers: hdrs,
+            body: payload,
+            signal: currentAbortController.signal,
+          });
 
-      const reader = fetchResp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
+          if (!fetchResp.ok || !fetchResp.body) {
+            const error = new UfoError({
+              message: `Unexpected HTTP status: ${fetchResp.status}`,
+              category: "HTTPError",
+              code: "BAD_STATUS",
+              details: { status: fetchResp.status, reconnectAttempt },
+            });
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+            // Try to reconnect if enabled and not manually cancelled
+            if (
+              reconnectConf &&
+              !isCancelled &&
+              reconnectAttempt < reconnectConf.maxAttempts
+            ) {
+              yield { ok: false, error } as Response<any>;
+              reconnectAttempt++;
 
-        // Process lines
-        let idx: number;
-        while ((idx = buffer.indexOf("\n\n")) !== -1) {
-          const line = buffer.slice(0, idx).trimEnd();
-          buffer = buffer.slice(idx + 1);
+              const delayMs = Math.min(
+                reconnectConf.initialDelayMs *
+                  Math.pow(reconnectConf.delayMultiplier, reconnectAttempt - 1),
+                reconnectConf.maxDelayMs
+              );
 
-          if (line === "") {
-            // ignore
-            continue;
+              await sleep(delayMs);
+              continue;
+            }
+
+            yield { ok: false, error } as Response<any>;
+            return;
           }
-          if (line.startsWith("data:")) {
-            const jsonStr = line.slice(5).trim();
-            try {
-              const evt = JSON.parse(jsonStr) as Response<any>;
-              yield evt;
-            } catch (err) {
-              yield { ok: false, error: asError(err) } as Response<any>;
+
+          // Reset reconnect attempt counter on successful connection
+          reconnectAttempt = 0;
+
+          const reader = fetchResp.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          try {
+            while (!isCancelled) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+
+              // Process lines
+              let idx: number;
+              while ((idx = buffer.indexOf("\n\n")) !== -1) {
+                const line = buffer.slice(0, idx).trimEnd();
+                buffer = buffer.slice(idx + 1);
+
+                if (line === "") {
+                  // ignore
+                  continue;
+                }
+                if (line.startsWith("data:")) {
+                  const jsonStr = line.slice(5).trim();
+                  try {
+                    const evt = JSON.parse(jsonStr) as Response<any>;
+                    yield evt;
+                  } catch (err) {
+                    yield { ok: false, error: asError(err) } as Response<any>;
+                    return;
+                  }
+                }
+              }
+            }
+
+            // If we reach here and weren't cancelled, the stream ended naturally
+            if (!isCancelled) {
               return;
             }
+          } catch (readError) {
+            // Connection was interrupted, try to reconnect if enabled
+            if (
+              reconnectConf &&
+              !isCancelled &&
+              reconnectAttempt < reconnectConf.maxAttempts
+            ) {
+              yield {
+                ok: false,
+                error: new UfoError({
+                  message: `Stream connection lost, attempting reconnect (${
+                    reconnectAttempt + 1
+                  }/${reconnectConf.maxAttempts})`,
+                  category: "ConnectionError",
+                  code: "STREAM_INTERRUPTED",
+                  details: { reconnectAttempt: reconnectAttempt + 1 },
+                }),
+              } as Response<any>;
+
+              reconnectAttempt++;
+              const delayMs = Math.min(
+                reconnectConf.initialDelayMs *
+                  Math.pow(reconnectConf.delayMultiplier, reconnectAttempt - 1),
+                reconnectConf.maxDelayMs
+              );
+
+              await sleep(delayMs);
+              continue;
+            }
+
+            // No more reconnect attempts or manually cancelled
+            if (!isCancelled) {
+              yield { ok: false, error: asError(readError) } as Response<any>;
+            }
+            return;
           }
+        } catch (fetchError) {
+          // Initial connection failed
+          if (
+            reconnectConf &&
+            !isCancelled &&
+            reconnectAttempt < reconnectConf.maxAttempts
+          ) {
+            yield {
+              ok: false,
+              error: new UfoError({
+                message: `Failed to connect to stream, attempting reconnect (${
+                  reconnectAttempt + 1
+                }/${reconnectConf.maxAttempts})`,
+                category: "ConnectionError",
+                code: "STREAM_CONNECT_FAILED",
+                details: { reconnectAttempt: reconnectAttempt + 1 },
+              }),
+            } as Response<any>;
+
+            reconnectAttempt++;
+            const delayMs = Math.min(
+              reconnectConf.initialDelayMs *
+                Math.pow(reconnectConf.delayMultiplier, reconnectAttempt - 1),
+              reconnectConf.maxDelayMs
+            );
+
+            await sleep(delayMs);
+            continue;
+          }
+
+          // No more reconnect attempts or manually cancelled
+          if (!isCancelled) {
+            yield { ok: false, error: asError(fetchError) } as Response<any>;
+          }
+          return;
         }
       }
     }
