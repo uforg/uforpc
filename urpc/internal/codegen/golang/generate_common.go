@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
@@ -77,9 +78,7 @@ func renderType(
 	name = parentName + name
 
 	og := genkit.NewGenKit().WithTabs()
-	if desc != "" {
-		og.Linef("/* %s %s */", name, desc)
-	}
+	renderMultilineComment(og, desc)
 	og.Linef("type %s struct {", name)
 	og.Block(func() {
 		for _, fieldDef := range fields {
@@ -349,4 +348,30 @@ func renderPreType(
 	og.Break()
 
 	return og.String()
+}
+
+// renderMultilineComment receives a text and renders it to the given genkit.GenKit
+// as a multiline comment.
+func renderMultilineComment(g *genkit.GenKit, text string) {
+	for line := range strings.SplitSeq(text, "\n") {
+		g.Linef("// %s", line)
+	}
+}
+
+// renderDeprecated receives a pointer to a string and if it is not nil, it will
+// render a comment with the deprecated message to the given genkit.GenKit.
+func renderDeprecated(g *genkit.GenKit, deprecated *string) {
+	if deprecated == nil {
+		return
+	}
+
+	desc := "Deprecated: "
+	if *deprecated == "" {
+		desc += "This is deprecated and should not be used in new code."
+	} else {
+		desc += *deprecated
+	}
+
+	g.Line("//")
+	renderMultilineComment(g, desc)
 }

@@ -3,7 +3,6 @@ package golang
 import (
 	_ "embed"
 	"fmt"
-	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
@@ -432,24 +431,4 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Break()
 
 	return g.String(), nil
-}
-
-// renderDeprecated receives a pointer to a string and if it is not nil, it will
-// render a comment with the deprecated message to the given genkit.GenKit.
-func renderDeprecated(g *genkit.GenKit, deprecated *string) {
-	if deprecated == nil {
-		return
-	}
-
-	desc := "Deprecated: "
-	if *deprecated == "" {
-		desc += "This is deprecated and should not be used in new code."
-	} else {
-		desc += *deprecated
-	}
-
-	g.Line("//")
-	for line := range strings.SplitSeq(desc, "\n") {
-		g.Linef("// %s", line)
-	}
 }
