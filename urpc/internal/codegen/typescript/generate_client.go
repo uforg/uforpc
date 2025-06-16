@@ -227,7 +227,7 @@ func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
 			g.Linef(" * Executes the %s procedure.", name)
 			g.Line(" *")
 			g.Linef(" * @param input - The %s input parameters", name)
-			g.Linef(" * @returns Promise resolving to Response<%s>", outputType)
+			g.Linef(" * @returns Promise resolving to %s or throws UfoError if something went wrong", outputType)
 			g.Line(" */")
 			g.Linef("async execute(input: %s): Promise<%s> {", inputType, outputType)
 			g.Block(func() {
