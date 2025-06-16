@@ -40,8 +40,5 @@ tasks:
   fmt-check:
     desc: Run all repository code formatter checks
     cmds:
-      - prettier . --check # <- Default formatter for the root directory
-      # The following commands are specific to each directory that has its
-      # own formatter
       - cd ./urpc && task fmt-check
       - cd ./playground && npm run fmt-check
