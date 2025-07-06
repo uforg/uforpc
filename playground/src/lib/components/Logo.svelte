@@ -5,26 +5,52 @@
   interface Props {
     class?: ClassValue;
     animateAuto?: boolean;
+    animateAutoSpeed?: number;
     animateHover?: boolean;
+    animateHoverSpeed?: number;
     // biome-ignore lint/suspicious/noExplicitAny: can be any other attribute
     rest?: any;
   }
 
   let {
     class: className,
-    animateAuto,
-    animateHover,
+    animateAuto = true,
+    animateHover = false,
+    animateAutoSpeed = 3,
+    animateHoverSpeed = 3,
     ...rest
   }: Props = $props();
+
+  let isHover = $state(false);
+  let svgElement: SVGElement | null = $state(null);
+  let shouldAnimate = $derived(animateAuto || (animateHover && isHover));
+  let currentSpeed = $state(3);
+
+  // Speed transition
+  $effect(() => {
+    if (!svgElement) return;
+    animateAutoSpeed ??= 3;
+    animateHoverSpeed ??= 3;
+    const useHoverSpeed = animateHover && isHover;
+    currentSpeed = useHoverSpeed ? animateHoverSpeed : animateAutoSpeed;
+  });
+
+  // Set the speed
+  $effect(() => {
+    if (!svgElement) return;
+    svgElement.style.setProperty("--animation-duration", `${currentSpeed}s`);
+  });
 </script>
 
 <svg
+  bind:this={svgElement}
+  onmouseenter={() => (isHover = true)}
+  onmouseleave={() => (isHover = false)}
   xmlns="http://www.w3.org/2000/svg"
   viewBox="7.93 9.14 392.07 70"
   class={mergeClasses(
     {
-      "uforpc-logo-animate-auto": animateAuto,
-      "uforpc-logo-animate-hover": animateHover,
+      "uforpc-logo-animate": shouldAnimate,
     },
     "uforpc-logo",
     className,
@@ -129,21 +155,20 @@
 </svg>
 
 <style>
-  .uforpc-logo-animate-auto,
-  .uforpc-logo-animate-hover:hover {
+  .uforpc-logo-animate {
     .ufo-middle-left {
-      animation: logoBlink 3s ease-in-out infinite;
+      animation: logoBlink var(--animation-duration) ease-in-out infinite;
       animation-delay: 0s;
     }
 
     .ufo-middle-center {
-      animation: logoBlink 3s ease-in-out infinite;
-      animation-delay: 1s;
+      animation: logoBlink var(--animation-duration) ease-in-out infinite;
+      animation-delay: calc(var(--animation-duration) / 3);
     }
 
     .ufo-middle-right {
-      animation: logoBlink 3s ease-in-out infinite;
-      animation-delay: 2s;
+      animation: logoBlink var(--animation-duration) ease-in-out infinite;
+      animation-delay: calc(var(--animation-duration) * 2 / 3);
     }
   }
 
