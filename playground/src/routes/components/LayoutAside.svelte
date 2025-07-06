@@ -8,6 +8,7 @@
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
   import type { Schema } from "$lib/urpcTypes";
 
+  import Logo from "$lib/components/Logo.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   import LayoutAsideFilters from "./LayoutAsideFilters.svelte";
@@ -81,8 +82,7 @@
   >
     <a
       class={[
-        "flex items-center space-x-2 whitespace-nowrap",
-        "sticky top-0 z-10 h-[72px] w-full p-4",
+        "sticky top-0 z-10 flex h-[72px] w-full items-end p-4",
         {
           "shadow-xs": uiStore.aside.scroll.isTopScrolled,
         },
@@ -90,8 +90,13 @@
       href="https://uforpc.uforg.dev"
       target="_blank"
     >
-      <img src="./assets/logo.png" alt="UFO RPC Logo" class="h-full" />
-      <h1 class="font-bold">UFO RPC Playground</h1>
+      <Logo
+        class="mx-auto h-full"
+        animateAuto
+        animateAutoSpeed={2}
+        animateHover
+        animateHoverSpeed={0.5}
+      />
     </a>
 
     <LayoutAsideFilters />

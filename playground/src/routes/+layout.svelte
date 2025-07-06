@@ -19,6 +19,8 @@
   } from "$lib/uiStore.svelte";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
 
+  import Logo from "$lib/components/Logo.svelte";
+
   import "../app.css";
 
   import LayoutAside from "./components/LayoutAside.svelte";
@@ -95,12 +97,12 @@
     out:fade={{ duration: 200 }}
     class="fixed top-0 left-0 flex h-screen w-screen flex-col items-center justify-center"
   >
-    <img
-      src="./assets/logo-square.png"
-      alt="UFO RPC Logo"
-      class="size-[150px]"
+    <Logo
+      animateAuto
+      animateAutoSpeed={1}
+      class="mb-2 h-auto w-[90dvw] max-w-[600px]"
     />
-    <h1 class="mb-2 text-3xl font-bold">UFO RPC Playground</h1>
+    <h1 class="mb-2 text-3xl font-bold">Playground</h1>
     <h2 class="mb-6">{message}...</h2>
     <Loader class="animate size-10 animate-spin" />
   </main>

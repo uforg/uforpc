@@ -1,20 +1,20 @@
 <script lang="ts">
   import { BookOpenText, Github, Info, Zap } from "@lucide/svelte";
 
-  import H1 from "$lib/components/H1.svelte";
+  import Logo from "$lib/components/Logo.svelte";
 </script>
 
 <div class="container mx-auto px-4 py-16">
   <div class="mb-16 text-center">
     <div class="mb-8">
-      <img src="./assets/logo.png" alt="UFO RPC Logo" class="mx-auto h-full" />
+      <Logo
+        class="mx-auto h-full max-w-[600px]"
+        animateAuto
+        animateAutoSpeed={2}
+        animateHover
+        animateHoverSpeed={0.5}
+      />
     </div>
-
-    <H1
-      class="from-primary to-secondary bg-gradient-to-r bg-clip-text pb-2 text-transparent"
-    >
-      UFO RPC Playground
-    </H1>
 
     <p class="text-base-content/70 mx-auto mb-8 max-w-2xl text-xl">
       Test and experiment with UFO RPC in this interactive playground using the
