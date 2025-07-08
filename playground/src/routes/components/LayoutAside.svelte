@@ -13,7 +13,7 @@
 
   import LayoutAsideFilters from "./LayoutAsideFilters.svelte";
   import LayoutAsideItem from "./LayoutAsideItem.svelte";
-  import LayoutAsideSchemaManager from "./LayoutAsideSchemaManager.svelte";
+  import LayoutAsideSchema from "./LayoutAsideSchema.svelte";
 
   // if has hash anchor navigate to it
   onMount(async () => {
@@ -103,7 +103,7 @@
   </header>
 
   <nav class="p-4">
-    <LayoutAsideSchemaManager />
+    <LayoutAsideSchema />
 
     <Tooltip content="RPC Home">
       <a
