@@ -98,7 +98,7 @@
 
   {#if urpcSchema !== ""}
     <div class="space-y-4">
-      <H2>URPC Schema</H2>
+      <H2>Schema for {name}</H2>
       <Code lang="urpc" code={urpcSchema} collapsible={false} isOpen />
     </div>
   {/if}
