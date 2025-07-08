@@ -9,13 +9,19 @@
   import { uiStore } from "$lib/uiStore.svelte";
 
   interface Props {
+    lang: string;
     value: string;
     class?: ClassValue;
     // biome-ignore lint/suspicious/noExplicitAny: can be any other attribute
     rest?: any;
   }
 
-  let { value = $bindable(), class: className, ...rest }: Props = $props();
+  let {
+    lang = "urpc",
+    value = $bindable(),
+    class: className,
+    ...rest
+  }: Props = $props();
   let editorContainer: HTMLElement;
   let monaco: typeof Monaco | null = $state(null);
   let editor: Monaco.editor.IStandaloneCodeEditor | null = $state(null);
@@ -29,7 +35,7 @@
 
     editor = monaco.editor.create(editorContainer, {
       value: value,
-      language: "urpc",
+      language: lang,
       tabSize: 2,
       insertSpaces: true,
       padding: { top: 30, bottom: 30 },

@@ -96,6 +96,7 @@
 
   <Editor
     class="rounded-box h-[600px] w-full overflow-hidden shadow-md"
+    lang="json"
     value={output ?? ""}
   />
 {/if}

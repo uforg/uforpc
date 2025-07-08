@@ -66,6 +66,7 @@
   </div>
 
   <Editor
+    lang="urpc"
     bind:value={modifiedSchema}
     class="rounded-box w-full flex-grow overflow-hidden shadow-md"
   />
