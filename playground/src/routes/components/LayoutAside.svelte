@@ -90,13 +90,7 @@
       href="https://uforpc.uforg.dev"
       target="_blank"
     >
-      <Logo
-        class="mx-auto h-full"
-        animateAuto
-        animateAutoSpeed={2}
-        animateHover
-        animateHoverSpeed={0.5}
-      />
+      <Logo class="mx-auto h-full" />
     </a>
 
     <LayoutAsideFilters />

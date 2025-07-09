@@ -1,7 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { onNavigate } from "$app/navigation";
-  import { Loader } from "@lucide/svelte";
   import { onMount } from "svelte";
   import { toast, Toaster } from "svelte-sonner";
   import { fade } from "svelte/transition";
@@ -97,14 +96,8 @@
     out:fade={{ duration: 200 }}
     class="fixed top-0 left-0 flex h-screen w-screen flex-col items-center justify-center"
   >
-    <Logo
-      animateAuto
-      animateAutoSpeed={1}
-      class="mb-2 h-auto w-[90dvw] max-w-[600px]"
-    />
-    <h1 class="mb-2 text-3xl font-bold">Playground</h1>
-    <h2 class="mb-6">{message}...</h2>
-    <Loader class="animate size-10 animate-spin" />
+    <Logo class="mb-6 h-auto w-[90dvw] max-w-[600px]" />
+    <h2>{message}...</h2>
   </main>
 {/if}
 

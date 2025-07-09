@@ -14,13 +14,7 @@
 <div class="container mx-auto px-4 py-16">
   <div class="mb-16 text-center">
     <div class="mb-8">
-      <Logo
-        class="mx-auto h-full max-w-[600px]"
-        animateAuto
-        animateAutoSpeed={2}
-        animateHover
-        animateHoverSpeed={0.5}
-      />
+      <Logo class="mx-auto h-full max-w-[600px]" />
     </div>
 
     <p class="text-base-content/70 mx-auto mb-8 max-w-2xl text-xl">

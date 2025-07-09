@@ -4,53 +4,27 @@
 
   interface Props {
     class?: ClassValue;
-    animateAuto?: boolean;
-    animateAutoSpeed?: number;
-    animateHover?: boolean;
-    animateHoverSpeed?: number;
+    animate?: boolean;
+    animateSpeed?: number;
     // biome-ignore lint/suspicious/noExplicitAny: can be any other attribute
     rest?: any;
   }
 
   let {
     class: className,
-    animateAuto = true,
-    animateHover = false,
-    animateAutoSpeed = 3,
-    animateHoverSpeed = 3,
+    animate = true,
+    animateSpeed = 2,
     ...rest
   }: Props = $props();
-
-  let isHover = $state(false);
-  let svgElement: SVGElement | null = $state(null);
-  let shouldAnimate = $derived(animateAuto || (animateHover && isHover));
-  let currentSpeed = $state(3);
-
-  // Speed transition
-  $effect(() => {
-    if (!svgElement) return;
-    animateAutoSpeed ??= 3;
-    animateHoverSpeed ??= 3;
-    const useHoverSpeed = animateHover && isHover;
-    currentSpeed = useHoverSpeed ? animateHoverSpeed : animateAutoSpeed;
-  });
-
-  // Set the speed
-  $effect(() => {
-    if (!svgElement) return;
-    svgElement.style.setProperty("--animation-duration", `${currentSpeed}s`);
-  });
 </script>
 
 <svg
-  bind:this={svgElement}
-  onmouseenter={() => (isHover = true)}
-  onmouseleave={() => (isHover = false)}
+  style="--animation-duration: {animateSpeed}s"
   xmlns="http://www.w3.org/2000/svg"
   viewBox="7.93 9.14 392.07 70"
   class={mergeClasses(
     {
-      "uforpc-logo-animate": shouldAnimate,
+      "uforpc-logo-animate": animate,
     },
     "uforpc-logo",
     className,
