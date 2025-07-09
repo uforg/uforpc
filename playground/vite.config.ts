@@ -10,6 +10,14 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
+          src: "../urpc/dist/urpc.wasm",
+          dest: "_app/_urpc",
+        },
+        {
+          src: "../urpc/dist/wasm_exec.js",
+          dest: "_app/_urpc",
+        },
+        {
           src: "node_modules/web-tree-sitter/tree-sitter.wasm",
           dest: "_app/_cconv",
         },

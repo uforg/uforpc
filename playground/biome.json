@@ -7,8 +7,7 @@
       "dist",
       "build",
       ".svelte-kit",
-      "src/lib/urpcTypes.ts",
-      "static/urpc/wasm_exec.js"
+      "src/lib/urpcTypes.ts"
     ]
   },
   "formatter": {

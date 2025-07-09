@@ -54,8 +54,8 @@ function waitUntilInitialized(): Promise<void> {
  * @returns A promise that resolves when the wasm has been initialized
  */
 async function initWasm(): Promise<void> {
-  const execURL = "./urpc/wasm_exec.js";
-  const wasmURL = "./urpc/urpc.wasm";
+  const execURL = "./_app/_urpc/wasm_exec.js";
+  const wasmURL = "./_app/_urpc/urpc.wasm";
 
   if (isInitialized()) return;
   await loadScript(execURL);
