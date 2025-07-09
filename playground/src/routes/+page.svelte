@@ -9,18 +9,24 @@
   } from "@lucide/svelte";
 
   import Logo from "$lib/components/Logo.svelte";
+
+  import PageAbduction from "./components/PageAbduction.svelte";
 </script>
 
 <div class="container mx-auto px-4 py-16">
   <div class="mb-16 text-center">
     <div class="mb-8">
-      <Logo class="mx-auto h-full max-w-[600px]" />
+      <Logo class="mx-auto h-full max-w-[600px]" animate={false} />
     </div>
 
     <p class="text-base-content/70 mx-auto mb-8 max-w-2xl text-xl">
       Test and experiment with UFO RPC in this interactive playground using the
       left sidebar to navigate the schema.
     </p>
+
+    <div class="mb-8 flex items-center justify-center">
+      <PageAbduction width={200} />
+    </div>
 
     <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
       <a
