@@ -96,6 +96,7 @@ export interface UiStore {
   loaded: boolean;
   theme: Theme;
   codeSnippetsOpen: boolean;
+  codeSnippetsLang: string;
   asideSearchOpen: boolean;
   asideSearchQuery: string;
   asideHideDocs: boolean;
@@ -112,6 +113,7 @@ export interface UiStore {
 const localStorageKeys = {
   theme: "theme",
   codeSnippetsOpen: "codeSnippetsOpen",
+  codeSnippetsLang: "codeSnippetsLang",
   asideSearchOpen: "asideSearchOpen",
   asideSearchQuery: "asideSearchQuery",
   asideHideDocs: "asideHideDocs",
@@ -124,6 +126,7 @@ export const uiStore = $state<UiStore>({
   loaded: false,
   theme: "dark",
   codeSnippetsOpen: false,
+  codeSnippetsLang: "Curl",
   asideSearchOpen: false,
   asideSearchQuery: "",
   asideHideDocs: false,
@@ -163,6 +166,12 @@ export const loadUiStore = () => {
   uiStore.codeSnippetsOpen = codeSnippetsOpen
     ? codeSnippetsOpen === "true"
     : true;
+
+  // Load code snippets lang from local storage
+  const codeSnippetsLang = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsLang,
+  );
+  uiStore.codeSnippetsLang = codeSnippetsLang ?? "Curl";
 
   // Load aside search open state from local storage
   const asideSearchOpen = globalThis.localStorage.getItem(
@@ -217,6 +226,12 @@ export const saveUiStore = () => {
   globalThis.localStorage.setItem(
     localStorageKeys.codeSnippetsOpen,
     uiStore.codeSnippetsOpen.toString(),
+  );
+
+  // Save code snippets lang to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsLang,
+    uiStore.codeSnippetsLang,
   );
 
   // Save aside search open state to local storage
