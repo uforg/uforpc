@@ -10,7 +10,7 @@
 
   import Logo from "$lib/components/Logo.svelte";
 
-  import PageAbduction from "./components/PageAbduction.svelte";
+  import UfoAbduction from "../lib/components/UfoAbduction.svelte";
 </script>
 
 <div class="container mx-auto px-4 py-16">
@@ -25,7 +25,7 @@
     </p>
 
     <div class="mb-8 flex items-center justify-center">
-      <PageAbduction width={200} />
+      <UfoAbduction width={200} />
     </div>
 
     <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">

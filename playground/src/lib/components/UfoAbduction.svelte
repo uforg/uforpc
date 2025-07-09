@@ -28,20 +28,16 @@
       "outdated docs",
       "type errors",
       "boilerplate",
-      "breaking changes",
       "manual coding",
       "schema drift",
       "version conflicts",
       "any types",
       "runtime errors",
-      "flaky connections",
-      "lost requests",
       "config hell",
       "dependency hell",
       "integration pain",
       "sync nightmares",
       "API mismatch",
-      "build failures",
       "legacy cruft",
       "proto fatigue",
       "GraphQL complexity",
@@ -50,9 +46,6 @@
       "debugging torture",
       "type gymnastics",
       "handwritten clients",
-      "3am alerts",
-      "on-call nightmares",
-      '"it works on my machine"',
       "TODO: fix later",
       "// don't touch this",
     ],
@@ -76,7 +69,7 @@
       abductionProgress = 0;
 
       const animate = () => {
-        abductionProgress += 0.015;
+        abductionProgress += 0.01;
         if (abductionProgress < 1) {
           requestAnimationFrame(animate);
         } else {
