@@ -14,7 +14,7 @@
 
 <Tooltip content="Show full schema">
   <button
-    class="btn btn-ghost btn-block justify-start space-x-2 border-transparent"
+    class="btn btn-ghost btn-block justify-start space-x-2 border-transparent hover:bg-blue-500/20"
     onclick={openModal}
   >
     <ScrollText class="size-4" />
