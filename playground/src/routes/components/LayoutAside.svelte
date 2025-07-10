@@ -22,9 +22,8 @@
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     if (window.location.hash) {
-      const element = document.getElementById(
-        `navlink-${window.location.hash.slice(1)}`,
-      );
+      const id = `navlink-${window.location.hash.replaceAll("#/", "")}`;
+      const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       }
@@ -70,7 +69,7 @@
     use:dimensionschangeAction
     ondimensionschange={(e) => (uiStore.aside = e.detail)}
     class={[
-      "bg-base-100 h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[90px]",
+      "bg-base-100 h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[130px]",
       "overflow-x-hidden overflow-y-auto",
     ]}
   >
