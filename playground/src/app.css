@@ -7,6 +7,12 @@
   logs: false;
 }
 
+@theme {
+  /* https://tailwindcss.com/docs/responsive-design#removing-default-breakpoints */
+  --breakpoint-*: initial;
+  --breakpoint-desk: 1200px;
+}
+
 * {
   scrollbar-width: thin;
   scroll-behavior: smooth;

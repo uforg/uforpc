@@ -68,7 +68,7 @@
     </div>
   </div>
 
-  <div class="mb-16 grid gap-8 md:grid-cols-2">
+  <div class="desk:grid-cols-2 mb-16 grid gap-8">
     <div class="card bg-base-200 shadow-sm">
       <div class="card-body">
         <h2 class="card-title mb-4 text-2xl">What is UFO RPC?</h2>
@@ -94,7 +94,7 @@
 
   <div class="text-center">
     <h2 class="mb-8 text-3xl font-bold">Key Features</h2>
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="desk:grid-cols-4 grid gap-6">
       <div class="card bg-base-200 shadow-sm">
         <div class="card-body text-center">
           <div
