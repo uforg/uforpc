@@ -2,7 +2,6 @@
   import { page } from "$app/state";
   import { Home, X } from "@lucide/svelte";
   import { onMount } from "svelte";
-  import { fade } from "svelte/transition";
 
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { store } from "$lib/store.svelte";
@@ -10,6 +9,7 @@
   import type { Schema } from "$lib/urpcTypes";
 
   import Logo from "$lib/components/Logo.svelte";
+  import Offcanvas from "$lib/components/Offcanvas.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   import LayoutAsideFilters from "./LayoutAsideFilters.svelte";
@@ -104,7 +104,7 @@
             class="btn btn-ghost btn-square btn-sm"
             onclick={() => (uiStore.asideOpen = !uiStore.asideOpen)}
           >
-            <X class="size-4" />
+            <X class="size-6" />
           </button>
         </div>
       {/if}
@@ -152,20 +152,8 @@
   {@render aside()}
 {/if}
 
-{#if uiStore.isMobile && uiStore.asideOpen}
-  <div class="fixed z-40 h-[100dvh] w-[100dvw]">
-    <button
-      class="fixed inset-0 z-10 bg-black/50 text-transparent"
-      onclick={() => (uiStore.asideOpen = false)}
-    >
-      Close
-    </button>
-
-    <div
-      class="bg-base-100 fixed z-20 h-[100dvh] w-full max-w-[280px]"
-      transition:fade={{ duration: 100 }}
-    >
-      {@render aside()}
-    </div>
-  </div>
+{#if uiStore.isMobile}
+  <Offcanvas bind:isOpen={uiStore.asideOpen}>
+    {@render aside()}
+  </Offcanvas>
 {/if}
