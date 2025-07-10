@@ -111,7 +111,7 @@
       <LayoutAsideFilters />
     </header>
 
-    <nav class="p-4">
+    <nav class="p-4 pb-8">
       <Tooltip content="RPC Home">
         <a
           href="#/"
