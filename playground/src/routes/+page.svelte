@@ -17,7 +17,7 @@
 
 <div
   class={{
-    "container mx-auto p-4": true,
+    "container mx-auto": true,
     "py-16": !uiStore.isMobile,
   }}
 >
