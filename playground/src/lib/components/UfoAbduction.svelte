@@ -73,18 +73,15 @@
         if (abductionProgress < 1) {
           requestAnimationFrame(animate);
         } else {
-          setTimeout(() => {
-            isAbducting = false;
-            currentItem = "";
-          }, 200);
+          isAbducting = false;
+          currentItem = "";
         }
       };
+
       animate();
     };
 
-    const interval = setInterval(startAbduction, 1800);
-    setTimeout(startAbduction, 500);
-
+    const interval = setInterval(startAbduction, 300);
     return () => clearInterval(interval);
   });
 </script>
@@ -134,7 +131,7 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: var(--beam-width, 150px);
+    width: var(--beam-width);
     height: 100%;
     background: linear-gradient(to bottom, #fbbf24 0%, transparent 100%);
     clip-path: polygon(45% 0, 55% 0, 100% 100%, 0% 100%);
@@ -153,7 +150,7 @@
 
   .particle {
     position: absolute;
-    left: calc(50% + (var(--random) - 0.5) * var(--beam-width, 150px) * 0.8);
+    left: calc(50% + (var(--random) - 0.5) * var(--beam-width) * 0.8);
     top: 70%;
     width: 5px;
     height: 5px;
