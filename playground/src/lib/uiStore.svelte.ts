@@ -1,5 +1,7 @@
 import type { Action } from "svelte/action";
 
+import { debounce } from "./helpers/debounce";
+
 export interface UiStoreDimensions {
   element: HTMLElement | null;
   size: {
@@ -94,9 +96,11 @@ export type Theme = "light" | "dark";
 
 export interface UiStore {
   loaded: boolean;
+  isMobile: boolean;
   theme: Theme;
   codeSnippetsOpen: boolean;
   codeSnippetsLang: string;
+  asideOpen: boolean;
   asideSearchOpen: boolean;
   asideSearchQuery: string;
   asideHideDocs: boolean;
@@ -124,9 +128,11 @@ const localStorageKeys = {
 
 export const uiStore = $state<UiStore>({
   loaded: false,
+  isMobile: false,
   theme: "dark",
   codeSnippetsOpen: false,
   codeSnippetsLang: "Curl",
+  asideOpen: false,
   asideSearchOpen: false,
   asideSearchQuery: "",
   asideHideDocs: false,
@@ -141,6 +147,21 @@ export const uiStore = $state<UiStore>({
 });
 
 $effect.root(() => {
+  // Effect to check if the screen is mobile (even on resize) with debounce
+  $effect(() => {
+    const calcIsMobile = debounce(() => {
+      const mobileThreshold = 1200;
+      uiStore.isMobile = globalThis.innerWidth < mobileThreshold;
+    }, 100);
+
+    calcIsMobile();
+    globalThis.addEventListener("resize", calcIsMobile);
+    return () => {
+      globalThis.removeEventListener("resize", calcIsMobile);
+    };
+  });
+
+  // Effect to save the store to the browser's local storage
   $effect(() => {
     if (!uiStore.loaded) return;
     saveUiStore();
