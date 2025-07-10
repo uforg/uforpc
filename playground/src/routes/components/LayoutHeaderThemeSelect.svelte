@@ -17,21 +17,15 @@
 </script>
 
 <Tooltip content={tooltipContent} placement="left">
-  <button class="btn btn-ghost" onclick={toggleTheme}>
-    <span class="relative size-4">
-      {#if uiStore.theme === "light"}
-        <span transition:fade={{ duration: 100 }} class="absolute inset-0">
-          <Sun class="size-4" />
-        </span>
-      {/if}
-      {#if uiStore.theme === "dark"}
-        <span transition:fade={{ duration: 100 }} class="absolute inset-0">
-          <Moon class="size-4" />
-        </span>
-      {/if}
-    </span>
+  <button class="btn btn-ghost justify-start space-x-1" onclick={toggleTheme}>
+    {#if uiStore.theme === "light"}
+      <Sun class="size-4" />
+    {/if}
+    {#if uiStore.theme === "dark"}
+      <Moon class="size-4" />
+    {/if}
 
-    <span class="w-[5ch]">
+    <span class="w-[5ch] text-left">
       {#if uiStore.theme === "light"}
         Light
       {/if}

@@ -2,6 +2,7 @@
   import { Link, Plus, RefreshCcw, Settings, Trash, X } from "@lucide/svelte";
 
   import { loadDefaultConfig, store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
 
   import Modal from "$lib/components/Modal.svelte";
 
@@ -36,15 +37,17 @@
 </script>
 
 <button
-  class="btn btn-ghost flex items-center justify-start space-x-2 text-sm"
+  class="btn btn-ghost flex items-center justify-start space-x-1 text-sm"
   onclick={openModal}
 >
   <Settings class="size-4" />
   <span>Settings</span>
-  <span class="ml-4">
-    <kbd class="kbd kbd-sm">{ctrl}</kbd>
-    <kbd class="kbd kbd-sm">,</kbd>
-  </span>
+  {#if !uiStore.isMobile}
+    <span class="ml-4">
+      <kbd class="kbd kbd-sm">{ctrl}</kbd>
+      <kbd class="kbd kbd-sm">,</kbd>
+    </span>
+  {/if}
 </button>
 
 <Modal bind:isOpen>
