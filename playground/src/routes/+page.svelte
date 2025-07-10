@@ -8,18 +8,32 @@
     ShieldCheck,
   } from "@lucide/svelte";
 
+  import { uiStore } from "$lib/uiStore.svelte";
+
   import Logo from "$lib/components/Logo.svelte";
 
   import UfoAbduction from "../lib/components/UfoAbduction.svelte";
 </script>
 
-<div class="container mx-auto px-4 py-16">
+<div
+  class={{
+    "container mx-auto p-4": true,
+    "py-16": !uiStore.isMobile,
+  }}
+>
   <div class="mb-16 text-center">
-    <div class="mb-8">
-      <Logo class="mx-auto h-full max-w-[600px]" animate={false} />
-    </div>
+    {#if !uiStore.isMobile}
+      <div class="mb-8">
+        <Logo class="mx-auto h-full max-w-[600px]" animate={false} />
+      </div>
+    {/if}
 
-    <p class="text-base-content/70 mx-auto mb-8 max-w-2xl text-xl">
+    <p
+      class={{
+        "mx-auto mb-8 max-w-2xl text-xl": true,
+        "text-base-content/70": !uiStore.isMobile,
+      }}
+    >
       Test and experiment with UFO RPC in this interactive playground using the
       left sidebar to navigate the schema.
     </p>
@@ -28,11 +42,14 @@
       <UfoAbduction width={200} />
     </div>
 
-    <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+    <div class="flex items-center justify-center space-x-2">
       <a
         href="https://github.com/uforg/uforpc"
         target="_blank"
-        class="btn btn-primary btn-lg"
+        class={{
+          "btn btn-primary": true,
+          "btn-lg": !uiStore.isMobile,
+        }}
       >
         <Github class="size-5" />
         View on GitHub
@@ -40,7 +57,10 @@
       <a
         href="https://uforpc.uforg.dev"
         target="_blank"
-        class="btn btn-outline btn-lg"
+        class={{
+          "btn btn-outline": true,
+          "btn-lg": !uiStore.isMobile,
+        }}
       >
         <BookOpenText class="size-5" />
         Documentation
