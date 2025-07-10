@@ -14,6 +14,7 @@
   import Offcanvas from "$lib/components/Offcanvas.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
+  import LayoutHeaderSchema from "./LayoutHeaderSchema.svelte";
   import LayoutHeaderSearch from "./LayoutHeaderSearch.svelte";
   import LayoutHeaderSettings from "./LayoutHeaderSettings.svelte";
   import LayoutHeaderThemeSelect from "./LayoutHeaderThemeSelect.svelte";
@@ -73,9 +74,10 @@
     </button>
     <h2 class="text-lg font-bold">More options</h2>
   </div>
-  <div class="flex flex-col items-start space-y-2 p-4 [&>*]:w-full">
+  <div class="flex flex-col items-start p-4 [&>*]:w-full">
     {@render starOnGithub()}
     {@render docsLink()}
+    <LayoutHeaderSchema />
 
     {#if uiStore.isMobile}
       <LayoutHeaderSearch />

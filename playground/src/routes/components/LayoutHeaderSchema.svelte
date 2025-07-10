@@ -14,11 +14,11 @@
 
 <Tooltip content="Show full schema">
   <button
-    class="btn btn-ghost btn-block justify-start space-x-2 border-transparent hover:bg-blue-500/20"
+    class="btn btn-ghost btn-block justify-start space-x-1"
     onclick={openModal}
   >
     <ScrollText class="size-4" />
-    <span>Schema</span>
+    <span>Full schema</span>
   </button>
 </Tooltip>
 
