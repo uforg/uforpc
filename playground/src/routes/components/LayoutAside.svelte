@@ -1,7 +1,8 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { Home } from "@lucide/svelte";
+  import { Home, X } from "@lucide/svelte";
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
 
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { store } from "$lib/store.svelte";
@@ -64,68 +65,108 @@
   }
 </script>
 
-<aside
-  use:dimensionschangeAction
-  ondimensionschange={(e) => (uiStore.aside = e.detail)}
-  class={[
-    "h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[90px]",
-    "overflow-x-hidden overflow-y-auto",
-  ]}
->
-  <header
+{#snippet aside()}
+  <aside
+    use:dimensionschangeAction
+    ondimensionschange={(e) => (uiStore.aside = e.detail)}
     class={[
-      "bg-base-100/90 sticky top-0 z-10 w-full backdrop-blur-sm",
-      {
-        "shadow-xs": uiStore.aside.scroll.isTopScrolled,
-      },
+      "bg-base-100 h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[90px]",
+      "overflow-x-hidden overflow-y-auto",
     ]}
   >
-    <a
+    <header
       class={[
-        "sticky top-0 z-10 flex h-[72px] w-full items-end p-4",
+        "bg-base-100/90 sticky top-0 z-10 w-full backdrop-blur-sm",
         {
           "shadow-xs": uiStore.aside.scroll.isTopScrolled,
         },
       ]}
-      href="https://uforpc.uforg.dev"
-      target="_blank"
     >
-      <Logo class="mx-auto h-full" />
-    </a>
-
-    <LayoutAsideFilters />
-  </header>
-
-  <nav class="p-4">
-    <LayoutAsideSchema />
-
-    <Tooltip content="RPC Home">
-      <a
-        href="#/"
-        class={[
-          "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
-          "hover:bg-blue-500/20",
-          { "bg-blue-500/20": isHome },
-        ]}
-      >
-        <Home class="size-4" />
-        <span>Home</span>
-      </a>
-    </Tooltip>
-
-    {#each store.jsonSchema.nodes as node}
-      {#if shouldShowNode("doc", node)}
-        <LayoutAsideItem {node} />
+      {#if !uiStore.isMobile}
+        <a
+          class={[
+            "sticky top-0 z-10 flex h-[72px] w-full items-end p-4",
+            {
+              "shadow-xs": uiStore.aside.scroll.isTopScrolled,
+            },
+          ]}
+          href="https://uforpc.uforg.dev"
+          target="_blank"
+        >
+          <Logo class="mx-auto h-full" />
+        </a>
       {/if}
-      {#if shouldShowNode("type", node)}
-        <LayoutAsideItem {node} />
+
+      {#if uiStore.isMobile}
+        <div class="flex items-center justify-between p-4">
+          <Logo class="w-[180px]" />
+
+          <button
+            class="btn btn-ghost btn-square btn-sm"
+            onclick={() => (uiStore.asideOpen = !uiStore.asideOpen)}
+          >
+            <X class="size-4" />
+          </button>
+        </div>
       {/if}
-      {#if shouldShowNode("proc", node)}
-        <LayoutAsideItem {node} />
-      {/if}
-      {#if shouldShowNode("stream", node)}
-        <LayoutAsideItem {node} />
-      {/if}
-    {/each}
-  </nav>
-</aside>
+
+      <LayoutAsideFilters />
+    </header>
+
+    <nav class="p-4">
+      <LayoutAsideSchema />
+
+      <Tooltip content="RPC Home">
+        <a
+          href="#/"
+          onclick={() => (uiStore.asideOpen = false)}
+          class={[
+            "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
+            "hover:bg-blue-500/20",
+            { "bg-blue-500/20": isHome },
+          ]}
+        >
+          <Home class="size-4" />
+          <span>Home</span>
+        </a>
+      </Tooltip>
+
+      {#each store.jsonSchema.nodes as node}
+        {#if shouldShowNode("doc", node)}
+          <LayoutAsideItem {node} />
+        {/if}
+        {#if shouldShowNode("type", node)}
+          <LayoutAsideItem {node} />
+        {/if}
+        {#if shouldShowNode("proc", node)}
+          <LayoutAsideItem {node} />
+        {/if}
+        {#if shouldShowNode("stream", node)}
+          <LayoutAsideItem {node} />
+        {/if}
+      {/each}
+    </nav>
+  </aside>
+{/snippet}
+
+{#if !uiStore.isMobile}
+  {@render aside()}
+{/if}
+
+{#if uiStore.isMobile && uiStore.asideOpen}
+  <div class="fixed z-40 h-[100dvh] w-[100dvw]">
+    <button
+      class="fixed inset-0 z-10 bg-black/50 text-transparent"
+      onclick={() => (uiStore.asideOpen = false)}
+    >
+      Close
+    </button>
+
+    <div
+      class="bg-base-100 fixed z-20 h-[100dvh] w-full max-w-[280px]"
+      transition:fade={{ duration: 100 }}
+    >
+      {@render aside()}
+    </div>
+  </div>
+{/if}

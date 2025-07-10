@@ -78,6 +78,7 @@
   <a
     {id}
     {href}
+    onclick={() => (uiStore.asideOpen = false)}
     class={[
       "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
       {

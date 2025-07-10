@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BookOpenText, Github } from "@lucide/svelte";
+  import { BookOpenText, Github, Menu } from "@lucide/svelte";
 
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
 
@@ -20,6 +20,15 @@
   ]}
 >
   <div class="flex items-center justify-start space-x-2">
+    {#if uiStore.isMobile}
+      <button
+        class="btn btn-ghost btn-square"
+        onclick={() => (uiStore.asideOpen = !uiStore.asideOpen)}
+      >
+        <Menu class="size-4" />
+      </button>
+    {/if}
+
     <LayoutHeaderSearch />
     <LayoutHeaderSettings />
   </div>
