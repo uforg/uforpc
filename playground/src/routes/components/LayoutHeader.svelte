@@ -4,6 +4,7 @@
     Ellipsis,
     EllipsisVertical,
     Github,
+    Info,
     Menu,
     X,
   } from "@lucide/svelte";
@@ -84,6 +85,11 @@
       <LayoutHeaderSettings />
       <LayoutHeaderThemeSelect />
     {/if}
+
+    <a href="#/about" class="btn btn-ghost justify-start space-x-1">
+      <Info class="size-4" />
+      <span>About the project</span>
+    </a>
   </div>
 {/snippet}
 
