@@ -1,13 +1,9 @@
 <script lang="ts">
-  import { ChevronLeft, ChevronRight, Code } from "@lucide/svelte";
-  import { fade, slide } from "svelte/transition";
-
   import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
 
   import CodeComponent from "$lib/components/Code.svelte";
-  import Tooltip from "$lib/components/Tooltip.svelte";
+  import H2 from "$lib/components/H2.svelte";
 
   import SnippetsCode from "./SnippetsCode.svelte";
 
@@ -19,21 +15,6 @@
   }
 
   const { value, type, name }: Props = $props();
-
-  let maxHeight = $derived.by(() => {
-    const heightMargin = 16;
-    const windowHeight = globalThis.innerHeight;
-    const headerHeight = uiStore.header.size.clientHeight;
-
-    const maxHeight = windowHeight - headerHeight - 2 * heightMargin;
-    return maxHeight;
-  });
-
-  let stickyTop = $derived.by(() => {
-    const heightMargin = 16;
-    const headerHeight = uiStore.header.size.clientHeight;
-    return headerHeight + heightMargin;
-  });
 
   let curl = $derived.by(() => {
     const endpoint = joinPath([store.baseUrl, name]);
@@ -62,86 +43,28 @@
 
     return c;
   });
-
-  let isOpen = $derived(uiStore.codeSnippetsOpen);
-  function toggleIsOpen() {
-    uiStore.codeSnippetsOpen = !uiStore.codeSnippetsOpen;
-  }
 </script>
 
-<div
-  class={[
-    "sticky flex flex-col self-start",
-    {
-      "w-[40%]": isOpen,
-    },
-  ]}
-  style={`max-height: ${maxHeight}px; top: ${stickyTop}px;`}
->
-  <Tooltip
-    content={isOpen ? "Hide code snippets" : "Show code snippets"}
-    placement="left"
-  >
-    <button
-      class={[
-        "btn rounded-box group border-base-content/20 flex w-full items-center",
-        {
-          "justify-start rounded-b-none px-4": isOpen,
-          "px-3": !isOpen,
-        },
-      ]}
-      onclick={toggleIsOpen}
-    >
-      <span
-        class={{
-          "mr-2": isOpen,
-        }}
-      >
-        <Code class="size-4 group-hover:hidden" />
-        {#if isOpen}
-          <ChevronRight class="hidden size-4 group-hover:block" />
-        {:else}
-          <ChevronLeft class="hidden size-4 group-hover:block" />
-        {/if}
-      </span>
+<div>
+  <H2 class="mb-2 flex items-center space-x-2">
+    <span>Code snippets</span>
+  </H2>
 
-      {#if isOpen}
-        <span>Code snippets for {name}</span>
-      {/if}
-    </button>
-  </Tooltip>
+  {#if type === "stream"}
+    <p class="p-4 text-sm">
+      Streams use Server-Sent Events. Only curl examples are provided. Build a
+      client manually, or generate one with the urpc CLI if your language is
+      supported.
+      <br />
+      <a href="https://uforpc.uforg.dev/r/sse" target="_blank" class="link">
+        Learn more here
+      </a>
+    </p>
 
-  {#if isOpen}
-    <div
-      class={[
-        "rounded-box border-base-content/20 rounded-t-none border border-t-0",
-        "overflow-x-auto overflow-y-auto",
-      ]}
-      in:fade={{ duration: 100 }}
-      out:slide={{ duration: 100, axis: "x" }}
-    >
-      {#if type === "stream"}
-        <p class="p-4 text-sm">
-          Streams use Server-Sent Events. Only curl examples are provided. Build
-          a client manually, or generate one with the urpc CLI if your language
-          is supported.
-          <br />
-          <a href="https://uforpc.uforg.dev/r/sse" target="_blank" class="link">
-            Learn more here
-          </a>
-        </p>
+    <CodeComponent code={curl} lang="bash" collapsible={false} isOpen />
+  {/if}
 
-        <CodeComponent
-          rounded={false}
-          withBorder={false}
-          code={curl}
-          lang="bash"
-        />
-      {/if}
-
-      {#if type === "proc"}
-        <SnippetsCode {curl} />
-      {/if}
-    </div>
+  {#if type === "proc"}
+    <SnippetsCode {curl} />
   {/if}
 </div>

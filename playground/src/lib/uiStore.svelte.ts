@@ -98,7 +98,6 @@ export interface UiStore {
   loaded: boolean;
   isMobile: boolean;
   theme: Theme;
-  codeSnippetsOpen: boolean;
   codeSnippetsLang: string;
   asideOpen: boolean;
   asideSearchOpen: boolean;
@@ -116,7 +115,6 @@ export interface UiStore {
 
 const localStorageKeys = {
   theme: "theme",
-  codeSnippetsOpen: "codeSnippetsOpen",
   codeSnippetsLang: "codeSnippetsLang",
   asideSearchOpen: "asideSearchOpen",
   asideSearchQuery: "asideSearchQuery",
@@ -130,7 +128,6 @@ export const uiStore = $state<UiStore>({
   loaded: false,
   isMobile: false,
   theme: "dark",
-  codeSnippetsOpen: false,
   codeSnippetsLang: "Curl",
   asideOpen: false,
   asideSearchOpen: false,
@@ -179,14 +176,6 @@ export const loadUiStore = () => {
    * The theme should be loaded before anything else in
    * the app.html file.
    */
-
-  // Load code snippets open state from local storage
-  const codeSnippetsOpen = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsOpen,
-  );
-  uiStore.codeSnippetsOpen = codeSnippetsOpen
-    ? codeSnippetsOpen === "true"
-    : true;
 
   // Load code snippets lang from local storage
   const codeSnippetsLang = globalThis.localStorage.getItem(
@@ -242,12 +231,6 @@ export const saveUiStore = () => {
   // Save theme to local storage
   globalThis.localStorage.setItem(localStorageKeys.theme, uiStore.theme);
   setThemeAttribute(uiStore.theme);
-
-  // Save code snippets open state to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsOpen,
-    uiStore.codeSnippetsOpen.toString(),
-  );
 
   // Save code snippets lang to local storage
   globalThis.localStorage.setItem(

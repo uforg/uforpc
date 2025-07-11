@@ -330,7 +330,7 @@
   });
 </script>
 
-<fieldset class="fieldset m-4 mb-6">
+<fieldset class="fieldset mb-4">
   <legend class="fieldset-legend">Language</legend>
   <select class="select w-full" bind:value={uiStore.codeSnippetsLang}>
     {#each langGroups as langGroup}
@@ -349,4 +349,4 @@
   </select>
 </fieldset>
 
-<Code rounded={false} withBorder={false} code={pickedCode} lang={pickedLang} />
+<Code code={pickedCode} lang={pickedLang} collapsible={false} isOpen />

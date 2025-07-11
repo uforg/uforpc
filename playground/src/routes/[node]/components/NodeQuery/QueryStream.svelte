@@ -4,6 +4,7 @@
 
   import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
   import type { StreamDefinitionNode } from "$lib/urpcTypes";
 
   import H2 from "$lib/components/H2.svelte";
@@ -133,40 +134,36 @@
   }
 </script>
 
-<div class="flex space-x-4" bind:this={wrapper}>
-  <div class="flex-grow space-y-2 rounded-t-none">
+<div class="flex" bind:this={wrapper}>
+  <div class="flex-grow">
+    <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
+
     <div
-      class={[
-        "sticky top-[72px] z-10 flex w-full items-center justify-between",
-        "bg-base-100 -mt-4 space-x-2 pt-4 pb-2",
-      ]}
+      class={{
+        "join bg-base-100 flex w-full": true,
+        "sticky top-[72px] z-10 -mt-4 pt-4": !uiStore.isMobile,
+      }}
     >
-      <H2 class="flex items-center space-x-2 break-all">
-        <Zap class="size-6 flex-none" />
-        <span>Try {stream.name}</span>
-      </H2>
-      <div class="join">
-        <button
-          class={[
-            "btn join-item border-base-content/20",
-            tab === "input" && "btn-primary btn-active",
-          ]}
-          onclick={() => openInput(false)}
-        >
-          <MoveUpRight class="size-4" />
-          Input
-        </button>
-        <button
-          class={[
-            "btn join-item border-base-content/20",
-            tab === "output" && "btn-primary btn-active",
-          ]}
-          onclick={() => openOutput(false)}
-        >
-          <MoveDownLeft class="size-4" />
-          <span>Output</span>
-        </button>
-      </div>
+      <button
+        class={[
+          "btn join-item border-base-content/20 flex-grow",
+          tab === "input" && "btn-primary btn-active",
+        ]}
+        onclick={() => openInput(false)}
+      >
+        <MoveUpRight class="size-4" />
+        Input
+      </button>
+      <button
+        class={[
+          "btn join-item border-base-content/20 flex-grow",
+          tab === "output" && "btn-primary btn-active",
+        ]}
+        onclick={() => openOutput(false)}
+      >
+        <MoveDownLeft class="size-4" />
+        <span>Output</span>
+      </button>
     </div>
 
     <div
@@ -216,5 +213,19 @@
     </div>
   </div>
 
-  <Snippets {value} type="stream" name={stream.name} />
+  {#if !uiStore.isMobile}
+    <div class="divider divider-horizontal"></div>
+
+    <div class="w-[40%] flex-none">
+      <div class="sticky top-[72px] z-10 -mt-4 pt-4">
+        <Snippets {value} type="stream" name={stream.name} />
+      </div>
+    </div>
+  {/if}
 </div>
+
+{#if uiStore.isMobile}
+  <div class="mt-12">
+    <Snippets {value} type="stream" name={stream.name} />
+  </div>
+{/if}

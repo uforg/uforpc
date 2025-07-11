@@ -85,20 +85,20 @@
   </div>
 
   {#if node.kind === "proc"}
-    <div class="mt-4">
+    <div>
       <NodeQueryProc proc={node} />
     </div>
   {/if}
 
   {#if node.kind === "stream"}
-    <div class="mt-4">
+    <div>
       <NodeQueryStream stream={node} />
     </div>
   {/if}
 
   {#if urpcSchema !== ""}
     <div class="space-y-4">
-      <H2>Schema for {name}</H2>
+      <H2>Schema</H2>
       <Code lang="urpc" code={urpcSchema} collapsible={false} isOpen />
     </div>
   {/if}
