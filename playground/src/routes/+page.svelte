@@ -24,7 +24,7 @@
   <div class="mb-16 text-center">
     {#if !uiStore.isMobile}
       <div class="mb-8">
-        <Logo class="mx-auto h-full max-w-[600px]" animate={false} />
+        <Logo class="mx-auto h-full max-w-[600px]" />
       </div>
     {/if}
 
