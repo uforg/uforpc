@@ -3,33 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+    <link rel="icon" href="%sveltekit.assets%/icon.png" />
     <title>UFO RPC Playground</title>
 
-    <link rel="icon" href="%sveltekit.assets%/icon.png" />
-    <link
-      rel="preload"
-      href="./_app/_cconv/tree-sitter.wasm"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="./_app/_cconv/tree-sitter-bash.wasm"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-
     <script>
-      const originalFetch = window.fetch;
-      window.fetch = async function (resource, options) {
+      const __mpOriginalFetch = globalThis.fetch;
+      globalThis.fetch = async function (resource, options) {
         const redirects = {
           "/tree-sitter.wasm": "./_app/_cconv/tree-sitter.wasm",
           "/tree-sitter-bash.wasm": "./_app/_cconv/tree-sitter-bash.wasm",
         };
 
         if (redirects[resource]) resource = redirects[resource];
-        return originalFetch.call(this, resource, options);
+        return __mpOriginalFetch.call(this, resource, options);
       };
     </script>
 
