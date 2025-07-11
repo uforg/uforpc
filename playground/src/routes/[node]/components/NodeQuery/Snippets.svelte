@@ -51,7 +51,7 @@
   </H2>
 
   {#if type === "stream"}
-    <p class="p-4 text-sm">
+    <p class="pb-4 text-sm">
       Streams use Server-Sent Events. Only curl examples are provided. Build a
       client manually, or generate one with the urpc CLI if your language is
       supported.
