@@ -12,37 +12,33 @@
     "pt-16": !uiStore.isMobile,
   }}
 >
-  <div class="text-center">
-    {#if !uiStore.isMobile}
-      <div class="mb-12">
-        <Logo class="mx-auto h-full max-w-[600px]" />
-      </div>
-    {/if}
+  {#if !uiStore.isMobile}
+    <Logo class="mx-auto h-full max-w-[600px]" />
+  {/if}
 
-    <div class="flex items-center justify-center space-x-2">
-      <a
-        href="https://github.com/uforg/uforpc"
-        target="_blank"
-        class={{
-          "btn btn-primary": true,
-          "btn-lg": !uiStore.isMobile,
-        }}
-      >
-        <Github class="size-5" />
-        View on GitHub
-      </a>
-      <a
-        href="https://uforpc.uforg.dev"
-        target="_blank"
-        class={{
-          "btn btn-outline": true,
-          "btn-lg": !uiStore.isMobile,
-        }}
-      >
-        <BookOpenText class="size-5" />
-        Documentation
-      </a>
-    </div>
+  <div class="flex items-center justify-center space-x-2">
+    <a
+      href="https://github.com/uforg/uforpc"
+      target="_blank"
+      class={{
+        "btn btn-primary": true,
+        "btn-lg": !uiStore.isMobile,
+      }}
+    >
+      <Github class="size-5" />
+      View on GitHub
+    </a>
+    <a
+      href="https://uforpc.uforg.dev"
+      target="_blank"
+      class={{
+        "btn btn-outline": true,
+        "btn-lg": !uiStore.isMobile,
+      }}
+    >
+      <BookOpenText class="size-5" />
+      Documentation
+    </a>
   </div>
 
   <div class="card bg-base-200 shadow-sm">
