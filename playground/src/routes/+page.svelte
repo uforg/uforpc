@@ -15,6 +15,10 @@
   import UfoAbduction from "../lib/components/UfoAbduction.svelte";
 </script>
 
+<svelte:head>
+  <title>UFO RPC Playground</title>
+</svelte:head>
+
 <div
   class={{
     "container mx-auto": true,

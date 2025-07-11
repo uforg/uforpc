@@ -6,6 +6,10 @@
   import Logo from "$lib/components/Logo.svelte";
 </script>
 
+<svelte:head>
+  <title>About - UFO RPC Playground</title>
+</svelte:head>
+
 <div
   class={{
     "container mx-auto space-y-8 pb-8": true,
