@@ -86,7 +86,11 @@
       <LayoutHeaderThemeSelect />
     {/if}
 
-    <a href="#/about" class="btn btn-ghost justify-start space-x-1">
+    <a
+      href="#/about"
+      onclick={() => (isOffcanvasOpen = false)}
+      class="btn btn-ghost justify-start space-x-1"
+    >
       <Info class="size-4" />
       <span>About the project</span>
     </a>
