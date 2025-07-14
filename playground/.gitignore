@@ -7,7 +7,6 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
-!/build/gitkeep.txt
 
 # OS
 .DS_Store

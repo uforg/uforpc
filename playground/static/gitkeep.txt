@@ -1,5 +1,0 @@
-This is only to keep the build folder in git, so the tests and
-linter pass.
-
-The actual content of this directory will be written by the playground
-build process.
