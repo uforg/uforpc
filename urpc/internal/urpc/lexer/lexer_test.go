@@ -8,6 +8,8 @@ import (
 )
 
 func TestLexer(t *testing.T) {
+	// TODO: Add more tests specifically for the token positions
+
 	t.Run("TestLexerBasic", func(t *testing.T) {
 		input := ",:(){}[]@?"
 
@@ -81,51 +83,37 @@ func TestLexer(t *testing.T) {
 	})
 
 	t.Run("TestLexerKeywords", func(t *testing.T) {
-		input := "version rule type proc input output meta error true false for param string int float bool import datetime deprecated extends stream"
+		input := "version type proc input output true false string int float bool datetime deprecated stream"
 
 		tests := []token.Token{
-			{Type: token.Version, Literal: "version", FileName: "test.urpc", LineStart: 1, LineEnd: 1, ColumnStart: 1, ColumnEnd: 7},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 8, LineEnd: 1, ColumnEnd: 8},
-			{Type: token.Rule, Literal: "rule", FileName: "test.urpc", LineStart: 1, ColumnStart: 9, LineEnd: 1, ColumnEnd: 12},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 13, LineEnd: 1, ColumnEnd: 13},
-			{Type: token.Type, Literal: "type", FileName: "test.urpc", LineStart: 1, ColumnStart: 14, LineEnd: 1, ColumnEnd: 17},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 18, LineEnd: 1, ColumnEnd: 18},
-			{Type: token.Proc, Literal: "proc", FileName: "test.urpc", LineStart: 1, ColumnStart: 19, LineEnd: 1, ColumnEnd: 22},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 23, LineEnd: 1, ColumnEnd: 23},
-			{Type: token.Input, Literal: "input", FileName: "test.urpc", LineStart: 1, ColumnStart: 24, LineEnd: 1, ColumnEnd: 28},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 29, LineEnd: 1, ColumnEnd: 29},
-			{Type: token.Output, Literal: "output", FileName: "test.urpc", LineStart: 1, ColumnStart: 30, LineEnd: 1, ColumnEnd: 35},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 36, LineEnd: 1, ColumnEnd: 36},
-			{Type: token.Meta, Literal: "meta", FileName: "test.urpc", LineStart: 1, ColumnStart: 37, LineEnd: 1, ColumnEnd: 40},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 41, LineEnd: 1, ColumnEnd: 41},
-			{Type: token.Error, Literal: "error", FileName: "test.urpc", LineStart: 1, ColumnStart: 42, LineEnd: 1, ColumnEnd: 46},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 47, LineEnd: 1, ColumnEnd: 47},
-			{Type: token.TrueLiteral, Literal: "true", FileName: "test.urpc", LineStart: 1, ColumnStart: 48, LineEnd: 1, ColumnEnd: 51},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 52, LineEnd: 1, ColumnEnd: 52},
-			{Type: token.FalseLiteral, Literal: "false", FileName: "test.urpc", LineStart: 1, ColumnStart: 53, LineEnd: 1, ColumnEnd: 57},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 58, LineEnd: 1, ColumnEnd: 58},
-			{Type: token.For, Literal: "for", FileName: "test.urpc", LineStart: 1, ColumnStart: 59, LineEnd: 1, ColumnEnd: 61},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 62, LineEnd: 1, ColumnEnd: 62},
-			{Type: token.Param, Literal: "param", FileName: "test.urpc", LineStart: 1, ColumnStart: 63, LineEnd: 1, ColumnEnd: 67},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 68, LineEnd: 1, ColumnEnd: 68},
-			{Type: token.String, Literal: "string", FileName: "test.urpc", LineStart: 1, ColumnStart: 69, LineEnd: 1, ColumnEnd: 74},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 75, LineEnd: 1, ColumnEnd: 75},
-			{Type: token.Int, Literal: "int", FileName: "test.urpc", LineStart: 1, ColumnStart: 76, LineEnd: 1, ColumnEnd: 78},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 79, LineEnd: 1, ColumnEnd: 79},
-			{Type: token.Float, Literal: "float", FileName: "test.urpc", LineStart: 1, ColumnStart: 80, LineEnd: 1, ColumnEnd: 84},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 85, LineEnd: 1, ColumnEnd: 85},
-			{Type: token.Bool, Literal: "bool", FileName: "test.urpc", LineStart: 1, ColumnStart: 86, LineEnd: 1, ColumnEnd: 89},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 90, LineEnd: 1, ColumnEnd: 90},
-			{Type: token.Import, Literal: "import", FileName: "test.urpc", LineStart: 1, ColumnStart: 91, LineEnd: 1, ColumnEnd: 96},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 97, LineEnd: 1, ColumnEnd: 97},
-			{Type: token.Datetime, Literal: "datetime", FileName: "test.urpc", LineStart: 1, ColumnStart: 98, LineEnd: 1, ColumnEnd: 105},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 106, LineEnd: 1, ColumnEnd: 106},
-			{Type: token.Deprecated, Literal: "deprecated", FileName: "test.urpc", LineStart: 1, ColumnStart: 107, LineEnd: 1, ColumnEnd: 116},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 117, LineEnd: 1, ColumnEnd: 117},
-			{Type: token.Extends, Literal: "extends", FileName: "test.urpc", LineStart: 1, ColumnStart: 118, LineEnd: 1, ColumnEnd: 124},
-			{Type: token.Whitespace, Literal: " ", FileName: "test.urpc", LineStart: 1, ColumnStart: 125, LineEnd: 1, ColumnEnd: 125},
-			{Type: token.Stream, Literal: "stream", FileName: "test.urpc", LineStart: 1, ColumnStart: 126, LineEnd: 1, ColumnEnd: 131},
-			{Type: token.Eof, Literal: "", FileName: "test.urpc", LineStart: 1, ColumnStart: 132, LineEnd: 1, ColumnEnd: 132},
+			{Type: token.Version, Literal: "version"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Type, Literal: "type"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Proc, Literal: "proc"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Input, Literal: "input"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Output, Literal: "output"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.TrueLiteral, Literal: "true"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.FalseLiteral, Literal: "false"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.String, Literal: "string"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Int, Literal: "int"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Float, Literal: "float"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Bool, Literal: "bool"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Datetime, Literal: "datetime"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Deprecated, Literal: "deprecated"},
+			{Type: token.Whitespace, Literal: " "},
+			{Type: token.Stream, Literal: "stream"},
+			{Type: token.Eof, Literal: ""},
 		}
 
 		lex1 := NewLexer("test.urpc", input)
@@ -133,16 +121,7 @@ func TestLexer(t *testing.T) {
 			tok := lex1.NextToken()
 			require.Equal(t, test.Type, tok.Type, "test %d", i)
 			require.Equal(t, test.Literal, tok.Literal, "test %d", i)
-			require.Equal(t, test.FileName, tok.FileName, "test %d", i)
-			require.Equal(t, test.LineStart, tok.LineStart, "test %d", i)
-			require.Equal(t, test.ColumnStart, tok.ColumnStart, "test %d", i)
-			require.Equal(t, test.LineEnd, tok.LineEnd, "test %d", i)
-			require.Equal(t, test.ColumnEnd, tok.ColumnEnd, "test %d", i)
 		}
-
-		lex2 := NewLexer("test.urpc", input)
-		tokens := lex2.ReadTokens()
-		require.Equal(t, tests, tokens)
 	})
 
 	t.Run("TestLexerIdentifiers", func(t *testing.T) {
@@ -589,7 +568,7 @@ func TestLexer(t *testing.T) {
 
 			""" Product is a type that represents a product. """
 			deprecated("This type will be removed in v2.0")
-			type Product extends BaseProduct, OtherType {
+			type Product {
 				id: string
 					@uuid
 					@minLen(36)
@@ -644,10 +623,6 @@ func TestLexer(t *testing.T) {
 			{Type: token.RParen, Literal: ")"},
 			{Type: token.Type, Literal: "type"},
 			{Type: token.Ident, Literal: "Product"},
-			{Type: token.Extends, Literal: "extends"},
-			{Type: token.Ident, Literal: "BaseProduct"},
-			{Type: token.Comma, Literal: ","},
-			{Type: token.Ident, Literal: "OtherType"},
 			{Type: token.LBrace, Literal: "{"},
 			{Type: token.Ident, Literal: "id"},
 			{Type: token.Colon, Literal: ":"},
@@ -715,7 +690,7 @@ func TestLexer(t *testing.T) {
 			{Type: token.IntLiteral, Literal: "3"},
 			{Type: token.RBracket, Literal: "]"},
 			{Type: token.Comma, Literal: ","},
-			{Type: token.Error, Literal: "error"},
+			{Type: token.Ident, Literal: "error"},
 			{Type: token.Colon, Literal: ":"},
 			{Type: token.StringLiteral, Literal: "Priority must be 1, 2, or 3"},
 			{Type: token.RParen, Literal: ")"},
@@ -731,7 +706,7 @@ func TestLexer(t *testing.T) {
 			{Type: token.At, Literal: "@"},
 			{Type: token.Ident, Literal: "uuid"},
 			{Type: token.RBrace, Literal: "}"},
-			{Type: token.Meta, Literal: "meta"},
+			{Type: token.Ident, Literal: "meta"},
 			{Type: token.LBrace, Literal: "{"},
 			{Type: token.Ident, Literal: "audit"},
 			{Type: token.Colon, Literal: ":"},

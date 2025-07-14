@@ -53,19 +53,12 @@ const (
 
 	// Keywords
 	Version    TokenType = "Version"
-	Import     TokenType = "Import"
 	Deprecated TokenType = "Deprecated"
-	Rule       TokenType = "Rule"
 	Type       TokenType = "Type"
-	Extends    TokenType = "Extends"
 	Proc       TokenType = "Proc"
 	Stream     TokenType = "Stream"
 	Input      TokenType = "Input"
 	Output     TokenType = "Output"
-	Meta       TokenType = "Meta"
-	Error      TokenType = "Error"
-	For        TokenType = "For"
-	Param      TokenType = "Param"
 	String     TokenType = "String"
 	Int        TokenType = "Int"
 	Float      TokenType = "Float"
@@ -107,19 +100,12 @@ var TokenTypes = []TokenType{
 
 	// Keywords
 	Version,
-	Import,
 	Deprecated,
-	Rule,
 	Type,
-	Extends,
 	Proc,
 	Stream,
 	Input,
 	Output,
-	Meta,
-	Error,
-	For,
-	Param,
 	String,
 	Int,
 	Float,
@@ -156,19 +142,12 @@ func GetDelimiterTokenType(ch rune) TokenType {
 // keywords is a map of keywords to their corresponding token types.
 var keywords = map[string]TokenType{
 	"version":    Version,
-	"import":     Import,
 	"deprecated": Deprecated,
-	"rule":       Rule,
 	"type":       Type,
-	"extends":    Extends,
 	"proc":       Proc,
 	"stream":     Stream,
 	"input":      Input,
 	"output":     Output,
-	"meta":       Meta,
-	"error":      Error,
-	"for":        For,
-	"param":      Param,
 	"string":     String,
 	"int":        Int,
 	"float":      Float,
