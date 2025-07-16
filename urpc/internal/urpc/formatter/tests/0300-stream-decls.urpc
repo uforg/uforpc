@@ -14,9 +14,9 @@ stream ProcWithInput {input{
 // With output
 stream ProcWithOutput {
   output
-  {  """ Docstring """field1: datetime[
+  {  field1: datetime[
 
-  ]
+  ]""" Docstring """field2:string
           // Comment
 }
 }
@@ -50,9 +50,10 @@ deprecated stream ProcWithInput {
 // With output
 stream ProcWithOutput {
   output {
-    """ Docstring """
     field1: datetime[]
 
+    """ Docstring """
+    field2: string
     // Comment
   }
 }

@@ -29,7 +29,7 @@ proc ProcFull {input{
 output
   {  field1: datetime[
 
-  ]
+  ]""" Docstring """field2:string
 }      }
 
 // >>>>
@@ -62,5 +62,8 @@ proc ProcFull {
 
   output {
     field1: datetime[]
+
+    """ Docstring """
+    field2: string
   }
 }

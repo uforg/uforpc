@@ -174,7 +174,7 @@ func (f *fieldsFormatter) formatComment() {
 }
 
 func (f *fieldsFormatter) formatField() {
-	_, prevLineDiff, prevEOF := f.peekChild(-1)
+	prev, prevLineDiff, prevEOF := f.peekChild(-1)
 
 	shouldBreakBefore := false
 	if !prevEOF {
@@ -188,6 +188,12 @@ func (f *fieldsFormatter) formatField() {
 	}
 
 	if f.currentIndexChild.Field.Docstring != nil {
+		// Add a break before the docstring if it's not the first field
+		// and the previous element is a field
+		if !prevEOF && prev.Field != nil {
+			f.g.Break()
+		}
+
 		f.g.Linef("\"\"\"%s\"\"\"", f.currentIndexChild.Field.Docstring.Value)
 	}
 
