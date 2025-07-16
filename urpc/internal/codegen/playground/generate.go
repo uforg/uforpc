@@ -17,6 +17,10 @@ import (
 func Generate(absConfigDir string, sch *ast.Schema, config Config) error {
 	outputDir := filepath.Join(absConfigDir, config.OutputDir)
 
+	if err := os.RemoveAll(outputDir); err != nil {
+		return fmt.Errorf("error emptying output directory: %w", err)
+	}
+
 	err := extractEmbedFS(embedplayground.BuildFS, "build", outputDir)
 	if err != nil {
 		return fmt.Errorf("error extracting embedded filesystem: %w", err)
