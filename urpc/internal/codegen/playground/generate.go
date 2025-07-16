@@ -22,6 +22,11 @@ func Generate(absConfigDir string, sch *ast.Schema, config Config) error {
 		return fmt.Errorf("error extracting embedded filesystem: %w", err)
 	}
 
+	gitkeepPath := filepath.Join(outputDir, ".gitkeep")
+	if err := os.Remove(gitkeepPath); err != nil {
+		return fmt.Errorf("error deleting .gitkeep file: %w", err)
+	}
+
 	formattedSchema := formatter.FormatSchema(sch)
 	formattedSchemaPath := filepath.Join(outputDir, "schema.urpc")
 	if err := os.WriteFile(formattedSchemaPath, []byte(formattedSchema), 0644); err != nil {
