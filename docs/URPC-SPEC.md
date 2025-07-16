@@ -27,9 +27,7 @@ version <number>
 <Type documentation>
 """
 type <CustomTypeName> {
-  """
-  <Field documentation>
-  """
+  """ <Field documentation> """
   <field>[?]: <Type>
 }
 
@@ -38,16 +36,12 @@ type <CustomTypeName> {
 """
 proc <ProcedureName> {
   input {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -57,16 +51,12 @@ proc <ProcedureName> {
 """
 stream <StreamName> {
   input {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -108,16 +98,14 @@ ElementType[]  // E.g.: string[]
 ### 3.3 Custom Types
 
 You can define custom types additional of the primitive types provided by the
-transpiler that you can use in the input and output of your procedures.
+transpiler that you can use in the input and output of your procedures and streams.
 
 ```urpc
 """
 <Type documentation>
 """
 type <CustomTypeName> {
-  """
-  <Field documentation>
-  """
+  """ <Field documentation> """
   <field>[?]: <Type>
 }
 ```
@@ -148,8 +136,7 @@ type User {
 
 #### 3.3.3 Optional fields
 
-All fields of a type are required by default. To make a field optional, use the
-`?` suffix.
+All fields of a type are required by default. To make a field optional, use the `?` suffix.
 
 ```urpc
 // Optional field
@@ -159,7 +146,7 @@ field?: Type
 #### 3.3.4 Field documentation
 
 You can add documentation to your fields to help the developer understand how to
-use them.
+use them. It's recommended to be concise and use single line descriptions.
 
 ```urpc
 type User {
@@ -183,16 +170,12 @@ client.
 """
 proc <ProcedureName> {
   input {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -204,11 +187,20 @@ You can add documentation to your procedures to help the developer understand
 how to use them, they can include Markdown syntax that will be rendered in the
 generated documentation.
 
-### 4.2 Procedure input/output
+### 4.2 Procedure input
 
 The input of a procedure defines the parameters that are sent to the server for
-processing. The output defines the structure of the response data. Fields inside
-`input` and `output` blocks can also have their own documentation.
+processing.
+
+The fields inside the `input` block can also have their own documentation. It's
+recommended to be concise and use single line descriptions.
+
+### 4.3 Procedure output
+
+The output defines the structure of the response data.
+
+The fields inside the `output` block can also have their own documentation. It's
+recommended to be concise and use single line descriptions.
 
 ## 5. Defining Streams
 
@@ -222,16 +214,12 @@ clients.
 """
 stream <StreamName> {
   input {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
-    """
-    <Field documentation>
-    """
+    """ <Field documentation> """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -246,13 +234,17 @@ purpose and usage. Documentation can include Markdown syntax.
 
 The input section defines the parameters required to establish a stream
 subscription. These parameters determine what data the client wants to receive.
-Fields inside `input` can also have their own documentation.
+
+The fields inside the `input` block can also have their own documentation. It's
+recommended to be concise and use single line descriptions.
 
 ### 5.3 Stream output
 
 The output section defines the structure of events that will be emitted through
-the stream. Each event sent to the client will conform to this structure. Fields
-inside `output` can also have their own documentation.
+the stream. Each event sent to the client will conform to this structure.
+
+The fields inside the `output` block can also have their own documentation. It's
+recommended to be concise and use single line descriptions.
 
 ### 5.5 Example
 
@@ -289,9 +281,7 @@ procedures, streams or fields) or as standalone documentation.
     This is documentation for MyType.
     """
     type MyType {
-      """
-      This is documentation for myField.
-      """
+      """ This is documentation for myField. """
       myField: string
     }
     ```
@@ -317,6 +307,8 @@ procedures, streams or fields) or as standalone documentation.
 Docstrings support Markdown syntax, allowing you to format your documentation
 with headings, lists, code blocks, and more.
 
+Remember to keep your documentation up to date with your schema changes.
+
 ### 6.2 External Documentation Files
 
 For extensive documentation, you can reference external Markdown files:
@@ -339,8 +331,6 @@ When a docstring contains only a valid path to a Markdown file, the content of
 that file will be used as documentation. This approach helps maintain clean and
 focused schema files while allowing for detailed documentation in separate
 files.
-
-Note that external docstrings are not supported for field-level documentation.
 
 Remember to keep external documentation files up to date with your schema
 changes.
@@ -533,4 +523,3 @@ stream NewMessage {
 1. Keywords can't be used as identifiers
 2. Complex validation logic requires implementation via input processors
 3. Circular type dependencies are not allowed
-4. External docstrings for fields are not supported
