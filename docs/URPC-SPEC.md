@@ -27,6 +27,9 @@ version <number>
 <Type documentation>
 """
 type <CustomTypeName> {
+  """
+  <Field documentation>
+  """
   <field>[?]: <Type>
 }
 
@@ -35,10 +38,16 @@ type <CustomTypeName> {
 """
 proc <ProcedureName> {
   input {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -48,10 +57,16 @@ proc <ProcedureName> {
 """
 stream <StreamName> {
   input {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -100,6 +115,9 @@ transpiler that you can use in the input and output of your procedures.
 <Type documentation>
 """
 type <CustomTypeName> {
+  """
+  <Field documentation>
+  """
   <field>[?]: <Type>
 }
 ```
@@ -138,6 +156,21 @@ All fields of a type are required by default. To make a field optional, use the
 field?: Type
 ```
 
+#### 3.3.4 Field documentation
+
+You can add documentation to your fields to help the developer understand how to
+use them.
+
+```urpc
+type User {
+  """ The user's email address """
+  email: string
+
+  """ The user's full name """
+  name: string
+}
+```
+
 ## 4. Defining Procedures
 
 Procedures are the main building block of your API. They define the procedures
@@ -150,10 +183,16 @@ client.
 """
 proc <ProcedureName> {
   input {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -168,7 +207,8 @@ generated documentation.
 ### 4.2 Procedure input/output
 
 The input of a procedure defines the parameters that are sent to the server for
-processing. The output defines the structure of the response data.
+processing. The output defines the structure of the response data. Fields inside
+`input` and `output` blocks can also have their own documentation.
 
 ## 5. Defining Streams
 
@@ -182,10 +222,16 @@ clients.
 """
 stream <StreamName> {
   input {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 
   output {
+    """
+    <Field documentation>
+    """
     <field>[?]: <PrimitiveType> | <CustomType>
   }
 }
@@ -200,11 +246,13 @@ purpose and usage. Documentation can include Markdown syntax.
 
 The input section defines the parameters required to establish a stream
 subscription. These parameters determine what data the client wants to receive.
+Fields inside `input` can also have their own documentation.
 
 ### 5.3 Stream output
 
 The output section defines the structure of events that will be emitted through
-the stream. Each event sent to the client will conform to this structure.
+the stream. Each event sent to the client will conform to this structure. Fields
+inside `output` can also have their own documentation.
 
 ### 5.5 Example
 
@@ -231,37 +279,40 @@ stream NewMessage {
 ### 6.1 Docstrings
 
 Docstrings can be used in two ways: associated with specific elements (types,
-procedures, or streams) or as standalone documentation.
+procedures, streams or fields) or as standalone documentation.
 
-1. Associated docstrings: These are placed immediately before a type, procedure,
-   or stream definition and provide specific documentation for that element.
+1.  Associated docstrings: These are placed immediately before a type, procedure,
+    stream or field definition and provide specific documentation for that element.
 
-   ```urpc
-   """
-   This is documentation for MyType.
-   """
-   type MyType {
-     // ...
-   }
-   ```
+    ```urpc
+    """
+    This is documentation for MyType.
+    """
+    type MyType {
+      """
+      This is documentation for myField.
+      """
+      myField: string
+    }
+    ```
 
-2. Standalone docstrings: These provide general documentation for the schema and
-   are not associated with any specific element. To create a standalone
-   docstring, ensure there is at least one blank line between the docstring and
-   any following element.
+2.  Standalone docstrings: These provide general documentation for the schema and
+    are not associated with any specific element. To create a standalone
+    docstring, ensure there is at least one blank line between the docstring and
+    any following element.
 
-   ```urpc
-   """
-   This is general documentation for the entire schema.
-   It can include multiple paragraphs and Markdown formatting.
-   """
+    ```urpc
+    """
+    This is general documentation for the entire schema.
+    It can include multiple paragraphs and Markdown formatting.
+    """
 
-   // At least one blank line here
+    // At least one blank line here
 
-   type MyType {
-     // ...
-   }
-   ```
+    type MyType {
+      // ...
+    }
+    ```
 
 Docstrings support Markdown syntax, allowing you to format your documentation
 with headings, lists, code blocks, and more.
@@ -288,6 +339,8 @@ When a docstring contains only a valid path to a Markdown file, the content of
 that file will be used as documentation. This approach helps maintain clean and
 focused schema files while allowing for detailed documentation in separate
 files.
+
+Note that external docstrings are not supported for field-level documentation.
 
 Remember to keep external documentation files up to date with your schema
 changes.
@@ -384,9 +437,17 @@ Represents a product in the catalog
 """
 type Product {
   base: BaseEntity
+
+  """ The name of the product. """
   name: string
+
+  """ The price of the product. """
   price: float
+
+  """ The date when the product will be available. """
   availabilityDate: datetime
+
+  """ A list of tags for the product. """
   tags?: string[]
 }
 
@@ -394,7 +455,10 @@ type Product {
 Represents a review of a product
 """
 type Review {
+  """ The rating of the review, from 1 to 5. """
   rating: int
+
+  """ The comment of the review. """
   comment: string
 }
 
@@ -431,12 +495,18 @@ Sends a message to a chat room
 """
 proc SendMessage {
   input {
+    """ The id of the chat room to send the message to. """
     chatId: string
+
+    """ The content of the message. """
     message: string
   }
 
   output {
+    """ The id of the message that was sent. """
     messageId: string
+
+    """ The timestamp of when the message was sent. """
     timestamp: datetime
   }
 }
@@ -463,3 +533,4 @@ stream NewMessage {
 1. Keywords can't be used as identifiers
 2. Complex validation logic requires implementation via input processors
 3. Circular type dependencies are not allowed
+4. External docstrings for fields are not supported
