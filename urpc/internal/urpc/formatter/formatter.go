@@ -7,6 +7,7 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/urpc/parser"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 // Format formats URPC code according to the spec, using 2 spaces for indentation.
@@ -27,6 +28,9 @@ func Format(filename, content string) (string, error) {
 func FormatSchema(sch *ast.Schema) string {
 	schFormatter := newSchemaFormatter(sch)
 	formatted := schFormatter.format().String()
+
+	// Ensure the formatted string does not have more than 2 consecutive newlines
+	formatted = strutil.LimitConsecutiveNewlines(formatted, 2)
 
 	// Ensure the formatted string ends with exactly one newline
 	formatted = strings.TrimSpace(formatted)
