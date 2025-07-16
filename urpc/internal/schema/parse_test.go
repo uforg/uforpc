@@ -149,6 +149,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 					"fields": [
 						{
 							"name": "id",
+							"doc": "User ID",
 							"typeName": "string",
 							"isArray": false,
 							"optional": false
@@ -181,6 +182,8 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 
 		// Check the fields
 		require.Equal(t, "id", typeNode.Fields[0].Name)
+		require.NotNil(t, typeNode.Fields[0].Doc)
+		require.Equal(t, "User ID", *typeNode.Fields[0].Doc)
 		require.NotNil(t, typeNode.Fields[0].TypeName)
 		require.Equal(t, "string", *typeNode.Fields[0].TypeName)
 		require.False(t, typeNode.Fields[0].IsArray)
@@ -204,6 +207,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 					"input": [
 						{
 							"name": "id",
+							"doc": "User ID",
 							"typeName": "string",
 							"isArray": false,
 							"optional": false
@@ -238,6 +242,8 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		// Check input fields
 		require.Len(t, procNode.Input, 1)
 		require.Equal(t, "id", procNode.Input[0].Name)
+		require.NotNil(t, procNode.Input[0].Doc)
+		require.Equal(t, "User ID", *procNode.Input[0].Doc)
 		require.NotNil(t, procNode.Input[0].TypeName)
 		require.Equal(t, "string", *procNode.Input[0].TypeName)
 
@@ -259,6 +265,7 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 					"input": [
 						{
 							"name": "id",
+							"doc": "User ID",
 							"typeName": "string",
 							"isArray": false,
 							"optional": false
@@ -293,6 +300,8 @@ func TestBasicSchemaUnmarshal(t *testing.T) {
 		// Check input fields
 		require.Len(t, streamNode.Input, 1)
 		require.Equal(t, "id", streamNode.Input[0].Name)
+		require.NotNil(t, streamNode.Input[0].Doc)
+		require.Equal(t, "User ID", *streamNode.Input[0].Doc)
 		require.NotNil(t, streamNode.Input[0].TypeName)
 		require.Equal(t, "string", *streamNode.Input[0].TypeName)
 

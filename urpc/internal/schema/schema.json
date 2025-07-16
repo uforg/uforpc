@@ -164,6 +164,10 @@
           "type": "string",
           "pattern": "^[a-zA-Z0-9]*$"
         },
+        "doc": {
+          "description": "Associated documentation string (optional).",
+          "type": "string"
+        },
         "typeName": {
           "description": "Name of the primitive or custom type (used if the type is not inline).",
           "type": "string"

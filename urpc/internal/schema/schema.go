@@ -254,6 +254,8 @@ func (n *NodeStream) NodeKind() string { return n.Kind }
 // FieldDefinition defines a field within a type or procedure input/output.
 type FieldDefinition struct {
 	Name string `json:"name"`
+	// Doc is the associated documentation string (optional).
+	Doc *string `json:"doc,omitempty"`
 	// TypeName holds the name if the type is named (primitive or custom). Mutually exclusive with TypeInline.
 	TypeName *string `json:"typeName,omitempty"`
 	// TypeInline holds the definition if the type is inline. Mutually exclusive with TypeName.
