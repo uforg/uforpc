@@ -11,7 +11,7 @@ Test   {
   } output {
 
   field: {
-    subfield:{
+    subfield:{ /* Comment */""" Docstring """
       subsubfield: string[]
   }
     }
@@ -59,7 +59,8 @@ proc Test {
 
   output {
     field: {
-      subfield: {
+      subfield: { /* Comment */
+        """ Docstring """
         subsubfield: string[]
       }
     }

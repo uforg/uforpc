@@ -187,6 +187,10 @@ func (f *fieldsFormatter) formatField() {
 		f.g.Break()
 	}
 
+	if f.currentIndexChild.Field.Docstring != nil {
+		f.g.Linef("\"\"\"%s\"\"\"", f.currentIndexChild.Field.Docstring.Value)
+	}
+
 	// Force strict camel case
 	if f.currentIndexChild.Field.Optional {
 		f.g.Inlinef("%s?: ", strutil.ToCamelCase(f.currentIndexChild.Field.Name))
