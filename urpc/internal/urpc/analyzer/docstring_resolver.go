@@ -39,17 +39,59 @@ func (r *docstringResolver) resolve(astSchema *ast.Schema) (*ast.Schema, []Diagn
 		if typeDecl.Docstring != nil {
 			diagnostics = r.resolveExternalDocstring(typeDecl.Docstring, diagnostics)
 		}
+
+		for _, field := range typeDecl.GetFlattenedFields() {
+			if field.Docstring != nil {
+				diagnostics = r.resolveExternalDocstring(field.Docstring, diagnostics)
+			}
+		}
 	}
 
 	for _, proc := range astSchema.GetProcs() {
 		if proc.Docstring != nil {
 			diagnostics = r.resolveExternalDocstring(proc.Docstring, diagnostics)
 		}
+
+		for _, child := range proc.Children {
+			if child.Input != nil {
+				for _, field := range child.Input.GetFlattenedFields() {
+					if field.Docstring != nil {
+						diagnostics = r.resolveExternalDocstring(field.Docstring, diagnostics)
+					}
+				}
+			}
+
+			if child.Output != nil {
+				for _, field := range child.Output.GetFlattenedFields() {
+					if field.Docstring != nil {
+						diagnostics = r.resolveExternalDocstring(field.Docstring, diagnostics)
+					}
+				}
+			}
+		}
 	}
 
 	for _, stream := range astSchema.GetStreams() {
 		if stream.Docstring != nil {
 			diagnostics = r.resolveExternalDocstring(stream.Docstring, diagnostics)
+		}
+
+		for _, child := range stream.Children {
+			if child.Input != nil {
+				for _, field := range child.Input.GetFlattenedFields() {
+					if field.Docstring != nil {
+						diagnostics = r.resolveExternalDocstring(field.Docstring, diagnostics)
+					}
+				}
+			}
+
+			if child.Output != nil {
+				for _, field := range child.Output.GetFlattenedFields() {
+					if field.Docstring != nil {
+						diagnostics = r.resolveExternalDocstring(field.Docstring, diagnostics)
+					}
+				}
+			}
 		}
 	}
 

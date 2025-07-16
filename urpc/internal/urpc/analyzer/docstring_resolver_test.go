@@ -130,16 +130,30 @@ func TestResolver(t *testing.T) {
 
 						""" docs/overview.md """
 
-						"""docs/type.md"""
+						""" docs/type.md """
 						type User {
+							""" docs/field.md """
 							id: string
 							email: string
+							foo?: {
+								bar?: {
+									""" docs/field.md """
+									baz?: string
+								}[]
+							}[]
 						}
 
 						""" docs/proc.md """
 						proc GetUser {
 							input {
+								""" docs/field.md """
 								id: string
+								foo?: {
+									bar?: {
+										""" docs/field.md """
+										baz?: string
+									}[]
+								}[]
 							}
 							output {
 								user: User
@@ -152,7 +166,14 @@ func TestResolver(t *testing.T) {
 								id: string
 							}
 							output {
+								""" docs/field.md """
 								user: User
+								foo?: {
+									bar?: {
+										""" docs/field.md """
+										baz?: string
+									}[]
+								}[]
 							}
 						}
 					`,
@@ -160,6 +181,7 @@ func TestResolver(t *testing.T) {
 				"/main.urpc/docs/type.md":     "# User Type\n\nRepresents a user in the system.\n",
 				"/main.urpc/docs/proc.md":     "# GetUser Procedure\n\nRetrieves a user by ID.\n",
 				"/main.urpc/docs/stream.md":   "# MyStream Stream\n\nStream for user events.\n",
+				"/main.urpc/docs/field.md":    "Field docstring",
 			},
 		}
 
@@ -184,13 +206,25 @@ func TestResolver(t *testing.T) {
 		require.Len(t, astSchema.GetTypes(), 1)
 		require.Equal(t, "# User Type\n\nRepresents a user in the system.\n", astSchema.GetTypes()[0].Docstring.Value)
 
+		// Check type fields docstrings
+		require.Equal(t, "Field docstring", astSchema.GetTypes()[0].Children[0].Field.Docstring.Value)
+		require.Equal(t, "Field docstring", astSchema.GetTypes()[0].Children[2].Field.Type.Base.Object.Children[0].Field.Type.Base.Object.Children[0].Field.Docstring.Value)
+
 		// Check proc docstring
 		require.Len(t, astSchema.GetProcs(), 1)
 		require.Equal(t, "# GetUser Procedure\n\nRetrieves a user by ID.\n", astSchema.GetProcs()[0].Docstring.Value)
 
+		// Check proc input fields docstrings
+		require.Equal(t, "Field docstring", astSchema.GetProcs()[0].Children[0].Input.Children[0].Field.Docstring.Value)
+		require.Equal(t, "Field docstring", astSchema.GetProcs()[0].Children[0].Input.Children[1].Field.Type.Base.Object.Children[0].Field.Type.Base.Object.Children[0].Field.Docstring.Value)
+
 		// Check stream docstring
 		require.Len(t, astSchema.GetStreams(), 1)
 		require.Equal(t, "# MyStream Stream\n\nStream for user events.\n", astSchema.GetStreams()[0].Docstring.Value)
+
+		// Check stream output fields docstrings
+		require.Equal(t, "Field docstring", astSchema.GetStreams()[0].Children[1].Output.Children[0].Field.Docstring.Value)
+		require.Equal(t, "Field docstring", astSchema.GetStreams()[0].Children[1].Output.Children[1].Field.Type.Base.Object.Children[0].Field.Type.Base.Object.Children[0].Field.Docstring.Value)
 	})
 
 	t.Run("Basic schema with no imports", func(t *testing.T) {
