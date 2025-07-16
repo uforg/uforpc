@@ -67,7 +67,8 @@ procedure's input, output, or inline object, and stream's input, output.
 
 - Each field is placed on its own line.
 - **Field Separation:** For simple fields without complex formatting, fields may
-  be placed consecutively without blank lines.
+  be placed consecutively without blank lines. When a field has a docstring,
+  separate it from the preceding field with one blank line for readability.
 
 _Recommended for simple fields:_
 
@@ -78,6 +79,20 @@ address: {
   street: string
   city: string
   zip: string
+}
+```
+
+_Recommended for fields with docstrings:_
+
+Use one blank line to separate fields that have docstrings.
+
+```urpc
+type Product {
+  """ The unique identifier. """
+  id: string
+
+  """ The product's name. """
+  name: string
 }
 ```
 
@@ -124,7 +139,7 @@ type Example {
 
 ## 7. Docstrings
 
-- Place docstrings immediately above the `type`, `proc`, or `stream` they
+- Place docstrings immediately above the `type`, `proc`, `stream`, or `field` they
   document.
 - They are enclosed in triple quotes (`"""`), preserving internal newlines and
   formatting.
@@ -134,16 +149,32 @@ _Example:_
 ```urpc
 """
 Docstring for MyType.
+Can be multi-line.
 """
 type MyType {
   // ...
 }
+```
 
-"""
-Docstring for MyStream.
-"""
-stream MyStream {
-  // ...
+### 7.1 Field Docstrings
+
+- For fields, prefer concise, single-line docstrings.
+- Place the docstring on the line immediately before the field it documents,
+  indented to the same level.
+- When multiple fields have docstrings, separate each one with a blank line to
+  improve readability.
+
+_Example:_
+
+```urpc
+type User {
+  """ The user's unique identifier. """
+  id: string
+
+  """ The user's email address. Must be unique. """
+  email: string
+
+  name?: string // A field without a docstring does not require a blank line before it.
 }
 ```
 
