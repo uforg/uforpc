@@ -62,6 +62,10 @@ export interface FieldDefinition {
    */
   name: string;
   /**
+   * Associated documentation string (optional).
+   */
+  doc?: string;
+  /**
    * Name of the primitive or custom type (used if the type is not inline).
    */
   typeName?: string;
