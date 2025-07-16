@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm run genschema && REPLACE_ASSETS=false vite dev",
-    "build": "npm run genschema && npm run lint && REPLACE_ASSETS=true vite build && node ./replaceAssets.js",
+    "build": "npm run genschema && npm run lint && REPLACE_ASSETS=true vite build && node ./postbuild.js",
     "preview": "npm run genschema && npm run lint && vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && biome lint --write .",
