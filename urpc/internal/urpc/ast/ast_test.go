@@ -40,3 +40,123 @@ func TestDocstringGetExternal(t *testing.T) {
 		require.Equal(t, tt.expected, path, tt.name)
 	}
 }
+
+func TestFlattenedFields(t *testing.T) {
+	primitiveString := "string"
+	primitiveInt := "int"
+
+	// Constructing a nested field structure for testing
+	fURL := &Field{Name: "url", Type: FieldType{Base: &FieldTypeBase{Named: &primitiveString}}}
+	fSize := &Field{Name: "size", Type: FieldType{Base: &FieldTypeBase{Named: &primitiveInt}}}
+	fAvatar := &Field{
+		Name: "avatar",
+		Type: FieldType{
+			Base: &FieldTypeBase{
+				Object: &FieldTypeObject{
+					Children: []*FieldOrComment{
+						{Field: fURL},
+						{Field: fSize},
+					},
+				},
+			},
+		},
+	}
+	fName := &Field{Name: "name", Type: FieldType{Base: &FieldTypeBase{Named: &primitiveString}}}
+	fProfile := &Field{
+		Name: "profile",
+		Type: FieldType{
+			Base: &FieldTypeBase{
+				Object: &FieldTypeObject{
+					Children: []*FieldOrComment{
+						{Field: fName},
+						{Field: fAvatar},
+					},
+				},
+			},
+		},
+	}
+	fId := &Field{Name: "id", Type: FieldType{Base: &FieldTypeBase{Named: &primitiveInt}}}
+	fRole := &Field{Name: "role", Type: FieldType{Base: &FieldTypeBase{Named: &primitiveString}}}
+
+	fieldsAndComments := []*FieldOrComment{
+		{Field: fId},
+		{Comment: &Comment{Simple: &[]string{"// some comment"}[0]}},
+		{Field: fProfile},
+		{Field: fRole},
+	}
+
+	expectedFieldNames := []string{"id", "profile", "name", "avatar", "url", "size", "role"}
+
+	t.Run("TypeDecl", func(t *testing.T) {
+		typeDecl := &TypeDecl{
+			Name:     "User",
+			Children: fieldsAndComments,
+		}
+
+		flattened := typeDecl.GetFlattenedFields()
+		require.Len(t, flattened, len(expectedFieldNames), "should have correct number of fields")
+
+		for i, field := range flattened {
+			require.Equal(t, expectedFieldNames[i], field.Name, "field name should match")
+		}
+
+		// Test pointer modification
+		require.False(t, flattened[0].Optional, "id should not be optional initially")
+		flattened[0].Optional = true
+		require.True(t, fId.Optional, "modifying flattened field should modify original field")
+	})
+
+	t.Run("ProcOrStreamDeclChildInput", func(t *testing.T) {
+		inputDecl := &ProcOrStreamDeclChildInput{
+			Children: fieldsAndComments,
+		}
+
+		flattened := inputDecl.GetFlattenedFields()
+		require.Len(t, flattened, len(expectedFieldNames), "should have correct number of fields")
+
+		for i, field := range flattened {
+			require.Equal(t, expectedFieldNames[i], field.Name, "field name should match")
+		}
+
+		// Test pointer modification
+		fId.Optional = false // reset from previous test
+		require.False(t, flattened[0].Optional, "id should not be optional initially")
+		flattened[0].Optional = true
+		require.True(t, fId.Optional, "modifying flattened field should modify original field")
+	})
+
+	t.Run("ProcOrStreamDeclChildOutput", func(t *testing.T) {
+		outputDecl := &ProcOrStreamDeclChildOutput{
+			Children: fieldsAndComments,
+		}
+
+		flattened := outputDecl.GetFlattenedFields()
+		require.Len(t, flattened, len(expectedFieldNames), "should have correct number of fields")
+
+		for i, field := range flattened {
+			require.Equal(t, expectedFieldNames[i], field.Name, "field name should match")
+		}
+
+		// Test pointer modification
+		fId.Optional = false // reset from previous test
+		require.False(t, flattened[0].Optional, "id should not be optional initially")
+		flattened[0].Optional = true
+		require.True(t, fId.Optional, "modifying flattened field should modify original field")
+	})
+
+	t.Run("Field.GetFlattenedField", func(t *testing.T) {
+		flattened := fProfile.GetFlattenedField()
+		expected := []string{"profile", "name", "avatar", "url", "size"}
+		require.Len(t, flattened, len(expected), "should have correct number of fields")
+
+		for i, field := range flattened {
+			require.Equal(t, expected[i], field.Name, "field name should match")
+		}
+
+		// Test pointer modification
+		require.False(t, flattened[1].Optional, "name should not be optional initially")
+		flattened[1].Optional = true
+		require.True(t, fName.Optional, "modifying flattened field should modify original field")
+		fName.Optional = false // reset
+	})
+}

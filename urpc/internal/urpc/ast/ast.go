@@ -190,6 +190,18 @@ type TypeDecl struct {
 	Children   []*FieldOrComment `parser:"LBrace @@* RBrace"`
 }
 
+// GetFlattenedFields returns a recursive flattened list of all fields in the type declaration.
+func (t *TypeDecl) GetFlattenedFields() []*Field {
+	fields := []*Field{}
+	for _, child := range t.Children {
+		if child.Field == nil {
+			continue
+		}
+		fields = append(fields, child.Field.GetFlattenedField()...)
+	}
+	return fields
+}
+
 // ProcDecl represents a procedure declaration.
 type ProcDecl struct {
 	Positions
@@ -222,10 +234,34 @@ type ProcOrStreamDeclChildInput struct {
 	Children []*FieldOrComment `parser:"Input LBrace @@* RBrace"`
 }
 
+// GetFlattenedFields returns a recursive flattened list of all fields in the input block.
+func (i *ProcOrStreamDeclChildInput) GetFlattenedFields() []*Field {
+	fields := []*Field{}
+	for _, child := range i.Children {
+		if child.Field == nil {
+			continue
+		}
+		fields = append(fields, child.Field.GetFlattenedField()...)
+	}
+	return fields
+}
+
 // ProcOrStreamDeclChildOutput represents the Output{...} block within a ProcDecl or StreamDecl.
 type ProcOrStreamDeclChildOutput struct {
 	Positions
 	Children []*FieldOrComment `parser:"Output LBrace @@* RBrace"`
+}
+
+// GetFlattenedFields returns a recursive flattened list of all fields in the output block.
+func (o *ProcOrStreamDeclChildOutput) GetFlattenedFields() []*Field {
+	fields := []*Field{}
+	for _, child := range o.Children {
+		if child.Field == nil {
+			continue
+		}
+		fields = append(fields, child.Field.GetFlattenedField()...)
+	}
+	return fields
 }
 
 //////////////////
@@ -295,6 +331,24 @@ type Field struct {
 	Name      string     `parser:"@Ident"`
 	Optional  bool       `parser:"@(Question)?"`
 	Type      FieldType  `parser:"Colon @@"`
+}
+
+// GetFlattenedField returns a recursive flattened list of this field and all its children fields.
+func (f *Field) GetFlattenedField() []*Field {
+	fields := []*Field{f}
+
+	if f.Type.Base.Object == nil {
+		return fields
+	}
+
+	for _, child := range f.Type.Base.Object.Children {
+		if child.Field == nil {
+			continue
+		}
+		fields = append(fields, child.Field.GetFlattenedField()...)
+	}
+
+	return fields
 }
 
 // FieldType represents the type of a field.
