@@ -56,6 +56,7 @@
               },
               {
                 "name": "price",
+                "doc": " Price ",
                 "typeName": "float",
                 "isArray": false,
                 "optional": false

@@ -10,6 +10,7 @@ type Order {
   items: {
     productId: string
     quantity: int
+    """ Price """
     price: float
   }[]
 }

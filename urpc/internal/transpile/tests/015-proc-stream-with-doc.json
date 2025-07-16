@@ -8,6 +8,7 @@
       "input": [
         {
           "name": "username",
+          "doc": " Username ",
           "typeName": "string",
           "isArray": false,
           "optional": false
@@ -28,6 +29,7 @@
       "output": [
         {
           "name": "token",
+          "doc": " Token ",
           "typeName": "string",
           "isArray": false,
           "optional": false
@@ -53,6 +55,7 @@
       "input": [
         {
           "name": "username",
+          "doc": " Username ",
           "typeName": "string",
           "isArray": false,
           "optional": false
@@ -73,6 +76,7 @@
       "output": [
         {
           "name": "token",
+          "doc": " Token ",
           "typeName": "string",
           "isArray": false,
           "optional": false

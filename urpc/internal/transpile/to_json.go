@@ -112,6 +112,12 @@ func convertFieldToJSON(field *ast.Field) (schema.FieldDefinition, error) {
 		IsArray:  field.Type.IsArray,
 	}
 
+	// Add docstring if available
+	if field.Docstring != nil {
+		docValue := field.Docstring.Value
+		fieldDef.Doc = &docValue
+	}
+
 	// Process field type
 	if field.Type.Base.Named != nil {
 		typeName := *field.Type.Base.Named

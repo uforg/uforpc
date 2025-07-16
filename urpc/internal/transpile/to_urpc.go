@@ -110,6 +110,13 @@ func convertFieldToURPC(fieldDef schema.FieldDefinition) (*ast.Field, error) {
 		Optional: fieldDef.Optional,
 	}
 
+	// Add docstring if available
+	if fieldDef.Doc != nil && *fieldDef.Doc != "" {
+		field.Docstring = &ast.Docstring{
+			Value: *fieldDef.Doc,
+		}
+	}
+
 	// Process field type
 	fieldType := ast.FieldType{
 		IsArray: fieldDef.IsArray,
