@@ -291,9 +291,10 @@ type FieldOrComment struct {
 // Field represents a field definition.
 type Field struct {
 	Positions
-	Name     string    `parser:"@Ident"`
-	Optional bool      `parser:"@(Question)?"`
-	Type     FieldType `parser:"Colon @@"`
+	Docstring *Docstring `parser:"(@@ (?! Newline Newline))?"`
+	Name      string     `parser:"@Ident"`
+	Optional  bool       `parser:"@(Question)?"`
+	Type      FieldType  `parser:"Colon @@"`
 }
 
 // FieldType represents the type of a field.

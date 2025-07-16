@@ -600,6 +600,126 @@ func TestParserField(t *testing.T) {
 
 		testutil.ASTEqualNoPos(t, expected, parsed)
 	})
+
+	t.Run("With comments and docstrings", func(t *testing.T) {
+		input := `
+			type MyType {
+				// This is a comment
+				""" This is a docstring """
+				field1?: string
+
+				/* This is a comment */
+				""" This is a docstring """
+				field2?: MyCustomType
+
+				field3?: {
+					subfield: {
+						// This is a comment
+						""" This is a docstring """
+						subsubfield: datetime[]
+					}[]
+				}[]
+			}
+		`
+		parsed, err := ParserInstance.ParseString("schema.urpc", input)
+		require.NoError(t, err)
+
+		expected := &ast.Schema{
+			Children: []*ast.SchemaChild{
+				{
+					Type: &ast.TypeDecl{
+						Name: "MyType",
+						Children: []*ast.FieldOrComment{
+							{
+								Comment: &ast.Comment{
+									Simple: testutil.Pointer(" This is a comment"),
+								},
+							},
+							{
+								Field: &ast.Field{
+									Name: "field1",
+									Docstring: &ast.Docstring{
+										Value: " This is a docstring ",
+									},
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("string")},
+									},
+									Optional: true,
+								},
+							},
+							{
+								Comment: &ast.Comment{
+									Block: testutil.Pointer(" This is a comment "),
+								},
+							},
+							{
+								Field: &ast.Field{
+									Name: "field2",
+									Docstring: &ast.Docstring{
+										Value: " This is a docstring ",
+									},
+									Type: ast.FieldType{
+										Base: &ast.FieldTypeBase{Named: testutil.Pointer("MyCustomType")},
+									},
+									Optional: true,
+								},
+							},
+							{
+								Field: &ast.Field{
+									Name:     "field3",
+									Optional: true,
+									Type: ast.FieldType{
+										IsArray: true,
+										Base: &ast.FieldTypeBase{
+											Object: &ast.FieldTypeObject{
+												Children: []*ast.FieldOrComment{
+													{
+														Field: &ast.Field{
+															Name: "subfield",
+															Type: ast.FieldType{
+																IsArray: true,
+																Base: &ast.FieldTypeBase{
+																	Object: &ast.FieldTypeObject{
+																		Children: []*ast.FieldOrComment{
+																			{
+																				Comment: &ast.Comment{
+																					Simple: testutil.Pointer(" This is a comment"),
+																				},
+																			},
+																			{
+																				Field: &ast.Field{
+																					Name: "subsubfield",
+																					Docstring: &ast.Docstring{
+																						Value: " This is a docstring ",
+																					},
+																					Type: ast.FieldType{
+																						IsArray: true,
+																						Base: &ast.FieldTypeBase{
+																							Named: testutil.Pointer("datetime"),
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		testutil.ASTEqualNoPos(t, expected, parsed)
+	})
 }
 
 func TestParserProcDecl(t *testing.T) {
@@ -1939,6 +2059,7 @@ func TestParserFullSchema(t *testing.T) {
 					processingSteps: {
 						name: string
 						duration: float
+						""" This is a docstring """
 						success: bool
 					}[]
 					serverInfo: {
@@ -2674,6 +2795,9 @@ func TestParserFullSchema(t *testing.T) {
 																					{
 																						Field: &ast.Field{
 																							Name: "success",
+																							Docstring: &ast.Docstring{
+																								Value: " This is a docstring ",
+																							},
 																							Type: ast.FieldType{
 																								Base: &ast.FieldTypeBase{
 																									Named: testutil.Pointer("bool"),
