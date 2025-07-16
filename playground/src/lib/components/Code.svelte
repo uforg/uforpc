@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronDown, ChevronRight, Copy, ScrollText } from "@lucide/svelte";
+  import { Copy } from "@lucide/svelte";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { toast } from "svelte-sonner";
   import { slide } from "svelte/transition";
@@ -18,22 +18,20 @@
     code: string;
     lang: "urpc" | string;
     class?: ClassValue;
-    collapsible?: boolean;
-    isOpen?: boolean;
-    title?: string;
     rounded?: boolean;
     withBorder?: boolean;
+    scrollY?: boolean;
+    scrollX?: boolean;
   }
 
   let {
     code,
     lang,
     class: className,
-    collapsible = false,
-    isOpen = $bindable(true),
-    title = "Code",
     rounded = true,
     withBorder = true,
+    scrollY = true,
+    scrollX = true,
   }: Props = $props();
 
   let urpcSchemaHighlighted = $state("");
@@ -67,64 +65,32 @@
       });
     }
   }
-
-  function toggleCollapse() {
-    isOpen = !isOpen;
-  }
 </script>
 
 {#if urpcSchemaHighlighted !== ""}
-  <div class={mergeClasses("group", className)}>
-    {#if collapsible}
-      <button
-        class={[
-          "btn w-full justify-start",
-          "group/btn",
-          {
-            "border-base-content/20 border": withBorder,
-            "rounded-box": rounded,
-            "rounded-b-none": isOpen,
-          },
-        ]}
-        onclick={toggleCollapse}
-      >
-        <ScrollText class="mr-2 block size-4 group-hover/btn:hidden" />
-        {#if isOpen}
-          <ChevronDown class="mr-2 hidden size-4 group-hover/btn:block" />
-        {:else}
-          <ChevronRight class="mr-2 hidden size-4 group-hover/btn:block" />
-        {/if}
-        {#if title}
-          {title}
-        {/if}
-      </button>
-    {/if}
-
-    {#if !collapsible || isOpen}
-      <div
-        class={[
-          "relative z-10 p-4",
-          "bg-base-200",
-          {
-            "border-base-content/20 border": withBorder,
-            "rounded-box": rounded,
-            "rounded-t-none border-t-0 pt-2": collapsible,
-          },
-        ]}
-        transition:slide={{ duration: 100 }}
-      >
-        <button
-          class="btn absolute top-4 right-4 hidden group-hover:block"
-          onclick={() => copyToClipboard(code)}
-        >
-          <span class="flex items-center justify-center space-x-2">
-            <Copy class="size-4" />
-            <span>Copy</span>
-          </span>
-        </button>
-        {@html urpcSchemaHighlighted}
-      </div>
-    {/if}
+  <div
+    class={mergeClasses([
+      "group bg-base-200 relative z-10 p-4",
+      {
+        "overflow-y-auto": scrollY,
+        "overflow-x-auto": scrollX,
+        "border-base-content/20 border": withBorder,
+        "rounded-box": rounded,
+      },
+      className,
+    ])}
+    transition:slide={{ duration: 100 }}
+  >
+    <button
+      class="btn absolute top-4 right-4 hidden group-hover:block"
+      onclick={() => copyToClipboard(code)}
+    >
+      <span class="flex items-center justify-center space-x-2">
+        <Copy class="size-4" />
+        <span>Copy</span>
+      </span>
+    </button>
+    {@html urpcSchemaHighlighted}
   </div>
 {/if}
 

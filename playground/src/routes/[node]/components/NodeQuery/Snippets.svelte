@@ -1,8 +1,9 @@
 <script lang="ts">
   import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
 
-  import CodeComponent from "$lib/components/Code.svelte";
+  import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
 
   import SnippetsCode from "./SnippetsCode.svelte";
@@ -43,9 +44,25 @@
 
     return c;
   });
+
+  let maxHeight = $derived.by(() => {
+    if (uiStore.isMobile) return "100%";
+
+    const appHeight = uiStore.app.size.offsetHeight;
+    const headerHeight = uiStore.header.size.offsetHeight;
+    const padding = 16 * 2;
+
+    const mh = appHeight - headerHeight - padding;
+    return `${mh}px`;
+  });
 </script>
 
-<div>
+<div
+  class={{
+    "flex h-full flex-col": !uiStore.isMobile,
+  }}
+  style="max-height: {maxHeight}"
+>
   <H2 class="mb-2 flex items-center space-x-2">
     <span>Code snippets</span>
   </H2>
@@ -61,7 +78,7 @@
       </a>
     </p>
 
-    <CodeComponent code={curl} lang="bash" collapsible={false} isOpen />
+    <Code code={curl} lang="bash" />
   {/if}
 
   {#if type === "proc"}

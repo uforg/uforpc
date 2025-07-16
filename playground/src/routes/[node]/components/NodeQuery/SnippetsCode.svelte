@@ -349,4 +349,4 @@
   </select>
 </fieldset>
 
-<Code code={pickedCode} lang={pickedLang} collapsible={false} isOpen />
+<Code code={pickedCode} lang={pickedLang} />
