@@ -137,51 +137,53 @@
   </Menu>
 {/snippet}
 
-<label class="group/field block w-full">
-  <span class="mb-1 block font-semibold">
-    <Label optional={field.optional} {label} />
-  </span>
+<div>
+  <label class="group/field block w-full">
+    <span class="mb-1 block font-semibold">
+      <Label optional={field.optional} {label} />
+    </span>
 
-  {#if inputType !== "checkbox" && inputType !== "datetime"}
-    <div class="mb-1 flex items-center justify-start">
-      <input
-        type={inputType}
-        step={inputStep}
-        bind:value
-        class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
-        placeholder={`Enter ${label} here...`}
-      />
+    {#if inputType !== "checkbox" && inputType !== "datetime"}
+      <div class="mb-1 flex items-center justify-start">
+        <input
+          type={inputType}
+          step={inputStep}
+          bind:value
+          class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
+          placeholder={`Enter ${label} here...`}
+        />
 
-      {@render menu()}
-    </div>
-  {/if}
+        {@render menu()}
+      </div>
+    {/if}
 
-  {#if inputType === "datetime"}
-    <div class="mb-1 flex items-center justify-start">
-      <input
-        id={fieldId}
-        type={inputType}
-        step={inputStep}
-        bind:value
-        class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
-        placeholder={`Enter ${label} here...`}
-      />
+    {#if inputType === "datetime"}
+      <div class="mb-1 flex items-center justify-start">
+        <input
+          id={fieldId}
+          type={inputType}
+          step={inputStep}
+          bind:value
+          class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
+          placeholder={`Enter ${label} here...`}
+        />
 
-      {@render menu()}
-    </div>
-  {/if}
+        {@render menu()}
+      </div>
+    {/if}
 
-  {#if inputType === "checkbox"}
-    <div class="flex items-center justify-start space-x-2">
-      <input
-        type="checkbox"
-        bind:checked={value as boolean}
-        class="toggle toggle-lg"
-      />
+    {#if inputType === "checkbox"}
+      <div class="flex items-center justify-start space-x-2">
+        <input
+          type="checkbox"
+          bind:checked={value as boolean}
+          class="toggle toggle-lg"
+        />
 
-      {@render menu()}
-    </div>
-  {/if}
+        {@render menu()}
+      </div>
+    {/if}
+  </label>
 
   <FieldDoc doc={field.doc} />
-</label>
+</div>
