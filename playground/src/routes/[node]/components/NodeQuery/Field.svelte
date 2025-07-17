@@ -3,6 +3,7 @@
   import type { FieldDefinition } from "$lib/urpcTypes";
 
   import FieldArray from "./FieldArray.svelte";
+  import FieldDoc from "./FieldDoc.svelte";
   import FieldInline from "./FieldInline.svelte";
   import FieldNamed from "./FieldNamed.svelte";
   import Fieldset from "./Fieldset.svelte";
@@ -63,6 +64,9 @@
       <legend class="fieldset-legend">
         <Label label={`${path}.${field.name}`} optional={field.optional} />
       </legend>
+
+      <FieldDoc doc={field.doc} class="-mt-2" />
+
       <FieldInline
         fields={field.typeInline.fields}
         path={`${path}.${field.name}`}

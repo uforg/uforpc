@@ -9,6 +9,7 @@
   import Menu from "$lib/components/Menu.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
+  import FieldDoc from "./FieldDoc.svelte";
   import Label from "./Label.svelte";
   import { prettyLabel } from "./prettyLabel";
 
@@ -136,13 +137,13 @@
   </Menu>
 {/snippet}
 
-<label class="group/field block w-full space-y-1">
-  <span class="block font-semibold">
+<label class="group/field block w-full">
+  <span class="mb-1 block font-semibold">
     <Label optional={field.optional} {label} />
   </span>
 
   {#if inputType !== "checkbox" && inputType !== "datetime"}
-    <div class="flex items-center justify-start">
+    <div class="mb-1 flex items-center justify-start">
       <input
         type={inputType}
         step={inputStep}
@@ -156,7 +157,7 @@
   {/if}
 
   {#if inputType === "datetime"}
-    <div class="flex items-center justify-start">
+    <div class="mb-1 flex items-center justify-start">
       <input
         id={fieldId}
         type={inputType}
@@ -181,4 +182,6 @@
       {@render menu()}
     </div>
   {/if}
+
+  <FieldDoc doc={field.doc} />
 </label>

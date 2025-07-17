@@ -12,6 +12,7 @@
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
+  import FieldDoc from "./FieldDoc.svelte";
   import FieldInline from "./FieldInline.svelte";
   import FieldNamed from "./FieldNamed.svelte";
   import Fieldset from "./Fieldset.svelte";
@@ -58,6 +59,8 @@
   <legend class="fieldset-legend">
     <Label optional={field.optional} label={path} />
   </legend>
+
+  <FieldDoc doc={field.doc} class="-mt-2" />
 
   {#if indexesLen == 0}
     <PackageOpen class="mx-auto size-6" />
