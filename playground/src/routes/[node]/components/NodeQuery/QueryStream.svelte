@@ -176,7 +176,10 @@
       {#if stream.input}
         <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
           <Info class="size-4" />
-          <span>All validations are performed on the server side</span>
+          <span>
+            Requests are made from your browser and validations are performed on
+            the server side
+          </span>
         </div>
         <Field fields={stream.input} path="root" bind:value />
       {:else}
