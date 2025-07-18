@@ -2,7 +2,6 @@ package formatter
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
@@ -19,7 +18,7 @@ type fieldsFormatter struct {
 	currentIndexChild ast.FieldOrComment
 }
 
-func newFieldsFormatter(parent ast.WithPositions, fields []*ast.FieldOrComment) *fieldsFormatter {
+func newFieldsFormatter(g *genkit.GenKit, parent ast.WithPositions, fields []*ast.FieldOrComment) *fieldsFormatter {
 	if fields == nil {
 		fields = []*ast.FieldOrComment{}
 	}
@@ -34,7 +33,7 @@ func newFieldsFormatter(parent ast.WithPositions, fields []*ast.FieldOrComment) 
 	}
 
 	return &fieldsFormatter{
-		g:                 genkit.NewGenKit().WithSpaces(2),
+		g:                 g,
 		parent:            parent,
 		fields:            fields,
 		maxIndex:          maxIndex,
@@ -194,7 +193,10 @@ func (f *fieldsFormatter) formatField() {
 			f.g.Break()
 		}
 
-		f.g.Linef(`"""%s"""`, f.currentIndexChild.Field.Docstring.Value)
+		f.g.Inline(`"""`)
+		f.g.Raw(f.currentIndexChild.Field.Docstring.Value)
+		f.g.Raw(`"""`)
+		f.g.Break()
 	}
 
 	// Force strict camel case
@@ -204,25 +206,24 @@ func (f *fieldsFormatter) formatField() {
 		f.g.Inlinef("%s: ", strutil.ToCamelCase(f.currentIndexChild.Field.Name))
 	}
 
-	typeLiteral := ""
-
 	if f.currentIndexChild.Field.Type.Base.Named != nil {
-		typeLiteral = *f.currentIndexChild.Field.Type.Base.Named
+		typeLiteral := *f.currentIndexChild.Field.Type.Base.Named
 		// Force strict pascal case for non primitive types
 		if !ast.IsPrimitiveType(typeLiteral) {
 			typeLiteral = strutil.ToPascalCase(typeLiteral)
 		}
+		f.g.Inline(typeLiteral)
 	}
 
 	if f.currentIndexChild.Field.Type.Base.Object != nil {
 		children := f.currentIndexChild.Field.Type.Base.Object.Children
-		nestedFormatter := newFieldsFormatter(f.currentIndexChild, children)
-		typeLiteral = strings.TrimSpace(nestedFormatter.format().String())
+		nestedFormatter := newFieldsFormatter(f.g, f.currentIndexChild, children)
+		nestedFormatter.format()
 	}
 
 	if f.currentIndexChild.Field.Type.IsArray {
-		typeLiteral = typeLiteral + "[]"
+		f.g.Inline("[]")
 	}
 
-	f.LineAndComment(typeLiteral)
+	f.LineAndComment("")
 }

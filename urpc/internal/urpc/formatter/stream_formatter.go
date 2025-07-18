@@ -1,8 +1,6 @@
 package formatter
 
 import (
-	"strings"
-
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
@@ -18,7 +16,7 @@ type streamFormatter struct {
 	currentIndexChild ast.ProcOrStreamDeclChild
 }
 
-func newStreamFormatter(streamDecl *ast.StreamDecl) *streamFormatter {
+func newStreamFormatter(g *genkit.GenKit, streamDecl *ast.StreamDecl) *streamFormatter {
 	if streamDecl == nil {
 		streamDecl = &ast.StreamDecl{}
 	}
@@ -37,7 +35,7 @@ func newStreamFormatter(streamDecl *ast.StreamDecl) *streamFormatter {
 	}
 
 	return &streamFormatter{
-		g:                 genkit.NewGenKit().WithSpaces(2),
+		g:                 g,
 		streamDecl:        streamDecl,
 		children:          streamDecl.Children,
 		maxIndex:          maxIndex,
@@ -189,13 +187,15 @@ func (f *streamFormatter) breakBeforeBlock() {
 func (f *streamFormatter) formatInput() {
 	f.breakBeforeBlock()
 	f.g.Inline("input ")
-	fieldsFormatter := newFieldsFormatter(f.currentIndexChild, f.currentIndexChild.Input.Children)
-	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
+	fieldsFormatter := newFieldsFormatter(f.g, f.currentIndexChild, f.currentIndexChild.Input.Children)
+	fieldsFormatter.format()
+	f.g.Break()
 }
 
 func (f *streamFormatter) formatOutput() {
 	f.breakBeforeBlock()
 	f.g.Inline("output ")
-	fieldsFormatter := newFieldsFormatter(f.currentIndexChild, f.currentIndexChild.Output.Children)
-	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
+	fieldsFormatter := newFieldsFormatter(f.g, f.currentIndexChild, f.currentIndexChild.Output.Children)
+	fieldsFormatter.format()
+	f.g.Break()
 }

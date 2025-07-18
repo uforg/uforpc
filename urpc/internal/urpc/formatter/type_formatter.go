@@ -1,8 +1,6 @@
 package formatter
 
 import (
-	"strings"
-
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
@@ -13,13 +11,13 @@ type typeFormatter struct {
 	typeDecl *ast.TypeDecl
 }
 
-func newTypeFormatter(typeDecl *ast.TypeDecl) *typeFormatter {
+func newTypeFormatter(g *genkit.GenKit, typeDecl *ast.TypeDecl) *typeFormatter {
 	if typeDecl == nil {
 		typeDecl = &ast.TypeDecl{}
 	}
 
 	return &typeFormatter{
-		g:        genkit.NewGenKit().WithSpaces(2),
+		g:        g,
 		typeDecl: typeDecl,
 	}
 }
@@ -44,8 +42,8 @@ func (f *typeFormatter) format() *genkit.GenKit {
 	// Force strict pascal case
 	f.g.Inlinef(`type %s `, strutil.ToPascalCase(f.typeDecl.Name))
 
-	fieldsFormatter := newFieldsFormatter(f.typeDecl, f.typeDecl.Children)
-	f.g.Line(strings.TrimSpace(fieldsFormatter.format().String()))
+	fieldsFormatter := newFieldsFormatter(f.g, f.typeDecl, f.typeDecl.Children)
+	fieldsFormatter.format()
 
 	return f.g
 }

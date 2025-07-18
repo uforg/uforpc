@@ -26,7 +26,9 @@ func Format(filename, content string) (string, error) {
 
 // FormatSchema formats an already parsed UFO RPC AST Schema.
 func FormatSchema(sch *ast.Schema) string {
-	schFormatter := newSchemaFormatter(sch)
+	g := genkit.NewGenKit().WithSpaces(2)
+
+	schFormatter := newSchemaFormatter(g, sch)
 	formatted := schFormatter.format().String()
 
 	// Ensure the formatted string does not have more than 2 consecutive newlines
@@ -49,7 +51,7 @@ type schemaFormatter struct {
 }
 
 // newSchemaFormatter creates a new schema formatter and initializes all the necessary fields.
-func newSchemaFormatter(sch *ast.Schema) *schemaFormatter {
+func newSchemaFormatter(g *genkit.GenKit, sch *ast.Schema) *schemaFormatter {
 	maxIndex := max(len(sch.Children)-1, 0)
 	currentIndex := 0
 	currentIndexEOF := len(sch.Children) < 1
@@ -60,7 +62,7 @@ func newSchemaFormatter(sch *ast.Schema) *schemaFormatter {
 	}
 
 	return &schemaFormatter{
-		g:                 genkit.NewGenKit().WithSpaces(2),
+		g:                 g,
 		sch:               sch,
 		maxIndex:          maxIndex,
 		currentIndex:      currentIndex,
@@ -225,8 +227,9 @@ func (f *schemaFormatter) formatType() {
 		f.g.Break()
 	}
 
-	typeFormatter := newTypeFormatter(f.currentIndexChild.Type)
-	f.LineAndComment(strings.TrimSpace(typeFormatter.format().String()))
+	typeFormatter := newTypeFormatter(f.g, f.currentIndexChild.Type)
+	typeFormatter.format()
+	f.LineAndComment("")
 }
 
 func (f *schemaFormatter) formatProc() {
@@ -247,8 +250,9 @@ func (f *schemaFormatter) formatProc() {
 		f.g.Break()
 	}
 
-	procFormatter := newProcFormatter(f.currentIndexChild.Proc)
-	f.LineAndComment(strings.TrimSpace(procFormatter.format().String()))
+	procFormatter := newProcFormatter(f.g, f.currentIndexChild.Proc)
+	procFormatter.format()
+	f.LineAndComment("")
 }
 
 func (f *schemaFormatter) formatStream() {
@@ -269,6 +273,7 @@ func (f *schemaFormatter) formatStream() {
 		f.g.Break()
 	}
 
-	streamFormatter := newStreamFormatter(f.currentIndexChild.Stream)
-	f.LineAndComment(strings.TrimSpace(streamFormatter.format().String()))
+	streamFormatter := newStreamFormatter(f.g, f.currentIndexChild.Stream)
+	streamFormatter.format()
+	f.LineAndComment("")
 }
