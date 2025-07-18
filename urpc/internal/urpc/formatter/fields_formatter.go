@@ -194,7 +194,7 @@ func (f *fieldsFormatter) formatField() {
 			f.g.Break()
 		}
 
-		f.g.Linef("\"\"\"%s\"\"\"", f.currentIndexChild.Field.Docstring.Value)
+		f.g.Linef(`"""%s"""`, f.currentIndexChild.Field.Docstring.Value)
 	}
 
 	// Force strict camel case

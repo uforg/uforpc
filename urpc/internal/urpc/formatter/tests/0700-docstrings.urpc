@@ -1,7 +1,11 @@
 """ Standalone """
 
 """ Standalone """ // Comment
-""" Standalone """
+  """ 
+    Standalone
+    
+          Multi-line
+    """
 
 
 """ Standalone """/* Comment */""" Standalone """""" Associated """ type Test {} """ Standalone """
@@ -21,7 +25,11 @@
 """ Standalone """
 
 """ Standalone """ // Comment
-""" Standalone """
+""" 
+    Standalone
+    
+          Multi-line
+    """
 
 """ Standalone """ /* Comment */
 """ Standalone """

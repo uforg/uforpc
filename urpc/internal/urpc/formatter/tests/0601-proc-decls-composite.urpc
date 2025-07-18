@@ -11,7 +11,11 @@ Test   {
   } output {
 
   field: {
-    subfield:{ /* Comment */""" Docstring """
+    subfield:{ /* Comment */""" 
+    Field
+    
+          Multi-line
+      """
       subsubfield: string[]
   }
     }
@@ -60,7 +64,11 @@ proc Test {
   output {
     field: {
       subfield: { /* Comment */
-        """ Docstring """
+        """ 
+    Field
+    
+          Multi-line
+      """
         subsubfield: string[]
       }
     }
