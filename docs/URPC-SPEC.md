@@ -304,8 +304,43 @@ procedures, streams or fields) or as standalone documentation.
     }
     ```
 
+#### 6.1.1 Multi-line Docstrings and Indentation
+
 Docstrings support Markdown syntax, allowing you to format your documentation
 with headings, lists, code blocks, and more.
+
+Since docstrings can contain Markdown, whitespace is significant for formatting constructs like lists or code blocks. To prevent conflicts with URPC's own syntax indentation, UFO RPC automatically normalizes multi-line docstrings.
+
+The leading whitespace from the first non-empty line is considered the baseline indentation. This baseline is then removed from every line in the docstring. This process preserves the _relative_ indentation, ensuring that Markdown formatting remains intact regardless of how the docstring block is indented in the source file.
+
+_Example:_
+
+In the following docstring, the first line has 4 spaces of indentation, which will be removed from all lines.
+
+```urpc
+type MyType {
+  """
+    This is a multi-line docstring.
+
+    The list below will be rendered correctly:
+
+    - Level 1
+      - Level 2
+  """
+  field: string
+}
+```
+
+The resulting content for rendering will be:
+
+```markdown
+This is a multi-line docstring.
+
+The list below will be rendered correctly:
+
+- Level 1
+  - Level 2
+```
 
 Remember to keep your documentation up to date with your schema changes.
 
