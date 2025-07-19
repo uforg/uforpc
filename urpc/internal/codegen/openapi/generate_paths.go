@@ -1,6 +1,8 @@
 package openapi
 
 import (
+	"fmt"
+
 	"github.com/uforg/uforpc/urpc/internal/schema"
 )
 
@@ -10,7 +12,7 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 	for _, procNode := range sch.GetProcNodes() {
 		name := procNode.Name
 		// inputName := fmt.Sprintf("%sInput", name)
-		// responseName := fmt.Sprintf("%sResponse", name)
+		outputName := fmt.Sprintf("%sOutput", name)
 
 		doc := ""
 		if procNode.Doc != nil {
@@ -21,6 +23,11 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 			"post": map[string]any{
 				"tags":        []string{"procedures"},
 				"description": doc,
+				"responses": map[string]any{
+					"200": map[string]any{
+						"$ref": fmt.Sprintf("#/components/responses/%s", outputName),
+					},
+				},
 			},
 		}
 	}
@@ -28,7 +35,7 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 	for _, streamNode := range sch.GetStreamNodes() {
 		name := streamNode.Name
 		// inputName := fmt.Sprintf("%sInput", name)
-		// responseName := fmt.Sprintf("%sResponse", name)
+		outputName := fmt.Sprintf("%sOutput", name)
 
 		doc := ""
 		if streamNode.Doc != nil {
@@ -39,6 +46,11 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 			"post": map[string]any{
 				"tags":        []string{"streams"},
 				"description": doc,
+				"responses": map[string]any{
+					"200": map[string]any{
+						"$ref": fmt.Sprintf("#/components/responses/%s", outputName),
+					},
+				},
 			},
 		}
 	}

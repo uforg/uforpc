@@ -9,10 +9,9 @@ import (
 )
 
 type componentRequestBodySchema struct {
-	Type        string         `json:"type"`
-	Description string         `json:"description"`
-	Properties  map[string]any `json:"properties"`
-	Required    []string       `json:"required,omitempty"`
+	Type       string         `json:"type"`
+	Properties map[string]any `json:"properties"`
+	Required   []string       `json:"required,omitempty"`
 }
 
 func generateComponents(sch schema.Schema) (Components, error) {
@@ -55,47 +54,30 @@ func generateComponents(sch schema.Schema) (Components, error) {
 		name := procNode.Name
 		inputName := fmt.Sprintf("%sInput", name)
 		outputName := fmt.Sprintf("%sOutput", name)
-		errorName := fmt.Sprintf("%sError", name)
 
 		inputProperties, inputRequiredFields := generateProperties(procNode.Input)
 		components.RequestBodies[inputName] = map[string]any{
+			"description": "Request body for the " + name + " procedure",
 			"content": map[string]any{
 				"application/json": map[string]any{
 					"schema": componentRequestBodySchema{
-						Type:        "object",
-						Description: "Request body for the " + name + " procedure",
-						Properties:  inputProperties,
-						Required:    inputRequiredFields,
+						Type:       "object",
+						Properties: inputProperties,
+						Required:   inputRequiredFields,
 					},
 				},
 			},
 		}
 
-		outputProperties, outputRequiredFields := generateProperties(procNode.Output)
+		outputProperties, outputRequiredFields := generateOutputProperties(procNode.Output)
 		components.Responses[outputName] = map[string]any{
-			"description": "Successful response for the " + name + " procedure",
+			"description": "Response for the " + name + " procedure both for success and error cases based on the `ok` field.",
 			"content": map[string]any{
 				"application/json": map[string]any{
 					"schema": componentRequestBodySchema{
-						Type:        "object",
-						Description: "Successful response for the " + name + " procedure",
-						Properties:  outputProperties,
-						Required:    outputRequiredFields,
-					},
-				},
-			},
-		}
-
-		errorProperties, errorRequiredFields := generateErrorProperties()
-		components.Responses[errorName] = map[string]any{
-			"description": "Error response for the " + name + " procedure",
-			"content": map[string]any{
-				"application/json": map[string]any{
-					"schema": componentRequestBodySchema{
-						Type:        "object",
-						Description: "Error response for the " + name + " procedure",
-						Properties:  errorProperties,
-						Required:    errorRequiredFields,
+						Type:       "object",
+						Properties: outputProperties,
+						Required:   outputRequiredFields,
 					},
 				},
 			},
@@ -106,47 +88,30 @@ func generateComponents(sch schema.Schema) (Components, error) {
 		name := streamNode.Name
 		inputName := fmt.Sprintf("%sInput", name)
 		outputName := fmt.Sprintf("%sOutput", name)
-		errorName := fmt.Sprintf("%sError", name)
 
 		inputProperties, inputRequiredFields := generateProperties(streamNode.Input)
 		components.RequestBodies[inputName] = map[string]any{
+			"description": "Request body for the " + name + " stream",
 			"content": map[string]any{
 				"application/json": map[string]any{
 					"schema": componentRequestBodySchema{
-						Type:        "object",
-						Description: "Request body for the " + name + " stream",
-						Properties:  inputProperties,
-						Required:    inputRequiredFields,
+						Type:       "object",
+						Properties: inputProperties,
+						Required:   inputRequiredFields,
 					},
 				},
 			},
 		}
 
-		outputProperties, outputRequiredFields := generateProperties(streamNode.Output)
+		outputProperties, outputRequiredFields := generateOutputProperties(streamNode.Output)
 		components.Responses[outputName] = map[string]any{
-			"description": "Successful response for the " + name + " stream",
+			"description": "Response for the " + name + " stream, both for success and error cases based on the `ok` field.",
 			"content": map[string]any{
 				"application/json": map[string]any{
 					"schema": componentRequestBodySchema{
-						Type:        "object",
-						Description: "Successful response for the " + name + " stream",
-						Properties:  outputProperties,
-						Required:    outputRequiredFields,
-					},
-				},
-			},
-		}
-
-		errorProperties, errorRequiredFields := generateErrorProperties()
-		components.Responses[errorName] = map[string]any{
-			"description": "Error response for the " + name + " stream",
-			"content": map[string]any{
-				"application/json": map[string]any{
-					"schema": componentRequestBodySchema{
-						Type:        "object",
-						Description: "Error response for the " + name + " stream",
-						Properties:  errorProperties,
-						Required:    errorRequiredFields,
+						Type:       "object",
+						Properties: outputProperties,
+						Required:   outputRequiredFields,
 					},
 				},
 			},

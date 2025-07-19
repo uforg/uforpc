@@ -113,14 +113,24 @@ func generateProperties(fields []schema.FieldDefinition) (map[string]any, []stri
 	return properties, requiredFields
 }
 
-// generateErrorProperties generates the generic error response properties.
+// generateOutputProperties generates the output properties for a given list of fields.
+//
+// It includes the `ok` field and the `error` field to handle both success and failure cases.
 //
 // It returns a map of the JSON schema properties and a list of required fields.
-func generateErrorProperties() (map[string]any, []string) {
+func generateOutputProperties(fields []schema.FieldDefinition) (map[string]any, []string) {
+	outputProperties, outputRequiredFields := generateProperties(fields)
+	output := componentRequestBodySchema{
+		Type:       "object",
+		Properties: outputProperties,
+		Required:   outputRequiredFields,
+	}
+
 	properties := map[string]any{
 		"ok": map[string]any{
 			"type": "boolean",
 		},
+		"output": output,
 		"error": map[string]any{
 			"type": "object",
 			"properties": map[string]any{
@@ -143,5 +153,5 @@ func generateErrorProperties() (map[string]any, []string) {
 		},
 	}
 
-	return properties, []string{"ok", "error"}
+	return properties, []string{"ok"}
 }
