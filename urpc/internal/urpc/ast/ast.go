@@ -15,12 +15,30 @@ import (
 // and auto-completion. Those positions are automatically populated
 // by the participle library.
 
+// PrimitiveType represents a primitive type.
+type PrimitiveType = string
+
+// PrimitiveType constants.
+const (
+	PrimitiveTypeString   PrimitiveType = "string"
+	PrimitiveTypeInt      PrimitiveType = "int"
+	PrimitiveTypeFloat    PrimitiveType = "float"
+	PrimitiveTypeBool     PrimitiveType = "bool"
+	PrimitiveTypeDatetime PrimitiveType = "datetime"
+)
+
 // PrimitiveTypes is a list of primitive types that are not
 // considered as custom types.
-var PrimitiveTypes = []string{"string", "int", "float", "bool", "datetime"}
+var PrimitiveTypes = []PrimitiveType{
+	PrimitiveTypeString,
+	PrimitiveTypeInt,
+	PrimitiveTypeFloat,
+	PrimitiveTypeBool,
+	PrimitiveTypeDatetime,
+}
 
 // IsPrimitiveType checks if a type is a primitive type.
-func IsPrimitiveType(name string) bool {
+func IsPrimitiveType(name PrimitiveType) bool {
 	return slices.Contains(PrimitiveTypes, name)
 }
 
