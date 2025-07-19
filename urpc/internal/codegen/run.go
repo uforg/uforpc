@@ -65,7 +65,7 @@ func Run(configPath string) error {
 	/////////////////////////
 
 	if config.HasOpenAPI() {
-		if err := runOpenAPI(absConfigDir, config.OpenAPI, astSchema); err != nil {
+		if err := runOpenAPI(absConfigDir, config.OpenAPI, jsonSchema); err != nil {
 			return fmt.Errorf("failed to run openapi code generator: %w", err)
 		}
 	}
@@ -91,7 +91,7 @@ func Run(configPath string) error {
 	return nil
 }
 
-func runOpenAPI(absConfigDir string, config *openapi.Config, astSchema *ast.Schema) error {
+func runOpenAPI(absConfigDir string, config *openapi.Config, schema schema.Schema) error {
 	outputFile := filepath.Join(absConfigDir, config.OutputFile)
 	outputDir := filepath.Dir(outputFile)
 
@@ -101,7 +101,7 @@ func runOpenAPI(absConfigDir string, config *openapi.Config, astSchema *ast.Sche
 	}
 
 	// Generate the code
-	code, err := openapi.Generate(astSchema, *config)
+	code, err := openapi.Generate(schema, *config)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}

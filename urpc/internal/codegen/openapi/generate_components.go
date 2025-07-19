@@ -1,0 +1,157 @@
+package openapi
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/uforg/uforpc/urpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
+)
+
+type componentRequestBodySchema struct {
+	Type        string         `json:"type"`
+	Description string         `json:"description"`
+	Properties  map[string]any `json:"properties"`
+	Required    []string       `json:"required,omitempty"`
+}
+
+func generateComponents(sch schema.Schema) (Components, error) {
+	components := Components{
+		Schemas:       map[string]any{},
+		RequestBodies: map[string]any{},
+		Responses:     map[string]any{},
+	}
+
+	for _, typeNode := range sch.GetTypeNodes() {
+		desc := "is a domain type defined in UFO RPC with no documentation."
+		if typeNode.Doc != nil {
+			desc = strings.TrimSpace(strutil.NormalizeIndent(*typeNode.Doc))
+		}
+
+		if typeNode.Deprecated != nil {
+			desc += "\n\nDeprecated: "
+			if *typeNode.Deprecated == "" {
+				desc += "This type is deprecated and should not be used in new code."
+			} else {
+				desc += *typeNode.Deprecated
+			}
+		}
+
+		properties, requiredFields := generateProperties(typeNode.Fields)
+
+		typeSchema := map[string]any{
+			"type":        "object",
+			"description": desc,
+			"properties":  properties,
+		}
+		if len(requiredFields) > 0 {
+			typeSchema["required"] = requiredFields
+		}
+
+		components.Schemas[typeNode.Name] = typeSchema
+	}
+
+	for _, procNode := range sch.GetProcNodes() {
+		name := procNode.Name
+		inputName := fmt.Sprintf("%sInput", name)
+		outputName := fmt.Sprintf("%sOutput", name)
+		errorName := fmt.Sprintf("%sError", name)
+
+		inputProperties, inputRequiredFields := generateProperties(procNode.Input)
+		components.RequestBodies[inputName] = map[string]any{
+			"content": map[string]any{
+				"application/json": map[string]any{
+					"schema": componentRequestBodySchema{
+						Type:        "object",
+						Description: "Request body for the " + name + " procedure",
+						Properties:  inputProperties,
+						Required:    inputRequiredFields,
+					},
+				},
+			},
+		}
+
+		outputProperties, outputRequiredFields := generateProperties(procNode.Output)
+		components.Responses[outputName] = map[string]any{
+			"description": "Successful response for the " + name + " procedure",
+			"content": map[string]any{
+				"application/json": map[string]any{
+					"schema": componentRequestBodySchema{
+						Type:        "object",
+						Description: "Successful response for the " + name + " procedure",
+						Properties:  outputProperties,
+						Required:    outputRequiredFields,
+					},
+				},
+			},
+		}
+
+		errorProperties, errorRequiredFields := generateErrorProperties()
+		components.Responses[errorName] = map[string]any{
+			"description": "Error response for the " + name + " procedure",
+			"content": map[string]any{
+				"application/json": map[string]any{
+					"schema": componentRequestBodySchema{
+						Type:        "object",
+						Description: "Error response for the " + name + " procedure",
+						Properties:  errorProperties,
+						Required:    errorRequiredFields,
+					},
+				},
+			},
+		}
+	}
+
+	for _, streamNode := range sch.GetStreamNodes() {
+		name := streamNode.Name
+		inputName := fmt.Sprintf("%sInput", name)
+		outputName := fmt.Sprintf("%sOutput", name)
+		errorName := fmt.Sprintf("%sError", name)
+
+		inputProperties, inputRequiredFields := generateProperties(streamNode.Input)
+		components.RequestBodies[inputName] = map[string]any{
+			"content": map[string]any{
+				"application/json": map[string]any{
+					"schema": componentRequestBodySchema{
+						Type:        "object",
+						Description: "Request body for the " + name + " stream",
+						Properties:  inputProperties,
+						Required:    inputRequiredFields,
+					},
+				},
+			},
+		}
+
+		outputProperties, outputRequiredFields := generateProperties(streamNode.Output)
+		components.Responses[outputName] = map[string]any{
+			"description": "Successful response for the " + name + " stream",
+			"content": map[string]any{
+				"application/json": map[string]any{
+					"schema": componentRequestBodySchema{
+						Type:        "object",
+						Description: "Successful response for the " + name + " stream",
+						Properties:  outputProperties,
+						Required:    outputRequiredFields,
+					},
+				},
+			},
+		}
+
+		errorProperties, errorRequiredFields := generateErrorProperties()
+		components.Responses[errorName] = map[string]any{
+			"description": "Error response for the " + name + " stream",
+			"content": map[string]any{
+				"application/json": map[string]any{
+					"schema": componentRequestBodySchema{
+						Type:        "object",
+						Description: "Error response for the " + name + " stream",
+						Properties:  errorProperties,
+						Required:    errorRequiredFields,
+					},
+				},
+			},
+		}
+	}
+
+	return components, nil
+}

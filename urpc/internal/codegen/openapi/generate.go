@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
+	"github.com/uforg/uforpc/urpc/internal/schema"
 )
 
-func Generate(schema *ast.Schema, config Config) (string, error) {
+func Generate(schema schema.Schema, config Config) (string, error) {
 	if config.Title == "" {
 		config.Title = "UFO RPC API"
 	}
@@ -19,8 +19,18 @@ func Generate(schema *ast.Schema, config Config) (string, error) {
 		OpenAPI: "3.0.0",
 		Info: Info{
 			Title:       config.Title,
-			Description: config.Description,
 			Version:     "1.0.0",
+			Description: config.Description,
+		},
+		Tags: []Tag{
+			{
+				Name:        "procedures",
+				Description: "All procedures from the UFO RPC schema",
+			},
+			{
+				Name:        "streams",
+				Description: "All streams from the UFO RPC schema",
+			},
 		},
 	}
 
@@ -31,6 +41,18 @@ func Generate(schema *ast.Schema, config Config) (string, error) {
 			},
 		}
 	}
+
+	paths, err := generatePaths(schema)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate paths: %w", err)
+	}
+	spec.Paths = paths
+
+	components, err := generateComponents(schema)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate components: %w", err)
+	}
+	spec.Components = components
 
 	code, err := encodeSpec(spec, config)
 	if err != nil {
