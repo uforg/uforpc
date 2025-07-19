@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
+	"github.com/uforg/uforpc/urpc/internal/codegen/openapi"
 	"github.com/uforg/uforpc/urpc/internal/codegen/playground"
 	"github.com/uforg/uforpc/urpc/internal/codegen/typescript"
 	"github.com/uforg/uforpc/urpc/internal/schema"
@@ -63,6 +64,12 @@ func Run(configPath string) error {
 	// RUN CODE GENERATORS //
 	/////////////////////////
 
+	if config.HasOpenAPI() {
+		if err := runOpenAPI(absConfigDir, config.OpenAPI, astSchema); err != nil {
+			return fmt.Errorf("failed to run openapi code generator: %w", err)
+		}
+	}
+
 	if config.HasPlayground() {
 		if err := runPlayground(absConfigDir, config.Playground, astSchema); err != nil {
 			return fmt.Errorf("failed to run playground code generator: %w", err)
@@ -79,6 +86,28 @@ func Run(configPath string) error {
 		if err := runTypescript(absConfigDir, config.Typescript, jsonSchema); err != nil {
 			return fmt.Errorf("failed to run typescript code generator: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func runOpenAPI(absConfigDir string, config *openapi.Config, astSchema *ast.Schema) error {
+	outputFile := filepath.Join(absConfigDir, config.OutputFile)
+	outputDir := filepath.Dir(outputFile)
+
+	// Ensure output directory exists
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Generate the code
+	code, err := openapi.Generate(astSchema, *config)
+	if err != nil {
+		return fmt.Errorf("failed to generate code: %w", err)
+	}
+
+	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
+		return fmt.Errorf("failed to write generated code to file: %w", err)
 	}
 
 	return nil
