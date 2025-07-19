@@ -111,6 +111,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 
 		// Client method to create builder
 		g.Linef("// %s creates a call builder for the %s procedure.", name, name)
+		renderDoc(g, procNode.Doc, true)
 		renderDeprecated(g, procNode.Deprecated)
 		g.Linef("func (registry *clientProcRegistry) %s() *%s {", name, builderName)
 		g.Block(func() {
@@ -217,6 +218,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 
 		// Client method to create stream builder
 		g.Linef("// %s creates a stream builder for the %s stream.", name, name)
+		renderDoc(g, streamNode.Doc, true)
 		renderDeprecated(g, streamNode.Deprecated)
 		g.Linef("func (registry *clientStreamRegistry) %s() *%s {", name, builderStream)
 		g.Block(func() {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
+	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
@@ -18,7 +19,7 @@ func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 	for _, typeNode := range sch.GetTypeNodes() {
 		desc := "is a domain type defined in UFO RPC with no documentation."
 		if typeNode.Doc != nil {
-			desc = strings.TrimSpace(*typeNode.Doc)
+			desc = strings.TrimSpace(strutil.NormalizeIndent(*typeNode.Doc))
 		}
 
 		if typeNode.Deprecated != nil {

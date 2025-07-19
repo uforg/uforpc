@@ -154,6 +154,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("//")
 		g.Line("// This is useful for implementing custom validation logic, input sanitization,")
 		g.Line("// or data transformation that goes beyond the default required fields validation.")
+		renderDoc(g, procNode.Doc, true)
 		renderDeprecated(g, procNode.Deprecated)
 		g.Linef("func (p *serverProcRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
@@ -186,6 +187,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// The handler is executed after all before-handler hooks and input processing.")
 		g.Line("// If an input handler is registered, the input will be processed through that")
 		g.Line("// handler before reaching this main handler.")
+		renderDoc(g, procNode.Doc, true)
 		renderDeprecated(g, procNode.Deprecated)
 		g.Linef("func (p *serverProcRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {
@@ -256,6 +258,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// This is useful for implementing custom validation logic, input sanitization,")
 		g.Line("// or data transformation specific to stream initialization that goes beyond")
 		g.Line("// the default required fields validation.")
+		renderDoc(g, streamNode.Doc, true)
 		renderDeprecated(g, streamNode.Deprecated)
 		g.Linef("func (s *serverStreamRegistry[T]) Set%sInputHandler(", name)
 		g.Block(func() {
@@ -289,6 +292,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// The handler is executed after all before-handler hooks and input processing.")
 		g.Line("//")
 		g.Line("// Each emitted event goes through before-emit and after-emit hooks.")
+		renderDoc(g, streamNode.Doc, true)
 		renderDeprecated(g, streamNode.Deprecated)
 		g.Linef("func (s *serverStreamRegistry[T]) Set%sHandler(", name)
 		g.Block(func() {

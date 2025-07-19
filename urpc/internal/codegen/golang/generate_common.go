@@ -64,8 +64,9 @@ func renderField(parentTypeName string, field schema.FieldDefinition) string {
 		jsonTag = fmt.Sprintf(" `json:\"%s,omitempty\"`", nameCamel)
 	}
 
+	doc := renderDocString(field.Doc, false)
 	result := fmt.Sprintf("%s %s", namePascal, typeLiteral)
-	return result + jsonTag
+	return doc + result + jsonTag
 }
 
 // renderType renders a type definition with all its fields
@@ -356,6 +357,34 @@ func renderMultilineComment(g *genkit.GenKit, text string) {
 	for line := range strings.SplitSeq(text, "\n") {
 		g.Linef("// %s", line)
 	}
+}
+
+// renderDocString is the same as renderDoc but it returns a string instead of
+// rendering to the given genkit.GenKit.
+func renderDocString(doc *string, newLineBefore bool) string {
+	if doc == nil {
+		return ""
+	}
+
+	og := genkit.NewGenKit().WithTabs()
+	renderDoc(og, doc, newLineBefore)
+	return og.String()
+}
+
+// renderDoc receives a pointer to a string and if it is not nil, it will
+// render a comment with the documentation to the given genkit.GenKit.
+//
+// It will normalize the indent and trim the trailing and leading whitespace.
+func renderDoc(g *genkit.GenKit, doc *string, newLineBefore bool) {
+	if doc == nil {
+		return
+	}
+
+	if newLineBefore {
+		g.Line("//")
+	}
+
+	renderMultilineComment(g, strings.TrimSpace(strutil.NormalizeIndent(*doc)))
 }
 
 // renderDeprecated receives a pointer to a string and if it is not nil, it will
