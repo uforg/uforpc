@@ -11,7 +11,7 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 
 	for _, procNode := range sch.GetProcNodes() {
 		name := procNode.Name
-		// inputName := fmt.Sprintf("%sInput", name)
+		inputName := fmt.Sprintf("%sInput", name)
 		outputName := fmt.Sprintf("%sOutput", name)
 
 		doc := ""
@@ -23,6 +23,9 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 			"post": map[string]any{
 				"tags":        []string{"procedures"},
 				"description": doc,
+				"requestBody": map[string]any{
+					"$ref": fmt.Sprintf("#/components/requestBodies/%s", inputName),
+				},
 				"responses": map[string]any{
 					"200": map[string]any{
 						"$ref": fmt.Sprintf("#/components/responses/%s", outputName),
@@ -34,7 +37,7 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 
 	for _, streamNode := range sch.GetStreamNodes() {
 		name := streamNode.Name
-		// inputName := fmt.Sprintf("%sInput", name)
+		inputName := fmt.Sprintf("%sInput", name)
 		outputName := fmt.Sprintf("%sOutput", name)
 
 		doc := ""
@@ -46,6 +49,9 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 			"post": map[string]any{
 				"tags":        []string{"streams"},
 				"description": doc,
+				"requestBody": map[string]any{
+					"$ref": fmt.Sprintf("#/components/requestBodies/%s", inputName),
+				},
 				"responses": map[string]any{
 					"200": map[string]any{
 						"$ref": fmt.Sprintf("#/components/responses/%s", outputName),
