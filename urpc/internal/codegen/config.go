@@ -5,6 +5,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
+	"github.com/uforg/uforpc/urpc/internal/codegen/openapi"
 	"github.com/uforg/uforpc/urpc/internal/codegen/playground"
 	"github.com/uforg/uforpc/urpc/internal/codegen/typescript"
 )
@@ -13,9 +14,14 @@ import (
 type Config struct {
 	Version    int                `toml:"version"`
 	Schema     string             `toml:"schema"`
+	OpenAPI    *openapi.Config    `toml:"openapi"`
 	Playground *playground.Config `toml:"playground"`
 	Golang     *golang.Config     `toml:"golang"`
 	Typescript *typescript.Config `toml:"typescript"`
+}
+
+func (c *Config) HasOpenAPI() bool {
+	return c.OpenAPI != nil
 }
 
 func (c *Config) HasPlayground() bool {
@@ -48,6 +54,12 @@ func (c *Config) Validate() error {
 
 	if c.Schema == "" {
 		return fmt.Errorf(`"schema" is required`)
+	}
+
+	if c.OpenAPI != nil {
+		if err := c.OpenAPI.Validate(); err != nil {
+			return fmt.Errorf("openapi config is invalid: %w", err)
+		}
 	}
 
 	if c.Playground != nil {
