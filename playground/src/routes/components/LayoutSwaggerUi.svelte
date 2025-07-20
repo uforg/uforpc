@@ -14,7 +14,7 @@
 </script>
 
 <header
-  class="flex h-[90px] flex-col items-center justify-center space-y-2 px-4 pt-4 text-center"
+  class="mt-12 flex h-[80px] flex-col items-center justify-center space-y-2 px-4 text-center"
 >
   <Logo class="flex-grow" />
   <span class="text-base-content/50 text-sm">
