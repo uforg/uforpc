@@ -150,7 +150,7 @@
 
     <div
       class={{
-        "space-y-2": true,
+        "mt-4 space-y-2": true,
         hidden: tab === "input",
         block: tab === "output",
       }}
