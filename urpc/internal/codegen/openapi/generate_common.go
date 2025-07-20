@@ -48,6 +48,10 @@ func generateProperties(fields []schema.FieldDefinition) (map[string]any, []stri
 				"type": fieldType,
 			}
 
+			if *field.TypeName == ast.PrimitiveTypeDatetime {
+				prop["format"] = "date-time"
+			}
+
 			if hasDoc {
 				prop["description"] = doc
 			}
