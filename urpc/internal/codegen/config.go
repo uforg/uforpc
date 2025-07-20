@@ -14,14 +14,14 @@ import (
 type Config struct {
 	Version    int                `toml:"version"`
 	Schema     string             `toml:"schema"`
-	OpenAPI    *openapi.Config    `toml:"openapi"`
+	OpenAPI    openapi.Config     `toml:"openapi"`
 	Playground *playground.Config `toml:"playground"`
 	Golang     *golang.Config     `toml:"golang"`
 	Typescript *typescript.Config `toml:"typescript"`
 }
 
 func (c *Config) HasOpenAPI() bool {
-	return c.OpenAPI != nil && c.OpenAPI.OutputFile != ""
+	return c.OpenAPI.OutputFile != ""
 }
 
 func (c *Config) HasPlayground() bool {
@@ -56,10 +56,8 @@ func (c *Config) Validate() error {
 		return fmt.Errorf(`"schema" is required`)
 	}
 
-	if c.OpenAPI != nil {
-		if err := c.OpenAPI.Validate(); err != nil {
-			return fmt.Errorf("openapi config is invalid: %w", err)
-		}
+	if err := c.OpenAPI.Validate(); err != nil {
+		return fmt.Errorf("openapi config is invalid: %w", err)
 	}
 
 	if c.Playground != nil {

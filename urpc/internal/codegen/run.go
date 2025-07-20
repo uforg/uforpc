@@ -71,7 +71,7 @@ func Run(configPath string) error {
 	}
 
 	if config.HasPlayground() {
-		if err := runPlayground(absConfigDir, config.Playground, astSchema); err != nil {
+		if err := runPlayground(absConfigDir, config.Playground, config.OpenAPI, astSchema, jsonSchema); err != nil {
 			return fmt.Errorf("failed to run playground code generator: %w", err)
 		}
 	}
@@ -91,7 +91,7 @@ func Run(configPath string) error {
 	return nil
 }
 
-func runOpenAPI(absConfigDir string, config *openapi.Config, schema schema.Schema) error {
+func runOpenAPI(absConfigDir string, config openapi.Config, schema schema.Schema) error {
 	outputFile := filepath.Join(absConfigDir, config.OutputFile)
 	outputDir := filepath.Dir(outputFile)
 
@@ -101,7 +101,7 @@ func runOpenAPI(absConfigDir string, config *openapi.Config, schema schema.Schem
 	}
 
 	// Generate the code
-	code, err := openapi.Generate(schema, *config)
+	code, err := openapi.Generate(schema, config)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}
@@ -113,8 +113,9 @@ func runOpenAPI(absConfigDir string, config *openapi.Config, schema schema.Schem
 	return nil
 }
 
-func runPlayground(absConfigDir string, config *playground.Config, astSchema *ast.Schema) error {
+func runPlayground(absConfigDir string, config *playground.Config, openAPIConfig openapi.Config, astSchema *ast.Schema, jsonSchema schema.Schema) error {
 	outputDir := filepath.Join(absConfigDir, config.OutputDir)
+	openAPIOutputFile := filepath.Join(outputDir, "openapi.yaml")
 
 	// Ensure output directory exists
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -125,6 +126,20 @@ func runPlayground(absConfigDir string, config *playground.Config, astSchema *as
 	err := playground.Generate(absConfigDir, astSchema, *config)
 	if err != nil {
 		return fmt.Errorf("failed to generate playground: %w", err)
+	}
+
+	// Generate the openapi.yaml file
+	if openAPIConfig.BaseURL == "" {
+		openAPIConfig.BaseURL = config.DefaultBaseURL
+	}
+
+	code, err := openapi.Generate(jsonSchema, openAPIConfig)
+	if err != nil {
+		return fmt.Errorf("failed to generate openapi.yaml code: %w", err)
+	}
+
+	if err := os.WriteFile(openAPIOutputFile, []byte(code), 0644); err != nil {
+		return fmt.Errorf("failed to write generated openapi.yaml code to file: %w", err)
 	}
 
 	return nil
