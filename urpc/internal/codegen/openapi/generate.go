@@ -14,13 +14,23 @@ func Generate(schema schema.Schema, config Config) (string, error) {
 	if config.Title == "" {
 		config.Title = "UFO RPC API"
 	}
+	if config.Version == "" {
+		config.Version = "1.0.0"
+	}
 
 	spec := Spec{
 		OpenAPI: "3.0.0",
 		Info: Info{
 			Title:       config.Title,
-			Version:     "1.0.0",
+			Version:     config.Version,
 			Description: config.Description,
+			Contact: InfoContact{
+				Name:  config.ContactName,
+				Email: config.ContactEmail,
+			},
+			License: InfoLicense{
+				Name: config.LicenseName,
+			},
 		},
 		Tags: []Tag{
 			{

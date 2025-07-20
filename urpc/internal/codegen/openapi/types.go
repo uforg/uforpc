@@ -10,9 +10,20 @@ type Spec struct {
 }
 
 type Info struct {
-	Title       string `json:"title,omitzero"`
-	Version     string `json:"version"`
-	Description string `json:"description,omitzero"`
+	Title       string      `json:"title,omitzero"`
+	Version     string      `json:"version,omitzero"`
+	Description string      `json:"description,omitzero"`
+	Contact     InfoContact `json:"contact,omitzero"`
+	License     InfoLicense `json:"license,omitzero"`
+}
+
+type InfoContact struct {
+	Name  string `json:"name,omitzero"`
+	Email string `json:"email,omitzero"`
+}
+
+type InfoLicense struct {
+	Name string `json:"name,omitzero"`
 }
 
 type Server struct {

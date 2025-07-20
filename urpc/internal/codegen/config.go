@@ -21,7 +21,7 @@ type Config struct {
 }
 
 func (c *Config) HasOpenAPI() bool {
-	return c.OpenAPI != nil
+	return c.OpenAPI != nil && c.OpenAPI.OutputFile != ""
 }
 
 func (c *Config) HasPlayground() bool {
