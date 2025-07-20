@@ -21,6 +21,7 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 
 		paths["/"+name] = map[string]any{
 			"post": map[string]any{
+				"deprecated":  procNode.Deprecated != nil,
 				"tags":        []string{"procedures"},
 				"description": doc,
 				"requestBody": map[string]any{
@@ -47,6 +48,7 @@ func generatePaths(sch schema.Schema) (Paths, error) {
 
 		paths["/"+name] = map[string]any{
 			"post": map[string]any{
+				"deprecated":  streamNode.Deprecated != nil,
 				"tags":        []string{"streams"},
 				"description": doc,
 				"requestBody": map[string]any{

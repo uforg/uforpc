@@ -39,6 +39,7 @@ func generateComponents(sch schema.Schema) (Components, error) {
 		properties, requiredFields := generateProperties(typeNode.Fields)
 
 		typeSchema := map[string]any{
+			"deprecated":  typeNode.Deprecated != nil,
 			"type":        "object",
 			"description": desc,
 			"properties":  properties,
