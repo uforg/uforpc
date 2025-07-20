@@ -24,6 +24,7 @@
 
   import LayoutAside from "./components/LayoutAside.svelte";
   import LayoutHeader from "./components/LayoutHeader.svelte";
+  import LayoutSwaggerSwitch from "./components/LayoutSwaggerSwitch.svelte";
 
   let { children } = $props();
 
@@ -116,7 +117,7 @@
     >
       <LayoutHeader />
       <main
-        class="w-full p-4"
+        class="w-full p-4 pb-[75px]"
         use:dimensionschangeAction
         ondimensionschange={(e) => (uiStore.main = e.detail)}
       >
@@ -124,6 +125,9 @@
       </main>
     </div>
   </div>
+
+  <!-- Requires a space at bottom of the page to fit the switch button without covering other content -->
+  <LayoutSwaggerSwitch />
 {/if}
 
 <Toaster richColors closeButton duration={5000} />
