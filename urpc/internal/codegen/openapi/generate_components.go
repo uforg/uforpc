@@ -14,8 +14,26 @@ type componentRequestBodySchema struct {
 	Required   []string       `json:"required,omitempty"`
 }
 
+const authTokenDescription = `
+Enter the full value for the Authorization header. The specific format (Bearer, Basic, API Key, etc.) is determined by the server's implementation.
+
+---
+**Examples:**
+- **Bearer Token:** ''Bearer eyJhbGciOiJIUzI1Ni...'' (a JWT token)
+- **Basic Auth:** ''Basic dXNlcm5hbWU6cGFzc3dvcmQ='' (a base64 encoding of ''username:password'')
+- **API Key:** ''sk_live_123abc456def'' (a raw token)
+`
+
 func generateComponents(sch schema.Schema) (Components, error) {
 	components := Components{
+		SecuritySchemes: map[string]any{
+			"AuthToken": map[string]any{
+				"type":        "apiKey",
+				"in":          "header",
+				"name":        "Authorization",
+				"description": strings.TrimSpace(strings.ReplaceAll(authTokenDescription, "''", "`")),
+			},
+		},
 		Schemas:       map[string]any{},
 		RequestBodies: map[string]any{},
 		Responses:     map[string]any{},

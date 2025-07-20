@@ -32,6 +32,11 @@ func Generate(schema schema.Schema, config Config) (string, error) {
 				Name: config.LicenseName,
 			},
 		},
+		Security: []map[string][]string{
+			{
+				"AuthToken": {},
+			},
+		},
 		Tags: []Tag{
 			{
 				Name:        "procedures",

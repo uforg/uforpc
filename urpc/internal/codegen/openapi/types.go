@@ -1,12 +1,13 @@
 package openapi
 
 type Spec struct {
-	OpenAPI    string     `json:"openapi"`
-	Info       Info       `json:"info"`
-	Servers    []Server   `json:"servers,omitempty"`
-	Tags       []Tag      `json:"tags,omitempty"`
-	Paths      Paths      `json:"paths,omitempty"`
-	Components Components `json:"components,omitzero"`
+	OpenAPI    string                `json:"openapi"`
+	Info       Info                  `json:"info"`
+	Servers    []Server              `json:"servers,omitempty"`
+	Security   []map[string][]string `json:"security,omitempty"`
+	Tags       []Tag                 `json:"tags,omitempty"`
+	Paths      Paths                 `json:"paths,omitempty"`
+	Components Components            `json:"components,omitzero"`
 }
 
 type Info struct {
@@ -38,7 +39,8 @@ type Tag struct {
 type Paths map[string]any
 
 type Components struct {
-	Schemas       map[string]any `json:"schemas,omitempty"`
-	RequestBodies map[string]any `json:"requestBodies,omitempty"`
-	Responses     map[string]any `json:"responses,omitempty"`
+	SecuritySchemes map[string]any `json:"securitySchemes,omitempty"`
+	Schemas         map[string]any `json:"schemas,omitempty"`
+	RequestBodies   map[string]any `json:"requestBodies,omitempty"`
+	Responses       map[string]any `json:"responses,omitempty"`
 }
