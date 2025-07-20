@@ -20,9 +20,12 @@
   const { stream }: Props = $props();
 
   let value = $state({ root: {} });
-  let output: string | null = $state(null);
+  // biome-ignore lint/suspicious/noExplicitAny: can be any stream response
+  let outputArray: any[] = $state([]);
   let isExecuting = $state(false);
   let cancelRequest = $state<() => void>(() => {});
+
+  let output = $derived(JSON.stringify(outputArray, null, 2));
 
   async function executeStream() {
     if (isExecuting) return;
@@ -88,20 +91,9 @@
 
             try {
               const parsedData = JSON.parse(eventData);
-
-              // Add message to output at the beginning
-              if (output) {
-                output = `${JSON.stringify(parsedData, null, 2)}\n\n${output}`;
-              } else {
-                output = JSON.stringify(parsedData, null, 2);
-              }
+              outputArray.unshift(parsedData);
             } catch (parseError) {
-              // If not JSON, treat as plain text
-              if (output) {
-                output = `${eventData}\n${"─".repeat(50)}\n${output}`;
-              } else {
-                output = eventData;
-              }
+              outputArray.unshift(eventData);
             }
           }
         }

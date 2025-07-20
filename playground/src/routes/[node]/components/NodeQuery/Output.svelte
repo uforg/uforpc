@@ -89,7 +89,8 @@
   {#if type == "stream" && isExecuting}
     <p>
       The data stream is currently active using Server Sent Events (SSE). You
-      can stop it by clicking the button below.
+      can stop it by clicking the button below. New messages will be added to
+      the top of the output.
     </p>
     {@render CancelButton()}
   {/if}
