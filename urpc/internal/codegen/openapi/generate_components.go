@@ -40,7 +40,7 @@ func generateComponents(sch schema.Schema) (Components, error) {
 	}
 
 	for _, typeNode := range sch.GetTypeNodes() {
-		desc := "is a domain type defined in UFO RPC with no documentation."
+		desc := ""
 		if typeNode.Doc != nil {
 			desc = strings.TrimSpace(strutil.NormalizeIndent(*typeNode.Doc))
 		}
@@ -57,10 +57,12 @@ func generateComponents(sch schema.Schema) (Components, error) {
 		properties, requiredFields := generateProperties(typeNode.Fields)
 
 		typeSchema := map[string]any{
-			"deprecated":  typeNode.Deprecated != nil,
-			"type":        "object",
-			"description": desc,
-			"properties":  properties,
+			"deprecated": typeNode.Deprecated != nil,
+			"type":       "object",
+			"properties": properties,
+		}
+		if desc != "" {
+			typeSchema["description"] = desc
 		}
 		if len(requiredFields) > 0 {
 			typeSchema["required"] = requiredFields
