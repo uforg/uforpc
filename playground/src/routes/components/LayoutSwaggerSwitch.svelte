@@ -17,7 +17,11 @@
 
 <Tooltip content={tooltipContent} placement="left">
   <button
-    class="group btn btn-circle btn-lg fixed right-4 bottom-4 z-50"
+    class={{
+      "group btn btn-circle btn-lg fixed right-4 bottom-4 z-50": true,
+      "bg-base-300 border-base-content/20": isOpen,
+      "btn-ghost bg-transparent": !isOpen,
+    }}
     onclick={toggle}
   >
     {#if !isOpen}
