@@ -56,7 +56,7 @@
   let abductionProgress = $state(0);
 
   let itemOpacity = $derived(isAbducting ? 1 - abductionProgress ** 3 : 0);
-  let itemY = $derived(isAbducting ? 80 - abductionProgress * 100 : 80);
+  let itemY = $derived(isAbducting ? 30 - abductionProgress * 100 : 30);
   let itemTransform = $derived(`translateX(-50%) translateY(${itemY}px)`);
 
   onMount(() => {
