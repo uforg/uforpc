@@ -24,3 +24,12 @@
 </header>
 
 <div id={elId}></div>
+
+<style>
+  :global([data-theme="dark"] .swagger-ui) {
+    filter: invert(88%) hue-rotate(180deg);
+  }
+  :global([data-theme="dark"] .swagger-ui .microlight) {
+    filter: invert(100%) hue-rotate(180deg);
+  }
+</style>
