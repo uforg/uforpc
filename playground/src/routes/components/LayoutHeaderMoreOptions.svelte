@@ -4,6 +4,7 @@
   import { uiStore } from "$lib/uiStore.svelte";
 
   import LayoutHeaderDocsLink from "./LayoutHeaderDocsLink.svelte";
+  import LayoutHeaderOpenApiSchema from "./LayoutHeaderOpenApiSchema.svelte";
   import LayoutHeaderSchema from "./LayoutHeaderSchema.svelte";
   import LayoutHeaderSearch from "./LayoutHeaderSearch.svelte";
   import LayoutHeaderSettings from "./LayoutHeaderSettings.svelte";
@@ -18,6 +19,7 @@
   {/if}
 
   <LayoutHeaderSchema />
+  <LayoutHeaderOpenApiSchema />
 
   {#if uiStore.isMobile}
     <LayoutHeaderSearch />
