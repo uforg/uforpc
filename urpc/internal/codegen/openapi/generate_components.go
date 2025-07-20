@@ -106,13 +106,19 @@ func generateComponents(sch schema.Schema) (Components, error) {
 
 		outputProperties, outputRequiredFields := generateOutputProperties(streamNode.Output)
 		components.Responses[outputName] = map[string]any{
-			"description": "Response for the " + name + " stream, both for success and error cases based on the `ok` field.",
+			"description": "Server sent events (SSE). Event response for the " + name + " stream, both for success and error cases based on the `ok` field.",
 			"content": map[string]any{
-				"application/json": map[string]any{
-					"schema": componentRequestBodySchema{
-						Type:       "object",
-						Properties: outputProperties,
-						Required:   outputRequiredFields,
+				"text/event-stream": map[string]any{
+					"schema": map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"data": componentRequestBodySchema{
+								Type:       "object",
+								Properties: outputProperties,
+								Required:   outputRequiredFields,
+							},
+						},
+						"required": []string{"data"},
 					},
 				},
 			},
