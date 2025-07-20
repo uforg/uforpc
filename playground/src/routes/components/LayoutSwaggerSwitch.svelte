@@ -7,11 +7,32 @@
 
   import LayoutSwaggerUi from "./LayoutSwaggerUi.svelte";
 
+  const animationDuration = 200;
+
+  let isAnimating = $state(false);
   let isOpen = $state(false);
-  const toggle = () => (isOpen = !isOpen);
+  let isOpenAnimated = $state(false);
+  let opacity = $state(0);
+
+  const toggle = async () => {
+    if (isAnimating) return;
+
+    isOpen = !isOpen;
+    isAnimating = true;
+    if (isOpenAnimated) {
+      opacity = 0;
+      await new Promise((resolve) => setTimeout(resolve, animationDuration));
+      isOpenAnimated = false;
+    } else {
+      isOpenAnimated = true;
+      await new Promise((resolve) => setTimeout(resolve, 10)); // Wait for repaint
+      opacity = 1;
+    }
+    isAnimating = false;
+  };
 
   let tooltipContent = $derived(
-    isOpen ? "Switch to UFO RPC" : "Switch to Swagger UI (OpenAPI)",
+    isOpenAnimated ? "Switch to UFO RPC" : "Switch to Swagger UI (OpenAPI)",
   );
 </script>
 
@@ -25,24 +46,25 @@
     onclick={toggle}
   >
     {#if !isOpen}
-      <span in:fade={{ duration: 200 }}>
+      <span in:fade={{ duration: animationDuration }}>
         <SwaggerLogo class="w-full" />
       </span>
     {/if}
     {#if isOpen}
-      <span in:fade={{ duration: 200 }}>
+      <span in:fade={{ duration: animationDuration }}>
         <LogoUfo class="size-10" />
       </span>
     {/if}
   </button>
 </Tooltip>
 
-{#if isOpen}
-  <div
-    data-theme="light"
-    class="bg-base-100 fixed top-0 left-0 z-40 h-[100dvh] w-[100dvw] overflow-y-auto"
-    transition:fade={{ duration: 200 }}
-  >
-    <LayoutSwaggerUi />
-  </div>
-{/if}
+<div
+  class={{
+    "bg-base-100 fixed top-0 left-0 z-40 h-[100dvh] w-[100dvw] overflow-y-auto": true,
+    "transition-opacity": true,
+    "translate-x-[300%]": !isOpenAnimated,
+  }}
+  style="opacity: {opacity}; transition-duration: {animationDuration}ms;"
+>
+  <LayoutSwaggerUi />
+</div>
