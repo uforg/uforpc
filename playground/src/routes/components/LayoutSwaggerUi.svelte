@@ -9,6 +9,7 @@
   $effect(() => {
     SwaggerUI({
       domNode: document.getElementById(elId),
+      url: "./openapi.yaml",
     });
   });
 </script>
