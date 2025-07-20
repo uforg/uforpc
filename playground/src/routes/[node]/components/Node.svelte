@@ -65,7 +65,7 @@
   });
 </script>
 
-<section class="mb-[200px] min-h-[100dvh] space-y-12">
+<section class="min-h-[100dvh] space-y-12">
   <div class="prose max-w-5xl">
     <h1>{name}</h1>
 
