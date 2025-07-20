@@ -1,101 +1,22 @@
 <script lang="ts">
-  import {
-    BookOpenText,
-    Ellipsis,
-    EllipsisVertical,
-    Github,
-    Info,
-    Menu,
-    X,
-  } from "@lucide/svelte";
+  import { Ellipsis, EllipsisVertical, Menu, X } from "@lucide/svelte";
 
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
 
+  import H4 from "$lib/components/H3.svelte";
   import Logo from "$lib/components/Logo.svelte";
+  import MenuComponent from "$lib/components/Menu.svelte";
   import Offcanvas from "$lib/components/Offcanvas.svelte";
-  import Tooltip from "$lib/components/Tooltip.svelte";
 
-  import LayoutHeaderSchema from "./LayoutHeaderSchema.svelte";
+  import LayoutHeaderDocsLink from "./LayoutHeaderDocsLink.svelte";
+  import LayoutHeaderMoreOptions from "./LayoutHeaderMoreOptions.svelte";
   import LayoutHeaderSearch from "./LayoutHeaderSearch.svelte";
   import LayoutHeaderSettings from "./LayoutHeaderSettings.svelte";
+  import LayoutHeaderStarOnGithub from "./LayoutHeaderStarOnGithub.svelte";
   import LayoutHeaderThemeSelect from "./LayoutHeaderThemeSelect.svelte";
 
-  let isOffcanvasOpen = $state(false);
+  let isMobileOffcanvasOpen = $state(false);
 </script>
-
-{#snippet starOnGithub()}
-  <a
-    href="https://github.com/uforg/uforpc"
-    target="_blank"
-    class="btn btn-ghost justify-start space-x-1"
-  >
-    <Github class="size-4" />
-    <span>Star on GitHub</span>
-    <img
-      alt="GitHub Repo stars"
-      src="https://img.shields.io/github/stars/uforg/uforpc?style=plastic&label=%20"
-    />
-  </a>
-{/snippet}
-
-{#snippet docsLink()}
-  <a
-    href="https://uforpc.uforg.dev"
-    target="_blank"
-    class="btn btn-ghost justify-start space-x-1"
-  >
-    <BookOpenText class="size-4" />
-    <span>Docs</span>
-  </a>
-{/snippet}
-
-{#snippet offcanvasOpenButton()}
-  <Tooltip content="More options" placement="left">
-    <button
-      class="btn btn-ghost btn-square"
-      onclick={() => (isOffcanvasOpen = true)}
-    >
-      {#if !uiStore.isMobile}
-        <EllipsisVertical class="size-4" />
-      {/if}
-      {#if uiStore.isMobile}
-        <Ellipsis class="size-6" />
-      {/if}
-    </button>
-  </Tooltip>
-{/snippet}
-
-{#snippet offcanvasMenu()}
-  <div class="mt-4 ml-4 flex items-center justify-start space-x-2">
-    <button
-      class="btn btn-ghost btn-square btn-sm"
-      onclick={() => (isOffcanvasOpen = false)}
-    >
-      <X class="size-6" />
-    </button>
-    <h2 class="text-lg font-bold">More options</h2>
-  </div>
-  <div class="flex flex-col items-start p-4 [&>*]:w-full">
-    {@render starOnGithub()}
-    {@render docsLink()}
-    <LayoutHeaderSchema />
-
-    {#if uiStore.isMobile}
-      <LayoutHeaderSearch />
-      <LayoutHeaderSettings />
-      <LayoutHeaderThemeSelect />
-    {/if}
-
-    <a
-      href="#/about"
-      onclick={() => (isOffcanvasOpen = false)}
-      class="btn btn-ghost justify-start space-x-1"
-    >
-      <Info class="size-4" />
-      <span>About the project</span>
-    </a>
-  </div>
-{/snippet}
 
 {#if !uiStore.isMobile}
   <header
@@ -114,10 +35,23 @@
       <LayoutHeaderSettings />
     </div>
     <div class="flex items-center justify-end space-x-2">
-      {@render starOnGithub()}
-      {@render docsLink()}
+      <LayoutHeaderStarOnGithub />
+      <LayoutHeaderDocsLink />
       <LayoutHeaderThemeSelect />
-      {@render offcanvasOpenButton()}
+
+      {#snippet menuContent()}
+        <LayoutHeaderMoreOptions />
+      {/snippet}
+
+      <MenuComponent
+        content={menuContent}
+        trigger="mouseenter focus"
+        placement="bottom-start"
+      >
+        <button class="btn btn-ghost btn-square">
+          <EllipsisVertical class="size-4" />
+        </button>
+      </MenuComponent>
     </div>
   </header>
 {/if}
@@ -146,11 +80,27 @@
     <Logo class="mx-auto h-[80%]" />
 
     <div class="flex items-center justify-end space-x-2">
-      {@render offcanvasOpenButton()}
+      <button
+        class="btn btn-ghost btn-square"
+        onclick={() => (isMobileOffcanvasOpen = true)}
+      >
+        <Ellipsis class="size-6" />
+      </button>
     </div>
   </header>
-{/if}
 
-<Offcanvas bind:isOpen={isOffcanvasOpen} direction="right">
-  {@render offcanvasMenu()}
-</Offcanvas>
+  <Offcanvas bind:isOpen={isMobileOffcanvasOpen} direction="right">
+    <div class="mt-4 ml-4 flex items-center justify-start space-x-2">
+      <button
+        class="btn btn-ghost btn-square btn-sm"
+        onclick={() => (isMobileOffcanvasOpen = false)}
+      >
+        <X class="size-6" />
+      </button>
+      <h2 class="text-lg font-bold">More options</h2>
+    </div>
+    <div class="p-4">
+      <LayoutHeaderMoreOptions />
+    </div>
+  </Offcanvas>
+{/if}

@@ -5,22 +5,19 @@
 
   import Code from "$lib/components/Code.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import Tooltip from "$lib/components/Tooltip.svelte";
 
   let isOpen = $state(false);
   const openModal = () => (isOpen = true);
   const closeModal = () => (isOpen = false);
 </script>
 
-<Tooltip content="Show full schema">
-  <button
-    class="btn btn-ghost btn-block justify-start space-x-1"
-    onclick={openModal}
-  >
-    <ScrollText class="size-4" />
-    <span>Full schema</span>
-  </button>
-</Tooltip>
+<button
+  class="btn btn-ghost btn-block justify-start space-x-1"
+  onclick={openModal}
+>
+  <ScrollText class="size-4" />
+  <span>Show full schema</span>
+</button>
 
 <Modal
   bind:isOpen
