@@ -25,6 +25,9 @@
 
 <div id={elId}></div>
 
+<!-- Space for the switch button to avoid hiding content behind it -->
+<div class="h-[75px]"></div>
+
 <style>
   :global([data-theme="dark"] .swagger-ui) {
     filter: invert(88%) hue-rotate(180deg);
