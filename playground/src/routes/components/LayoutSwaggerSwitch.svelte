@@ -39,7 +39,8 @@
 
 {#if isOpen}
   <div
-    class="bg-base-100 fixed top-0 left-0 z-40 h-[100dvh] w-[100dvw]"
+    data-theme="light"
+    class="bg-base-100 fixed top-0 left-0 z-40 h-[100dvh] w-[100dvw] overflow-y-auto"
     transition:fade={{ duration: 200 }}
   >
     <LayoutSwaggerUi />
