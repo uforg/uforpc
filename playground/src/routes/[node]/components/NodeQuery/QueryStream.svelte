@@ -209,9 +209,7 @@
   </div>
 
   {#if !uiStore.isMobile}
-    <div class="divider divider-horizontal"></div>
-
-    <div class="w-[40%] flex-none">
+    <div class="w-[40%] flex-none pl-6">
       <div class="sticky top-[72px] z-10 -mt-4 pt-4">
         <Snippets {value} type="stream" name={stream.name} />
       </div>
