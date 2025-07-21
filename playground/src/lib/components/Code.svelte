@@ -2,7 +2,6 @@
   import { Copy, Download, EllipsisVertical } from "@lucide/svelte";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { toast } from "svelte-sonner";
-  import { slide } from "svelte/transition";
 
   import { getLangExtension } from "$lib/helpers/getLangExtension";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
@@ -117,7 +116,7 @@
 {#if codeHighlighted !== ""}
   <div
     class={mergeClasses([
-      "group bg-base-200 relative z-10 p-4",
+      "bg-base-200 relative z-10 p-4",
       {
         "overflow-y-auto": scrollY,
         "overflow-x-auto": scrollX,
@@ -126,7 +125,6 @@
       },
       className,
     ])}
-    transition:slide={{ duration: 100 }}
   >
     <div
       class={["sticky top-0 left-0 z-10 flex justify-end", "-mb-6 h-6 w-full"]}
@@ -152,8 +150,6 @@
   div {
     :global(pre) {
       @apply bg-base-200!;
-      @apply overflow-x-auto;
-      @apply absolute z-0;
     }
 
     :global(pre:focus-visible) {
