@@ -129,16 +129,10 @@ func generateComponents(sch schema.Schema) (Components, error) {
 			"description": "Server sent events (SSE). Event response for the " + name + " stream, both for success and error cases based on the `ok` field.",
 			"content": map[string]any{
 				"text/event-stream": map[string]any{
-					"schema": map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"data": componentRequestBodySchema{
-								Type:       "object",
-								Properties: outputProperties,
-								Required:   outputRequiredFields,
-							},
-						},
-						"required": []string{"data"},
+					"schema": componentRequestBodySchema{
+						Type:       "object",
+						Properties: outputProperties,
+						Required:   outputRequiredFields,
 					},
 				},
 			},
