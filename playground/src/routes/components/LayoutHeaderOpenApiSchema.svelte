@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { Braces, Download, X } from "@lucide/svelte";
-
-  import { store } from "$lib/store.svelte";
+  import { Braces, X } from "@lucide/svelte";
 
   import Code from "$lib/components/Code.svelte";
   import Modal from "$lib/components/Modal.svelte";
@@ -37,16 +35,5 @@
     </button>
   </div>
 
-  <Code
-    lang="yaml"
-    code={openApiSchema}
-    class="w-full flex-grow overflow-auto"
-  />
-
-  <div class="flex justify-end">
-    <a href="./openapi.yaml" class="btn btn-primary" download>
-      <Download class="size-4" />
-      <span>Download</span>
-    </a>
-  </div>
+  <Code lang="yaml" code={openApiSchema} class="w-full flex-grow" />
 </Modal>

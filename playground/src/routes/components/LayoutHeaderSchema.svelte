@@ -30,9 +30,5 @@
     </button>
   </div>
 
-  <Code
-    lang="urpc"
-    code={store.urpcSchema}
-    class="w-full flex-grow overflow-auto"
-  />
+  <Code lang="urpc" code={store.urpcSchema} class="w-full flex-grow" />
 </Modal>

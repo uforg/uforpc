@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { Copy } from "@lucide/svelte";
+  import { Copy, Download, EllipsisVertical } from "@lucide/svelte";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { toast } from "svelte-sonner";
   import { slide } from "svelte/transition";
 
+  import { getLangExtension } from "$lib/helpers/getLangExtension";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
   import {
@@ -13,6 +14,8 @@
     lightTheme,
   } from "$lib/shiki";
   import { uiStore } from "$lib/uiStore.svelte";
+
+  import Menu from "./Menu.svelte";
 
   interface Props {
     code: string;
@@ -34,7 +37,7 @@
     scrollX = true,
   }: Props = $props();
 
-  let urpcSchemaHighlighted = $state("");
+  let codeHighlighted = $state("");
   $effect(() => {
     const themeMap = {
       dark: darkTheme,
@@ -46,7 +49,7 @@
 
     (async () => {
       const highlighter = await getHighlighter();
-      urpcSchemaHighlighted = highlighter.codeToHtml(codeToHighlight, {
+      codeHighlighted = highlighter.codeToHtml(codeToHighlight, {
         lang: getOrFallbackLanguage(lang),
         theme: theme,
         transformers: [transformerColorizedBrackets()],
@@ -54,20 +57,64 @@
     })();
   });
 
-  async function copyToClipboard(text: string) {
+  async function copyToClipboard() {
     try {
-      await navigator.clipboard.writeText(text);
-      toast.success("Text copied to clipboard", { duration: 1500 });
+      await navigator.clipboard.writeText(code);
+      toast.success("Code copied to clipboard", { duration: 1500 });
     } catch (err) {
-      console.error("Failed to copy text: ", err);
-      toast.error("Failed to copy text", {
+      console.error("Failed to copy code: ", err);
+      toast.error("Failed to copy code", {
         description: `Error: ${err}`,
       });
     }
   }
+
+  const downloadCode = () => {
+    try {
+      // Create a blob from the code
+      const blob = new Blob([code], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      // Find extension from lang
+      const extension = getLangExtension(lang);
+      const fileName = `code.${extension}`;
+
+      // Download the file
+      a.href = url;
+      a.download = fileName;
+      a.click();
+
+      toast.success("Code downloaded", { duration: 1500 });
+    } catch (error) {
+      console.error("Failed to download code: ", error);
+      toast.error("Failed to download code", {
+        description: `Error: ${error}`,
+      });
+    }
+  };
 </script>
 
-{#if urpcSchemaHighlighted !== ""}
+{#snippet menuContent()}
+  <div class="flex flex-col space-y-1">
+    <button
+      class="btn btn-ghost btn-sm justify-start"
+      onclick={() => copyToClipboard()}
+    >
+      <Copy class="size-4" />
+      <span>Copy to clipboard</span>
+    </button>
+    <button
+      class="btn btn-ghost btn-sm justify-start"
+      onclick={() => downloadCode()}
+    >
+      <Download class="size-4" />
+      <span>Download</span>
+    </button>
+  </div>
+{/snippet}
+
+{#if codeHighlighted !== ""}
   <div
     class={mergeClasses([
       "group bg-base-200 relative z-10 p-4",
@@ -81,16 +128,20 @@
     ])}
     transition:slide={{ duration: 100 }}
   >
-    <button
-      class="btn absolute top-4 right-4 hidden group-hover:block"
-      onclick={() => copyToClipboard(code)}
+    <div
+      class={["sticky top-0 left-0 z-10 flex justify-end", "-mb-6 h-6 w-full"]}
     >
-      <span class="flex items-center justify-center space-x-2">
-        <Copy class="size-4" />
-        <span>Copy</span>
-      </span>
-    </button>
-    {@html urpcSchemaHighlighted}
+      <Menu
+        content={menuContent}
+        trigger="mouseenter focus"
+        placement="left-start"
+      >
+        <button class="btn btn-sm btn-square">
+          <EllipsisVertical class="size-4" />
+        </button>
+      </Menu>
+    </div>
+    {@html codeHighlighted}
   </div>
 {/if}
 
@@ -102,6 +153,11 @@
     :global(pre) {
       @apply bg-base-200!;
       @apply overflow-x-auto;
+      @apply absolute z-0;
+    }
+
+    :global(pre:focus-visible) {
+      @apply outline-none;
     }
 
     /* 
