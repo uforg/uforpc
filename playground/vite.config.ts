@@ -11,19 +11,19 @@ export default defineConfig({
       targets: [
         {
           src: "../urpc/dist/urpc.wasm",
-          dest: "_app/_urpc",
+          dest: "app/urpc",
         },
         {
           src: "../urpc/dist/wasm_exec.js",
-          dest: "_app/_urpc",
+          dest: "app/urpc",
         },
         {
           src: "node_modules/web-tree-sitter/tree-sitter.wasm",
-          dest: "_app/_cconv",
+          dest: "app/cconv",
         },
         {
           src: "node_modules/curlconverter/dist/tree-sitter-bash.wasm",
-          dest: "_app/_cconv",
+          dest: "app/cconv",
         },
       ],
     }),

@@ -11,8 +11,8 @@
       const __mpOriginalFetch = globalThis.fetch;
       globalThis.fetch = async function (resource, options) {
         const redirects = {
-          "/tree-sitter.wasm": "./_app/_cconv/tree-sitter.wasm",
-          "/tree-sitter-bash.wasm": "./_app/_cconv/tree-sitter-bash.wasm",
+          "/tree-sitter.wasm": "./app/cconv/tree-sitter.wasm",
+          "/tree-sitter-bash.wasm": "./app/cconv/tree-sitter-bash.wasm",
         };
 
         if (redirects[resource]) resource = redirects[resource];
