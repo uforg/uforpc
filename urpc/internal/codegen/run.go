@@ -129,6 +129,7 @@ func runPlayground(absConfigDir string, config *playground.Config, openAPIConfig
 	}
 
 	// Generate the openapi.yaml file
+	openAPIConfig.OutputFile = openAPIOutputFile
 	if openAPIConfig.BaseURL == "" {
 		openAPIConfig.BaseURL = config.DefaultBaseURL
 	}
