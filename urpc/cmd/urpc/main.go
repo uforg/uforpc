@@ -15,25 +15,28 @@ type allArgs struct {
 	Transpile *cmdTranspileArgs `arg:"subcommand:transpile" help:"Transpile a URPC schema to JSON and vice versa, the result will be printed to stdout"`
 	Generate  *cmdGenerateArgs  `arg:"subcommand:generate" help:"Generate code from the URPC schema"`
 	LSP       *cmdLSPArgs       `arg:"subcommand:lsp" help:"Start the UFO RPC Language Server"`
-	Version   *cmdVersionArgs   `arg:"subcommand:version" help:"Show urpc version information"`
+	Version   *struct{}         `arg:"subcommand:version" help:"Show urpc version information"`
+}
+
+func printVersion() {
+	fmt.Printf("%s\n\n", version.AsciiArt)
 }
 
 func main() {
 	// If the LSP is called, then omit the arg parser to avoid taking
 	// control of the stdin/stdout because the LSP will need it.
+	//
+	// If the command is not lsp, then continue with the rest of the logic.
 	if len(os.Args) > 1 && os.Args[1] == "lsp" {
 		cmdLSP(nil)
 		return
 	}
 
-	// If the command is not lsp, then continue with the rest of the logic.
-	fmt.Printf("%s\n\n", version.AsciiArt)
-
 	// Check for version flags before argument parsing
 	if len(os.Args) > 1 {
 		arg := os.Args[1]
 		if arg == "--version" || arg == "-v" {
-			cmdVersion(nil)
+			printVersion()
 			return
 		}
 	}
@@ -47,6 +50,7 @@ func main() {
 	err = p.Parse(os.Args[1:])
 	switch {
 	case err == arg.ErrHelp: // indicates that user wrote "--help" on command line
+		printVersion()
 		p.WriteHelp(os.Stdout)
 		os.Exit(0)
 	case err != nil:
@@ -76,5 +80,5 @@ func main() {
 	}
 
 	// If no subcommand was specified, show version by default
-	cmdVersion(nil)
+	printVersion()
 }

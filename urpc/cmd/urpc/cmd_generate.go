@@ -19,8 +19,8 @@ func cmdGenerate(args *cmdGenerateArgs) {
 	}
 
 	if err := codegen.Run(args.ConfigPath); err != nil {
-		log.Fatalf("failed to run code generator: %s", err)
+		log.Fatalf("UFO RPC: failed to run code generator: %s", err)
 	}
 
-	log.Printf("code generation finished in %s", time.Since(startTime))
+	log.Printf("UFO RPC: code generation finished in %s", time.Since(startTime))
 }

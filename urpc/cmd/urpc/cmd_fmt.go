@@ -21,28 +21,28 @@ func cmdFmt(args *cmdFmtArgs) {
 
 	matches, err = filepath.Glob(args.Pattern)
 	if err != nil {
-		log.Fatalf("failed to glob pattern: %s", err)
+		log.Fatalf("UFO RPC: failed to glob pattern: %s", err)
 	}
 
 	for _, match := range matches {
 		fileBytes, err := os.ReadFile(match)
 		if err != nil {
-			log.Fatalf("failed to read file: %s", err)
+			log.Fatalf("UFO RPC: failed to read file: %s", err)
 		}
 
 		formatted, err := formatter.Format(match, string(fileBytes))
 		if err != nil {
-			log.Fatalf("failed to format file: %s", err)
+			log.Fatalf("UFO RPC: failed to format file: %s", err)
 		}
 
 		if err := os.WriteFile(match, []byte(formatted), 0644); err != nil {
-			log.Fatalf("failed to write file: %s", err)
+			log.Fatalf("UFO RPC: failed to write file: %s", err)
 		}
 
 		if args.Verbose {
-			log.Println("formatted", match)
+			log.Println("UFO RPC: formatted", match)
 		}
 	}
 
-	log.Printf("formatted %d files in %s", len(matches), time.Since(startTime))
+	log.Printf("UFO RPC: formatted %d files in %s", len(matches), time.Since(startTime))
 }

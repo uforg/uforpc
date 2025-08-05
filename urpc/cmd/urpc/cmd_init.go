@@ -27,12 +27,12 @@ func cmdInit(args *cmdInitArgs) {
 
 	// Validate that path is a directory
 	if info, err := os.Stat(args.Path); err == nil && !info.IsDir() {
-		log.Fatalf("path must be a directory, not a file: %s", args.Path)
+		log.Fatalf("UFO RPC: path must be a directory, not a file: %s", args.Path)
 	}
 
 	// Create directory if it doesn't exist
 	if err := os.MkdirAll(args.Path, 0755); err != nil {
-		log.Fatalf("failed to create directory: %s", err)
+		log.Fatalf("UFO RPC: failed to create directory: %s", err)
 	}
 
 	// Generate unique filenames
@@ -40,15 +40,15 @@ func cmdInit(args *cmdInitArgs) {
 
 	// Write both files
 	if err := os.WriteFile(schemaPath, initSchema, 0644); err != nil {
-		log.Fatalf("failed to write schema file: %s", err)
+		log.Fatalf("UFO RPC: failed to write schema file: %s", err)
 	}
 
 	initConfigStr := strings.ReplaceAll(string(initConfig), "{{schema_path}}", "./"+schemaName)
 	if err := os.WriteFile(configPath, []byte(initConfigStr), 0644); err != nil {
-		log.Fatalf("failed to write config file: %s", err)
+		log.Fatalf("UFO RPC: failed to write config file: %s", err)
 	}
 
-	fmt.Printf("URPC files initialized:\n- %s\n- %s\n", schemaPath, configPath)
+	fmt.Printf("UFO RPC: files initialized:\n- %s\n- %s\n", schemaPath, configPath)
 }
 
 // generateUniqueFilenames generates unique filenames for the schema and config files
