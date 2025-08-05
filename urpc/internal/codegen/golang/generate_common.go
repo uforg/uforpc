@@ -256,6 +256,7 @@ func renderPreType(
 		og.Line("// Transformations")
 		for _, fieldDef := range fields {
 			fieldName := strutil.ToPascalCase(fieldDef.Name)
+			fieldNameTemp := "transformed" + fieldName
 			isRequired := !fieldDef.Optional
 			isBuiltinType := fieldDef.IsBuiltInType()
 			isCustomType := fieldDef.IsCustomType()
@@ -265,9 +266,9 @@ func renderPreType(
 			// Process fields with builtin types
 			if isBuiltinType {
 				if isRequired {
-					og.Linef("%s := p.%s.Value", fieldName, fieldName)
+					og.Linef("%s := p.%s.Value", fieldNameTemp, fieldName)
 				} else {
-					og.Linef("%s := p.%s", fieldName, fieldName)
+					og.Linef("%s := p.%s", fieldNameTemp, fieldName)
 				}
 				continue
 			}
@@ -283,10 +284,10 @@ func renderPreType(
 				}
 
 				if isRequired {
-					og.Linef("%s := p.%s.Value.transform()", fieldName, fieldName)
+					og.Linef("%s := p.%s.Value.transform()", fieldNameTemp, fieldName)
 				} else {
 					og.Linef("%s := Optional[%s]{Present: p.%s.Present, Value: p.%s.Value.transform()}",
-						fieldName,
+						fieldNameTemp,
 						typeName,
 						fieldName,
 						fieldName,
@@ -305,29 +306,29 @@ func renderPreType(
 					typeName = name + fieldName
 				}
 
-				fieldNameTemp := "trans_" + fieldName
+				fieldNameTempArr := "items" + strutil.ToPascalCase(fieldNameTemp)
 				og.Linef(
 					"%s := make([]%s, len(p.%s.Value))",
-					fieldNameTemp,
+					fieldNameTempArr,
 					typeName,
 					fieldName,
 				)
 
 				og.Linef("for index, preItem := range p.%s.Value {", fieldName)
 				og.Block(func() {
-					og.Linef("%s[index] = preItem.transform()", fieldNameTemp)
+					og.Linef("%s[index] = preItem.transform()", fieldNameTempArr)
 				})
 				og.Line("}")
 
 				if isRequired {
-					og.Linef("%s := %s", fieldName, fieldNameTemp)
+					og.Linef("%s := %s", fieldNameTemp, fieldNameTempArr)
 				} else {
 					og.Linef(
 						"%s := Optional[[]%s]{Present: p.%s.Present, Value: %s}",
-						fieldName,
+						fieldNameTemp,
 						typeName,
 						fieldName,
-						fieldNameTemp,
+						fieldNameTempArr,
 					)
 				}
 				continue
@@ -339,8 +340,9 @@ func renderPreType(
 		og.Linef("return %s{", name)
 		og.Block(func() {
 			for _, fieldDef := range fields {
-				name := strutil.ToPascalCase(fieldDef.Name)
-				og.Linef("%s: %s,", name, name)
+				fieldName := strutil.ToPascalCase(fieldDef.Name)
+				fieldNameTemp := "transformed" + fieldName
+				og.Linef("%s: %s,", fieldName, fieldNameTemp)
 			}
 		})
 		og.Line("}")
