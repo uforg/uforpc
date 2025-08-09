@@ -141,15 +141,16 @@ func (h *HandlerContext[P, I]) OperationName() string { return h.operationName }
 // OperationType returns the type of operation (e.g. "proc" or "stream")
 func (h *HandlerContext[P, I]) OperationType() string { return h.operationType }
 
-// GlobalMiddleware is the signature for a middleware applied to all requests.
-// It uses an explicit func(c, next) pattern for fine-grained control.
-//
-// The first return value is the output of the middleware. Since it's global
-// and runs for every request, it can be any type.
-type GlobalMiddleware[P any] func(
+// GlobalHandlerFunc is the signature for a global handler function.
+// Both for procedures and streams
+type GlobalHandlerFunc[P any] func(
 	c *HandlerContext[P, any],
-	next func(c *HandlerContext[P, any]) (any, error),
 ) (any, error)
+
+// GlobalMiddleware is the signature for a middleware applied to all requests.
+type GlobalMiddleware[P any] func(
+	next GlobalHandlerFunc[P],
+) GlobalHandlerFunc[P]
 
 // ProcHandlerFunc is the signature of the final business handler for a proc.
 type ProcHandlerFunc[P any, I any, O any] func(
@@ -167,7 +168,7 @@ type ProcMiddlewareFunc[P any, I any, O any] func(
 // StreamHandlerFunc is the signature of the main handler that initializes a stream.
 type StreamHandlerFunc[P any, I any, O any] func(
 	c *HandlerContext[P, I],
-	emit EmitFunc[O],
+	emit EmitFunc[P, I, O],
 ) error
 
 // StreamMiddlewareFunc is the signature for a middleware that wraps the main stream handler.
@@ -176,15 +177,15 @@ type StreamMiddlewareFunc[P any, I any, O any] func(
 ) StreamHandlerFunc[P, I, O]
 
 // EmitFunc is the signature for emitting events from a stream.
-type EmitFunc[O any] func(
+type EmitFunc[P any, I any, O any] func(
+	c *HandlerContext[P, I],
 	output O,
 ) error
 
 // EmitMiddlewareFunc is the signature for a middleware that wraps each call to emit.
-type EmitMiddlewareFunc[P any, O any] func(
-	c *HandlerContext[P, any],
-	next EmitFunc[O],
-) EmitFunc[O]
+type EmitMiddlewareFunc[P any, I any, O any] func(
+	next EmitFunc[P, I, O],
+) EmitFunc[P, I, O]
 
 // -----------------------------------------------------------------------------
 // Server Internal Implementation
@@ -224,7 +225,7 @@ type internalServer[P any] struct {
 	// streamMiddlewares contains per-stream middlewares (already adapted to untyped layer)
 	streamMiddlewares map[string][]StreamMiddlewareFunc[P, any, any]
 	// streamEmitMiddlewares contains per-stream emit middlewares (already adapted to untyped layer)
-	streamEmitMiddlewares map[string][]EmitMiddlewareFunc[P, any]
+	streamEmitMiddlewares map[string][]EmitMiddlewareFunc[P, any, any]
 }
 
 // newInternalServer creates a new UFO RPC server instance with the specified
@@ -268,7 +269,7 @@ func newInternalServer[P any](
 		globalMiddlewares:     []GlobalMiddleware[P]{},
 		procMiddlewares:       map[string][]ProcMiddlewareFunc[P, any, any]{},
 		streamMiddlewares:     map[string][]StreamMiddlewareFunc[P, any, any]{},
-		streamEmitMiddlewares: map[string][]EmitMiddlewareFunc[P, any]{},
+		streamEmitMiddlewares: map[string][]EmitMiddlewareFunc[P, any, any]{},
 	}
 }
 
@@ -311,7 +312,7 @@ func (s *internalServer[P]) addStreamMiddleware(
 // Middlewares are executed in the order they were registered.
 func (s *internalServer[P]) addStreamEmitMiddleware(
 	streamName string,
-	mw EmitMiddlewareFunc[P, any],
+	mw EmitMiddlewareFunc[P, any, any],
 ) *internalServer[P] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
@@ -422,10 +423,11 @@ func (s *internalServer[P]) handleRequest(
 
 	// Build the global middleware chain (in reverse registration order)
 	exec := adapter
-	for i := len(s.globalMiddlewares) - 1; i >= 0; i-- {
-		mw := s.globalMiddlewares[i]
-		next := exec
-		exec = func(c *HandlerContext[P, any]) (any, error) { return mw(c, next) }
+	if len(s.globalMiddlewares) > 0 {
+		mwChain := append([]GlobalMiddleware[P](nil), s.globalMiddlewares...)
+		for i := len(mwChain) - 1; i >= 0; i-- {
+			exec = mwChain[i](exec)
+		}
 	}
 
 	// Execute the chain
@@ -528,7 +530,7 @@ func (s *internalServer[P]) handleStreamRequest(
 	}
 
 	// Base emit writes SSE envelope with {ok:true, output}
-	baseEmit := func(data any) error {
+	baseEmit := func(_ *HandlerContext[P, any], data any) error {
 		response := Response[any]{
 			Ok:     true,
 			Output: data,
@@ -550,9 +552,11 @@ func (s *internalServer[P]) handleStreamRequest(
 	// Compose emit middlewares (reverse registration order)
 	emitFinal := baseEmit
 	if len(emitMws) > 0 {
-		mwChain := append([]EmitMiddlewareFunc[P, any](nil), emitMws...)
+		mwChain := append([]EmitMiddlewareFunc[P, any, any](nil), emitMws...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
-			emitFinal = mwChain[i](c, emitFinal)
+			emitFinal = func(c *HandlerContext[P, any], data any) error {
+				return mwChain[i](emitFinal)(c, data)
+			}
 		}
 	}
 
