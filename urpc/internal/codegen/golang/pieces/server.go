@@ -407,7 +407,7 @@ func (s *internalServer[P]) handleRequest(
 		return s.writeProcResponse(httpAdapter, res)
 	}
 
-	// Build the unified handler context for the global middleware chain
+	// Build the unified handler context (raw input at this point).
 	c := &HandlerContext[P, any]{
 		Input:         rawInput,
 		Props:         props,
@@ -419,34 +419,10 @@ func (s *internalServer[P]) handleRequest(
 	// Track whether the stream connection has been started (headers sent)
 	startedStream := false
 
-	// Dispatcher bridges the global chain with the specific proc/stream function
-	dispatch := func(c *HandlerContext[P, any]) (any, error) {
-		switch operationType {
-		case ServerOperationTypeProc:
-			return s.handleProcRequest(c, operationName, rawInput)
-		case ServerOperationTypeStream:
-			// handle stream lifecycle and return error to propagate through global middlewares
-			startedStream = true // set to true as soon as we enter the stream path
-			return nil, s.handleStreamRequest(c, operationName, rawInput, httpAdapter, &startedStream)
-		default:
-			return nil, fmt.Errorf("unsupported operation type: %s", operationType)
-		}
-	}
-
-	// Build the global middleware chain (in reverse registration order)
-	exec := dispatch
-	if len(s.globalMiddlewares) > 0 {
-		mwChain := append([]GlobalMiddleware[P](nil), s.globalMiddlewares...)
-		for i := len(mwChain) - 1; i >= 0; i-- {
-			exec = mwChain[i](exec)
-		}
-	}
-
-	// Execute the chain
-	output, err := exec(c)
-
-	// Stream response path
+	// Dispatch based on operation type. Global middlewares are applied inside
+	// handleProcRequest/handleStreamRequest after input deserialization.
 	if operationType == ServerOperationTypeStream {
+		err := s.handleStreamRequest(c, operationName, rawInput, httpAdapter, &startedStream)
 		if err != nil {
 			if startedStream {
 				// Emit a final error event for stream failures after connection started
@@ -476,6 +452,8 @@ func (s *internalServer[P]) handleRequest(
 		}
 		return nil
 	}
+
+	output, err := s.handleProcRequest(c, operationName, rawInput)
 
 	// Procedure response path
 	response := Response[any]{}
@@ -518,7 +496,7 @@ func (s *internalServer[P]) handleProcRequest(
 	}
 	c.Input = typedInput
 
-	// Compose middlewares around the base handler (reverse registration order)
+	// Compose specific per-proc middlewares around the base handler (reverse registration order)
 	final := baseHandler
 	if len(mws) > 0 {
 		mwChain := append([]ProcMiddlewareFunc[P, any, any](nil), mws...)
@@ -527,7 +505,16 @@ func (s *internalServer[P]) handleProcRequest(
 		}
 	}
 
-	return final(c)
+	// Wrap the specific chain with global middlewares (executed before specific ones)
+	exec := func(c *HandlerContext[P, any]) (any, error) { return final(c) }
+	if len(s.globalMiddlewares) > 0 {
+		mwChain := append([]GlobalMiddleware[P](nil), s.globalMiddlewares...)
+		for i := len(mwChain) - 1; i >= 0; i-- {
+			exec = mwChain[i](exec)
+		}
+	}
+
+	return exec(c)
 }
 
 // handleStreamRequest builds the per-request middleware chain for a stream, sets up SSE,
@@ -607,8 +594,17 @@ func (s *internalServer[P]) handleStreamRequest(
 		}
 	}
 
-	// Execute chain
-	return final(c, emitFinal)
+	// Wrap the specific stream chain with global middlewares (executed before specific ones)
+	exec := func(c *HandlerContext[P, any]) (any, error) { return nil, final(c, emitFinal) }
+	if len(s.globalMiddlewares) > 0 {
+		mwChain := append([]GlobalMiddleware[P](nil), s.globalMiddlewares...)
+		for i := len(mwChain) - 1; i >= 0; i-- {
+			exec = mwChain[i](exec)
+		}
+	}
+
+	_, err = exec(c)
+	return err
 }
 
 // writeProcResponse writes a procedure response to the client as JSON.
