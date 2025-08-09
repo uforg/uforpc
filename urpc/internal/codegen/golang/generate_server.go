@@ -176,7 +176,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Handle registers the business handler for the %s procedure.", name)
 		g.Linef("func (e proc%sEntry[P]) Handle(handler %sHandlerFunc[P]) {", name, name)
 		g.Block(func() {
-			g.Linef("adapted := func(cGeneric *HandlerContext[P, any]) (any, error) {")
+			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[P, any]) (any, error) {")
 			g.Block(func() {
 				g.Line("// 1. Create the specific context from the generic one provided by the server.")
 				g.Line("//    This requires a type assertion on the input field.")
@@ -197,7 +197,20 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("return handler(cSpecific)")
 			})
 			g.Line("}")
-			g.Linef("e.intServer.setProcHandler(\"%s\", adapted)", name)
+
+			g.Linef("deserializer := func(raw json.RawMessage) (any, error) {")
+			g.Block(func() {
+				g.Linef("var pre pre%sInput", name)
+				g.Line("if err := json.Unmarshal(raw, &pre); err != nil {")
+				g.Block(func() { g.Linef("return nil, fmt.Errorf(\"failed to unmarshal %s input: %%w\", err)", name) })
+				g.Line("}")
+				g.Line("if err := pre.validate(); err != nil { return nil, err }")
+				g.Line("typed := pre.transform()")
+				g.Line("return typed, nil")
+			})
+			g.Line("}")
+
+			g.Linef("e.intServer.setProcHandler(\"%s\", adaptedHandler, deserializer)", name)
 		})
 		g.Line("}")
 		g.Break()
@@ -356,7 +369,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Handle registers the business handler for the %s stream.", name)
 		g.Linef("func (e stream%sEntry[P]) Handle(handler %sHandlerFunc[P]) {", name, name)
 		g.Block(func() {
-			g.Linef("adapted := func(cGeneric *HandlerContext[P, any], emitGeneric EmitFunc[P, any, any]) error {")
+			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[P, any], emitGeneric EmitFunc[P, any, any]) error {")
 			g.Block(func() {
 				g.Line("// 1. Create the specific, type-safe emit function by wrapping the generic one.")
 				g.Line("//    It uses 'cGeneric' from the outer scope, which has the correct type for the generic call.")
@@ -384,7 +397,19 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 			})
 			g.Line("}")
 
-			g.Linef("e.intServer.setStreamHandler(\"%s\", adapted)", name)
+			g.Linef("deserializer := func(raw json.RawMessage) (any, error) {")
+			g.Block(func() {
+				g.Linef("var pre pre%sInput", name)
+				g.Line("if err := json.Unmarshal(raw, &pre); err != nil {")
+				g.Block(func() { g.Linef("return nil, fmt.Errorf(\"failed to unmarshal %s input: %%w\", err)", name) })
+				g.Line("}")
+				g.Line("if err := pre.validate(); err != nil { return nil, err }")
+				g.Line("typed := pre.transform()")
+				g.Line("return typed, nil")
+			})
+			g.Line("}")
+
+			g.Linef("e.intServer.setStreamHandler(\"%s\", adaptedHandler, deserializer)", name)
 		})
 		g.Line("}")
 		g.Break()

@@ -187,6 +187,9 @@ type EmitMiddlewareFunc[P any, I any, O any] func(
 	next EmitFunc[P, I, O],
 ) EmitFunc[P, I, O]
 
+// Deserializer function convert raw JSON input into typed input prior to handler execution.
+type DeserializeFunc func(raw json.RawMessage) (any, error)
+
 // -----------------------------------------------------------------------------
 // Server Internal Implementation
 // -----------------------------------------------------------------------------
@@ -212,20 +215,22 @@ type internalServer[P any] struct {
 	operationNamesMap map[string]string
 	// handlersMu protects all handler maps and middleware slices from concurrent access
 	handlersMu sync.RWMutex
-	// procHandlers maps procedure names to their final implementation functions
-	// The function receives a generic HandlerContext with any input and returns (any, error)
+	// procHandlers stores the final implementation functions for procedures
 	procHandlers map[string]ProcHandlerFunc[P, any, any]
-	// streamHandlers maps stream names to their final implementation functions
-	// The function receives a generic HandlerContext with any input and a generic emit function.
+	// streamHandlers stores the final implementation functions for streams
 	streamHandlers map[string]StreamHandlerFunc[P, any, any]
 	// globalMiddlewares contains middlewares that run for every request (both procs and streams)
 	globalMiddlewares []GlobalMiddleware[P]
-	// procMiddlewares contains per-procedure middlewares (already adapted to untyped layer)
+	// procMiddlewares contains per-procedure middlewares
 	procMiddlewares map[string][]ProcMiddlewareFunc[P, any, any]
-	// streamMiddlewares contains per-stream middlewares (already adapted to untyped layer)
+	// streamMiddlewares contains per-stream middlewares
 	streamMiddlewares map[string][]StreamMiddlewareFunc[P, any, any]
-	// streamEmitMiddlewares contains per-stream emit middlewares (already adapted to untyped layer)
+	// streamEmitMiddlewares contains per-stream emit middlewares
 	streamEmitMiddlewares map[string][]EmitMiddlewareFunc[P, any, any]
+	// procDeserializers contains per-procedure input deserializers
+	procDeserializers map[string]DeserializeFunc
+	// streamDeserializers contains per-stream input deserializers
+	streamDeserializers map[string]DeserializeFunc
 }
 
 // newInternalServer creates a new UFO RPC server instance with the specified
@@ -270,6 +275,8 @@ func newInternalServer[P any](
 		procMiddlewares:       map[string][]ProcMiddlewareFunc[P, any, any]{},
 		streamMiddlewares:     map[string][]StreamMiddlewareFunc[P, any, any]{},
 		streamEmitMiddlewares: map[string][]EmitMiddlewareFunc[P, any, any]{},
+		procDeserializers:     map[string]DeserializeFunc{},
+		streamDeserializers:   map[string]DeserializeFunc{},
 	}
 }
 
@@ -284,7 +291,7 @@ func (s *internalServer[P]) addGlobalMiddleware(
 	return s
 }
 
-// addProcMiddleware registers an untyped wrapper middleware for a specific procedure.
+// addProcMiddleware registers a wrapper middleware for a specific procedure.
 // Middlewares are executed in the order they were registered.
 func (s *internalServer[P]) addProcMiddleware(
 	procName string,
@@ -296,7 +303,7 @@ func (s *internalServer[P]) addProcMiddleware(
 	return s
 }
 
-// addStreamMiddleware registers an untyped wrapper middleware for a specific stream.
+// addStreamMiddleware registers a wrapper middleware for a specific stream.
 // Middlewares are executed in the order they were registered.
 func (s *internalServer[P]) addStreamMiddleware(
 	streamName string,
@@ -308,7 +315,7 @@ func (s *internalServer[P]) addStreamMiddleware(
 	return s
 }
 
-// addStreamEmitMiddleware registers an untyped emit wrapper middleware for a specific stream.
+// addStreamEmitMiddleware registers an emit wrapper middleware for a specific stream.
 // Middlewares are executed in the order they were registered.
 func (s *internalServer[P]) addStreamEmitMiddleware(
 	streamName string,
@@ -320,13 +327,14 @@ func (s *internalServer[P]) addStreamEmitMiddleware(
 	return s
 }
 
-// setProcHandler registers the final implementation function for the specified procedure name.
-// The provided function is stored as-is. Middlewares are composed at request time.
+// setProcHandler registers the final implementation function and deserializer for the specified procedure name.
+// The provided functions are stored as-is. Middlewares are composed at request time.
 //
 // Panics if a handler is already registered for the given procedure name.
 func (s *internalServer[P]) setProcHandler(
 	procName string,
 	handler ProcHandlerFunc[P, any, any],
+	deserializer DeserializeFunc,
 ) *internalServer[P] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
@@ -334,16 +342,18 @@ func (s *internalServer[P]) setProcHandler(
 		panic(fmt.Sprintf("the procedure handler for %s is already registered", procName))
 	}
 	s.procHandlers[procName] = handler
+	s.procDeserializers[procName] = deserializer
 	return s
 }
 
-// setStreamHandler registers the final implementation function for the specified stream name.
-// The provided function is stored as-is. Middlewares are composed at request time.
+// setStreamHandler registers the final implementation function and deserializer for the specified stream name.
+// The provided functions are stored as-is. Middlewares are composed at request time.
 //
 // Panics if a handler is already registered for the given stream name.
 func (s *internalServer[P]) setStreamHandler(
 	streamName string,
 	handler StreamHandlerFunc[P, any, any],
+	deserializer DeserializeFunc,
 ) *internalServer[P] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
@@ -351,6 +361,7 @@ func (s *internalServer[P]) setStreamHandler(
 		panic(fmt.Sprintf("the stream handler for %s is already registered", streamName))
 	}
 	s.streamHandlers[streamName] = handler
+	s.streamDeserializers[streamName] = deserializer
 	return s
 }
 
@@ -378,8 +389,8 @@ func (s *internalServer[P]) handleRequest(
 	}
 
 	// Decode the request body into a json.RawMessage as the initial input container
-	var input json.RawMessage
-	if err := json.NewDecoder(httpAdapter.RequestBody()).Decode(&input); err != nil {
+	var rawInput json.RawMessage
+	if err := json.NewDecoder(httpAdapter.RequestBody()).Decode(&rawInput); err != nil {
 		res := Response[any]{
 			Ok:    false,
 			Error: Error{Message: "Invalid request body"},
@@ -398,7 +409,7 @@ func (s *internalServer[P]) handleRequest(
 
 	// Build the unified handler context for the global middleware chain
 	c := &HandlerContext[P, any]{
-		Input:         input,
+		Input:         rawInput,
 		Props:         props,
 		Context:       ctx,
 		operationName: operationName,
@@ -408,21 +419,22 @@ func (s *internalServer[P]) handleRequest(
 	// Track whether the stream connection has been started (headers sent)
 	startedStream := false
 
-	// Adapter bridges the global chain with the specific proc/stream function
-	adapter := func(c *HandlerContext[P, any]) (any, error) {
+	// Dispatcher bridges the global chain with the specific proc/stream function
+	dispatch := func(c *HandlerContext[P, any]) (any, error) {
 		switch operationType {
 		case ServerOperationTypeProc:
-			return s.handleProcRequest(c, operationName)
+			return s.handleProcRequest(c, operationName, rawInput)
 		case ServerOperationTypeStream:
-			startedStream = true
-			return nil, s.handleStreamRequest(c, operationName, httpAdapter)
+			// handle stream lifecycle and return error to propagate through global middlewares
+			startedStream = true // set to true as soon as we enter the stream path
+			return nil, s.handleStreamRequest(c, operationName, rawInput, httpAdapter, &startedStream)
 		default:
 			return nil, fmt.Errorf("unsupported operation type: %s", operationType)
 		}
 	}
 
 	// Build the global middleware chain (in reverse registration order)
-	exec := adapter
+	exec := dispatch
 	if len(s.globalMiddlewares) > 0 {
 		mwChain := append([]GlobalMiddleware[P](nil), s.globalMiddlewares...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
@@ -483,16 +495,28 @@ func (s *internalServer[P]) handleRequest(
 func (s *internalServer[P]) handleProcRequest(
 	c *HandlerContext[P, any],
 	procName string,
+	rawInput json.RawMessage,
 ) (any, error) {
-	// Snapshot handler and middlewares under read lock
+	// Snapshot handler, middlewares, and deserializer under read lock
 	s.handlersMu.RLock()
 	baseHandler, ok := s.procHandlers[procName]
 	mws := s.procMiddlewares[procName]
+	deserialize := s.procDeserializers[procName]
 	s.handlersMu.RUnlock()
 
 	if !ok {
 		return nil, fmt.Errorf("%s procedure not implemented", procName)
 	}
+	if deserialize == nil {
+		return nil, fmt.Errorf("%s procedure deserializer not registered", procName)
+	}
+
+	// Deserialize, validate and transform input into its typed form
+	typedInput, err := deserialize(rawInput)
+	if err != nil {
+		return nil, err
+	}
+	c.Input = typedInput
 
 	// Compose middlewares around the base handler (reverse registration order)
 	final := baseHandler
@@ -511,22 +535,38 @@ func (s *internalServer[P]) handleProcRequest(
 func (s *internalServer[P]) handleStreamRequest(
 	c *HandlerContext[P, any],
 	streamName string,
+	rawInput json.RawMessage,
 	httpAdapter ServerHTTPAdapter,
+	started *bool,
 ) error {
-	// Set SSE headers
-	httpAdapter.SetHeader("Content-Type", "text/event-stream")
-	httpAdapter.SetHeader("Cache-Control", "no-cache")
-	httpAdapter.SetHeader("Connection", "keep-alive")
-
-	// Snapshot handler and middlewares under read lock
+	// Snapshot handler, middlewares, emit middlewares and deserializer under read lock
 	s.handlersMu.RLock()
 	baseHandler, ok := s.streamHandlers[streamName]
 	streamMws := s.streamMiddlewares[streamName]
 	emitMws := s.streamEmitMiddlewares[streamName]
+	deserialize := s.streamDeserializers[streamName]
 	s.handlersMu.RUnlock()
 
 	if !ok {
 		return fmt.Errorf("%s stream not implemented", streamName)
+	}
+	if deserialize == nil {
+		return fmt.Errorf("%s stream deserializer not registered", streamName)
+	}
+
+	// Deserialize, validate and transform input into its typed form
+	typedInput, err := deserialize(rawInput)
+	if err != nil {
+		return err
+	}
+	c.Input = typedInput
+
+	// Set SSE headers and mark the stream as started
+	httpAdapter.SetHeader("Content-Type", "text/event-stream")
+	httpAdapter.SetHeader("Cache-Control", "no-cache")
+	httpAdapter.SetHeader("Connection", "keep-alive")
+	if started != nil {
+		*started = true
 	}
 
 	// Base emit writes SSE envelope with {ok:true, output}
@@ -554,9 +594,7 @@ func (s *internalServer[P]) handleStreamRequest(
 	if len(emitMws) > 0 {
 		mwChain := append([]EmitMiddlewareFunc[P, any, any](nil), emitMws...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
-			emitFinal = func(c *HandlerContext[P, any], data any) error {
-				return mwChain[i](emitFinal)(c, data)
-			}
+			emitFinal = mwChain[i](emitFinal)
 		}
 	}
 
