@@ -59,13 +59,30 @@ interface ReconnectConfig {
 // -----------------------------------------------------------------------------
 
 /**
+ * FetchLikeResponse is a minimal interface that a fetch response implementation must
+ * satisfy.
+ */
+interface FetchLikeResponse {
+  ok: boolean;
+  status: number;
+  body?: ReadableStream<Uint8Array>;
+  json(): Promise<any>;
+  text(): Promise<string>;
+}
+
+/**
+ * FetchLike is a minimal interface that a fetch implementation must satisfy.
+ */
+type FetchLike = (input: any, init?: any) => Promise<FetchLikeResponse>;
+
+/**
  * internalClient is the engine used by the generated façade. All identifiers
  * are deliberately un-exported because user code should interact only with the
  * generated wrappers.
  */
 class internalClient {
   private baseURL: string;
-  private fetchFn: typeof fetch;
+  private fetchFn: FetchLike;
   private globalHeaders: Record<string, string> = {};
   private procSet: Set<string>;
   private streamSet: Set<string>;
@@ -76,16 +93,44 @@ class internalClient {
     streamNames: string[],
     opts: internalClientOption[]
   ) {
+    this.verifyRuntimeDeps();
+
     this.baseURL = baseURL.replace(/\/+$/, "");
     this.procSet = new Set(procNames);
     this.streamSet = new Set(streamNames);
-    this.fetchFn = globalThis.fetch?.bind(globalThis) as typeof fetch;
+    this.fetchFn = (globalThis.fetch ?? null) as FetchLike;
 
-    opts.forEach((o) => o(this));
+    opts.forEach((optFn) => optFn(this));
 
     if (!this.fetchFn) {
       throw new Error(
         "globalThis.fetch is undefined - please supply a custom fetch using WithFetch()"
+      );
+    }
+  }
+
+  /**
+   * verifyRuntimeDeps checks if the runtime dependencies used by the client are present.
+   */
+  private verifyRuntimeDeps() {
+    const missing: string[] = [];
+
+    if (typeof AbortController !== "function") {
+      missing.push("AbortController");
+    }
+
+    if (typeof ReadableStream === "undefined") {
+      missing.push("ReadableStream");
+    }
+
+    if (typeof TextDecoder !== "function") {
+      missing.push("TextDecoder");
+    }
+
+    if (missing.length > 0) {
+      const missingStr = missing.join(", ");
+      throw new Error(
+        `Missing required runtime dependencies: ${missingStr}. Install the necessary polyfills or use a compatible environment.`
       );
     }
   }
@@ -464,8 +509,8 @@ class internalClient {
   }
 
   // Exposed mutators from builder
-  setFetch(fn: typeof fetch) {
-    this.fetchFn = fn.bind(globalThis) as typeof fetch;
+  setFetch(fetchFn: FetchLike) {
+    this.fetchFn = fetchFn;
   }
 
   addGlobalHeader(k: string, v: string) {
@@ -479,8 +524,8 @@ class internalClient {
 
 type internalClientOption = (c: internalClient) => void;
 
-function withFetch(fn: typeof fetch): internalClientOption {
-  return (c) => c.setFetch(fn);
+function withFetch(fetchFn: FetchLike): internalClientOption {
+  return (c) => c.setFetch(fetchFn);
 }
 
 function withGlobalHeader(key: string, value: string): internalClientOption {
@@ -499,8 +544,8 @@ class clientBuilder {
     this.baseURL = baseURL;
   }
 
-  withFetch(fn: typeof fetch): clientBuilder {
-    this.opts.push(withFetch(fn));
+  withFetch(fetchFn: FetchLike): clientBuilder {
+    this.opts.push(withFetch(fetchFn));
     return this;
   }
 
