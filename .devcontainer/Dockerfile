@@ -30,7 +30,7 @@ RUN apt update && \
 
 # Install Node.js using n and global node utilities
 RUN npm install -g n@latest && \
-    n 22.15.0 && \
+    n 22.18.0 && \
     npm install -g prettier@3.5.3
 
 # Install downloadable binaries
