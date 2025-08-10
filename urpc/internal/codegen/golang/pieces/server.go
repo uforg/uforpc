@@ -116,10 +116,10 @@ func (r *ServerNetHTTPAdapter) Flush() error {
 //
 // The generic type I represents the input type, which can be any type depending
 // on the operation.
-type HandlerContext[P any, I any] struct {
+type HandlerContext[T any, I any] struct {
 	// Props is the user-defined container, created per request,
 	// for application dependencies and request data (e.g., UserID).
-	Props P
+	Props T
 
 	// Input contains the request body, already deserialized and typed.
 	// For global middlewares, the type I will be any.
@@ -136,56 +136,56 @@ type HandlerContext[P any, I any] struct {
 }
 
 // OperationName returns the name of the operation (e.g. "CreateUser", "GetPost", etc.)
-func (h *HandlerContext[P, I]) OperationName() string { return h.operationName }
+func (h *HandlerContext[T, I]) OperationName() string { return h.operationName }
 
 // OperationType returns the type of operation (e.g. "proc" or "stream")
-func (h *HandlerContext[P, I]) OperationType() string { return h.operationType }
+func (h *HandlerContext[T, I]) OperationType() string { return h.operationType }
 
 // GlobalHandlerFunc is the signature for a global handler function.
 // Both for procedures and streams
-type GlobalHandlerFunc[P any] func(
-	c *HandlerContext[P, any],
+type GlobalHandlerFunc[T any] func(
+	c *HandlerContext[T, any],
 ) (any, error)
 
 // GlobalMiddleware is the signature for a middleware applied to all requests.
-type GlobalMiddleware[P any] func(
-	next GlobalHandlerFunc[P],
-) GlobalHandlerFunc[P]
+type GlobalMiddleware[T any] func(
+	next GlobalHandlerFunc[T],
+) GlobalHandlerFunc[T]
 
 // ProcHandlerFunc is the signature of the final business handler for a proc.
-type ProcHandlerFunc[P any, I any, O any] func(
-	c *HandlerContext[P, I],
+type ProcHandlerFunc[T any, I any, O any] func(
+	c *HandlerContext[T, I],
 ) (O, error)
 
 // ProcMiddlewareFunc is the signature for a proc-specific typed middleware.
 // It uses a wrapper pattern for a clean composition.
 //
 // This is the same as [GlobalMiddleware] but for specific procedures and with types.
-type ProcMiddlewareFunc[P any, I any, O any] func(
-	next ProcHandlerFunc[P, I, O],
-) ProcHandlerFunc[P, I, O]
+type ProcMiddlewareFunc[T any, I any, O any] func(
+	next ProcHandlerFunc[T, I, O],
+) ProcHandlerFunc[T, I, O]
 
 // StreamHandlerFunc is the signature of the main handler that initializes a stream.
-type StreamHandlerFunc[P any, I any, O any] func(
-	c *HandlerContext[P, I],
-	emit EmitFunc[P, I, O],
+type StreamHandlerFunc[T any, I any, O any] func(
+	c *HandlerContext[T, I],
+	emit EmitFunc[T, I, O],
 ) error
 
 // StreamMiddlewareFunc is the signature for a middleware that wraps the main stream handler.
-type StreamMiddlewareFunc[P any, I any, O any] func(
-	next StreamHandlerFunc[P, I, O],
-) StreamHandlerFunc[P, I, O]
+type StreamMiddlewareFunc[T any, I any, O any] func(
+	next StreamHandlerFunc[T, I, O],
+) StreamHandlerFunc[T, I, O]
 
 // EmitFunc is the signature for emitting events from a stream.
-type EmitFunc[P any, I any, O any] func(
-	c *HandlerContext[P, I],
+type EmitFunc[T any, I any, O any] func(
+	c *HandlerContext[T, I],
 	output O,
 ) error
 
 // EmitMiddlewareFunc is the signature for a middleware that wraps each call to emit.
-type EmitMiddlewareFunc[P any, I any, O any] func(
-	next EmitFunc[P, I, O],
-) EmitFunc[P, I, O]
+type EmitMiddlewareFunc[T any, I any, O any] func(
+	next EmitFunc[T, I, O],
+) EmitFunc[T, I, O]
 
 // Deserializer function convert raw JSON input into typed input prior to handler execution.
 type DeserializeFunc func(raw json.RawMessage) (any, error)
@@ -201,7 +201,7 @@ type DeserializeFunc func(raw json.RawMessage) (any, error)
 // The generic type P represents the user context type, allowing users to pass
 // custom data (authentication info, user sessions, etc.) through the entire
 // request processing pipeline.
-type internalServer[P any] struct {
+type internalServer[T any] struct {
 	// procNames contains the list of all registered procedure names
 	procNames []string
 	// procNamesMap contains the list of all registered procedure names
@@ -216,17 +216,17 @@ type internalServer[P any] struct {
 	// handlersMu protects all handler maps and middleware slices from concurrent access
 	handlersMu sync.RWMutex
 	// procHandlers stores the final implementation functions for procedures
-	procHandlers map[string]ProcHandlerFunc[P, any, any]
+	procHandlers map[string]ProcHandlerFunc[T, any, any]
 	// streamHandlers stores the final implementation functions for streams
-	streamHandlers map[string]StreamHandlerFunc[P, any, any]
+	streamHandlers map[string]StreamHandlerFunc[T, any, any]
 	// globalMiddlewares contains middlewares that run for every request (both procs and streams)
-	globalMiddlewares []GlobalMiddleware[P]
+	globalMiddlewares []GlobalMiddleware[T]
 	// procMiddlewares contains per-procedure middlewares
-	procMiddlewares map[string][]ProcMiddlewareFunc[P, any, any]
+	procMiddlewares map[string][]ProcMiddlewareFunc[T, any, any]
 	// streamMiddlewares contains per-stream middlewares
-	streamMiddlewares map[string][]StreamMiddlewareFunc[P, any, any]
+	streamMiddlewares map[string][]StreamMiddlewareFunc[T, any, any]
 	// streamEmitMiddlewares contains per-stream emit middlewares
-	streamEmitMiddlewares map[string][]EmitMiddlewareFunc[P, any, any]
+	streamEmitMiddlewares map[string][]EmitMiddlewareFunc[T, any, any]
 	// procDeserializers contains per-procedure input deserializers
 	procDeserializers map[string]DeserializeFunc
 	// streamDeserializers contains per-stream input deserializers
@@ -246,10 +246,10 @@ type internalServer[P any] struct {
 //   - streamNames: List of stream names that this server will handle
 //
 // Returns a new internalServer instance ready for handler and middleware registration.
-func newInternalServer[P any](
+func newInternalServer[T any](
 	procNames []string,
 	streamNames []string,
-) *internalServer[P] {
+) *internalServer[T] {
 	procNamesMap := make(map[string]bool)
 	streamNamesMap := make(map[string]bool)
 	operationNamesMap := make(map[string]string)
@@ -262,19 +262,19 @@ func newInternalServer[P any](
 		operationNamesMap[streamName] = ServerOperationTypeStream
 	}
 
-	return &internalServer[P]{
+	return &internalServer[T]{
 		procNames:             procNames,
 		procNamesMap:          procNamesMap,
 		streamNames:           streamNames,
 		streamNamesMap:        streamNamesMap,
 		operationNamesMap:     operationNamesMap,
 		handlersMu:            sync.RWMutex{},
-		procHandlers:          map[string]ProcHandlerFunc[P, any, any]{},
-		streamHandlers:        map[string]StreamHandlerFunc[P, any, any]{},
-		globalMiddlewares:     []GlobalMiddleware[P]{},
-		procMiddlewares:       map[string][]ProcMiddlewareFunc[P, any, any]{},
-		streamMiddlewares:     map[string][]StreamMiddlewareFunc[P, any, any]{},
-		streamEmitMiddlewares: map[string][]EmitMiddlewareFunc[P, any, any]{},
+		procHandlers:          map[string]ProcHandlerFunc[T, any, any]{},
+		streamHandlers:        map[string]StreamHandlerFunc[T, any, any]{},
+		globalMiddlewares:     []GlobalMiddleware[T]{},
+		procMiddlewares:       map[string][]ProcMiddlewareFunc[T, any, any]{},
+		streamMiddlewares:     map[string][]StreamMiddlewareFunc[T, any, any]{},
+		streamEmitMiddlewares: map[string][]EmitMiddlewareFunc[T, any, any]{},
 		procDeserializers:     map[string]DeserializeFunc{},
 		streamDeserializers:   map[string]DeserializeFunc{},
 	}
@@ -282,9 +282,9 @@ func newInternalServer[P any](
 
 // addGlobalMiddleware registers a global middleware that executes for every request (proc and stream).
 // Middlewares are executed in the order they were registered.
-func (s *internalServer[P]) addGlobalMiddleware(
-	mw GlobalMiddleware[P],
-) *internalServer[P] {
+func (s *internalServer[T]) addGlobalMiddleware(
+	mw GlobalMiddleware[T],
+) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
 	s.globalMiddlewares = append(s.globalMiddlewares, mw)
@@ -293,10 +293,10 @@ func (s *internalServer[P]) addGlobalMiddleware(
 
 // addProcMiddleware registers a wrapper middleware for a specific procedure.
 // Middlewares are executed in the order they were registered.
-func (s *internalServer[P]) addProcMiddleware(
+func (s *internalServer[T]) addProcMiddleware(
 	procName string,
-	mw ProcMiddlewareFunc[P, any, any],
-) *internalServer[P] {
+	mw ProcMiddlewareFunc[T, any, any],
+) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
 	s.procMiddlewares[procName] = append(s.procMiddlewares[procName], mw)
@@ -305,10 +305,10 @@ func (s *internalServer[P]) addProcMiddleware(
 
 // addStreamMiddleware registers a wrapper middleware for a specific stream.
 // Middlewares are executed in the order they were registered.
-func (s *internalServer[P]) addStreamMiddleware(
+func (s *internalServer[T]) addStreamMiddleware(
 	streamName string,
-	mw StreamMiddlewareFunc[P, any, any],
-) *internalServer[P] {
+	mw StreamMiddlewareFunc[T, any, any],
+) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
 	s.streamMiddlewares[streamName] = append(s.streamMiddlewares[streamName], mw)
@@ -317,10 +317,10 @@ func (s *internalServer[P]) addStreamMiddleware(
 
 // addStreamEmitMiddleware registers an emit wrapper middleware for a specific stream.
 // Middlewares are executed in the order they were registered.
-func (s *internalServer[P]) addStreamEmitMiddleware(
+func (s *internalServer[T]) addStreamEmitMiddleware(
 	streamName string,
-	mw EmitMiddlewareFunc[P, any, any],
-) *internalServer[P] {
+	mw EmitMiddlewareFunc[T, any, any],
+) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
 	s.streamEmitMiddlewares[streamName] = append(s.streamEmitMiddlewares[streamName], mw)
@@ -331,11 +331,11 @@ func (s *internalServer[P]) addStreamEmitMiddleware(
 // The provided functions are stored as-is. Middlewares are composed at request time.
 //
 // Panics if a handler is already registered for the given procedure name.
-func (s *internalServer[P]) setProcHandler(
+func (s *internalServer[T]) setProcHandler(
 	procName string,
-	handler ProcHandlerFunc[P, any, any],
+	handler ProcHandlerFunc[T, any, any],
 	deserializer DeserializeFunc,
-) *internalServer[P] {
+) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
 	if _, exists := s.procHandlers[procName]; exists {
@@ -350,11 +350,11 @@ func (s *internalServer[P]) setProcHandler(
 // The provided functions are stored as-is. Middlewares are composed at request time.
 //
 // Panics if a handler is already registered for the given stream name.
-func (s *internalServer[P]) setStreamHandler(
+func (s *internalServer[T]) setStreamHandler(
 	streamName string,
-	handler StreamHandlerFunc[P, any, any],
+	handler StreamHandlerFunc[T, any, any],
 	deserializer DeserializeFunc,
-) *internalServer[P] {
+) *internalServer[T] {
 	s.handlersMu.Lock()
 	defer s.handlersMu.Unlock()
 	if _, exists := s.streamHandlers[streamName]; exists {
@@ -378,9 +378,9 @@ func (s *internalServer[P]) setStreamHandler(
 //   - httpAdapter: The HTTP adapter for reading requests and writing responses
 //
 // Returns an error if request processing fails at the transport level.
-func (s *internalServer[P]) handleRequest(
+func (s *internalServer[T]) handleRequest(
 	ctx context.Context,
-	props P,
+	props T,
 	operationName string,
 	httpAdapter ServerHTTPAdapter,
 ) error {
@@ -408,7 +408,7 @@ func (s *internalServer[P]) handleRequest(
 	}
 
 	// Build the unified handler context (raw input at this point).
-	c := &HandlerContext[P, any]{
+	c := &HandlerContext[T, any]{
 		Input:         rawInput,
 		Props:         props,
 		Context:       ctx,
@@ -470,8 +470,8 @@ func (s *internalServer[P]) handleRequest(
 
 // handleProcRequest builds the per-request middleware chain for a procedure and executes it.
 // It returns the procedure output (as any) and an error if the handler failed.
-func (s *internalServer[P]) handleProcRequest(
-	c *HandlerContext[P, any],
+func (s *internalServer[T]) handleProcRequest(
+	c *HandlerContext[T, any],
 	procName string,
 	rawInput json.RawMessage,
 ) (any, error) {
@@ -499,16 +499,16 @@ func (s *internalServer[P]) handleProcRequest(
 	// Compose specific per-proc middlewares around the base handler (reverse registration order)
 	final := baseHandler
 	if len(mws) > 0 {
-		mwChain := append([]ProcMiddlewareFunc[P, any, any](nil), mws...)
+		mwChain := append([]ProcMiddlewareFunc[T, any, any](nil), mws...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
 			final = mwChain[i](final)
 		}
 	}
 
 	// Wrap the specific chain with global middlewares (executed before specific ones)
-	exec := func(c *HandlerContext[P, any]) (any, error) { return final(c) }
+	exec := func(c *HandlerContext[T, any]) (any, error) { return final(c) }
 	if len(s.globalMiddlewares) > 0 {
-		mwChain := append([]GlobalMiddleware[P](nil), s.globalMiddlewares...)
+		mwChain := append([]GlobalMiddleware[T](nil), s.globalMiddlewares...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
 			exec = mwChain[i](exec)
 		}
@@ -519,8 +519,8 @@ func (s *internalServer[P]) handleProcRequest(
 
 // handleStreamRequest builds the per-request middleware chain for a stream, sets up SSE,
 // composes emit middlewares, and executes the stream handler.
-func (s *internalServer[P]) handleStreamRequest(
-	c *HandlerContext[P, any],
+func (s *internalServer[T]) handleStreamRequest(
+	c *HandlerContext[T, any],
 	streamName string,
 	rawInput json.RawMessage,
 	httpAdapter ServerHTTPAdapter,
@@ -557,7 +557,7 @@ func (s *internalServer[P]) handleStreamRequest(
 	}
 
 	// Base emit writes SSE envelope with {ok:true, output}
-	baseEmit := func(_ *HandlerContext[P, any], data any) error {
+	baseEmit := func(_ *HandlerContext[T, any], data any) error {
 		response := Response[any]{
 			Ok:     true,
 			Output: data,
@@ -579,7 +579,7 @@ func (s *internalServer[P]) handleStreamRequest(
 	// Compose emit middlewares (reverse registration order)
 	emitFinal := baseEmit
 	if len(emitMws) > 0 {
-		mwChain := append([]EmitMiddlewareFunc[P, any, any](nil), emitMws...)
+		mwChain := append([]EmitMiddlewareFunc[T, any, any](nil), emitMws...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
 			emitFinal = mwChain[i](emitFinal)
 		}
@@ -588,16 +588,16 @@ func (s *internalServer[P]) handleStreamRequest(
 	// Compose stream middlewares around the base handler (reverse order)
 	final := baseHandler
 	if len(streamMws) > 0 {
-		mwChain := append([]StreamMiddlewareFunc[P, any, any](nil), streamMws...)
+		mwChain := append([]StreamMiddlewareFunc[T, any, any](nil), streamMws...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
 			final = mwChain[i](final)
 		}
 	}
 
 	// Wrap the specific stream chain with global middlewares (executed before specific ones)
-	exec := func(c *HandlerContext[P, any]) (any, error) { return nil, final(c, emitFinal) }
+	exec := func(c *HandlerContext[T, any]) (any, error) { return nil, final(c, emitFinal) }
 	if len(s.globalMiddlewares) > 0 {
-		mwChain := append([]GlobalMiddleware[P](nil), s.globalMiddlewares...)
+		mwChain := append([]GlobalMiddleware[T](nil), s.globalMiddlewares...)
 		for i := len(mwChain) - 1; i >= 0; i-- {
 			exec = mwChain[i](exec)
 		}
@@ -616,7 +616,7 @@ func (s *internalServer[P]) handleStreamRequest(
 //   - response: The response data to send to the client
 //
 // Returns an error if writing the response fails.
-func (s *internalServer[P]) writeProcResponse(
+func (s *internalServer[T]) writeProcResponse(
 	httpAdapter ServerHTTPAdapter,
 	response Response[any],
 ) error {

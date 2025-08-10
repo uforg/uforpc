@@ -42,11 +42,11 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//")
 	g.Line("// The generic type parameter P is your application context (props) that flows through")
 	g.Line("// the entire request lifecycle (authentication, per-request data, dependencies, etc.).")
-	g.Line("type Server[P any] struct {")
+	g.Line("type Server[T any] struct {")
 	g.Block(func() {
-		g.Line("intServer *internalServer[P]")
-		g.Line("Procs     *serverProcRegistry[P]")
-		g.Line("Streams   *serverStreamRegistry[P]")
+		g.Line("intServer *internalServer[T]")
+		g.Line("Procs     *serverProcRegistry[T]")
+		g.Line("Streams   *serverStreamRegistry[T]")
 	})
 	g.Line("}")
 	g.Break()
@@ -61,10 +61,10 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//       UserID string")
 	g.Line("//   }")
 	g.Line("//   s := NewServer[AppProps]()")
-	g.Line("func NewServer[P any]() *Server[P] {")
+	g.Line("func NewServer[T any]() *Server[T] {")
 	g.Block(func() {
-		g.Line("intServer := newInternalServer[P](ufoProcedureNames, ufoStreamNames)")
-		g.Line("return &Server[P]{")
+		g.Line("intServer := newInternalServer[T](ufoProcedureNames, ufoStreamNames)")
+		g.Line("return &Server[T]{")
 		g.Block(func() {
 			g.Line("intServer: intServer,")
 			g.Line("Procs:     newServerProcRegistry(intServer),")
@@ -81,7 +81,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//   - read/augment the HandlerContext")
 	g.Line("//   - short-circuit by returning an error")
 	g.Line("//   - call next to continue the chain")
-	g.Line("func (s *Server[P]) Use(mw GlobalMiddleware[P]) { s.intServer.addGlobalMiddleware(mw) }")
+	g.Line("func (s *Server[T]) Use(mw GlobalMiddleware[T]) { s.intServer.addGlobalMiddleware(mw) }")
 	g.Break()
 
 	g.Line("// HandleRequest processes an incoming RPC request and drives the complete")
@@ -98,7 +98,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("//       adapter := NewServerNetHTTPAdapter(w, r)")
 	g.Line("//       _ = server.HandleRequest(ctx, props, op, adapter)")
 	g.Line("//   })")
-	g.Line("func (s *Server[P]) HandleRequest(ctx context.Context, props P, operationName string, httpAdapter ServerHTTPAdapter) error {")
+	g.Line("func (s *Server[T]) HandleRequest(ctx context.Context, props T, operationName string, httpAdapter ServerHTTPAdapter) error {")
 	g.Block(func() {
 		g.Line("return s.intServer.handleRequest(ctx, props, operationName, httpAdapter)")
 	})
@@ -111,23 +111,23 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// serverProcRegistry groups all procedures and exposes typed entries to register")
 	g.Line("// per-procedure middlewares and the final business handler. Input deserialization")
 	g.Line("// and validation is handled automatically using generated pre* types.")
-	g.Line("type serverProcRegistry[P any] struct {")
+	g.Line("type serverProcRegistry[T any] struct {")
 	g.Block(func() {
-		g.Line("intServer *internalServer[P]")
+		g.Line("intServer *internalServer[T]")
 		for _, procNode := range sch.GetProcNodes() {
 			name := strutil.ToPascalCase(procNode.Name)
-			g.Linef("%s proc%sEntry[P]", name, name)
+			g.Linef("%s proc%sEntry[T]", name, name)
 		}
 	})
 	g.Line("}")
 	g.Break()
 
-	g.Line("func newServerProcRegistry[P any](intServer *internalServer[P]) *serverProcRegistry[P] {")
+	g.Line("func newServerProcRegistry[T any](intServer *internalServer[T]) *serverProcRegistry[T] {")
 	g.Block(func() {
-		g.Line("r := &serverProcRegistry[P]{intServer: intServer}")
+		g.Line("r := &serverProcRegistry[T]{intServer: intServer}")
 		for _, procNode := range sch.GetProcNodes() {
 			name := strutil.ToPascalCase(procNode.Name)
-			g.Linef("r.%s = proc%sEntry[P]{intServer: intServer}", name, name)
+			g.Linef("r.%s = proc%sEntry[T]{intServer: intServer}", name, name)
 		}
 		g.Line("return r")
 	})
@@ -138,18 +138,18 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		name := strutil.ToPascalCase(procNode.Name)
 
 		g.Linef("// proc%sEntry contains the typed API for the %s procedure.", name, name)
-		g.Linef("type proc%sEntry[P any] struct {", name)
+		g.Linef("type proc%sEntry[T any] struct {", name)
 		g.Block(func() {
-			g.Line("intServer *internalServer[P]")
+			g.Line("intServer *internalServer[T]")
 		})
 		g.Line("}")
 		g.Break()
 
 		// Generate type aliases
 		g.Linef("// Type aliases for %s procedure", name)
-		g.Linef("type %sHandlerContext[P any] = HandlerContext[P, %sInput]", name, name)
-		g.Linef("type %sHandlerFunc[P any] func(c *%sHandlerContext[P]) (%sOutput, error)", name, name, name)
-		g.Linef("type %sMiddlewareFunc[P any] func(next %sHandlerFunc[P]) %sHandlerFunc[P]", name, name, name)
+		g.Linef("type %sHandlerContext[T any] = HandlerContext[T, %sInput]", name, name)
+		g.Linef("type %sHandlerFunc[T any] func(c *%sHandlerContext[T]) (%sOutput, error)", name, name, name)
+		g.Linef("type %sMiddlewareFunc[T any] func(next %sHandlerFunc[T]) %sHandlerFunc[T]", name, name, name)
 		g.Break()
 
 		// Use (procedure middleware)
@@ -163,15 +163,15 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// then the final handler is invoked.")
 		renderDoc(g, procNode.Doc, true)
 		renderDeprecated(g, procNode.Deprecated)
-		g.Linef("func (e proc%sEntry[P]) Use(mw %sMiddlewareFunc[P]) {", name, name)
+		g.Linef("func (e proc%sEntry[T]) Use(mw %sMiddlewareFunc[T]) {", name, name)
 		g.Block(func() {
-			g.Linef("adapted := func(next ProcHandlerFunc[P, any, any]) ProcHandlerFunc[P, any, any] {")
+			g.Linef("adapted := func(next ProcHandlerFunc[T, any, any]) ProcHandlerFunc[T, any, any] {")
 			g.Block(func() {
-				g.Linef("return func(cGeneric *HandlerContext[P, any]) (any, error) {")
+				g.Linef("return func(cGeneric *HandlerContext[T, any]) (any, error) {")
 				g.Block(func() {
 					g.Line("// 1. The \"final link\" in the specific middleware chain. When called,")
 					g.Line("//    it invokes the original generic 'next' handler.")
-					g.Linef("finalLink := func(c *%sHandlerContext[P]) (%sOutput, error) {", name, name)
+					g.Linef("finalLink := func(c *%sHandlerContext[T]) (%sOutput, error) {", name, name)
 					g.Block(func() {
 						g.Line("// Call the next generic handler in the chain.")
 						g.Line("genericOutput, err := next(cGeneric)")
@@ -196,7 +196,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					g.Line("// 3. Construct the typed context from the generic one.")
 					g.Line("//    It's assumed a higher layer guarantees the type is correct.")
 					g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
-					g.Linef("cSpecific := &%sHandlerContext[P]{", name)
+					g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 					g.Block(func() {
 						g.Line("Input:         input,")
 						g.Line("Props:         cGeneric.Props,")
@@ -226,15 +226,15 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("//   3) Invoke your handler with a typed context")
 		renderDoc(g, procNode.Doc, true)
 		renderDeprecated(g, procNode.Deprecated)
-		g.Linef("func (e proc%sEntry[P]) Handle(handler %sHandlerFunc[P]) {", name, name)
+		g.Linef("func (e proc%sEntry[T]) Handle(handler %sHandlerFunc[T]) {", name, name)
 		g.Block(func() {
-			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[P, any]) (any, error) {")
+			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[T, any]) (any, error) {")
 			g.Block(func() {
 				g.Line("// 1. Create the specific context from the generic one provided by the server.")
 				g.Line("//    This requires a type assertion on the input field.")
 				g.Line("//    It's assumed a higher layer guarantees the type is correct.")
 				g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
-				g.Linef("cSpecific := &%sHandlerContext[P]{", name)
+				g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 				g.Block(func() {
 					g.Line("Input:         input,")
 					g.Line("Props:         cGeneric.Props,")
@@ -274,23 +274,23 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	g.Line("// serverStreamRegistry groups all streams and exposes typed entries to register")
 	g.Line("// per-stream middlewares, emit middlewares, and the final business handler.")
 	g.Line("// Streaming uses Server-Sent Events and the middleware chain is composed per request.")
-	g.Line("type serverStreamRegistry[P any] struct {")
+	g.Line("type serverStreamRegistry[T any] struct {")
 	g.Block(func() {
-		g.Line("intServer *internalServer[P]")
+		g.Line("intServer *internalServer[T]")
 		for _, streamNode := range sch.GetStreamNodes() {
 			name := strutil.ToPascalCase(streamNode.Name)
-			g.Linef("%s stream%sEntry[P]", name, name)
+			g.Linef("%s stream%sEntry[T]", name, name)
 		}
 	})
 	g.Line("}")
 	g.Break()
 
-	g.Line("func newServerStreamRegistry[P any](intServer *internalServer[P]) *serverStreamRegistry[P] {")
+	g.Line("func newServerStreamRegistry[T any](intServer *internalServer[T]) *serverStreamRegistry[T] {")
 	g.Block(func() {
-		g.Line("r := &serverStreamRegistry[P]{intServer: intServer}")
+		g.Line("r := &serverStreamRegistry[T]{intServer: intServer}")
 		for _, streamNode := range sch.GetStreamNodes() {
 			name := strutil.ToPascalCase(streamNode.Name)
-			g.Linef("r.%s = stream%sEntry[P]{intServer: intServer}", name, name)
+			g.Linef("r.%s = stream%sEntry[T]{intServer: intServer}", name, name)
 		}
 		g.Line("return r")
 	})
@@ -300,20 +300,20 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 	for _, streamNode := range sch.GetStreamNodes() {
 		name := strutil.ToPascalCase(streamNode.Name)
 		g.Linef("// stream%sEntry contains the typed API for the %s stream.", name, name)
-		g.Linef("type stream%sEntry[P any] struct {", name)
+		g.Linef("type stream%sEntry[T any] struct {", name)
 		g.Block(func() {
-			g.Line("intServer *internalServer[P]")
+			g.Line("intServer *internalServer[T]")
 		})
 		g.Line("}")
 		g.Break()
 
 		// Generate type aliases
 		g.Linef("// Type aliases for %s stream", name)
-		g.Linef("type %sHandlerContext[P any] = HandlerContext[P, %sInput]", name, name)
-		g.Linef("type %sEmitFunc[P any] func(c *%sHandlerContext[P], output %sOutput) error", name, name, name)
-		g.Linef("type %sHandlerFunc[P any] func(c *%sHandlerContext[P], emit %sEmitFunc[P]) error", name, name, name)
-		g.Linef("type %sMiddlewareFunc[P any] func(next %sHandlerFunc[P]) %sHandlerFunc[P]", name, name, name)
-		g.Linef("type %sEmitMiddlewareFunc[P any] func(next %sEmitFunc[P]) %sEmitFunc[P]", name, name, name)
+		g.Linef("type %sHandlerContext[T any] = HandlerContext[T, %sInput]", name, name)
+		g.Linef("type %sEmitFunc[T any] func(c *%sHandlerContext[T], output %sOutput) error", name, name, name)
+		g.Linef("type %sHandlerFunc[T any] func(c *%sHandlerContext[T], emit %sEmitFunc[T]) error", name, name, name)
+		g.Linef("type %sMiddlewareFunc[T any] func(next %sHandlerFunc[T]) %sHandlerFunc[T]", name, name, name)
+		g.Linef("type %sEmitMiddlewareFunc[T any] func(next %sEmitFunc[T]) %sEmitFunc[T]", name, name, name)
 		g.Break()
 
 		// Generate Use (stream middleware)
@@ -326,18 +326,18 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// Execution order: middlewares run in registration order, then the handler.")
 		renderDoc(g, streamNode.Doc, true)
 		renderDeprecated(g, streamNode.Deprecated)
-		g.Linef("func (e stream%sEntry[P]) Use(mw %sMiddlewareFunc[P]) {", name, name)
+		g.Linef("func (e stream%sEntry[T]) Use(mw %sMiddlewareFunc[T]) {", name, name)
 		g.Block(func() {
-			g.Linef("adapted := func(next StreamHandlerFunc[P, any, any]) StreamHandlerFunc[P, any, any] {")
+			g.Linef("adapted := func(next StreamHandlerFunc[T, any, any]) StreamHandlerFunc[T, any, any] {")
 			g.Block(func() {
 				// Returns the final handler that the system will execute.
 				g.Line("// Returns the final handler that the system will execute.")
-				g.Linef("return func(cGeneric *HandlerContext[P, any], emitGeneric EmitFunc[P, any, any]) error {")
+				g.Linef("return func(cGeneric *HandlerContext[T, any], emitGeneric EmitFunc[T, any, any]) error {")
 				g.Block(func() {
 					g.Line("// 1. The \"final link\" in the specific middleware chain. When called,")
 					g.Line("//    it invokes the original generic 'next' handler, using the generic")
 					g.Line("//    arguments captured from this closure.")
-					g.Linef("finalLink := func(c *%sHandlerContext[P], emit %sEmitFunc[P]) error {", name, name)
+					g.Linef("finalLink := func(c *%sHandlerContext[T], emit %sEmitFunc[T]) error {", name, name)
 					g.Block(func() {
 						g.Line("return next(cGeneric, emitGeneric)")
 					})
@@ -348,7 +348,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 
 					g.Line("// 3. Create a typed 'emit' function that delegates to the generic emit.")
 					g.Line("//    Uses 'cGeneric' from the outer scope, which is the correct context.")
-					g.Linef("emitSpecific := func(c *%sHandlerContext[P], output %sOutput) error {", name, name)
+					g.Linef("emitSpecific := func(c *%sHandlerContext[T], output %sOutput) error {", name, name)
 					g.Block(func() {
 						g.Line("return emitGeneric(cGeneric, output)")
 					})
@@ -356,7 +356,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 
 					g.Line("// 4. Construct the typed context from the generic context.")
 					g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
-					g.Linef("cSpecific := &%sHandlerContext[P]{", name)
+					g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 					g.Block(func() {
 						g.Line("Input:         input,")
 						g.Line("Props:         cGeneric.Props,")
@@ -386,16 +386,16 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("// Execution order: emit middlewares run in registration order for every event.")
 		renderDoc(g, streamNode.Doc, true)
 		renderDeprecated(g, streamNode.Deprecated)
-		g.Linef("func (e stream%sEntry[P]) UseEmit(mw %sEmitMiddlewareFunc[P]) {", name, name)
+		g.Linef("func (e stream%sEntry[T]) UseEmit(mw %sEmitMiddlewareFunc[T]) {", name, name)
 		g.Block(func() {
-			g.Linef("adapted := func(next EmitFunc[P, any, any]) EmitFunc[P, any, any] {")
+			g.Linef("adapted := func(next EmitFunc[T, any, any]) EmitFunc[T, any, any] {")
 			g.Block(func() {
 				g.Line("// Return a new generic 'emit' function that wraps the logic.")
-				g.Line("return func(cGeneric *HandlerContext[P, any], outputGeneric any) error {")
+				g.Line("return func(cGeneric *HandlerContext[T, any], outputGeneric any) error {")
 				g.Block(func() {
 					g.Line("// 1. The \"next link\" in the emit chain. It is a wrapper that")
 					g.Line("//    calls the original generic 'next' provided by the system.")
-					g.Linef("nextSpecific := func(c *%sHandlerContext[P], output %sOutput) error {", name, name)
+					g.Linef("nextSpecific := func(c *%sHandlerContext[T], output %sOutput) error {", name, name)
 					g.Block(func() {
 						g.Line("return next(cGeneric, output)")
 					})
@@ -408,7 +408,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					g.Line("// 3. Create the specific context from the generic one. This is still")
 					g.Line("//    needed to call the final emitChain function.")
 					g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
-					g.Linef("cSpecific := &%sHandlerContext[P]{", name)
+					g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 					g.Block(func() {
 						g.Line("Input:         input,")
 						g.Line("Props:         cGeneric.Props,")
@@ -441,13 +441,13 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Line("//   3) Provide a typed emit function and invoke your handler")
 		renderDoc(g, streamNode.Doc, true)
 		renderDeprecated(g, streamNode.Deprecated)
-		g.Linef("func (e stream%sEntry[P]) Handle(handler %sHandlerFunc[P]) {", name, name)
+		g.Linef("func (e stream%sEntry[T]) Handle(handler %sHandlerFunc[T]) {", name, name)
 		g.Block(func() {
-			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[P, any], emitGeneric EmitFunc[P, any, any]) error {")
+			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[T, any], emitGeneric EmitFunc[T, any, any]) error {")
 			g.Block(func() {
 				g.Line("// 1. Create the specific, type-safe emit function by wrapping the generic one.")
 				g.Line("//    It uses 'cGeneric' from the outer scope, which has the correct type for the generic call.")
-				g.Linef("emitSpecific := func(c *%sHandlerContext[P], output %sOutput) error {", name, name)
+				g.Linef("emitSpecific := func(c *%sHandlerContext[T], output %sOutput) error {", name, name)
 				g.Block(func() {
 					g.Line("return emitGeneric(cGeneric, output)")
 				})
@@ -456,7 +456,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				g.Line("// 2. Create the specific context from the generic one provided by the server.")
 				g.Line("//    This requires a type assertion on the input field.")
 				g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
-				g.Linef("cSpecific := &%sHandlerContext[P]{", name)
+				g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 				g.Block(func() {
 					g.Line("Input:         input,")
 					g.Line("Props:         cGeneric.Props,")
