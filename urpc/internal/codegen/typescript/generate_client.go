@@ -132,6 +132,9 @@ func generateClientClass(g *genkit.GenKit) {
 	g.Line(" */")
 	g.Line("export class Client {")
 	g.Block(func() {
+		g.Line("private intClient: internalClient;")
+		g.Break()
+
 		g.Line("/** Registry for accessing RPC procedures */")
 		g.Line("public readonly procs: ProcRegistry;")
 		g.Break()
@@ -139,8 +142,9 @@ func generateClientClass(g *genkit.GenKit) {
 		g.Line("public readonly streams: StreamRegistry;")
 		g.Break()
 
-		g.Line("constructor(private intClient: internalClient) {")
+		g.Line("constructor(intClient: internalClient) {")
 		g.Block(func() {
+			g.Line("this.intClient = intClient;")
 			g.Line("this.procs = new ProcRegistry(intClient);")
 			g.Line("this.streams = new StreamRegistry(intClient);")
 		})
@@ -161,8 +165,14 @@ func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
 	g.Line(" * Registry providing access to all RPC procedures.")
 	g.Line(" */")
 	g.Line("class ProcRegistry {")
+	g.Line("private intClient: internalClient;")
+	g.Break()
 	g.Block(func() {
-		g.Line("constructor(private intClient: internalClient) {}")
+		g.Line("constructor(intClient: internalClient) {")
+		g.Block(func() {
+			g.Line("this.intClient = intClient;")
+		})
+		g.Line("}")
 		g.Break()
 
 		// Generate method for each procedure
@@ -200,6 +210,8 @@ func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
 		g.Linef(" */")
 		g.Linef("class %s {", builderName)
 		g.Block(func() {
+			g.Line("private intClient: internalClient;")
+			g.Line("private procName: string;")
 			g.Line("private headers: Record<string, string> = {};")
 			g.Line("private retryConfig?: RetryConfig;")
 			g.Line("private timeoutConfig?: TimeoutConfig;")
@@ -207,10 +219,15 @@ func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
 
 			g.Line("constructor(")
 			g.Block(func() {
-				g.Line("private intClient: internalClient,")
-				g.Line("private procName: string")
+				g.Line("intClient: internalClient,")
+				g.Line("procName: string")
 			})
-			g.Line(") {}")
+			g.Line(") {")
+			g.Block(func() {
+				g.Line("this.intClient = intClient;")
+				g.Line("this.procName = procName;")
+			})
+			g.Line("}")
 			g.Break()
 
 			g.Line("/**")
@@ -342,7 +359,14 @@ func generateStreamImplementation(g *genkit.GenKit, sch schema.Schema) {
 	g.Line(" */")
 	g.Line("class StreamRegistry {")
 	g.Block(func() {
-		g.Line("constructor(private intClient: internalClient) {}")
+		g.Line("private intClient: internalClient;")
+		g.Break()
+
+		g.Line("constructor(intClient: internalClient) {")
+		g.Block(func() {
+			g.Line("this.intClient = intClient;")
+		})
+		g.Line("}")
 		g.Break()
 
 		// Generate method for each stream
@@ -380,16 +404,23 @@ func generateStreamImplementation(g *genkit.GenKit, sch schema.Schema) {
 		g.Linef(" */")
 		g.Linef("class %s {", builderName)
 		g.Block(func() {
+			g.Line("private intClient: internalClient;")
+			g.Line("private streamName: string;")
 			g.Line("private headers: Record<string, string> = {};")
 			g.Line("private reconnectConfig?: ReconnectConfig;")
 			g.Break()
 
 			g.Line("constructor(")
 			g.Block(func() {
-				g.Line("private intClient: internalClient,")
-				g.Line("private streamName: string")
+				g.Line("intClient: internalClient,")
+				g.Line("streamName: string")
 			})
-			g.Line(") {}")
+			g.Line(") {")
+			g.Block(func() {
+				g.Line("this.intClient = intClient;")
+				g.Line("this.streamName = streamName;")
+			})
+			g.Line("}")
 			g.Break()
 
 			g.Line("/**")
