@@ -10,6 +10,7 @@ import (
 var wrappers map[string]js.Func = map[string]js.Func{
 	"cmdFmt":       cmdFmtWrapper(),
 	"cmdTranspile": cmdTranspileWrapper(),
+	"cmdCodegen":   cmdCodegenWrapper(),
 }
 
 func main() {
