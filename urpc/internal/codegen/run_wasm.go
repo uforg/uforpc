@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 
+	"github.com/uforg/uforpc/urpc/internal/codegen/dart"
 	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
 	"github.com/uforg/uforpc/urpc/internal/codegen/typescript"
 	"github.com/uforg/uforpc/urpc/internal/transpile"
@@ -12,7 +13,7 @@ import (
 // RunWasmOptions contains options for running code generators in WASM mode
 // without writing to files.
 type RunWasmOptions struct {
-	// Generator must be one of: "golang-server", "golang-client", "typescript-client".
+	// Generator must be one of: "golang-server", "golang-client", "typescript-client", "dart-client".
 	Generator string `json:"generator"`
 	// SchemaInput is the schema content as a string (URPC schema only).
 	SchemaInput string `json:"schemaInput"`
@@ -58,6 +59,11 @@ func RunWasm(opts RunWasmOptions) (string, error) {
 	if opts.Generator == "typescript-client" {
 		cfg := typescript.Config{IncludeServer: false, IncludeClient: true}
 		return typescript.Generate(jsonSchema, cfg)
+	}
+
+	if opts.Generator == "dart-client" {
+		cfg := dart.Config{}
+		return dart.Generate(jsonSchema, cfg)
 	}
 
 	return "", fmt.Errorf("unsupported generator: %s", opts.Generator)

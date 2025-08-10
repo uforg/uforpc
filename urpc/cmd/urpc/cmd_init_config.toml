@@ -39,3 +39,6 @@ schema = "{{schema_path}}"
 
 # [typescript-client]
 # output_file = "./ufogen/typescript-client/client.ts"
+
+# [dart-client]
+# output_file = "./ufogen/dart-client/client.dart"

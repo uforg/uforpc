@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/uforg/uforpc/urpc/internal/codegen/dart"
 	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
 	"github.com/uforg/uforpc/urpc/internal/codegen/openapi"
 	"github.com/uforg/uforpc/urpc/internal/codegen/playground"
@@ -103,6 +104,12 @@ func Run(configPath string) error {
 		}
 	}
 
+	if config.HasDartClient() {
+		if err := runDart(absConfigDir, config.DartClient, jsonSchema); err != nil {
+			return fmt.Errorf("failed to run dart-client code generator: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -195,6 +202,29 @@ func runTypescript(absConfigDir string, config *typescript.Config, schema schema
 
 	// Generate the code
 	code, err := typescript.Generate(schema, *config)
+	if err != nil {
+		return fmt.Errorf("failed to generate code: %w", err)
+	}
+
+	// Write the code to the output file
+	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
+		return fmt.Errorf("failed to write generated code to file: %w", err)
+	}
+
+	return nil
+}
+
+func runDart(absConfigDir string, config *dart.Config, schema schema.Schema) error {
+	outputFile := filepath.Join(absConfigDir, config.OutputFile)
+	outputDir := filepath.Dir(outputFile)
+
+	// Ensure output directory exists
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Generate the code
+	code, err := dart.Generate(schema, *config)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}

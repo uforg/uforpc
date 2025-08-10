@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/BurntSushi/toml"
+	"github.com/uforg/uforpc/urpc/internal/codegen/dart"
 	"github.com/uforg/uforpc/urpc/internal/codegen/golang"
 	"github.com/uforg/uforpc/urpc/internal/codegen/openapi"
 	"github.com/uforg/uforpc/urpc/internal/codegen/playground"
@@ -22,6 +23,7 @@ type Config struct {
 	GolangServer     *golang.Config     `toml:"golang-server"`
 	GolangClient     *golang.Config     `toml:"golang-client"`
 	TypescriptClient *typescript.Config `toml:"typescript-client"`
+	DartClient       *dart.Config       `toml:"dart-client"`
 }
 
 func (c *Config) HasOpenAPI() bool {
@@ -42,6 +44,10 @@ func (c *Config) HasGolangClient() bool {
 
 func (c *Config) HasTypescriptClient() bool {
 	return c.TypescriptClient != nil
+}
+
+func (c *Config) HasDartClient() bool {
+	return c.DartClient != nil
 }
 
 func (c *Config) Unmarshal(data []byte) error {
@@ -89,6 +95,12 @@ func (c *Config) Validate() error {
 	if c.TypescriptClient != nil {
 		if err := c.TypescriptClient.Validate(); err != nil {
 			return fmt.Errorf("typescript-client config is invalid: %w", err)
+		}
+	}
+
+	if c.DartClient != nil {
+		if err := c.DartClient.Validate(); err != nil {
+			return fmt.Errorf("dart-client config is invalid: %w", err)
 		}
 	}
 
