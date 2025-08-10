@@ -17,11 +17,11 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	ServerOperationTypeProc   = "proc"
-	ServerOperationTypeStream = "stream"
+	OperationTypeProc   = "proc"
+	OperationTypeStream = "stream"
 )
 
-// ServerHTTPAdapter defines the interface required by UFO RPC server to handle
+// HTTPAdapter defines the interface required by UFO RPC server to handle
 // incoming HTTP requests and write responses to clients. This abstraction allows
 // the server to work with different HTTP frameworks while maintaining the same
 // core functionality.
@@ -29,7 +29,7 @@ const (
 // Implementations must provide methods to read request bodies, set response headers,
 // write response data, and flush the response buffer to ensure immediate delivery
 // to the client.
-type ServerHTTPAdapter interface {
+type HTTPAdapter interface {
 	// RequestBody returns the body reader for the incoming HTTP request.
 	// The returned io.Reader allows the server to read the request payload
 	// containing RPC call data.
@@ -52,24 +52,24 @@ type ServerHTTPAdapter interface {
 	Flush() error
 }
 
-// ServerNetHTTPAdapter implements ServerHTTPAdapter for Go's standard net/http package.
+// NetHTTPAdapter implements HTTPAdapter for Go's standard net/http package.
 // This adapter bridges the UFO RPC server with the standard HTTP library, allowing
 // seamless integration with existing HTTP servers and middleware.
-type ServerNetHTTPAdapter struct {
+type NetHTTPAdapter struct {
 	responseWriter http.ResponseWriter
 	request        *http.Request
 }
 
-// NewServerNetHTTPAdapter creates a new ServerNetHTTPAdapter that implements the
-// ServerHTTPAdapter interface for net/http.
+// NewNetHTTPAdapter creates a new NetHTTPAdapter that implements the
+// HTTPAdapter interface for net/http.
 //
 // Parameters:
 //   - w: The http.ResponseWriter to write responses to
-//   - r: The http.Request containing the incoming request data
+//   - r: The *http.Request containing the incoming request data
 //
-// Returns a ServerHTTPAdapter implementation ready for use with UFO RPC server.
-func NewServerNetHTTPAdapter(w http.ResponseWriter, r *http.Request) ServerHTTPAdapter {
-	return &ServerNetHTTPAdapter{
+// Returns a HTTPAdapter implementation ready for use with UFO RPC server.
+func NewNetHTTPAdapter(w http.ResponseWriter, r *http.Request) HTTPAdapter {
+	return &NetHTTPAdapter{
 		responseWriter: w,
 		request:        r,
 	}
@@ -77,27 +77,27 @@ func NewServerNetHTTPAdapter(w http.ResponseWriter, r *http.Request) ServerHTTPA
 
 // RequestBody returns the body reader for the HTTP request.
 // This provides access to the request payload containing the RPC call data.
-func (r *ServerNetHTTPAdapter) RequestBody() io.Reader {
+func (r *NetHTTPAdapter) RequestBody() io.Reader {
 	return r.request.Body
 }
 
 // SetHeader sets a response header with the specified key-value pair.
 // This configures headers for the HTTP response, such as Content-Type
 // for JSON responses or streaming-specific headers.
-func (r *ServerNetHTTPAdapter) SetHeader(key, value string) {
+func (r *NetHTTPAdapter) SetHeader(key, value string) {
 	r.responseWriter.Header().Set(key, value)
 }
 
 // Write writes the provided data to the HTTP response body.
 // Returns the number of bytes written and any error encountered during writing.
-func (r *ServerNetHTTPAdapter) Write(data []byte) (int, error) {
+func (r *NetHTTPAdapter) Write(data []byte) (int, error) {
 	return r.responseWriter.Write(data)
 }
 
 // Flush immediately sends any buffered response data to the client.
 // For streaming responses, this ensures real-time delivery of events.
 // If the underlying ResponseWriter doesn't support flushing, this is a no-op.
-func (r *ServerNetHTTPAdapter) Flush() error {
+func (r *NetHTTPAdapter) Flush() error {
 	if f, ok := r.responseWriter.(http.Flusher); ok {
 		f.Flush()
 	}
@@ -255,11 +255,11 @@ func newInternalServer[T any](
 	operationNamesMap := make(map[string]string)
 	for _, procName := range procNames {
 		procNamesMap[procName] = true
-		operationNamesMap[procName] = ServerOperationTypeProc
+		operationNamesMap[procName] = OperationTypeProc
 	}
 	for _, streamName := range streamNames {
 		streamNamesMap[streamName] = true
-		operationNamesMap[streamName] = ServerOperationTypeStream
+		operationNamesMap[streamName] = OperationTypeStream
 	}
 
 	return &internalServer[T]{
@@ -382,7 +382,7 @@ func (s *internalServer[T]) handleRequest(
 	ctx context.Context,
 	props T,
 	operationName string,
-	httpAdapter ServerHTTPAdapter,
+	httpAdapter HTTPAdapter,
 ) error {
 	if httpAdapter == nil {
 		return fmt.Errorf("the HTTP adapter is nil, please provide a valid adapter")
@@ -417,7 +417,7 @@ func (s *internalServer[T]) handleRequest(
 	}
 
 	// Handle Stream
-	if operationType == ServerOperationTypeStream {
+	if operationType == OperationTypeStream {
 		err := s.handleStreamRequest(c, operationName, rawInput, httpAdapter)
 
 		// If no error, return without sending any response
@@ -512,7 +512,7 @@ func (s *internalServer[T]) handleStreamRequest(
 	c *HandlerContext[T, any],
 	streamName string,
 	rawInput json.RawMessage,
-	httpAdapter ServerHTTPAdapter,
+	httpAdapter HTTPAdapter,
 ) error {
 	// Snapshot handler, middlewares, emit middlewares and deserializer under read lock
 	s.handlersMu.RLock()
@@ -602,7 +602,7 @@ func (s *internalServer[T]) handleStreamRequest(
 //
 // Returns an error if writing the response fails.
 func (s *internalServer[T]) writeProcResponse(
-	httpAdapter ServerHTTPAdapter,
+	httpAdapter HTTPAdapter,
 	response Response[any],
 ) error {
 	httpAdapter.SetHeader("Content-Type", "application/json")
