@@ -65,7 +65,7 @@ interface ReconnectConfig {
 interface FetchLikeResponse {
   ok: boolean;
   status: number;
-  body?: ReadableStream<Uint8Array>;
+  body?: ReadableStream<Uint8Array> | undefined | null;
   json(): Promise<any>;
   text(): Promise<string>;
 }
