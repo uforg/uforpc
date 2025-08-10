@@ -32,6 +32,9 @@ func generateStreamTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Line(renderType("", outputName, outputDesc, streamNode.Output))
 		g.Break()
 
+		g.Line(renderHydrateType("", outputName, streamNode.Output))
+		g.Break()
+
 		g.Linef("// %s", responseDesc)
 		g.Linef("export type %s = Response<%s>", responseName, outputName)
 		g.Break()

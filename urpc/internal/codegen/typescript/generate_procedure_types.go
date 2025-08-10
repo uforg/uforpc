@@ -32,6 +32,9 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Line(renderType("", outputName, outputDesc, procNode.Output))
 		g.Break()
 
+		g.Line(renderHydrateType("", outputName, procNode.Output))
+		g.Break()
+
 		g.Linef("// %s", responseDesc)
 		g.Linef("export type %s = Response<%s>", responseName, outputName)
 		g.Break()

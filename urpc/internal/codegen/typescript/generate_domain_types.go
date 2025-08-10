@@ -15,6 +15,7 @@ func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Break()
 
+	// Generate typescript types
 	for _, typeNode := range sch.GetTypeNodes() {
 		desc := "is a domain type defined in UFO RPC with no documentation."
 		if typeNode.Doc != nil {
@@ -31,6 +32,9 @@ func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
 		}
 
 		g.Line(renderType("", typeNode.Name, desc, typeNode.Fields))
+		g.Break()
+
+		g.Line(renderHydrateType("", typeNode.Name, typeNode.Fields))
 		g.Break()
 	}
 

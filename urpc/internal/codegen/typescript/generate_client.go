@@ -199,6 +199,7 @@ func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
 	for _, procNode := range sch.GetProcNodes() {
 		name := strutil.ToPascalCase(procNode.Name)
 		builderName := fmt.Sprintf("builder%s", name)
+		hydrateFuncName := fmt.Sprintf("hydrate%sOutput", name)
 		inputType := fmt.Sprintf("%sInput", name)
 		outputType := fmt.Sprintf("%sOutput", name)
 
@@ -337,7 +338,7 @@ func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
 				g.Line(");")
 
 				g.Line("if (!rawResponse.ok) throw rawResponse.error;")
-				g.Linef("return rawResponse.output as %s;", outputType)
+				g.Linef("return %s(rawResponse.output);", hydrateFuncName)
 			})
 			g.Line("}")
 		})
@@ -393,6 +394,7 @@ func generateStreamImplementation(g *genkit.GenKit, sch schema.Schema) {
 	for _, streamNode := range sch.GetStreamNodes() {
 		name := strutil.ToPascalCase(streamNode.Name)
 		builderName := fmt.Sprintf("builder%sStream", name)
+		hydrateFuncName := fmt.Sprintf("hydrate%sOutput", name)
 		inputType := fmt.Sprintf("%sInput", name)
 		outputType := fmt.Sprintf("%sOutput", name)
 
@@ -525,12 +527,13 @@ func generateStreamImplementation(g *genkit.GenKit, sch schema.Schema) {
 				g.Block(func() {
 					g.Line("for await (const event of stream) {")
 					g.Block(func() {
-						g.Linef("yield event as Response<%s>;", outputType)
+						g.Linef("const evt = event as Response<%s>;", outputType)
+						g.Linef("if (evt.ok) evt.output = %s(evt.output);", hydrateFuncName)
+						g.Line("yield evt;")
 					})
 					g.Line("}")
 				})
 				g.Line("};")
-				g.Break()
 
 				g.Line("return {")
 				g.Block(func() {
