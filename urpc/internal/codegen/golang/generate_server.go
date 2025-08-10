@@ -310,7 +310,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		// Generate type aliases
 		g.Linef("// Type aliases for %s stream", name)
 		g.Linef("type %sHandlerContext[P any] = HandlerContext[P, %sInput]", name, name)
-		g.Linef("type %sEmitFunc[P any] = EmitFunc[P, %sInput, %sOutput]", name, name, name)
+		g.Linef("type %sEmitFunc[P any] func(c *%sHandlerContext[P], output %sOutput) error", name, name, name)
 		g.Linef("type %sHandlerFunc[P any] func(c *%sHandlerContext[P], emit %sEmitFunc[P]) error", name, name, name)
 		g.Linef("type %sMiddlewareFunc[P any] func(next %sHandlerFunc[P]) %sHandlerFunc[P]", name, name, name)
 		g.Linef("type %sEmitMiddlewareFunc[P any] func(next %sEmitFunc[P]) %sEmitFunc[P]", name, name, name)
