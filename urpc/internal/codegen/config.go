@@ -12,12 +12,16 @@ import (
 
 // Config is the configuration for the code generator.
 type Config struct {
-	Version    int                `toml:"version"`
-	Schema     string             `toml:"schema"`
+	Version int    `toml:"version"`
+	Schema  string `toml:"schema"`
+
 	OpenAPI    openapi.Config     `toml:"openapi"`
 	Playground *playground.Config `toml:"playground"`
-	Golang     *golang.Config     `toml:"golang"`
-	Typescript *typescript.Config `toml:"typescript"`
+
+	// New split generators
+	GolangServer     *golang.Config     `toml:"golang-server"`
+	GolangClient     *golang.Config     `toml:"golang-client"`
+	TypescriptClient *typescript.Config `toml:"typescript-client"`
 }
 
 func (c *Config) HasOpenAPI() bool {
@@ -28,12 +32,16 @@ func (c *Config) HasPlayground() bool {
 	return c.Playground != nil
 }
 
-func (c *Config) HasGolang() bool {
-	return c.Golang != nil
+func (c *Config) HasGolangServer() bool {
+	return c.GolangServer != nil
 }
 
-func (c *Config) HasTypescript() bool {
-	return c.Typescript != nil
+func (c *Config) HasGolangClient() bool {
+	return c.GolangClient != nil
+}
+
+func (c *Config) HasTypescriptClient() bool {
+	return c.TypescriptClient != nil
 }
 
 func (c *Config) Unmarshal(data []byte) error {
@@ -66,15 +74,21 @@ func (c *Config) Validate() error {
 		}
 	}
 
-	if c.Golang != nil {
-		if err := c.Golang.Validate(); err != nil {
-			return fmt.Errorf("golang config is invalid: %w", err)
+	if c.GolangServer != nil {
+		if err := c.GolangServer.Validate(); err != nil {
+			return fmt.Errorf("golang-server config is invalid: %w", err)
 		}
 	}
 
-	if c.Typescript != nil {
-		if err := c.Typescript.Validate(); err != nil {
-			return fmt.Errorf("typescript config is invalid: %w", err)
+	if c.GolangClient != nil {
+		if err := c.GolangClient.Validate(); err != nil {
+			return fmt.Errorf("golang-client config is invalid: %w", err)
+		}
+	}
+
+	if c.TypescriptClient != nil {
+		if err := c.TypescriptClient.Validate(); err != nil {
+			return fmt.Errorf("typescript-client config is invalid: %w", err)
 		}
 	}
 

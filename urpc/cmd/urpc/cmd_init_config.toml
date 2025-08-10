@@ -29,13 +29,13 @@ schema = "{{schema_path}}"
 #   { key = "X-Baz", value = "qux" },
 # ]
 
-# [golang]
-# output_file = "./ufogen/golang/ufogen.go"
-# package_name = "ufogen"
-# include_server = true
-# include_client = true
+# [golang-server]
+# output_file = "./ufogen/golang-server/server.go"
+# package_name = "uforpc"
 
-# [typescript]
-# output_file = "./ufogen/typescript/ufogen.ts"
-# include_server = true
-# include_client = true
+# [golang-client]
+# output_file = "./ufogen/golang-client/client.go"
+# package_name = "uforpc"
+
+# [typescript-client]
+# output_file = "./ufogen/typescript-client/client.ts"

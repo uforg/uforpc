@@ -76,15 +76,30 @@ func Run(configPath string) error {
 		}
 	}
 
-	if config.HasGolang() {
-		if err := runGolang(absConfigDir, config.Golang, jsonSchema); err != nil {
-			return fmt.Errorf("failed to run golang code generator: %w", err)
+	if config.HasGolangServer() {
+		cfg := *config.GolangServer
+		cfg.IncludeServer = true
+		cfg.IncludeClient = false
+		if err := runGolang(absConfigDir, &cfg, jsonSchema); err != nil {
+			return fmt.Errorf("failed to run golang-server code generator: %w", err)
 		}
 	}
 
-	if config.HasTypescript() {
-		if err := runTypescript(absConfigDir, config.Typescript, jsonSchema); err != nil {
-			return fmt.Errorf("failed to run typescript code generator: %w", err)
+	if config.HasGolangClient() {
+		cfg := *config.GolangClient
+		cfg.IncludeServer = false
+		cfg.IncludeClient = true
+		if err := runGolang(absConfigDir, &cfg, jsonSchema); err != nil {
+			return fmt.Errorf("failed to run golang-client code generator: %w", err)
+		}
+	}
+
+	if config.HasTypescriptClient() {
+		cfg := *config.TypescriptClient
+		cfg.IncludeServer = false
+		cfg.IncludeClient = true
+		if err := runTypescript(absConfigDir, &cfg, jsonSchema); err != nil {
+			return fmt.Errorf("failed to run typescript-client code generator: %w", err)
 		}
 	}
 
