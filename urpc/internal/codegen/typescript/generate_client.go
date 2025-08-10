@@ -91,7 +91,7 @@ func generateClientBuilder(g *genkit.GenKit) {
 		g.Line(" * Sets a custom fetch function for HTTP requests.")
 		g.Line(" * Useful for environments without global fetch or for custom configurations.")
 		g.Line(" */")
-		g.Line("withCustomFetch(fetchFn: typeof fetch): ClientBuilder {")
+		g.Line("withCustomFetch(fetchFn: FetchLike): ClientBuilder {")
 		g.Block(func() {
 			g.Line("this.builder.withFetch(fetchFn);")
 			g.Line("return this;")
