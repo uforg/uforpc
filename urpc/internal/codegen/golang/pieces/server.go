@@ -416,46 +416,35 @@ func (s *internalServer[T]) handleRequest(
 		operationType: operationType,
 	}
 
-	// Track whether the stream connection has been started (headers sent)
-	startedStream := false
-
-	// Dispatch based on operation type. Global middlewares are applied inside
-	// handleProcRequest/handleStreamRequest after input deserialization.
+	// Handle Stream
 	if operationType == ServerOperationTypeStream {
-		err := s.handleStreamRequest(c, operationName, rawInput, httpAdapter, &startedStream)
-		if err != nil {
-			if startedStream {
-				// Emit a final error event for stream failures after connection started
-				response := Response[any]{
-					Ok:    false,
-					Error: asError(err),
-				}
-				jsonData, marshalErr := json.Marshal(response)
-				if marshalErr != nil {
-					return fmt.Errorf("failed to marshal stream error: %w", marshalErr)
-				}
-				resPayload := fmt.Sprintf("data: %s\n\n", jsonData)
-				if _, writeErr := httpAdapter.Write([]byte(resPayload)); writeErr != nil {
-					return writeErr
-				}
-				if flushErr := httpAdapter.Flush(); flushErr != nil {
-					return flushErr
-				}
-			} else {
-				// Before establishing the stream, return a single JSON error response
-				res := Response[any]{
-					Ok:    false,
-					Error: asError(err),
-				}
-				return s.writeProcResponse(httpAdapter, res)
-			}
+		err := s.handleStreamRequest(c, operationName, rawInput, httpAdapter)
+
+		// If no error, return without sending any response
+		if err == nil {
+			return nil
 		}
-		return nil
+
+		// Send an event with the error before closing the connection
+		response := Response[any]{
+			Ok:    false,
+			Error: asError(err),
+		}
+		jsonData, marshalErr := json.Marshal(response)
+		if marshalErr != nil {
+			return fmt.Errorf("failed to marshal stream error: %w", marshalErr)
+		}
+		resPayload := fmt.Sprintf("data: %s\n\n", jsonData)
+		if _, writeErr := httpAdapter.Write([]byte(resPayload)); writeErr != nil {
+			return writeErr
+		}
+		if flushErr := httpAdapter.Flush(); flushErr != nil {
+			return flushErr
+		}
 	}
 
+	// Handle Procedure
 	output, err := s.handleProcRequest(c, operationName, rawInput)
-
-	// Procedure response path
 	response := Response[any]{}
 	if err != nil {
 		response.Ok = false
@@ -524,7 +513,6 @@ func (s *internalServer[T]) handleStreamRequest(
 	streamName string,
 	rawInput json.RawMessage,
 	httpAdapter ServerHTTPAdapter,
-	started *bool,
 ) error {
 	// Snapshot handler, middlewares, emit middlewares and deserializer under read lock
 	s.handlersMu.RLock()
@@ -533,6 +521,11 @@ func (s *internalServer[T]) handleStreamRequest(
 	emitMws := s.streamEmitMiddlewares[streamName]
 	deserialize := s.streamDeserializers[streamName]
 	s.handlersMu.RUnlock()
+
+	// Set SSE headers to the response
+	httpAdapter.SetHeader("Content-Type", "text/event-stream")
+	httpAdapter.SetHeader("Cache-Control", "no-cache")
+	httpAdapter.SetHeader("Connection", "keep-alive")
 
 	if !ok {
 		return fmt.Errorf("%s stream not implemented", streamName)
@@ -547,14 +540,6 @@ func (s *internalServer[T]) handleStreamRequest(
 		return err
 	}
 	c.Input = typedInput
-
-	// Set SSE headers and mark the stream as started
-	httpAdapter.SetHeader("Content-Type", "text/event-stream")
-	httpAdapter.SetHeader("Cache-Control", "no-cache")
-	httpAdapter.SetHeader("Connection", "keep-alive")
-	if started != nil {
-		*started = true
-	}
 
 	// Base emit writes SSE envelope with {ok:true, output}
 	baseEmit := func(_ *HandlerContext[T, any], data any) error {
