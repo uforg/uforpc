@@ -42,3 +42,4 @@ schema = "{{schema_path}}"
 
 # [dart-client]
 # output_dir = "./ufogen/dart-client"
+# package_name = "uforpc"

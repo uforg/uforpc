@@ -20,6 +20,8 @@ type RunWasmOptions struct {
 	SchemaInput string `json:"schemaInput"`
 	// GolangPackageName is required when Generator is golang-server or golang-client.
 	GolangPackageName string `json:"golangPackageName"`
+	// DartPackageName is required when Generator is dart-client.
+	DartPackageName string `json:"dartPackageName"`
 }
 
 // RunWasmOutputFile is a single generated file.
@@ -101,7 +103,7 @@ func runWasm(opts RunWasmOptions) (RunWasmOutput, error) {
 	}
 
 	if opts.Generator == "dart-client" {
-		cfg := dart.Config{}
+		cfg := dart.Config{PackageName: opts.DartPackageName}
 		output, err := dart.Generate(jsonSchema, cfg)
 		if err != nil {
 			return RunWasmOutput{}, fmt.Errorf("failed to generate dart client: %s", err)

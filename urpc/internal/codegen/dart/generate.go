@@ -63,6 +63,7 @@ func Generate(sch schema.Schema, config Config) (Output, error) {
 	}
 
 	// 2) Generate pubspec.yaml
+	pubspecRawPiece = strings.ReplaceAll(pubspecRawPiece, "{{ package_name }}", config.PackageName)
 	pubspec := OutputFile{
 		Path:    "pubspec.yaml",
 		Content: pubspecRawPiece,
