@@ -1,0 +1,8 @@
+name: uforpc
+homepage: https://github.com/uforg/uforpc
+
+environment:
+  sdk: ">=3.0.0"
+
+dependencies:
+  http: 1.5.0

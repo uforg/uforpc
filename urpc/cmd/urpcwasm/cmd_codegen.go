@@ -25,7 +25,7 @@ func cmdCodegenWrapper() js.Func {
 					reject.Invoke("failed to parse options JSON: " + err.Error())
 					return
 				}
-				if code, err := codegen.RunWasm(opts); err != nil {
+				if code, err := codegen.RunWasmString(opts); err != nil {
 					reject.Invoke("failed to generate: " + err.Error())
 				} else {
 					resolve.Invoke(code)

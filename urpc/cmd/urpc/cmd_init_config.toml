@@ -41,4 +41,4 @@ schema = "{{schema_path}}"
 # output_file = "./ufogen/typescript-client/client.ts"
 
 # [dart-client]
-# output_file = "./ufogen/dart-client/client.dart"
+# output_dir = "./ufogen/dart-client"

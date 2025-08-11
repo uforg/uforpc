@@ -18,8 +18,8 @@
 
 import 'dart:async';
 import 'dart:convert' as convert;
-import 'dart:io' as io;
 import 'dart:math' as math;
+import 'package:http/http.dart' as http;
 
 // -----------------------------------------------------------------------------
 // Core Types
@@ -166,57 +166,24 @@ class ReconnectConfig {
 }
 
 // -----------------------------------------------------------------------------
-// Internal Client
+// Internal Client (http-based)
 // -----------------------------------------------------------------------------
 
-class _FetchLikeResponse {
-  final bool ok;
-  final int status;
-  final Stream<List<int>>? body;
-  final Future<dynamic> Function() json;
-  final Future<String> Function() text;
-  _FetchLikeResponse({
-    required this.ok,
-    required this.status,
-    required this.body,
-    required this.json,
-    required this.text,
-  });
-}
-
-typedef _FetchLike =
-    Future<_FetchLikeResponse> Function(
-      String url, {
-      String method,
-      Map<String, String>? headers,
-      String? body,
-    });
-
 class _InternalClient {
-  late final String _baseURL;
-  _FetchLike? _fetchFn;
-  final Map<String, String> _globalHeaders = {};
-  late final Set<String> _procSet;
-  late final Set<String> _streamSet;
+  final String _baseURL;
+  final Set<String> _procSet;
+  final Set<String> _streamSet;
+  final Map<String, String> _globalHeaders;
+  final http.Client _client = http.Client();
 
   _InternalClient(
-    String baseURL,
+    this._baseURL,
     List<String> procNames,
     List<String> streamNames,
-    List<_InternalClientOption> opts,
-  ) {
-    _baseURL = baseURL.replaceAll(RegExp(r"/+$"), '');
-    _procSet = Set.of(procNames);
-    _streamSet = Set.of(streamNames);
-    for (final o in opts) {
-      o(this);
-    }
-    _fetchFn ??= _defaultFetch;
-  }
-
-  void setFetch(_FetchLike fetchFn) {
-    _fetchFn = fetchFn;
-  }
+    Map<String, String> globalHeaders,
+  ) : _procSet = Set.of(procNames),
+      _streamSet = Set.of(streamNames),
+      _globalHeaders = Map.of(globalHeaders);
 
   void addGlobalHeader(String k, String v) {
     _globalHeaders[k] = v;
@@ -249,7 +216,7 @@ class _InternalClient {
       return Response.error(_asError(err));
     }
 
-    final url = '$_baseURL/$name';
+    final url = "${_baseURL.replaceAll(RegExp(r"/+$"), '')}/$name";
     final hdrs = <String, String>{
       'content-type': 'application/json',
       'accept': 'application/json',
@@ -260,21 +227,19 @@ class _InternalClient {
     UfoError? lastError;
     for (var attempt = 1; attempt <= retryConf.maxAttempts; attempt++) {
       try {
-        final resp = await _fetchFn!(
-          url,
-          method: 'POST',
-          headers: hdrs,
-          body: payload,
-        ).timeout(Duration(milliseconds: timeoutConf.timeoutMs));
+        final uri = Uri.parse(url);
+        final resp = await _client
+            .post(uri, headers: hdrs, body: payload)
+            .timeout(Duration(milliseconds: timeoutConf.timeoutMs));
 
-        if (!resp.ok) {
+        if (resp.statusCode < 200 || resp.statusCode >= 300) {
           final error = UfoError(
-            message: 'Unexpected HTTP status: ${resp.status}',
+            message: 'Unexpected HTTP status: ${resp.statusCode}',
             category: 'HTTPError',
             code: 'BAD_STATUS',
-            details: {'status': resp.status, 'attempt': attempt},
+            details: {'status': resp.statusCode, 'attempt': attempt},
           );
-          if (resp.status >= 500 && attempt < retryConf.maxAttempts) {
+          if (resp.statusCode >= 500 && attempt < retryConf.maxAttempts) {
             lastError = error;
             final backoffMs = _backoffMs(retryConf, attempt);
             await _sleep(backoffMs);
@@ -283,17 +248,16 @@ class _InternalClient {
           return Response.error(error);
         }
 
-        final json = await resp.json();
-        if (json is Map<String, dynamic>) {
-          return Response<dynamic>.fromJson(json);
+        final bodyText = resp.body;
+        try {
+          final parsed = convert.jsonDecode(bodyText);
+          if (parsed is Map<String, dynamic>) {
+            return Response<dynamic>.fromJson(parsed);
+          }
+          return Response.error(UfoError(message: 'Invalid JSON response'));
+        } catch (err) {
+          return Response.error(_asError(err));
         }
-        if (json is String) {
-          final parsed = convert.jsonDecode(json);
-          return Response<dynamic>.fromJson(
-            (parsed as Map).cast<String, dynamic>(),
-          );
-        }
-        return Response.error(UfoError(message: 'Invalid JSON response'));
       } on TimeoutException {
         final timeoutError = UfoError(
           message: 'Request timeout after ${timeoutConf.timeoutMs}ms',
@@ -332,12 +296,12 @@ class _InternalClient {
     final reconnectConf = reconnectConfig ?? const ReconnectConfig();
 
     var isCancelled = false;
-    io.HttpClient? currentClient;
+    final streamClient = http.Client();
 
     void cancel() {
       isCancelled = true;
       try {
-        currentClient?.close(force: true);
+        streamClient.close();
       } catch (_) {}
     }
 
@@ -361,7 +325,7 @@ class _InternalClient {
         return;
       }
 
-      final url = '$_baseURL/$name';
+      final url = "${_baseURL.replaceAll(RegExp(r"/+$"), '')}/$name";
       final hdrs = <String, String>{
         'content-type': 'application/json',
         'accept': 'text/event-stream',
@@ -371,21 +335,20 @@ class _InternalClient {
 
       var reconnectAttempt = 0;
       while (!isCancelled) {
-        currentClient = io.HttpClient();
         try {
           final uri = Uri.parse(url);
-          final req = await currentClient!.openUrl('POST', uri);
-          hdrs.forEach((k, v) => req.headers.set(k, v));
-          req.add(convert.utf8.encode(payload));
-          final resp = await req.close();
+          final req = http.Request('POST', uri);
+          req.headers.addAll(hdrs);
+          req.body = payload;
 
-          if (!(resp.statusCode >= 200 && resp.statusCode < 300)) {
+          final streamed = await streamClient.send(req);
+          if (streamed.statusCode < 200 || streamed.statusCode >= 300) {
             final error = UfoError(
-              message: 'Unexpected HTTP status: ${resp.statusCode}',
+              message: 'Unexpected HTTP status: ${streamed.statusCode}',
               category: 'HTTPError',
               code: 'BAD_STATUS',
               details: {
-                'status': resp.statusCode,
+                'status': streamed.statusCode,
                 'reconnectAttempt': reconnectAttempt,
               },
             );
@@ -408,16 +371,14 @@ class _InternalClient {
           final decoder = convert.Utf8Decoder();
           var buffer = '';
 
-          await for (final chunk in resp) {
+          await for (final chunk in streamed.stream) {
             if (isCancelled) break;
-            buffer += decoder.convert(chunk, 0, chunk.length);
+            buffer += decoder.convert(chunk);
             int idx;
             while ((idx = buffer.indexOf('\n\n')) != -1) {
               final line = buffer.substring(0, idx).trimRight();
-              buffer = buffer.substring(idx + 1);
-              if (line.isEmpty) {
-                continue;
-              }
+              buffer = buffer.substring(idx + 2);
+              if (line.isEmpty) continue;
               if (line.startsWith('data:')) {
                 final jsonStr = line.substring(5).trim();
                 try {
@@ -461,7 +422,7 @@ class _InternalClient {
           return;
         } finally {
           try {
-            currentClient?.close(force: true);
+            // Stream client persists for this call; closed by cancel()
           } catch (_) {}
         }
       }
@@ -503,75 +464,11 @@ class _StreamHandle<T> {
   _StreamHandle({required this.stream, required this.cancel});
 }
 
-typedef _InternalClientOption = void Function(_InternalClient c);
-
-_InternalClientOption _withFetch(_FetchLike fetchFn) =>
-    (c) => c.setFetch(fetchFn);
-
-_InternalClientOption _withGlobalHeader(String key, String value) =>
-    (c) => c.addGlobalHeader(key, value);
-
 class _InternalClientBuilder {
   final String _baseURL;
-  final List<_InternalClientOption> _opts = [];
+  final Map<String, String> _headers = {};
   _InternalClientBuilder(this._baseURL);
-  void withFetch(_FetchLike fetchFn) => _opts.add(_withFetch(fetchFn));
-  void withGlobalHeader(String key, String value) =>
-      _opts.add(_withGlobalHeader(key, value));
+  void withGlobalHeader(String key, String value) => _headers[key] = value;
   _InternalClient build(List<String> procNames, List<String> streamNames) =>
-      _InternalClient(_baseURL, procNames, streamNames, _opts);
-}
-
-Future<_FetchLikeResponse> _defaultFetch(
-  String url, {
-  String method = 'GET',
-  Map<String, String>? headers,
-  String? body,
-}) async {
-  final client = io.HttpClient();
-  try {
-    final uri = Uri.parse(url);
-    final req = await client.openUrl(method, uri);
-    (headers ?? const <String, String>{}).forEach(
-      (k, v) => req.headers.set(k, v),
-    );
-    if (body != null) {
-      req.add(convert.utf8.encode(body));
-    }
-    final resp = await req.close();
-    final status = resp.statusCode;
-
-    Future<dynamic> parseJson() async {
-      final bytes = await resp.fold<List<int>>(
-        <int>[],
-        (prev, el) => prev..addAll(el),
-      );
-      final text = convert.utf8.decode(bytes);
-      try {
-        return convert.jsonDecode(text);
-      } catch (_) {
-        return text;
-      }
-    }
-
-    Future<String> parseText() async {
-      final bytes = await resp.fold<List<int>>(
-        <int>[],
-        (prev, el) => prev..addAll(el),
-      );
-      return convert.utf8.decode(bytes);
-    }
-
-    return _FetchLikeResponse(
-      ok: status >= 200 && status < 300,
-      status: status,
-      body: resp,
-      json: parseJson,
-      text: parseText,
-    );
-  } finally {
-    try {
-      client.close(force: true);
-    } catch (_) {}
-  }
+      _InternalClient(_baseURL, procNames, streamNames, _headers);
 }

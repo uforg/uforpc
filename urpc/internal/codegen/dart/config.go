@@ -2,21 +2,17 @@ package dart
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Config is the configuration for the Dart code generator.
 type Config struct {
-	// OutputFile is the file to output the generated code to.
-	OutputFile string `toml:"output_file"`
+	// OutputDir is the directory to output the generated Dart package to.
+	OutputDir string `toml:"output_dir"`
 }
 
 func (c Config) Validate() error {
-	if c.OutputFile == "" {
-		return fmt.Errorf(`"output_file" is required`)
-	}
-	if !strings.HasSuffix(c.OutputFile, ".dart") {
-		return fmt.Errorf(`"output_file" must end with ".dart"`)
+	if c.OutputDir == "" {
+		return fmt.Errorf("\"output_dir\" is required")
 	}
 	return nil
 }

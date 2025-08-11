@@ -1,6 +1,7 @@
 package dart
 
 import (
+	_ "embed"
 	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
@@ -8,8 +9,28 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
-// Generate takes a schema and a config and generates the Dart code for the schema.
-func Generate(sch schema.Schema, config Config) (string, error) {
+//go:embed pieces/pubspec.yaml
+var pubspecRawPiece string
+
+//go:embed pieces/pubspec.lock
+var pubspecLockRawPiece string
+
+//go:embed pieces/.gitignore
+var gitignoreRawPiece string
+
+// OutputFile represents a single generated file.
+type OutputFile struct {
+	Path    string `json:"path"`
+	Content string `json:"content"`
+}
+
+// Output represents multiple generated files for the Dart package.
+type Output struct {
+	Files []OutputFile `json:"files"`
+}
+
+// Generate takes a schema and a config and generates the Dart package files.
+func Generate(sch schema.Schema, config Config) (Output, error) {
 	subGenerators := []func(schema.Schema, Config) (string, error){
 		generateCore,
 		generateDomainTypes,
@@ -18,11 +39,12 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generateClient,
 	}
 
+	// 1) Generate lib/main.dart
 	g := genkit.NewGenKit().WithSpaces(2)
 	for _, generator := range subGenerators {
 		codeChunk, err := generator(sch, config)
 		if err != nil {
-			return "", err
+			return Output{}, err
 		}
 
 		codeChunk = strings.TrimSpace(codeChunk)
@@ -32,8 +54,38 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 			g.Break()
 		}
 	}
+	libClientContent := g.String()
+	libClientContent = strutil.LimitConsecutiveNewlines(libClientContent, 2)
 
-	generatedCode := g.String()
-	generatedCode = strutil.LimitConsecutiveNewlines(generatedCode, 2)
-	return generatedCode, nil
+	dartClient := OutputFile{
+		Path:    "lib/client.dart",
+		Content: libClientContent,
+	}
+
+	// 2) Generate pubspec.yaml
+	pubspec := OutputFile{
+		Path:    "pubspec.yaml",
+		Content: pubspecRawPiece,
+	}
+
+	// 3) Generate pubspec.lock
+	pubspecLock := OutputFile{
+		Path:    "pubspec.lock",
+		Content: pubspecLockRawPiece,
+	}
+
+	// 4) Generate .gitignore
+	gitignore := OutputFile{
+		Path:    ".gitignore",
+		Content: gitignoreRawPiece,
+	}
+
+	return Output{
+		Files: []OutputFile{
+			dartClient,
+			pubspec,
+			pubspecLock,
+			gitignore,
+		},
+	}, nil
 }

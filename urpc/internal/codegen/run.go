@@ -215,8 +215,7 @@ func runTypescript(absConfigDir string, config *typescript.Config, schema schema
 }
 
 func runDart(absConfigDir string, config *dart.Config, schema schema.Schema) error {
-	outputFile := filepath.Join(absConfigDir, config.OutputFile)
-	outputDir := filepath.Dir(outputFile)
+	outputDir := filepath.Join(absConfigDir, config.OutputDir)
 
 	// Ensure output directory exists
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -224,14 +223,21 @@ func runDart(absConfigDir string, config *dart.Config, schema schema.Schema) err
 	}
 
 	// Generate the code
-	code, err := dart.Generate(schema, *config)
+	output, err := dart.Generate(schema, *config)
 	if err != nil {
 		return fmt.Errorf("failed to generate code: %w", err)
 	}
 
-	// Write the code to the output file
-	if err := os.WriteFile(outputFile, []byte(code), 0644); err != nil {
-		return fmt.Errorf("failed to write generated code to file: %w", err)
+	for _, file := range output.Files {
+		outputFile := filepath.Join(outputDir, file.Path)
+		outputFileDir := filepath.Dir(outputFile)
+		if err := os.MkdirAll(outputFileDir, 0755); err != nil {
+			return fmt.Errorf("failed to create output directory: %w", err)
+		}
+
+		if err := os.WriteFile(outputFile, []byte(file.Content), 0644); err != nil {
+			return fmt.Errorf("failed to write generated code to file %s: %w", outputFile, err)
+		}
 	}
 
 	return nil
