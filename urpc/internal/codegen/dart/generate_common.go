@@ -112,7 +112,7 @@ func dartFromJsonExpr(parentTypeName string, field schema.FieldDefinition, jsonA
 
 // dartToJsonExpr returns the Dart expression to serialise a field to JSON.
 // varName is the variable expression to serialise (must be non-nullable in the call site).
-func dartToJsonExpr(parentTypeName string, field schema.FieldDefinition, varName string) string {
+func dartToJsonExpr(field schema.FieldDefinition, varName string) string {
 	isNamed := field.IsNamed()
 	isInline := field.IsInline()
 
@@ -213,10 +213,10 @@ func renderDartType(parentName, name, desc string, fields []schema.FieldDefiniti
 				if field.Optional {
 					local := "__v_" + fieldName
 					og.Linef("final %s = %s;", local, fieldName)
-					ser := dartToJsonExpr(name, field, local)
+					ser := dartToJsonExpr(field, local)
 					og.Linef("if (%s != null) _data['%s'] = %s;", local, jsonKey, ser)
 				} else {
-					ser := dartToJsonExpr(name, field, fieldName)
+					ser := dartToJsonExpr(field, fieldName)
 					og.Linef("_data['%s'] = %s;", jsonKey, ser)
 				}
 			}
