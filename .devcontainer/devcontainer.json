@@ -20,7 +20,8 @@
         "Chanzhaoyu.svelte-5-snippets",
         "esbenp.prettier-vscode",
         "vitest.explorer",
-        "biomejs.biome"
+        "biomejs.biome",
+        "Dart-Code.dart-code"
       ],
       "settings": {
         "autoOpenWorkspace.enableAutoOpenIfSingleWorkspace": true,

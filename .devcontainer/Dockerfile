@@ -62,6 +62,11 @@ RUN set -e && \
 # Go install binaries
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
+# Install Dart SDK
+RUN wget --no-verbose -O dart.deb https://storage.googleapis.com/dart-archive/channels/stable/release/latest/linux_packages/dart_3.8.3-1_amd64.deb && \
+    dpkg -i dart.deb && \
+    rm dart.deb
+
 # Default git config
 # https://github.com/golangci/golangci-lint/issues/4033
 RUN git config --global --add safe.directory '*'
