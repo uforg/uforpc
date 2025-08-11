@@ -112,7 +112,7 @@ func dartFromJsonExpr(parentTypeName string, field schema.FieldDefinition, jsonA
 
 // dartToJsonExpr returns the Dart expression to serialise a field to JSON.
 // varName is the variable expression to serialise (must be non-nullable in the call site).
-func dartToJsonExpr(_ string, field schema.FieldDefinition, varName string) string {
+func dartToJsonExpr(parentTypeName string, field schema.FieldDefinition, varName string) string {
 	isNamed := field.IsNamed()
 	isInline := field.IsInline()
 
@@ -125,9 +125,9 @@ func dartToJsonExpr(_ string, field schema.FieldDefinition, varName string) stri
 	case isNamed && field.IsBuiltInType():
 		if *field.TypeName == "datetime" {
 			if field.IsArray {
-				return fmt.Sprintf("%s.map((e) => e.toIso8601String()).toList()", varName)
+				return fmt.Sprintf("%s.map((e) => e.toUtc().toIso8601String()).toList()", varName)
 			}
-			return fmt.Sprintf("%s.toIso8601String()", varName)
+			return fmt.Sprintf("%s.toUtc().toIso8601String()", varName)
 		}
 		return varName
 	case isInline:
