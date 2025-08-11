@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Config is the configuration for the Go code generator.
+// Config is the configuration for the Dart code generator.
 type Config struct {
 	// OutputFile is the file to output the generated code to.
 	OutputFile string `toml:"output_file"`
