@@ -549,7 +549,7 @@ func (c *internalClient) stream(
 			if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 				resp.Body.Close()
 
-				// Try to reconnect on 5xx errors
+				// Reconnect only on 5xx HTTP errors
 				if resp.StatusCode >= 500 && reconnectConf != nil && reconnectAttempt < reconnectConf.MaxAttempts {
 					events <- Response[json.RawMessage]{
 						Ok: false,
@@ -582,11 +582,11 @@ func (c *internalClient) stream(
 			reconnectAttempt = 0
 
 			// Process the stream
-			handleStreamEvents(ctx, resp, events, &reconnectAttempt)
+			hadError := handleStreamEvents(ctx, resp, events)
 			resp.Body.Close()
 
-			// If we reach here, the stream ended. Check if we should reconnect.
-			if reconnectConf != nil && reconnectAttempt < reconnectConf.MaxAttempts {
+			// If we reach here, the stream ended. Reconnect only on network/read errors.
+			if reconnectConf != nil && hadError && reconnectAttempt < reconnectConf.MaxAttempts {
 				events <- Response[json.RawMessage]{
 					Ok: false,
 					Error: Error{
@@ -615,8 +615,7 @@ func handleStreamEvents(
 	ctx context.Context,
 	resp *http.Response,
 	events chan<- Response[json.RawMessage],
-	reconnectAttempt *int,
-) {
+) (hadError bool) {
 	// Use a large buffer with no maximum size limit for SSE events
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Buffer(make([]byte, 0, 64*1024), bufio.MaxScanTokenSize)
@@ -629,8 +628,7 @@ func handleStreamEvents(
 		}
 		var evt Response[json.RawMessage]
 		if err := json.Unmarshal(dataBuf.Bytes(), &evt); err != nil {
-			// Protocol violation – stop the stream and trigger reconnect
-			*reconnectAttempt++
+			// Protocol violation – stop the stream without reconnect
 			events <- Response[json.RawMessage]{
 				Ok:    false,
 				Error: asError(fmt.Errorf("received invalid SSE payload: %v", err)),
@@ -652,8 +650,14 @@ func handleStreamEvents(
 		}
 
 		if !scanner.Scan() {
-			// EOF or error – trigger reconnect
-			*reconnectAttempt++
+			// EOF or error
+			if err := scanner.Err(); err != nil {
+				// Network/read error: indicate reconnection
+				hadError = true
+			} else {
+				// Normal EOF: no reconnection
+				hadError = false
+			}
 			return
 		}
 		line := scanner.Text()

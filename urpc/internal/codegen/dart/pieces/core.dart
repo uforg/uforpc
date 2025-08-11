@@ -79,13 +79,13 @@ class UfoError implements Exception {
   UfoError({required this.message, this.category, this.code, this.details});
 
   factory UfoError.fromJson(Map<String, dynamic> json) => UfoError(
-    message: json['message']?.toString() ?? 'Unknown error',
-    category: json['category'] as String?,
-    code: json['code'] as String?,
-    details: json['details'] is Map
-        ? (json['details'] as Map).cast<String, dynamic>()
-        : null,
-  );
+        message: json['message']?.toString() ?? 'Unknown error',
+        category: json['category'] as String?,
+        code: json['code'] as String?,
+        details: json['details'] is Map
+            ? (json['details'] as Map).cast<String, dynamic>()
+            : null,
+      );
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{'message': message};
@@ -128,11 +128,11 @@ class RetryConfig {
   });
 
   factory RetryConfig.sanitised(RetryConfig c) => RetryConfig(
-    maxAttempts: c.maxAttempts < 0 ? 0 : c.maxAttempts,
-    initialDelayMs: c.initialDelayMs < 100 ? 100 : c.initialDelayMs,
-    maxDelayMs: c.maxDelayMs < 100 ? 100 : c.maxDelayMs,
-    delayMultiplier: c.delayMultiplier < 1 ? 1 : c.delayMultiplier,
-  );
+        maxAttempts: c.maxAttempts < 0 ? 0 : c.maxAttempts,
+        initialDelayMs: c.initialDelayMs < 100 ? 100 : c.initialDelayMs,
+        maxDelayMs: c.maxDelayMs < 100 ? 100 : c.maxDelayMs,
+        delayMultiplier: c.delayMultiplier < 1 ? 1 : c.delayMultiplier,
+      );
 }
 
 /// Configuration for timeout behavior in procedures.
@@ -158,11 +158,11 @@ class ReconnectConfig {
   });
 
   factory ReconnectConfig.sanitised(ReconnectConfig c) => ReconnectConfig(
-    maxAttempts: c.maxAttempts < 0 ? 0 : c.maxAttempts,
-    initialDelayMs: c.initialDelayMs < 100 ? 100 : c.initialDelayMs,
-    maxDelayMs: c.maxDelayMs < 100 ? 100 : c.maxDelayMs,
-    delayMultiplier: c.delayMultiplier < 1 ? 1 : c.delayMultiplier,
-  );
+        maxAttempts: c.maxAttempts < 0 ? 0 : c.maxAttempts,
+        initialDelayMs: c.initialDelayMs < 100 ? 100 : c.initialDelayMs,
+        maxDelayMs: c.maxDelayMs < 100 ? 100 : c.maxDelayMs,
+        delayMultiplier: c.delayMultiplier < 1 ? 1 : c.delayMultiplier,
+      );
 }
 
 // -----------------------------------------------------------------------------
@@ -181,9 +181,9 @@ class _InternalClient {
     List<String> procNames,
     List<String> streamNames,
     Map<String, String> globalHeaders,
-  ) : _procSet = Set.of(procNames),
-      _streamSet = Set.of(streamNames),
-      _globalHeaders = Map.of(globalHeaders);
+  )   : _procSet = Set.of(procNames),
+        _streamSet = Set.of(streamNames),
+        _globalHeaders = Map.of(globalHeaders);
 
   void addGlobalHeader(String k, String v) {
     _globalHeaders[k] = v;
@@ -352,7 +352,9 @@ class _InternalClient {
                 'reconnectAttempt': reconnectAttempt,
               },
             );
-            if (!isCancelled && reconnectAttempt < reconnectConf.maxAttempts) {
+            if (!isCancelled &&
+                streamed.statusCode >= 500 &&
+                reconnectAttempt < reconnectConf.maxAttempts) {
               yield Response.error(error);
               reconnectAttempt++;
               final delayMs = _reconnectDelayMs(
@@ -440,8 +442,8 @@ int _backoffMs(RetryConfig conf, int attempt) {
   final bounded = delay < 0
       ? 0
       : (delay > conf.maxDelayMs.toDouble()
-            ? conf.maxDelayMs.toDouble()
-            : delay);
+          ? conf.maxDelayMs.toDouble()
+          : delay);
   return bounded.toInt();
 }
 
@@ -453,8 +455,8 @@ int _reconnectDelayMs(ReconnectConfig conf, int attempt) {
   final bounded = delay < 0
       ? 0
       : (delay > conf.maxDelayMs.toDouble()
-            ? conf.maxDelayMs.toDouble()
-            : delay);
+          ? conf.maxDelayMs.toDouble()
+          : delay);
   return bounded.toInt();
 }
 

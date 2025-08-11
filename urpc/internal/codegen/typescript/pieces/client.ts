@@ -231,7 +231,11 @@ class internalClient {
           return { ok: false, error };
         }
 
-        return await fetchResp.json();
+        try {
+          return await fetchResp.json();
+        } catch (parseErr) {
+          return { ok: false, error: asError(parseErr) } as Response<any>;
+        }
       } catch (err) {
         // Clear timeout on error
         if (timeoutId !== undefined) {
@@ -359,7 +363,7 @@ class internalClient {
             signal: currentAbortController.signal,
           });
 
-          if (!fetchResp.ok || !fetchResp.body) {
+          if (!fetchResp.ok) {
             const error = new UfoError({
               message: `Unexpected HTTP status: ${fetchResp.status}`,
               category: "HTTPError",
@@ -367,8 +371,8 @@ class internalClient {
               details: { status: fetchResp.status, reconnectAttempt },
             });
 
-            // Try to reconnect if enabled and not manually cancelled
             if (
+              fetchResp.status >= 500 &&
               reconnectConf &&
               !isCancelled &&
               reconnectAttempt < reconnectConf.maxAttempts
@@ -386,6 +390,18 @@ class internalClient {
               continue;
             }
 
+            yield { ok: false, error } as Response<any>;
+            return;
+          }
+
+          if (!fetchResp.body) {
+            const error = new UfoError({
+              message: "Missing response body for stream",
+              category: "ConnectionError",
+              code: "STREAM_CONNECT_FAILED",
+              details: { reconnectAttempt },
+            });
+            // Do not reconnect; treat as non-retriable
             yield { ok: false, error } as Response<any>;
             return;
           }
