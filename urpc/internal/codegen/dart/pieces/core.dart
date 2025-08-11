@@ -114,20 +114,20 @@ Future<void> _sleep(int ms) => Future<void>.delayed(Duration(milliseconds: ms));
 // -----------------------------------------------------------------------------
 
 /// Configuration for automatic retry behavior in procedures.
-class _RetryConfig {
+class RetryConfig {
   final int maxAttempts;
   final int initialDelayMs;
   final int maxDelayMs;
   final double delayMultiplier;
 
-  const _RetryConfig({
+  const RetryConfig({
     this.maxAttempts = 3,
     this.initialDelayMs = 1000,
     this.maxDelayMs = 5000,
     this.delayMultiplier = 2.0,
   });
 
-  factory _RetryConfig.sanitised(_RetryConfig c) => _RetryConfig(
+  factory RetryConfig.sanitised(RetryConfig c) => RetryConfig(
     maxAttempts: c.maxAttempts < 0 ? 0 : c.maxAttempts,
     initialDelayMs: c.initialDelayMs < 100 ? 100 : c.initialDelayMs,
     maxDelayMs: c.maxDelayMs < 100 ? 100 : c.maxDelayMs,
@@ -136,28 +136,28 @@ class _RetryConfig {
 }
 
 /// Configuration for timeout behavior in procedures.
-class _TimeoutConfig {
+class TimeoutConfig {
   final int timeoutMs;
-  const _TimeoutConfig({this.timeoutMs = 30000});
-  factory _TimeoutConfig.sanitised(_TimeoutConfig c) =>
-      _TimeoutConfig(timeoutMs: c.timeoutMs < 100 ? 100 : c.timeoutMs);
+  const TimeoutConfig({this.timeoutMs = 30000});
+  factory TimeoutConfig.sanitised(TimeoutConfig c) =>
+      TimeoutConfig(timeoutMs: c.timeoutMs < 100 ? 100 : c.timeoutMs);
 }
 
 /// Configuration for automatic reconnection behavior in streams.
-class _ReconnectConfig {
+class ReconnectConfig {
   final int maxAttempts;
   final int initialDelayMs;
   final int maxDelayMs;
   final double delayMultiplier;
 
-  const _ReconnectConfig({
+  const ReconnectConfig({
     this.maxAttempts = 5,
     this.initialDelayMs = 1000,
     this.maxDelayMs = 5000,
     this.delayMultiplier = 2.0,
   });
 
-  factory _ReconnectConfig.sanitised(_ReconnectConfig c) => _ReconnectConfig(
+  factory ReconnectConfig.sanitised(ReconnectConfig c) => ReconnectConfig(
     maxAttempts: c.maxAttempts < 0 ? 0 : c.maxAttempts,
     initialDelayMs: c.initialDelayMs < 100 ? 100 : c.initialDelayMs,
     maxDelayMs: c.maxDelayMs < 100 ? 100 : c.maxDelayMs,
@@ -226,11 +226,11 @@ class _InternalClient {
     String name,
     Object? input,
     Map<String, String> headers,
-    _RetryConfig? retryConfig,
-    _TimeoutConfig? timeoutConfig,
+    RetryConfig? retryConfig,
+    TimeoutConfig? timeoutConfig,
   ) async {
-    final retryConf = retryConfig ?? const _RetryConfig();
-    final timeoutConf = timeoutConfig ?? const _TimeoutConfig();
+    final retryConf = retryConfig ?? const RetryConfig();
+    final timeoutConf = timeoutConfig ?? const TimeoutConfig();
 
     if (!_procSet.contains(name)) {
       return Response.error(
@@ -327,9 +327,9 @@ class _InternalClient {
     String name,
     Object? input,
     Map<String, String> headers,
-    _ReconnectConfig? reconnectConfig,
+    ReconnectConfig? reconnectConfig,
   ) {
-    final reconnectConf = reconnectConfig ?? const _ReconnectConfig();
+    final reconnectConf = reconnectConfig ?? const ReconnectConfig();
 
     var isCancelled = false;
     io.HttpClient? currentClient;
@@ -471,7 +471,7 @@ class _InternalClient {
   }
 }
 
-int _backoffMs(_RetryConfig conf, int attempt) {
+int _backoffMs(RetryConfig conf, int attempt) {
   final exp = math
       .pow(conf.delayMultiplier == 0 ? 1 : conf.delayMultiplier, attempt - 1)
       .toDouble();
@@ -484,7 +484,7 @@ int _backoffMs(_RetryConfig conf, int attempt) {
   return bounded.toInt();
 }
 
-int _reconnectDelayMs(_ReconnectConfig conf, int attempt) {
+int _reconnectDelayMs(ReconnectConfig conf, int attempt) {
   final exp = math
       .pow(conf.delayMultiplier == 0 ? 1 : conf.delayMultiplier, attempt - 1)
       .toDouble();
