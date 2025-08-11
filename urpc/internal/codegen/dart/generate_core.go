@@ -9,6 +9,6 @@ import (
 //go:embed pieces/core.dart
 var coreRawPiece string
 
-func generateCoreTypes(_ schema.Schema, _ Config) (string, error) {
+func generateCore(_ schema.Schema, _ Config) (string, error) {
 	return coreRawPiece, nil
 }
