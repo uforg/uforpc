@@ -142,7 +142,8 @@ func dartToJsonExpr(field schema.FieldDefinition, varName string) string {
 	return varName
 }
 
-// renderDartType renders a Dart class for given fields, with fromJson/toJson.
+// renderDartType renders a Dart class for given fields, including a short description,
+// a factory constructor to hydrate from JSON and a toJson method for serialisation.
 func renderDartType(parentName, name, desc string, fields []schema.FieldDefinition) string {
 	name = parentName + name
 
@@ -156,11 +157,16 @@ func renderDartType(parentName, name, desc string, fields []schema.FieldDefiniti
 		for _, field := range fields {
 			fieldName := strutil.ToCamelCase(field.Name)
 			typeLit := dartTypeLiteral(name, field)
+			// Field description if present in schema
+			if field.Doc != nil && strings.TrimSpace(*field.Doc) != "" {
+				og.Line("/// " + strings.ReplaceAll(strings.TrimSpace(*field.Doc), "\n", "\n/// "))
+			}
 			og.Linef("final %s %s;", typeLit, fieldName)
 		}
 		og.Break()
 
 		// Constructor
+		og.Linef("/// Creates a new %s instance.", name)
 		og.Linef("const %s({", name)
 		og.Block(func() {
 			for _, field := range fields {
@@ -177,6 +183,7 @@ func renderDartType(parentName, name, desc string, fields []schema.FieldDefiniti
 		og.Break()
 
 		// fromJson factory
+		og.Linef("/// Hydrates a %s from a JSON map.", name)
 		og.Linef("factory %s.fromJson(Map<String, dynamic> json) {", name)
 		og.Block(func() {
 			for _, field := range fields {
@@ -204,6 +211,7 @@ func renderDartType(parentName, name, desc string, fields []schema.FieldDefiniti
 		og.Break()
 
 		// toJson method
+		og.Linef("/// Serialises this %s to a JSON map compatible with the server.", name)
 		og.Line("Map<String, dynamic> toJson() {")
 		og.Block(func() {
 			og.Line("final _data = <String, dynamic>{};")
@@ -232,7 +240,12 @@ func renderDartType(parentName, name, desc string, fields []schema.FieldDefiniti
 		if !field.IsInline() {
 			continue
 		}
-		og.Line(renderDartType(name, strutil.ToPascalCase(field.Name), "", field.TypeInline.Fields))
+		// Inline type inherits description if present on the containing field
+		childDesc := ""
+		if field.Doc != nil {
+			childDesc = strings.TrimSpace(*field.Doc)
+		}
+		og.Line(renderDartType(name, strutil.ToPascalCase(field.Name), childDesc, field.TypeInline.Fields))
 	}
 
 	return og.String()

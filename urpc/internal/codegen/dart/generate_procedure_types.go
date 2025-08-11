@@ -24,7 +24,7 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 
 		inputDesc := fmt.Sprintf("%s represents the input parameters for the %s procedure.", inputName, namePascal)
 		outputDesc := fmt.Sprintf("%s represents the output parameters for the %s procedure.", outputName, namePascal)
-		responseDesc := fmt.Sprintf("%s represents the response for the %s procedure.", responseName, namePascal)
+		responseDesc := fmt.Sprintf("%s is the typed result wrapper returned by %s calls.", responseName, namePascal)
 
 		g.Line(renderDartType("", inputName, inputDesc, procNode.Input))
 		g.Break()
@@ -32,12 +32,12 @@ func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Line(renderDartType("", outputName, outputDesc, procNode.Output))
 		g.Break()
 
-		g.Linef("// %s", responseDesc)
+		g.Linef("/// %s", responseDesc)
 		g.Linef("typedef %s = Response<%s>;", responseName, outputName)
 		g.Break()
 	}
 
-	g.Line("// __ufoProcedureNames is a list of all procedure names.")
+	g.Line("/// __ufoProcedureNames lists all procedure identifiers available in this client.")
 	g.Line("const List<String> __ufoProcedureNames = [")
 	g.Block(func() {
 		for _, procNode := range sch.GetProcNodes() {

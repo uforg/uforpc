@@ -24,7 +24,7 @@ func generateStreamTypes(sch schema.Schema, _ Config) (string, error) {
 
 		inputDesc := fmt.Sprintf("%s represents the input parameters for the %s stream.", inputName, namePascal)
 		outputDesc := fmt.Sprintf("%s represents the output parameters for the %s stream.", outputName, namePascal)
-		responseDesc := fmt.Sprintf("%s represents the response for the %s stream.", responseName, namePascal)
+		responseDesc := fmt.Sprintf("%s is the typed event wrapper yielded by the %s stream.", responseName, namePascal)
 
 		g.Line(renderDartType("", inputName, inputDesc, streamNode.Input))
 		g.Break()
@@ -32,12 +32,12 @@ func generateStreamTypes(sch schema.Schema, _ Config) (string, error) {
 		g.Line(renderDartType("", outputName, outputDesc, streamNode.Output))
 		g.Break()
 
-		g.Linef("// %s", responseDesc)
+		g.Linef("/// %s", responseDesc)
 		g.Linef("typedef %s = Response<%s>;", responseName, outputName)
 		g.Break()
 	}
 
-	g.Line("// __ufoStreamNames is a list of all stream names.")
+	g.Line("/// __ufoStreamNames lists all stream identifiers available in this client.")
 	g.Line("const List<String> __ufoStreamNames = [")
 	g.Block(func() {
 		for _, streamNode := range sch.GetStreamNodes() {
