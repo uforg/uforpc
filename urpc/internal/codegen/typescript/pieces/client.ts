@@ -401,27 +401,23 @@ class internalClient {
             while (!isCancelled) {
               const { done, value } = await reader.read();
               if (done) break;
+
               buffer += decoder.decode(value, { stream: true });
+              const idx = buffer.indexOf("\n\n");
+              if (idx < 0) continue;
 
-              // Process lines
-              let idx: number;
-              while ((idx = buffer.indexOf("\n\n")) !== -1) {
-                const line = buffer.slice(0, idx).trimEnd();
-                buffer = buffer.slice(idx + 1);
+              const line = buffer.slice(0, idx).trim();
+              buffer = buffer.slice(idx + 2);
+              if (line === "") continue;
 
-                if (line === "") {
-                  // ignore
-                  continue;
-                }
-                if (line.startsWith("data:")) {
-                  const jsonStr = line.slice(5).trim();
-                  try {
-                    const evt = JSON.parse(jsonStr) as Response<any>;
-                    yield evt;
-                  } catch (err) {
-                    yield { ok: false, error: asError(err) } as Response<any>;
-                    return;
-                  }
+              if (line.startsWith("data:")) {
+                const jsonStr = line.slice(5).trim();
+                try {
+                  const evt = JSON.parse(jsonStr) as Response<any>;
+                  yield evt;
+                } catch (err) {
+                  yield { ok: false, error: asError(err) } as Response<any>;
+                  return;
                 }
               }
             }
