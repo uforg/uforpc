@@ -1,7 +1,6 @@
 package golang
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/uforg/uforpc/urpc/internal/genkit"
@@ -36,10 +35,12 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 	}
 
 	generatedCode := g.String()
+
+	// Try to format the generated code (might not work when running in WebAssembly)
 	formattedCode, err := imports.Process("", []byte(generatedCode), nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to format generated code: %w", err)
+	if err == nil {
+		generatedCode = string(formattedCode)
 	}
 
-	return string(formattedCode), nil
+	return generatedCode, nil
 }
