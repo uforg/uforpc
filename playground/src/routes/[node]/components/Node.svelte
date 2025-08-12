@@ -8,6 +8,7 @@
   import { store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
+  import BottomSpace from "$lib/components/BottomSpace.svelte";
   import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
 
@@ -67,6 +68,8 @@
     const extracted = extractNodeFromSchema(store.urpcSchema, node.kind, name);
     if (extracted) urpcSchema = extracted;
   });
+
+  let isProcOrStream = $derived(node.kind === "proc" || node.kind === "stream");
 </script>
 
 <div
@@ -77,8 +80,9 @@
 >
   <section
     class={{
-      "space-y-12 p-4 pt-0": true,
-      "col-span-8 overflow-y-auto": !uiStore.isMobile,
+      "h-full space-y-12 overflow-y-auto p-4 pt-0": true,
+      "col-span-8": !uiStore.isMobile && isProcOrStream,
+      "col-span-12": !uiStore.isMobile && !isProcOrStream,
     }}
   >
     <div class="prose max-w-none pt-4">
@@ -117,11 +121,16 @@
         <Code lang="urpc" code={urpcSchema} />
       </div>
     {/if}
+
+    {#if uiStore.isMobile}
+      <BottomSpace />
+    {/if}
   </section>
 
   {#if !uiStore.isMobile && (node.kind == "proc" || node.kind == "stream")}
     <div class="col-span-4 overflow-y-auto p-4 pt-0">
       <Snippets {value} type={node.kind} name={node.name} />
+      <BottomSpace />
     </div>
   {/if}
 </div>
