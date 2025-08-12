@@ -85,7 +85,13 @@
       "col-span-12": !uiStore.isMobile && !isProcOrStream,
     }}
   >
-    <div class="prose max-w-none pt-4">
+    <div
+      class={{
+        "prose pt-4": true,
+        "max-w-none": isProcOrStream,
+        "max-w-5xl": !isProcOrStream,
+      }}
+    >
       <h1>{name}</h1>
 
       {#if deprecatedMessage !== ""}
@@ -116,7 +122,12 @@
     {/if}
 
     {#if urpcSchema !== ""}
-      <div class="space-y-4">
+      <div
+        class={{
+          "space-y-4": true,
+          "max-w-5xl": !isProcOrStream,
+        }}
+      >
         <H2>Schema</H2>
         <Code lang="urpc" code={urpcSchema} />
       </div>
