@@ -72,22 +72,10 @@
       "overflow-x-hidden overflow-y-auto",
     ]}
   >
-    <header
-      class={[
-        "bg-base-100/90 sticky top-0 z-10 w-full backdrop-blur-sm",
-        {
-          "shadow-xs": uiStore.aside.scroll.isTopScrolled,
-        },
-      ]}
-    >
+    <header class="bg-base-100 sticky top-0 z-10 w-full shadow-xs">
       {#if !uiStore.isMobile}
         <a
-          class={[
-            "sticky top-0 z-10 flex h-[72px] w-full items-end p-4",
-            {
-              "shadow-xs": uiStore.aside.scroll.isTopScrolled,
-            },
-          ]}
+          class="sticky top-0 z-10 flex h-[72px] w-full items-end p-4 shadow-xs"
           href="https://uforpc.uforg.dev"
           target="_blank"
         >

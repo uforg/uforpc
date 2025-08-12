@@ -2,14 +2,20 @@
   import { FileWarning } from "@lucide/svelte";
 
   import H1 from "$lib/components/H1.svelte";
+  import LogoUfo from "$lib/components/LogoUfo.svelte";
 </script>
 
-<H1 class="flex items-center justify-start space-x-2">
-  <FileWarning class="size-8" />
-  <span>Not Found</span>
-</H1>
+<div class="h-full overflow-y-auto p-4">
+  <div
+    class="flex h-full flex-col items-center justify-center space-y-4 pb-[100px] text-center"
+  >
+    <LogoUfo class="w-[100px]" />
 
-<p class="pt-4">
-  What you're looking for doesn't exist in the current schema or has been
-  renamed. Use the menu on the left to navigate between available pages.
-</p>
+    <H1>Not Found</H1>
+
+    <p>
+      What you're looking for doesn't exist in the current schema or has been
+      renamed. Use the menu on the left to navigate between available pages.
+    </p>
+  </div>
+</div>

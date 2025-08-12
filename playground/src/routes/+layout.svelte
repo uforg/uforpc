@@ -90,6 +90,19 @@
       });
     });
   });
+
+  let mainWidth = $derived.by(() => {
+    if (uiStore.isMobile) return uiStore.app.size.offsetWidth;
+    return uiStore.app.size.offsetWidth - uiStore.aside.size.offsetWidth;
+  });
+
+  let mainHeight = $derived.by(() => {
+    return uiStore.app.size.offsetHeight - uiStore.header.size.offsetHeight;
+  });
+
+  let mainStyle = $derived.by(() => {
+    return `width: ${mainWidth}px; height: ${mainHeight}px;`;
+  });
 </script>
 
 {#if !initialized}
@@ -113,11 +126,12 @@
     <div
       use:dimensionschangeAction
       ondimensionschange={(e) => (uiStore.contentWrapper = e.detail)}
-      class="h-[100dvh] flex-grow scroll-p-[90px] overflow-x-hidden overflow-y-auto"
+      class="h-[100dvh] flex-grow scroll-p-[90px]"
     >
       <LayoutHeader />
       <main
-        class="w-full p-4 pb-[75px]"
+        class="overflow-hidden"
+        style={mainStyle}
         use:dimensionschangeAction
         ondimensionschange={(e) => (uiStore.main = e.detail)}
       >

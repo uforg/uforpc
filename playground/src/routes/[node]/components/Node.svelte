@@ -67,17 +67,30 @@
     const extracted = extractNodeFromSchema(store.urpcSchema, node.kind, name);
     if (extracted) urpcSchema = extracted;
   });
+
+  let snippetsWrapperHeight = $derived.by(() => {
+    return (
+      uiStore.app.size.offsetHeight - uiStore.header.size.offsetHeight - 32
+    );
+  });
+
+  let snippetsWrapperStyle = $derived.by(() => {
+    if (uiStore.isMobile) return "";
+    return `height: ${snippetsWrapperHeight}px;`;
+  });
 </script>
 
 <div
   class={{
     "grid grid-cols-12 gap-4": !uiStore.isMobile,
+    "overflow-hidden": !uiStore.isMobile,
   }}
+  style={snippetsWrapperStyle}
 >
   <section
     class={{
       "min-h-[100dvh] space-y-12": true,
-      "col-span-8": !uiStore.isMobile,
+      "col-span-8 overflow-y-auto pr-4": !uiStore.isMobile,
     }}
   >
     <div class="prose max-w-none">
@@ -119,11 +132,7 @@
   </section>
 
   {#if !uiStore.isMobile && (node.kind == "proc" || node.kind == "stream")}
-    <div
-      class={{
-        "col-span-4": !uiStore.isMobile,
-      }}
-    >
+    <div class="col-span-4 overflow-y-auto pr-4" style={snippetsWrapperStyle}>
       <Snippets {value} type={node.kind} name={node.name} />
     </div>
   {/if}

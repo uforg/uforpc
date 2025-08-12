@@ -3,7 +3,6 @@
 
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
 
-  import H4 from "$lib/components/H3.svelte";
   import Logo from "$lib/components/Logo.svelte";
   import MenuComponent from "$lib/components/Menu.svelte";
   import Offcanvas from "$lib/components/Offcanvas.svelte";
@@ -24,10 +23,7 @@
     ondimensionschange={(e) => (uiStore.header = e.detail)}
     class={[
       "sticky top-0 z-30 flex h-[72px] w-full items-center justify-between space-x-2 p-4",
-      "bg-base-100/90 backdrop-blur-sm",
-      {
-        "shadow-xs": uiStore.contentWrapper.scroll.isTopScrolled,
-      },
+      "bg-base-100 shadow-xs",
     ]}
   >
     <div class="flex items-center justify-start space-x-2">
@@ -62,10 +58,7 @@
     ondimensionschange={(e) => (uiStore.header = e.detail)}
     class={[
       "sticky top-0 z-30 flex h-[72px] w-full items-center justify-between space-x-2 p-4",
-      "bg-base-100/90 backdrop-blur-sm",
-      {
-        "shadow-xs": uiStore.contentWrapper.scroll.isTopScrolled,
-      },
+      "bg-base-100 shadow-xs",
     ]}
   >
     <div class="flex items-center justify-start space-x-2">
