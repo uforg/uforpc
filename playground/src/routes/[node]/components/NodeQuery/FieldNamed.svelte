@@ -170,6 +170,9 @@
 
         {@render menu()}
       </div>
+      <div class="prose prose-sm text-base-content/50 max-w-none font-bold">
+        Time is shown in your local timezone and will be sent as UTC
+      </div>
     {/if}
 
     {#if inputType === "checkbox"}
