@@ -38,12 +38,14 @@
 {/snippet}
 
 {#if !hasOutput && !isExecuting}
-  <div class="mt-12 flex w-full flex-col items-center justify-center space-y-2">
+  <div
+    class="mt-[100px] flex w-full flex-col items-center justify-center space-y-2"
+  >
     <CloudAlert class="size-10" />
     <H3 class="flex items-center justify-start space-x-2">No Output</H3>
   </div>
 
-  <p class="pt-4 text-center">
+  <p class="mb-[100px] pt-4 text-center">
     Please execute the {type === "proc" ? "procedure" : "stream"} from the input
     tab to see the output.
   </p>
