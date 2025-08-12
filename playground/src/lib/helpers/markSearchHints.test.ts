@@ -22,6 +22,13 @@ describe("markSearchHints", () => {
     expect(result).toBe("This is a <mark>test</mark> string");
   });
 
+  it("highlights a single term sanitized", () => {
+    const searchResult = createMockResult(["test*+?^${}()|"]);
+    const text = "This is a test*+?^${}()| string";
+    const result = markSearchHintsMinisearch(searchResult, text);
+    expect(result).toBe("This is a <mark>test*+?^${}()|</mark> string");
+  });
+
   it("highlights multiple occurrences of a term", () => {
     const searchResult = createMockResult(["test"]);
     const text = "test this test string test";

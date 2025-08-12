@@ -8,7 +8,20 @@ import type { SearchResult } from "minisearch";
  * @returns The text string with matching terms wrapped in <mark> tags
  */
 export function markSearchHints(searchResult: string[], textToMark: string) {
-  const regexp = new RegExp(`(${searchResult.join("|")})`, "gi");
+  // Escape special regex characters in each search term to avoid regexp errors
+  const escapeRegExp = (str: string) =>
+    str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Filter out empty strings to avoid empty alternatives in the regexp
+  const sanitizedTerms = searchResult
+    .filter((term) => term && term.length > 0)
+    .map(escapeRegExp);
+
+  if (sanitizedTerms.length === 0) {
+    return textToMark;
+  }
+
+  const regexp = new RegExp(`(${sanitizedTerms.join("|")})`, "gi");
   return textToMark.replace(regexp, "<mark>$1</mark>");
 }
 
