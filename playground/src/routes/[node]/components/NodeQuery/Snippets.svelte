@@ -23,7 +23,7 @@
   <div
     class={{
       "mb-4": true,
-      "bg-base-100 sticky top-0 z-20 -mt-4 pt-4": !uiStore.isMobile,
+      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.isMobile,
     }}
   >
     <H2 class="mb-4 flex items-center space-x-2">Code snippets</H2>
