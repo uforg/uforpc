@@ -1,15 +1,13 @@
 <script lang="ts">
-  import { Download, Loader } from "@lucide/svelte";
-  import { downloadZip } from "client-zip";
-  import { toast } from "svelte-sonner";
+  import { ChevronDown, ChevronRight } from "@lucide/svelte";
+  import type { Snippet } from "svelte";
+  import { slide } from "svelte/transition";
 
-  import { store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
-  import {
-    cmdCodegen,
-    type CmdCodegenOptions,
-    type CmdCodegenOutputFile,
-  } from "$lib/urpc";
+
+  import SnippetsSdkDownload from "./SnippetsSdkDownload.svelte";
+  import SnippetsSdkSetup from "./SnippetsSdkSetup.svelte";
+  import SnippetsSdkUsage from "./SnippetsSdkUsage.svelte";
 
   interface Props {
     type: "proc" | "stream";
@@ -18,150 +16,97 @@
 
   const { type, name }: Props = $props();
 
-  let isGenerating: boolean = $state(false);
-
-  let downloadFileName = $derived.by(() => {
-    if (uiStore.codeSnippetsSdkLang === "typescript-client") {
-      return "uforpc-client-sdk.ts";
+  function toggleStep(step: "download" | "setup" | "usage") {
+    if (uiStore.codeSnippetsSdkStep === step) {
+      uiStore.codeSnippetsSdkStep = "";
+      return;
     }
-    if (uiStore.codeSnippetsSdkLang === "golang-client") {
-      return "uforpc-client-sdk.go";
-    }
-    if (uiStore.codeSnippetsSdkLang === "golang-server") {
-      return "uforpc-server-sdk.go";
-    }
-    if (uiStore.codeSnippetsSdkLang === "dart-client") {
-      return "uforpc-dart-client-sdk.zip";
-    }
-    return "unknown";
-  });
-
-  function downloadSingleFile(file: CmdCodegenOutputFile) {
-    const blob = new Blob([file.content], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = downloadFileName;
-    link.click();
-    link.remove();
-  }
-
-  async function downloadMultipleFiles(files: CmdCodegenOutputFile[]) {
-    const zipInputFiles = files.map((file) => ({
-      name: file.path,
-      input: file.content,
-      lastModified: new Date(),
-    }));
-
-    const blob = await downloadZip(zipInputFiles).blob();
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = downloadFileName;
-    link.click();
-    link.remove();
-  }
-
-  async function generateAndDownload() {
-    if (isGenerating) return;
-    isGenerating = true;
-
-    try {
-      let opts: CmdCodegenOptions = {
-        generator: uiStore.codeSnippetsSdkLang,
-        schemaInput: store.urpcSchema,
-      };
-      if (uiStore.codeSnippetsSdkLang === "golang-client") {
-        opts.golangPackageName =
-          uiStore.codeSnippetsSdkGolangPackageName.trim();
-        if (opts.golangPackageName === "") {
-          throw new Error("Package name is required");
-        }
-      }
-      if (uiStore.codeSnippetsSdkLang === "dart-client") {
-        opts.dartPackageName = uiStore.codeSnippetsSdkDartPackageName.trim();
-        if (opts.dartPackageName === "") {
-          throw new Error("Package name is required");
-        }
-      }
-
-      const result = await cmdCodegen(opts);
-
-      if (result.files.length === 1) {
-        downloadSingleFile(result.files[0]);
-      }
-      if (result.files.length > 1) {
-        await downloadMultipleFiles(result.files);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to generate SDK", {
-        description: String(error),
-        duration: 5000,
-      });
-    } finally {
-      isGenerating = false;
-    }
+    uiStore.codeSnippetsSdkStep = step;
   }
 </script>
 
-<div class="space-y-4">
-  <div>
-    <label class="fieldset">
-      <legend class="fieldset-legend">Language</legend>
-      <select
-        id="sdk-generator-select"
-        class="select w-full"
-        bind:value={uiStore.codeSnippetsSdkLang}
-      >
-        <option value="typescript-client">TypeScript</option>
-        <option value="golang-client">Go</option>
-        <option value="dart-client">Dart</option>
-      </select>
-      <div class="prose prose-sm text-base-content/50 max-w-none">
-        If your language is not supported, you can use the Curl code snippets,
-        generate a client SDK from the provided OpenAPI spec or write your own.
-      </div>
-    </label>
-
-    {#if uiStore.codeSnippetsSdkLang === "golang-client"}
-      <label class="fieldset">
-        <legend class="fieldset-legend">Go package name</legend>
-        <input
-          id="go-pkg"
-          class="input w-full"
-          placeholder="Package name..."
-          bind:value={uiStore.codeSnippetsSdkGolangPackageName}
-        />
-      </label>
-    {/if}
-
-    {#if uiStore.codeSnippetsSdkLang === "dart-client"}
-      <label class="fieldset">
-        <legend class="fieldset-legend">Dart package name</legend>
-        <input
-          id="go-pkg"
-          class="input w-full"
-          placeholder="Package name..."
-          bind:value={uiStore.codeSnippetsSdkDartPackageName}
-        />
-      </label>
-    {/if}
-
-    <div class="fieldset">
-      <legend class="fieldset-legend">Download SDK</legend>
-      <button
-        class="btn btn-primary btn-block"
-        disabled={isGenerating}
-        onclick={generateAndDownload}
-        type="button"
-      >
-        {#if isGenerating}
-          <Loader class="animate size-4 animate-spin" />
-        {/if}
-        {#if !isGenerating}
-          <Download class="size-4" />
-        {/if}
-        <span>Download SDK</span>
-      </button>
-    </div>
+<label class="fieldset mb-4">
+  <legend class="fieldset-legend">Language</legend>
+  <select
+    id="sdk-generator-select"
+    class="select w-full"
+    bind:value={uiStore.codeSnippetsSdkLang}
+  >
+    <option value="typescript-client">TypeScript</option>
+    <option value="golang-client">Go</option>
+    <option value="dart-client">Dart</option>
+  </select>
+  <div class="prose prose-sm text-base-content/50 max-w-none">
+    <b>Can't find your language?</b> No problem. You can still use the HTTP
+    request snippets (Curl and others) to get started, or generate a client SDK
+    using the
+    <a href="./openapi.yaml" target="_blank" class="text-base-content/50">
+      OpenAPI specification.
+    </a>
   </div>
+</label>
+
+{#snippet step(
+  isOpen: boolean,
+  stepName: string,
+  onToggle: () => void,
+  children: Snippet,
+)}
+  <div class="rounded-box bg-base-200 border-base-content/20 border">
+    <button
+      class=" flex w-full cursor-pointer items-center justify-start space-x-2 px-4 py-2"
+      onclick={onToggle}
+    >
+      {#if isOpen}
+        <ChevronDown class="size-4" />
+      {:else}
+        <ChevronRight class="size-4" />
+      {/if}
+      <span>{stepName}</span>
+    </button>
+
+    {#if isOpen}
+      <div
+        class="border-base-content/20 border-t p-4"
+        transition:slide={{ duration: 200 }}
+      >
+        {@render children()}
+      </div>
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet download()}
+  <SnippetsSdkDownload />
+{/snippet}
+
+{#snippet setup()}
+  <SnippetsSdkSetup />
+{/snippet}
+
+{#snippet usage()}
+  <SnippetsSdkUsage {type} {name} />
+{/snippet}
+
+<div class="space-y-4">
+  {@render step(
+    uiStore.codeSnippetsSdkStep === "download",
+    "1. Download SDK",
+    () => toggleStep("download"),
+    download,
+  )}
+
+  {@render step(
+    uiStore.codeSnippetsSdkStep === "setup",
+    "2. Setup SDK",
+    () => toggleStep("setup"),
+    setup,
+  )}
+
+  {@render step(
+    uiStore.codeSnippetsSdkStep === "usage",
+    "3. Usage example",
+    () => toggleStep("usage"),
+    usage,
+  )}
 </div>

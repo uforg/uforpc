@@ -102,6 +102,7 @@ export interface UiStore {
   codeSnippetsTab: "sdk" | "curl";
   codeSnippetsCurlLang: string;
   codeSnippetsSdkLang: CodegenGenerator;
+  codeSnippetsSdkStep: "download" | "setup" | "usage" | "";
   codeSnippetsSdkDartPackageName: string;
   codeSnippetsSdkGolangPackageName: string;
   asideOpen: boolean;
@@ -123,6 +124,7 @@ const localStorageKeys = {
   codeSnippetsTab: "codeSnippetsTab",
   codeSnippetsCurlLang: "codeSnippetsCurlLang",
   codeSnippetsSdkLang: "codeSnippetsSdkLang",
+  codeSnippetsSdkStep: "codeSnippetsSdkStep",
   codeSnippetsSdkDartPackageName: "codeSnippetsSdkDartPackageName",
   codeSnippetsSdkGolangPackageName: "codeSnippetsSdkGolangPackageName",
   asideSearchOpen: "asideSearchOpen",
@@ -140,6 +142,7 @@ export const uiStore = $state<UiStore>({
   codeSnippetsTab: "sdk",
   codeSnippetsCurlLang: "Curl",
   codeSnippetsSdkLang: "typescript-client",
+  codeSnippetsSdkStep: "download",
   codeSnippetsSdkDartPackageName: "uforpc",
   codeSnippetsSdkGolangPackageName: "uforpc",
   asideOpen: false,
@@ -208,6 +211,15 @@ export const loadUiStore = () => {
   );
   uiStore.codeSnippetsSdkLang = (codeSnippetsSdkLang ??
     "typescript-client") as CodegenGenerator;
+
+  // Load code snippets sdk step from local storage
+  const codeSnippetsSdkStep = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsSdkStep,
+  );
+  uiStore.codeSnippetsSdkStep = (codeSnippetsSdkStep ?? "download") as
+    | "download"
+    | "setup"
+    | "usage";
 
   // Load code snippets sdk dart package name from local storage
   const codeSnippetsSdkDartPackageName = globalThis.localStorage.getItem(
@@ -288,6 +300,12 @@ export const saveUiStore = () => {
   globalThis.localStorage.setItem(
     localStorageKeys.codeSnippetsSdkLang,
     uiStore.codeSnippetsSdkLang,
+  );
+
+  // Save code snippets sdk step to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsSdkStep,
+    uiStore.codeSnippetsSdkStep,
   );
 
   // Save code snippets sdk dart package name to local storage
