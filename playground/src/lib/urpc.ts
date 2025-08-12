@@ -108,9 +108,55 @@ async function transpileUrpcToJson(input: string): Promise<Schema> {
   return JSON.parse(await cmdTranspile("urpc", input));
 }
 
+/**
+ * Code generation types and command (WASM)
+ */
+export type CodegenGenerator =
+  | "golang-server"
+  | "golang-client"
+  | "typescript-client"
+  | "dart-client";
+
+export interface CmdCodegenOptions {
+  /** The generator to use */
+  generator: CodegenGenerator;
+  /** The URPC schema content */
+  schemaInput: string;
+  /** Required when generator is golang-server or golang-client */
+  golangPackageName?: string;
+  /** Required when generator is dart-client */
+  dartPackageName?: string;
+}
+
+export interface CmdCodegenOutputFile {
+  /** The path where the generated file should be saved */
+  path: string;
+  /** The content of the generated file */
+  content: string;
+}
+
+export interface CmdCodegenOutput {
+  /** The files that were generated */
+  files: CmdCodegenOutputFile[];
+}
+
+/**
+ * Run code generation inside the WASM module.
+ * Accepts options matching the Go CmdCodegenOptions and returns a typed output.
+ */
+async function cmdCodegen(
+  options: CmdCodegenOptions,
+): Promise<CmdCodegenOutput> {
+  await waitUntilInitialized();
+  // biome-ignore lint/suspicious/noExplicitAny: it's a global function
+  const json = await (window as any).cmdCodegen(JSON.stringify(options));
+  return JSON.parse(json) as CmdCodegenOutput;
+}
+
 export {
   cmdFmt,
   cmdTranspile,
+  cmdCodegen,
   initWasm,
   isInitialized,
   transpileUrpcToJson,
