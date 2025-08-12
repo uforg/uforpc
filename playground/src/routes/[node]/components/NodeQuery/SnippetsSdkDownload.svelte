@@ -96,48 +96,46 @@
   }
 </script>
 
-<div class="space-y-4">
-  <div>
-    {#if uiStore.codeSnippetsSdkLang === "golang-client"}
-      <label class="fieldset">
-        <legend class="fieldset-legend">Go package name</legend>
-        <input
-          id="go-pkg"
-          class="input w-full"
-          placeholder="Package name..."
-          bind:value={uiStore.codeSnippetsSdkGolangPackageName}
-        />
-      </label>
-    {/if}
+<div>
+  {#if uiStore.codeSnippetsSdkLang === "golang-client"}
+    <label class="fieldset">
+      <legend class="fieldset-legend">Go package name</legend>
+      <input
+        id="go-pkg"
+        class="input w-full"
+        placeholder="Package name..."
+        bind:value={uiStore.codeSnippetsSdkGolangPackageName}
+      />
+    </label>
+  {/if}
 
-    {#if uiStore.codeSnippetsSdkLang === "dart-client"}
-      <label class="fieldset">
-        <legend class="fieldset-legend">Dart package name</legend>
-        <input
-          id="go-pkg"
-          class="input w-full"
-          placeholder="Package name..."
-          bind:value={uiStore.codeSnippetsSdkDartPackageName}
-        />
-      </label>
-    {/if}
+  {#if uiStore.codeSnippetsSdkLang === "dart-client"}
+    <label class="fieldset">
+      <legend class="fieldset-legend">Dart package name</legend>
+      <input
+        id="go-pkg"
+        class="input w-full"
+        placeholder="Package name..."
+        bind:value={uiStore.codeSnippetsSdkDartPackageName}
+      />
+    </label>
+  {/if}
 
-    <div class="fieldset">
-      <legend class="fieldset-legend">Download SDK</legend>
-      <button
-        class="btn btn-primary btn-block"
-        disabled={isGenerating}
-        onclick={generateAndDownload}
-        type="button"
-      >
-        {#if isGenerating}
-          <Loader class="animate size-4 animate-spin" />
-        {/if}
-        {#if !isGenerating}
-          <Download class="size-4" />
-        {/if}
-        <span>Download SDK</span>
-      </button>
-    </div>
+  <div class="fieldset">
+    <legend class="fieldset-legend">Download SDK</legend>
+    <button
+      class="btn btn-primary btn-block"
+      disabled={isGenerating}
+      onclick={generateAndDownload}
+      type="button"
+    >
+      {#if isGenerating}
+        <Loader class="animate size-4 animate-spin" />
+      {/if}
+      {#if !isGenerating}
+        <Download class="size-4" />
+      {/if}
+      <span>Download SDK</span>
+    </button>
   </div>
 </div>
