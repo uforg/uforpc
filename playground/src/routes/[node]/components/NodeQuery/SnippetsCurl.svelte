@@ -44,25 +44,9 @@
 
     return c;
   });
-
-  let maxHeight = $derived.by(() => {
-    if (uiStore.isMobile) return "100%";
-
-    const appHeight = uiStore.app.size.offsetHeight;
-    const headerHeight = uiStore.header.size.offsetHeight;
-    const padding = 16 * 2;
-
-    const mh = appHeight - headerHeight - padding;
-    return `${mh}px`;
-  });
 </script>
 
-<div
-  class={{
-    "flex h-full flex-col": !uiStore.isMobile,
-  }}
-  style="max-height: {maxHeight}"
->
+<div>
   {#if type === "stream"}
     <p class="pb-4 text-sm">
       Streams use Server-Sent Events. Only curl examples are provided. Build a
