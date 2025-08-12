@@ -1,9 +1,15 @@
 <script lang="ts">
-  import { Download } from "@lucide/svelte";
+  import { Download, X } from "@lucide/svelte";
   import SwaggerUI from "swagger-ui";
   import "swagger-ui/dist/swagger-ui.css";
 
   import Logo from "$lib/components/Logo.svelte";
+
+  interface Props {
+    onClose: () => void;
+  }
+
+  const { onClose }: Props = $props();
 
   const elId = $props.id();
 
@@ -17,11 +23,17 @@
 
 <header
   class={[
-    "bg-base-100 border-base-content/20 flex justify-center border-b py-4",
+    "bg-base-100 border-base-content/20 flex justify-between border-b px-4 py-4",
     "sticky top-0 left-0 z-50",
   ]}
 >
+  <div class="flex-grow"></div>
   <Logo class="h-[32px] flex-grow" />
+  <div class="flex flex-grow justify-end">
+    <button class="btn btn-ghost btn-circle" onclick={onClose}>
+      <X class="size-6" />
+    </button>
+  </div>
 </header>
 
 <p class="text-base-content/50 mt-8 block px-4 text-center text-sm">

@@ -15,6 +15,17 @@
   let tooltipContent = $derived(
     isOpen ? "Switch to UFO RPC" : "Switch to Swagger UI (OpenAPI)",
   );
+
+  const handleEscapeKey = (event: KeyboardEvent) => {
+    if (!isOpen) return;
+    if (event.key === "Escape") toggle();
+  };
+  $effect(() => {
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  });
 </script>
 
 <Tooltip content={tooltipContent} placement="left">
@@ -47,5 +58,5 @@
   }}
   style="transition-duration: {animationDuration}ms;"
 >
-  <LayoutSwaggerUi />
+  <LayoutSwaggerUi onClose={toggle} />
 </div>
