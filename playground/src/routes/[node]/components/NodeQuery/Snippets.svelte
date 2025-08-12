@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { joinPath } from "$lib/helpers/joinPath";
-  import { getHeadersObject, store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
-  import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
+  import Tabs from "$lib/components/Tabs.svelte";
 
-  import SnippetsCode from "./SnippetsCode.svelte";
+  import SnippetsCurl from "./SnippetsCurl.svelte";
+  import SnippetsSdk from "./SnippetsSdk.svelte";
 
   interface Props {
-    // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
+    // biome-ignore lint/suspicious/noExplicitAny: consistent with sibling components
     value: any;
     type: "proc" | "stream";
     name: string;
@@ -17,33 +16,7 @@
 
   const { value, type, name }: Props = $props();
 
-  let curl = $derived.by(() => {
-    const endpoint = joinPath([store.baseUrl, name]);
-    const payload = value.root ?? {};
-    let payloadStr = JSON.stringify(payload, null, 2);
-    payloadStr = payloadStr.replace(/'/g, "'\\''");
-
-    let c = `curl -X POST ${endpoint} \\\n`;
-
-    if (type === "stream") {
-      c += "-N \\\n";
-    }
-
-    let headers = getHeadersObject();
-    if (type === "stream") {
-      headers.set("Accept", "text/event-stream");
-      headers.set("Cache-Control", "no-cache");
-    }
-
-    for (const header of headers.entries()) {
-      let rawHeader = `${header[0]}: ${header[1]}`;
-      c += `-H ${JSON.stringify(rawHeader)} \\\n`;
-    }
-
-    c += `-d '${payloadStr}'`;
-
-    return c;
-  });
+  let activeTab: "sdk" | "curl" = $state("sdk");
 
   let maxHeight = $derived.by(() => {
     if (uiStore.isMobile) return "100%";
@@ -63,25 +36,24 @@
   }}
   style="max-height: {maxHeight}"
 >
-  <H2 class="mb-2 flex items-center space-x-2">
-    <span>Code snippets</span>
-  </H2>
+  <H2 class="mb-4 flex items-center space-x-2">Code snippets</H2>
 
-  {#if type === "stream"}
-    <p class="pb-4 text-sm">
-      Streams use Server-Sent Events. Only curl examples are provided. Build a
-      client manually, or generate one with the urpc CLI if your language is
-      supported.
-      <br />
-      <a href="https://uforpc.uforg.dev/r/sse" target="_blank" class="link">
-        Learn more here
-      </a>
-    </p>
+  <div class="mb-4">
+    <Tabs
+      items={[
+        { id: "sdk", label: "Client SDK Snippets" },
+        { id: "curl", label: "Curl Snippets" },
+      ]}
+      activeId={activeTab}
+      onSelect={(id) => (activeTab = id as "sdk" | "curl")}
+    />
+  </div>
 
-    <Code code={curl} lang="bash" />
-  {/if}
-
-  {#if type === "proc"}
-    <SnippetsCode {curl} />
-  {/if}
+  <div class="space-y-2 overflow-y-auto">
+    {#if activeTab === "sdk"}
+      <SnippetsSdk {value} {type} {name} />
+    {:else}
+      <SnippetsCurl {value} {type} {name} />
+    {/if}
+  </div>
 </div>

@@ -349,4 +349,4 @@
   </select>
 </fieldset>
 
-<Code code={pickedCode} lang={pickedLang} />
+<Code code={pickedCode} lang={pickedLang} scrollY={false} />
