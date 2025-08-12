@@ -15,11 +15,12 @@
 
   interface Props {
     proc: ProcedureDefinitionNode;
+    // biome-ignore lint/suspicious/noExplicitAny: consistent with sibling components
+    value: any;
   }
 
-  const { proc }: Props = $props();
+  let { proc, value = $bindable() }: Props = $props();
 
-  let value = $state({ root: {} });
   let output: string | null = $state(null);
   let isExecuting = $state(false);
   let cancelRequest = $state<() => void>(() => {});
@@ -77,16 +78,16 @@
   }
 </script>
 
-<div class="flex" bind:this={wrapper}>
-  <div class="flex-grow">
+<div bind:this={wrapper}>
+  <div
+    class={{
+      "bg-base-100/90 backdrop-blur-sm": !uiStore.isMobile,
+      "sticky top-[72px] z-20 -mt-4 pt-4": !uiStore.isMobile,
+    }}
+  >
     <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
 
-    <div
-      class={{
-        "join bg-base-100 flex w-full": true,
-        "sticky top-[72px] z-10 -mt-4 pt-4": !uiStore.isMobile,
-      }}
-    >
+    <div class="join flex w-full">
       <button
         class={[
           "btn join-item border-base-content/20 flex-grow",
@@ -108,64 +109,56 @@
         <span>Output</span>
       </button>
     </div>
+  </div>
 
-    <div
-      class={{
-        "space-y-4": true,
-        hidden: tab === "output",
-        block: tab === "input",
-      }}
-    >
-      {#if proc.input}
-        <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
-          <Info class="size-4" />
-          <span>
-            Requests are made from your browser and validations are performed on
-            the server side
-          </span>
-        </div>
-        <Field fields={proc.input} path="root" bind:value />
-      {:else}
-        <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
-          <Info class="size-4" />
-          <span>This procedure does not require any input</span>
-        </div>
-      {/if}
-
-      <div class="flex w-full justify-end pt-4">
-        <button
-          class="btn btn-primary"
-          disabled={isExecuting}
-          onclick={executeProcedure}
-        >
-          {#if isExecuting}
-            <Loader class="animate size-4 animate-spin" />
-          {:else}
-            <Zap class="size-4" />
-          {/if}
-          <span>Execute procedure</span>
-        </button>
+  <div
+    class={{
+      "space-y-4": true,
+      hidden: tab === "output",
+      block: tab === "input",
+    }}
+  >
+    {#if proc.input}
+      <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
+        <Info class="size-4" />
+        <span>
+          Requests are made from your browser and validations are performed on
+          the server side
+        </span>
       </div>
-    </div>
+      <Field fields={proc.input} path="root" bind:value />
+    {:else}
+      <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
+        <Info class="size-4" />
+        <span>This procedure does not require any input</span>
+      </div>
+    {/if}
 
-    <div
-      class={{
-        "mt-4 space-y-2": true,
-        hidden: tab === "input",
-        block: tab === "output",
-      }}
-    >
-      <Output {cancelRequest} {isExecuting} type="proc" {output} />
+    <div class="flex w-full justify-end pt-4">
+      <button
+        class="btn btn-primary"
+        disabled={isExecuting}
+        onclick={executeProcedure}
+      >
+        {#if isExecuting}
+          <Loader class="animate size-4 animate-spin" />
+        {:else}
+          <Zap class="size-4" />
+        {/if}
+        <span>Execute procedure</span>
+      </button>
     </div>
   </div>
 
-  {#if !uiStore.isMobile}
-    <div class="w-[40%] flex-none pl-6">
-      <div class="sticky top-[72px] z-10 -mt-4 pt-4">
-        <Snippets {value} type="proc" name={proc.name} />
-      </div>
-    </div>
-  {/if}
+  <div
+    class={{
+      "mt-4 space-y-2": true,
+      hidden: tab === "input",
+      block: tab === "output",
+    }}
+  >
+    <Output {cancelRequest} {isExecuting} type="proc" {output} />
+  </div>
 </div>
 
 {#if uiStore.isMobile}

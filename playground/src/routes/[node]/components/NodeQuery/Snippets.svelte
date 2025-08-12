@@ -17,28 +17,18 @@
   const { value, type, name }: Props = $props();
 
   let activeTab: "sdk" | "curl" = $state("sdk");
-
-  let maxHeight = $derived.by(() => {
-    if (uiStore.isMobile) return "100%";
-
-    const appHeight = uiStore.app.size.offsetHeight;
-    const headerHeight = uiStore.header.size.offsetHeight;
-    const padding = 16 * 2;
-
-    const mh = appHeight - headerHeight - padding;
-    return `${mh}px`;
-  });
 </script>
 
-<div
-  class={{
-    "flex h-full flex-col": !uiStore.isMobile,
-  }}
-  style="max-height: {maxHeight}"
->
-  <H2 class="mb-4 flex items-center space-x-2">Code snippets</H2>
+<div>
+  <div
+    class={{
+      "mb-4": true,
+      "bg-base-100/90 backdrop-blur-sm": !uiStore.isMobile,
+      "sticky top-[72px] z-20 -mt-4 pt-4": !uiStore.isMobile,
+    }}
+  >
+    <H2 class="mb-4 flex items-center space-x-2">Code snippets</H2>
 
-  <div class="mb-4">
     <Tabs
       items={[
         { id: "sdk", label: "Client SDK Snippets" },

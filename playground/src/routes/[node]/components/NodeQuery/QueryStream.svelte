@@ -15,11 +15,12 @@
 
   interface Props {
     stream: StreamDefinitionNode;
+    // biome-ignore lint/suspicious/noExplicitAny: consistent with sibling components
+    value: any;
   }
 
-  const { stream }: Props = $props();
+  let { stream, value = $bindable() }: Props = $props();
 
-  let value = $state({ root: {} });
   // biome-ignore lint/suspicious/noExplicitAny: can be any stream response
   let outputArray: any[] = $state([]);
   let isExecuting = $state(false);
@@ -126,16 +127,16 @@
   }
 </script>
 
-<div class="flex" bind:this={wrapper}>
-  <div class="flex-grow">
+<div bind:this={wrapper}>
+  <div
+    class={{
+      "bg-base-100/90 backdrop-blur-sm": !uiStore.isMobile,
+      "sticky top-[72px] z-20 -mt-4 pt-4": !uiStore.isMobile,
+    }}
+  >
     <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
 
-    <div
-      class={{
-        "join bg-base-100 flex w-full": true,
-        "sticky top-[72px] z-10 -mt-4 pt-4": !uiStore.isMobile,
-      }}
-    >
+    <div class="join flex w-full">
       <button
         class={[
           "btn join-item border-base-content/20 flex-grow",
@@ -157,64 +158,56 @@
         <span>Output</span>
       </button>
     </div>
+  </div>
 
-    <div
-      class={{
-        "space-y-4": true,
-        hidden: tab === "output",
-        block: tab === "input",
-      }}
-    >
-      {#if stream.input}
-        <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
-          <Info class="size-4" />
-          <span>
-            Requests are made from your browser and validations are performed on
-            the server side
-          </span>
-        </div>
-        <Field fields={stream.input} path="root" bind:value />
-      {:else}
-        <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
-          <Info class="size-4" />
-          <span>This stream does not require any input</span>
-        </div>
-      {/if}
-
-      <div class="flex w-full justify-end gap-2 pt-4">
-        <button
-          class="btn btn-primary"
-          disabled={isExecuting}
-          onclick={executeStream}
-        >
-          {#if isExecuting}
-            <Loader class="animate size-4 animate-spin" />
-          {:else}
-            <Zap class="size-4" />
-          {/if}
-          <span>Start stream</span>
-        </button>
+  <div
+    class={{
+      "space-y-4": true,
+      hidden: tab === "output",
+      block: tab === "input",
+    }}
+  >
+    {#if stream.input}
+      <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
+        <Info class="size-4" />
+        <span>
+          Requests are made from your browser and validations are performed on
+          the server side
+        </span>
       </div>
-    </div>
+      <Field fields={stream.input} path="root" bind:value />
+    {:else}
+      <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
+        <Info class="size-4" />
+        <span>This stream does not require any input</span>
+      </div>
+    {/if}
 
-    <div
-      class={{
-        "mt-4 space-y-2": true,
-        hidden: tab === "input",
-        block: tab === "output",
-      }}
-    >
-      <Output {cancelRequest} {isExecuting} type="stream" {output} />
+    <div class="flex w-full justify-end gap-2 pt-4">
+      <button
+        class="btn btn-primary"
+        disabled={isExecuting}
+        onclick={executeStream}
+      >
+        {#if isExecuting}
+          <Loader class="animate size-4 animate-spin" />
+        {:else}
+          <Zap class="size-4" />
+        {/if}
+        <span>Start stream</span>
+      </button>
     </div>
   </div>
 
-  {#if !uiStore.isMobile}
-    <div class="w-[40%] flex-none pl-6">
-      <div class="sticky top-[72px] z-10 -mt-4 pt-4">
-        <Snippets {value} type="stream" name={stream.name} />
-      </div>
-    </div>
-  {/if}
+  <div
+    class={{
+      "mt-4 space-y-2": true,
+      hidden: tab === "input",
+      block: tab === "output",
+    }}
+  >
+    <Output {cancelRequest} {isExecuting} type="stream" {output} />
+  </div>
 </div>
 
 {#if uiStore.isMobile}

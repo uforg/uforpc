@@ -6,18 +6,22 @@
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
   import { store } from "$lib/store.svelte";
+  import { uiStore } from "$lib/uiStore.svelte";
 
   import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
 
   import NodeQueryProc from "./NodeQuery/QueryProc.svelte";
   import NodeQueryStream from "./NodeQuery/QueryStream.svelte";
+  import Snippets from "./NodeQuery/Snippets.svelte";
 
   interface Props {
     node: (typeof store.jsonSchema.nodes)[number];
   }
 
   const { node }: Props = $props();
+
+  let value = $state({ root: {} });
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;
@@ -65,41 +69,62 @@
   });
 </script>
 
-<section class="min-h-[100dvh] space-y-12">
-  <div class="prose max-w-5xl">
-    <h1>{name}</h1>
+<div
+  class={{
+    "grid grid-cols-12 gap-4": !uiStore.isMobile,
+  }}
+>
+  <section
+    class={{
+      "min-h-[100dvh] space-y-12": true,
+      "col-span-8": !uiStore.isMobile,
+    }}
+  >
+    <div class="prose max-w-none">
+      <h1>{name}</h1>
 
-    {#if deprecatedMessage !== ""}
-      <div
-        role="alert"
-        class="alert alert-soft alert-error w-fit gap-2 font-bold italic"
-      >
-        <TriangleAlert class="size-4" />
-        <span>Deprecated: {deprecatedMessage}</span>
+      {#if deprecatedMessage !== ""}
+        <div
+          role="alert"
+          class="alert alert-soft alert-error w-fit gap-2 font-bold italic"
+        >
+          <TriangleAlert class="size-4" />
+          <span>Deprecated: {deprecatedMessage}</span>
+        </div>
+      {/if}
+
+      {#if documentation !== ""}
+        {@html documentation}
+      {/if}
+    </div>
+
+    {#if node.kind === "proc"}
+      <div>
+        <NodeQueryProc proc={node} bind:value />
       </div>
     {/if}
 
-    {#if documentation !== ""}
-      {@html documentation}
+    {#if node.kind === "stream"}
+      <div>
+        <NodeQueryStream stream={node} bind:value />
+      </div>
     {/if}
-  </div>
 
-  {#if node.kind === "proc"}
-    <div>
-      <NodeQueryProc proc={node} />
+    {#if urpcSchema !== ""}
+      <div class="space-y-4">
+        <H2>Schema</H2>
+        <Code lang="urpc" code={urpcSchema} />
+      </div>
+    {/if}
+  </section>
+
+  {#if !uiStore.isMobile && (node.kind == "proc" || node.kind == "stream")}
+    <div
+      class={{
+        "col-span-4": !uiStore.isMobile,
+      }}
+    >
+      <Snippets {value} type={node.kind} name={node.name} />
     </div>
   {/if}
-
-  {#if node.kind === "stream"}
-    <div>
-      <NodeQueryStream stream={node} />
-    </div>
-  {/if}
-
-  {#if urpcSchema !== ""}
-    <div class="space-y-4">
-      <H2>Schema</H2>
-      <Code lang="urpc" code={urpcSchema} />
-    </div>
-  {/if}
-</section>
+</div>
