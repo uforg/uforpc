@@ -5,6 +5,7 @@
   import { uiStore } from "$lib/uiStore.svelte";
 
   import Modal from "$lib/components/Modal.svelte";
+  import Tooltip from "$lib/components/Tooltip.svelte";
 
   const isMac = /mac/.test(navigator.userAgent.toLowerCase());
   const ctrl = isMac ? "⌘" : "CTRL";
@@ -28,11 +29,17 @@
   });
 
   const addHeader = () => {
-    store.headers = [...store.headers, { key: "", value: "" }];
+    store.headers = [...store.headers, { key: "", value: "", enabled: true }];
   };
 
   const removeHeader = (index: number) => {
     store.headers = store.headers.filter((_, i) => i !== index);
+  };
+
+  const loadDefaultConfigConfirm = () => {
+    if (confirm("Are you sure you want to reset the default settings?")) {
+      loadDefaultConfig();
+    }
   };
 </script>
 
@@ -86,7 +93,16 @@
       <p class="label mb-1">Headers to send with requests to the endpoint.</p>
 
       {#each store.headers as header, index}
-        <div class="mb-2 flex gap-2">
+        <div class="mb-2 flex items-center gap-2">
+          <Tooltip
+            content={header.enabled ? "Disable header" : "Enable header"}
+          >
+            <input
+              type="checkbox"
+              class="toggle"
+              bind:checked={header.enabled}
+            />
+          </Tooltip>
           <input
             type="text"
             class="input flex-1"
@@ -101,13 +117,14 @@
             placeholder="Value"
             bind:value={header.value}
           />
-          <button
-            class="btn btn-square btn-ghost btn-error"
-            onclick={() => removeHeader(index)}
-            title="Remove header"
-          >
-            <Trash class="size-4" />
-          </button>
+          <Tooltip content="Remove header">
+            <button
+              class="btn btn-square btn-ghost btn-error"
+              onclick={() => removeHeader(index)}
+            >
+              <Trash class="size-4" />
+            </button>
+          </Tooltip>
         </div>
       {/each}
 
@@ -118,7 +135,7 @@
     </fieldset>
 
     <div class="flex justify-end">
-      <button class="btn btn-ghost" onclick={loadDefaultConfig}>
+      <button class="btn btn-ghost" onclick={loadDefaultConfigConfirm}>
         <RefreshCcw class="mr-1 size-4" />
         Reset default settings
       </button>

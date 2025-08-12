@@ -43,14 +43,14 @@
       };
 
       const endpoint = joinPath([store.baseUrl, stream.name]);
+      const headers = getHeadersObject();
+      headers.set("Accept", "text/event-stream");
+      headers.set("Cache-Control", "no-cache");
+
       const response = await fetch(endpoint, {
         method: "POST",
         body: JSON.stringify(value.root ?? {}),
-        headers: {
-          ...getHeadersObject(),
-          Accept: "text/event-stream",
-          "Cache-Control": "no-cache",
-        },
+        headers,
         signal: signal,
       });
 

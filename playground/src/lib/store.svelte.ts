@@ -43,6 +43,7 @@ export const miniSearch = new MiniSearch({
 export interface Header {
   key: string;
   value: string;
+  enabled: boolean;
 }
 
 export interface Store {
@@ -84,7 +85,11 @@ export const loadStore = async () => {
 
   const headers = localStorage.getItem("headers");
   if (headers) {
-    store.headers = JSON.parse(headers);
+    try {
+      store.headers = normalizeHeaders(JSON.parse(headers));
+    } catch {
+      // Ignore invalid persisted headers
+    }
   }
 
   store.loaded = true;
@@ -107,15 +112,29 @@ export const saveStore = () => {
  * @param value The value of the header to add or update.
  */
 export const setHeader = (key: string, value: string) => {
-  const currHeaders = getHeadersObject();
-  currHeaders.set(key, value);
+  const trimmedKey = key.trim();
+  const targetKeyLower = trimmedKey.toLowerCase();
+  const existingIndex = store.headers.findIndex(
+    (h) => h.key.trim().toLowerCase() === targetKeyLower,
+  );
 
-  const newHeaders: Header[] = [];
-  for (const header of currHeaders.entries()) {
-    newHeaders.push({ key: header[0], value: header[1] });
+  if (existingIndex !== -1) {
+    // Update existing header value and ensure it is enabled
+    store.headers[existingIndex] = {
+      ...store.headers[existingIndex],
+      key: trimmedKey,
+      value,
+      enabled: true,
+    };
+    // Reassign to trigger reactivity in Svelte
+    store.headers = [...store.headers];
+  } else {
+    // Add a new enabled header
+    store.headers = [
+      ...store.headers,
+      { key: trimmedKey, value, enabled: true },
+    ];
   }
-
-  store.headers = newHeaders;
 };
 
 /**
@@ -130,6 +149,7 @@ export const getHeadersObject = (): Headers => {
   headers.set("Content-Type", "application/json");
 
   for (const header of store.headers) {
+    if (!header.enabled) continue;
     if (header.key.trim()) headers.set(header.key, header.value);
   }
 
@@ -154,8 +174,25 @@ export const loadDefaultConfig = async () => {
   }
 
   if (Array.isArray(config.headers)) {
-    store.headers = config.headers;
+    store.headers = normalizeHeaders(config.headers);
   }
+};
+
+type RawHeader = { key?: unknown; value?: unknown; enabled?: unknown };
+
+/**
+ * Normalize an unknown headers payload (from localStorage or config.json)
+ * into a strongly-typed array of Header with a default of enabled=true.
+ */
+const normalizeHeaders = (raw: unknown): Header[] => {
+  if (!Array.isArray(raw)) return [];
+
+  return (raw as RawHeader[]).map((item) => {
+    const key = typeof item?.key === "string" ? item.key : "";
+    const value = typeof item?.value === "string" ? item.value : "";
+    const enabled = typeof item?.enabled === "boolean" ? item.enabled : true;
+    return { key, value, enabled } satisfies Header;
+  });
 };
 
 /**
