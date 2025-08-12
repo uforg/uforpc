@@ -1,6 +1,7 @@
 import type { Action } from "svelte/action";
 
 import { debounce } from "./helpers/debounce";
+import type { CodegenGenerator } from "./urpc";
 
 export interface UiStoreDimensions {
   element: HTMLElement | null;
@@ -98,7 +99,11 @@ export interface UiStore {
   loaded: boolean;
   isMobile: boolean;
   theme: Theme;
-  codeSnippetsLang: string;
+  codeSnippetsTab: "sdk" | "curl";
+  codeSnippetsCurlLang: string;
+  codeSnippetsSdkLang: CodegenGenerator;
+  codeSnippetsSdkDartPackageName: string;
+  codeSnippetsSdkGolangPackageName: string;
   asideOpen: boolean;
   asideSearchOpen: boolean;
   asideSearchQuery: string;
@@ -115,7 +120,11 @@ export interface UiStore {
 
 const localStorageKeys = {
   theme: "theme",
-  codeSnippetsLang: "codeSnippetsLang",
+  codeSnippetsTab: "codeSnippetsTab",
+  codeSnippetsCurlLang: "codeSnippetsCurlLang",
+  codeSnippetsSdkLang: "codeSnippetsSdkLang",
+  codeSnippetsSdkDartPackageName: "codeSnippetsSdkDartPackageName",
+  codeSnippetsSdkGolangPackageName: "codeSnippetsSdkGolangPackageName",
   asideSearchOpen: "asideSearchOpen",
   asideSearchQuery: "asideSearchQuery",
   asideHideDocs: "asideHideDocs",
@@ -128,7 +137,11 @@ export const uiStore = $state<UiStore>({
   loaded: false,
   isMobile: false,
   theme: "dark",
-  codeSnippetsLang: "Curl",
+  codeSnippetsTab: "sdk",
+  codeSnippetsCurlLang: "Curl",
+  codeSnippetsSdkLang: "typescript-client",
+  codeSnippetsSdkDartPackageName: "uforpc",
+  codeSnippetsSdkGolangPackageName: "uforpc",
   asideOpen: false,
   asideSearchOpen: false,
   asideSearchQuery: "",
@@ -177,11 +190,38 @@ export const loadUiStore = () => {
    * the app.html file.
    */
 
-  // Load code snippets lang from local storage
-  const codeSnippetsLang = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsLang,
+  // Load code snippets tab from local storage
+  const codeSnippetsTab = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsTab,
   );
-  uiStore.codeSnippetsLang = codeSnippetsLang ?? "Curl";
+  uiStore.codeSnippetsTab = codeSnippetsTab === "curl" ? "curl" : "sdk";
+
+  // Load code snippets curl lang from local storage
+  const codeSnippetsCurlLang = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsCurlLang,
+  );
+  uiStore.codeSnippetsCurlLang = codeSnippetsCurlLang ?? "Curl";
+
+  // Load code snippets sdk lang from local storage
+  const codeSnippetsSdkLang = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsSdkLang,
+  );
+  uiStore.codeSnippetsSdkLang = (codeSnippetsSdkLang ??
+    "typescript-client") as CodegenGenerator;
+
+  // Load code snippets sdk dart package name from local storage
+  const codeSnippetsSdkDartPackageName = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsSdkDartPackageName,
+  );
+  uiStore.codeSnippetsSdkDartPackageName =
+    codeSnippetsSdkDartPackageName ?? "uforpc";
+
+  // Load code snippets sdk golang package name from local storage
+  const codeSnippetsSdkGolangPackageName = globalThis.localStorage.getItem(
+    localStorageKeys.codeSnippetsSdkGolangPackageName,
+  );
+  uiStore.codeSnippetsSdkGolangPackageName =
+    codeSnippetsSdkGolangPackageName ?? "uforpc";
 
   // Load aside search open state from local storage
   const asideSearchOpen = globalThis.localStorage.getItem(
@@ -232,10 +272,34 @@ export const saveUiStore = () => {
   globalThis.localStorage.setItem(localStorageKeys.theme, uiStore.theme);
   setThemeAttribute(uiStore.theme);
 
-  // Save code snippets lang to local storage
+  // Save code snippets curl lang to local storage
   globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsLang,
-    uiStore.codeSnippetsLang,
+    localStorageKeys.codeSnippetsTab,
+    uiStore.codeSnippetsTab,
+  );
+
+  // Save code snippets curl lang to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsCurlLang,
+    uiStore.codeSnippetsCurlLang,
+  );
+
+  // Save code snippets sdk lang to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsSdkLang,
+    uiStore.codeSnippetsSdkLang,
+  );
+
+  // Save code snippets sdk dart package name to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsSdkDartPackageName,
+    uiStore.codeSnippetsSdkDartPackageName,
+  );
+
+  // Save code snippets sdk golang package name to local storage
+  globalThis.localStorage.setItem(
+    localStorageKeys.codeSnippetsSdkGolangPackageName,
+    uiStore.codeSnippetsSdkGolangPackageName,
   );
 
   // Save aside search open state to local storage

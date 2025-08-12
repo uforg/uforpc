@@ -311,28 +311,34 @@
   });
 
   let pickedLang = $derived.by(() => {
-    const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
+    const lang = langs.find(
+      (lang) => lang.label === uiStore.codeSnippetsCurlLang,
+    );
     if (!lang) return defaultLang.langCode;
     return lang.langCode;
   });
 
   let pickedCode = $derived.by(() => {
-    const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
+    const lang = langs.find(
+      (lang) => lang.label === uiStore.codeSnippetsCurlLang,
+    );
     if (!lang) return defaultLang.func(curl);
     return lang.func(curl);
   });
 
   onMount(() => {
-    const lang = langs.find((lang) => lang.label === uiStore.codeSnippetsLang);
+    const lang = langs.find(
+      (lang) => lang.label === uiStore.codeSnippetsCurlLang,
+    );
     if (!lang) {
-      uiStore.codeSnippetsLang = defaultLang.label;
+      uiStore.codeSnippetsCurlLang = defaultLang.label;
     }
   });
 </script>
 
-<fieldset class="fieldset mb-4">
+<label class="fieldset mb-4">
   <legend class="fieldset-legend">Language</legend>
-  <select class="select w-full" bind:value={uiStore.codeSnippetsLang}>
+  <select class="select w-full" bind:value={uiStore.codeSnippetsCurlLang}>
     {#each langGroups as langGroup}
       {#if langGroup.langs.length > 1}
         <optgroup label={langGroup.group}>
@@ -347,6 +353,6 @@
       {/if}
     {/each}
   </select>
-</fieldset>
+</label>
 
 <Code code={pickedCode} lang={pickedLang} scrollY={false} />

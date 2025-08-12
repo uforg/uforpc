@@ -15,8 +15,6 @@
   }
 
   const { value, type, name }: Props = $props();
-
-  let activeTab: "sdk" | "curl" = $state("sdk");
 </script>
 
 <div>
@@ -33,14 +31,14 @@
         { id: "sdk", label: "Client SDK Snippets" },
         { id: "curl", label: "Curl Snippets" },
       ]}
-      activeId={activeTab}
-      onSelect={(id) => (activeTab = id as "sdk" | "curl")}
+      activeId={uiStore.codeSnippetsTab}
+      onSelect={(id) => (uiStore.codeSnippetsTab = id as "sdk" | "curl")}
     />
   </div>
 
   <div class="space-y-2">
-    {#if activeTab === "sdk"}
-      <SnippetsSdk {value} {type} {name} />
+    {#if uiStore.codeSnippetsTab === "sdk"}
+      <SnippetsSdk {type} {name} />
     {:else}
       <SnippetsCurl {value} {type} {name} />
     {/if}
