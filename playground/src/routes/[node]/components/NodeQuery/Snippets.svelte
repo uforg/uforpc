@@ -39,7 +39,7 @@
     />
   </div>
 
-  <div class="space-y-2 overflow-y-auto">
+  <div class="space-y-2">
     {#if activeTab === "sdk"}
       <SnippetsSdk {value} {type} {name} />
     {:else}
