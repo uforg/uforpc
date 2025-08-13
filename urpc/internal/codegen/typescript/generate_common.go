@@ -110,43 +110,37 @@ func renderHydrateField(parentTypeName string, field schema.FieldDefinition) str
 		return ""
 	}
 
-	nameHydrated := "hydrated" + strutil.ToPascalCase(name)
 	namePascal := strutil.ToPascalCase(name)
+	nameCamel := strutil.ToCamelCase(name)
+	nameHydrated := "hydrated" + namePascal
 	isOptional := field.Optional
 	isCustomType := field.IsCustomType()
 	isBuiltInType := field.IsBuiltInType()
 
-	valueLiteral := "input." + name
-
-	if isNamed && isCustomType {
-		valueLiteral = fmt.Sprintf("hydrate%s(input.%s)", namePascal, name)
-	}
-
-	if isNamed && isBuiltInType {
+	// Build a formatter for a single value hydration expression. Use "%s" placeholder for the value.
+	valueFmt := "%s"
+	if isInline {
+		valueFmt = fmt.Sprintf("hydrate%s%s(%%s)", parentTypeName, namePascal)
+	} else if isNamed && isCustomType {
+		typePascal := strutil.ToPascalCase(*field.TypeName)
+		valueFmt = fmt.Sprintf("hydrate%s(%%s)", typePascal)
+	} else if isNamed && isBuiltInType {
 		switch *field.TypeName {
-		case "string":
-			valueLiteral = "input." + name
-		case "int":
-			valueLiteral = "input." + name
-		case "float":
-			valueLiteral = "input." + name
-		case "bool":
-			valueLiteral = "input." + name
 		case "datetime":
-			valueLiteral = "new Date(input." + name + ")"
+			valueFmt = "new Date(%s)"
+		default:
+			valueFmt = "%s"
 		}
 	}
 
-	if isInline {
-		valueLiteral = fmt.Sprintf("hydrate%s%s(input.%s)", parentTypeName, namePascal, name)
-	}
-
+	// Compose the final value literal, handling arrays vs single values.
+	valueLiteral := fmt.Sprintf(valueFmt, "input."+nameCamel)
 	if field.IsArray {
-		valueLiteral = fmt.Sprintf("input.%s.map(%s => {const input = {%s}; return %s})", name, name, name, valueLiteral)
+		valueLiteral = fmt.Sprintf("input.%s.map(el => %s)", nameCamel, fmt.Sprintf(valueFmt, "el"))
 	}
 
 	if isOptional {
-		valueLiteral = fmt.Sprintf("input.%s ? %s : input.%s", name, valueLiteral, name)
+		valueLiteral = fmt.Sprintf("input.%s ? %s : input.%s", nameCamel, valueLiteral, nameCamel)
 	}
 
 	return fmt.Sprintf("const %s = %s", nameHydrated, valueLiteral)
@@ -167,8 +161,9 @@ func renderHydrateType(parentName string, name string, fields []schema.FieldDefi
 		og.Block(func() {
 			for _, fieldDef := range fields {
 				name := fieldDef.Name
+				nameCamel := strutil.ToCamelCase(name)
 				hydratedName := "hydrated" + strutil.ToPascalCase(name)
-				og.Linef("%s: %s,", name, hydratedName)
+				og.Linef("%s: %s,", nameCamel, hydratedName)
 			}
 		})
 		og.Linef("}")
