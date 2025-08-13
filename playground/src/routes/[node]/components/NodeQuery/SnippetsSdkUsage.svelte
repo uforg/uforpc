@@ -105,10 +105,6 @@ handle.cancel();`,
       <Code code={isProc ? tsProc : tsStream} lang="ts" />
     </div>
   {:else if uiStore.codeSnippetsSdkLang === "golang-client"}
-    <p>
-      Ensure your file imports <code>context</code> and <code>fmt</code> if you plan
-      to run these snippets directly.
-    </p>
     <div class="not-prose">
       <Code code={isProc ? goProc : goStream} lang="go" />
     </div>
