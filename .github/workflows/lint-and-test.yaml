@@ -20,11 +20,4 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           push: never
-          runCmd: >
-            /bin/bash -c "
-              task deps &&
-              task fmt-check &&
-              task lint &&
-              task test &&
-              task build
-            "
+          runCmd: /bin/bash -c "task ci"
