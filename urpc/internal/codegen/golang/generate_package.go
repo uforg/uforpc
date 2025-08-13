@@ -37,18 +37,32 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 	g.Linef("package %s", config.PackageName)
 	g.Break()
 
-	imports := []string{
-		"bufio",
-		"bytes",
-		"context",
-		"encoding/json",
-		"fmt",
-		"io",
-		"net/http",
-		"slices",
-		"strings",
-		"sync",
-		"time",
+	imports := []string{}
+
+	if config.IncludeServer {
+		imports = []string{
+			"context",
+			"encoding/json",
+			"fmt",
+			"io",
+			"net/http",
+			"sync",
+			"time",
+		}
+	}
+
+	if config.IncludeClient {
+		imports = []string{
+			"bufio",
+			"bytes",
+			"context",
+			"encoding/json",
+			"fmt",
+			"io",
+			"net/http",
+			"strings",
+			"time",
+		}
 	}
 
 	g.Line("import (")
@@ -59,6 +73,10 @@ func generatePackage(_ schema.Schema, config Config) (string, error) {
 	})
 	g.Line(")")
 	g.Break()
+
+	// Add code to prevent errors when not using some imports
+	g.Line("// No-op to keep the time package when not used")
+	g.Line("var _ *time.Time = nil")
 
 	return g.String(), nil
 }
