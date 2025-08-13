@@ -67,6 +67,7 @@ fmt.Println(output)`,
   const goStream = $derived.by(
     () => `// Assuming \`client\` is already created (see Setup)
 stream := client.Streams.${namePascal}().Execute(context.Background(), ...)
+
 for event := range stream {
   fmt.Println(event)
 }`,
