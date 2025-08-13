@@ -161,7 +161,7 @@
 
   .code-container {
     :global(pre) {
-      @apply bg-base-200! p-4;
+      @apply bg-base-200! rounded-box p-4;
     }
 
     :global(pre:focus-visible) {
