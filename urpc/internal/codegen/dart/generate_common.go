@@ -167,19 +167,24 @@ func renderDartType(parentName, name, desc string, fields []schema.FieldDefiniti
 
 		// Constructor
 		og.Linef("/// Creates a new %s instance.", name)
-		og.Linef("const %s({", name)
-		og.Block(func() {
-			for _, field := range fields {
-				fieldName := strutil.ToCamelCase(field.Name)
-				isRequired := !field.Optional
-				if isRequired {
-					og.Linef("required this.%s,", fieldName)
-				} else {
-					og.Linef("this.%s,", fieldName)
+		if len(fields) == 0 {
+			og.Linef("const %s();", name)
+		} else {
+			og.Linef("const %s({", name)
+			og.Block(func() {
+				for _, field := range fields {
+					fieldName := strutil.ToCamelCase(field.Name)
+					isRequired := !field.Optional
+					if isRequired {
+						og.Linef("required this.%s,", fieldName)
+					} else {
+						og.Linef("this.%s,", fieldName)
+					}
 				}
-			}
-		})
-		og.Line("});")
+			})
+			og.Line("});")
+		}
+
 		og.Break()
 
 		// fromJson factory
