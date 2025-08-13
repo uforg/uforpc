@@ -28,8 +28,8 @@
 
     <Tabs
       items={[
-        { id: "sdk", label: "Client SDK Snippets" },
-        { id: "curl", label: "HTTP Request Snippets" },
+        { id: "curl", label: "HTTP Snippets" },
+        { id: "sdk", label: "SDK Snippets" },
       ]}
       activeId={uiStore.codeSnippetsTab}
       onSelect={(id) => (uiStore.codeSnippetsTab = id as "sdk" | "curl")}

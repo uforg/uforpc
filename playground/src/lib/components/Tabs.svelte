@@ -22,7 +22,7 @@
   };
 </script>
 
-<div class="join bg-base-100 flex w-full">
+<div class="join bg-base-100 flex w-full overflow-x-auto overflow-y-hidden">
   {#each items as tab}
     <button
       class={[

@@ -353,6 +353,11 @@
       {/if}
     {/each}
   </select>
+  <div class="prose prose-sm text-base-content/50 max-w-none">
+    The easiest way to test this API is with the code snippets below. However,
+    if your language is supported, <b>using the SDK is recommended</b> for a smoother
+    integration experience.
+  </div>
 </label>
 
 <Code code={pickedCode} lang={pickedLang} scrollY={false} />

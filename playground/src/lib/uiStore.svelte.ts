@@ -139,7 +139,7 @@ export const uiStore = $state<UiStore>({
   loaded: false,
   isMobile: false,
   theme: "dark",
-  codeSnippetsTab: "sdk",
+  codeSnippetsTab: "curl",
   codeSnippetsCurlLang: "Curl",
   codeSnippetsSdkLang: "typescript-client",
   codeSnippetsSdkStep: "download",
@@ -197,7 +197,7 @@ export const loadUiStore = () => {
   const codeSnippetsTab = globalThis.localStorage.getItem(
     localStorageKeys.codeSnippetsTab,
   );
-  uiStore.codeSnippetsTab = codeSnippetsTab === "curl" ? "curl" : "sdk";
+  uiStore.codeSnippetsTab = codeSnippetsTab === "sdk" ? "sdk" : "curl";
 
   // Load code snippets curl lang from local storage
   const codeSnippetsCurlLang = globalThis.localStorage.getItem(
