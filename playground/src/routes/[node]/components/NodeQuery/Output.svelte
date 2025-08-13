@@ -16,7 +16,13 @@
   }
 
   const { cancelRequest, isExecuting, output, type }: Props = $props();
-  let hasOutput = $derived(!!output);
+  // let hasOutput = $derived(!!output);
+  let hasOutput = $derived.by(() => {
+    if (!output) return false;
+    if (output === "{}") return false;
+    if (output === "[]") return false;
+    return true;
+  });
 
   // Discover authentication tokens in the response
   let foundTokens = $derived(type === "proc" ? discoverAuthToken(output) : []);
