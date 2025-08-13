@@ -5,17 +5,16 @@ import type { BundledTheme, Highlighter } from "shiki";
 // Languages that are used in the playground snippets
 const langs: BundledLanguage[] = [
   "bash",
-  "yaml",
   "c",
-  "csharp",
   "clojure",
+  "csharp",
   "dart",
   "elixir",
   "go",
-  "json",
   "http",
   "java",
   "javascript",
+  "json",
   "julia",
   "kotlin",
   "lua",
@@ -30,6 +29,9 @@ const langs: BundledLanguage[] = [
   "ruby",
   "rust",
   "swift",
+  "typescript",
+  "ts",
+  "yaml",
 ];
 
 /**
