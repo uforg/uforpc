@@ -133,7 +133,7 @@
       </div>
     {/if}
 
-    {#if uiStore.isMobile}
+    {#if uiStore.isMobile || !isProcOrStream}
       <BottomSpace />
     {/if}
   </section>
