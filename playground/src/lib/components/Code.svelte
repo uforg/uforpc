@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Copy, Download, EllipsisVertical } from "@lucide/svelte";
+  import { Copy, Download } from "@lucide/svelte";
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { toast } from "svelte-sonner";
 
@@ -13,8 +13,6 @@
     lightTheme,
   } from "$lib/shiki";
   import { uiStore } from "$lib/uiStore.svelte";
-
-  import Menu from "./Menu.svelte";
 
   interface Props {
     code: string;
@@ -94,32 +92,11 @@
   };
 </script>
 
-{#snippet menuContent()}
-  <div class="flex flex-col space-y-1">
-    <button
-      class="btn btn-ghost btn-sm justify-start"
-      onclick={() => copyToClipboard()}
-    >
-      <Copy class="size-4" />
-      <span>Copy to clipboard</span>
-    </button>
-    <button
-      class="btn btn-ghost btn-sm justify-start"
-      onclick={() => downloadCode()}
-    >
-      <Download class="size-4" />
-      <span>Download</span>
-    </button>
-  </div>
-{/snippet}
-
 {#if codeHighlighted !== ""}
   <div
     class={mergeClasses([
-      "bg-base-200 relative z-10 p-4",
+      "bg-base-200",
       {
-        "overflow-y-auto": scrollY,
-        "overflow-x-auto": scrollX,
         "border-base-content/20 border": withBorder,
         "rounded-box": rounded,
       },
@@ -127,19 +104,42 @@
     ])}
   >
     <div
-      class={["sticky top-0 left-0 z-10 flex justify-end", "-mb-6 h-6 w-full"]}
+      class={mergeClasses([
+        "w-full border-b px-4 py-2",
+        {
+          "border-base-content/20 border-b": withBorder,
+        },
+        className,
+      ])}
     >
-      <Menu
-        content={menuContent}
-        trigger="mouseenter focus"
-        placement="left-start"
-      >
-        <button class="btn btn-sm btn-square">
-          <EllipsisVertical class="size-4" />
+      <div class="flex items-center justify-between space-x-1">
+        <button
+          class="btn btn-ghost btn-xs justify-start"
+          onclick={() => copyToClipboard()}
+        >
+          <Copy class="size-3" />
+          <span>Copy to clipboard</span>
         </button>
-      </Menu>
+        <button
+          class="btn btn-ghost btn-xs justify-end"
+          onclick={() => downloadCode()}
+        >
+          <Download class="size-3" />
+          <span>Download</span>
+        </button>
+      </div>
     </div>
-    {@html codeHighlighted}
+    <div
+      class={mergeClasses([
+        "code-container",
+        {
+          "code-container-scroll-y": scrollY,
+          "code-container-scroll-x": scrollX,
+        },
+      ])}
+    >
+      {@html codeHighlighted}
+    </div>
   </div>
 {/if}
 
@@ -147,9 +147,21 @@
   @reference "tailwindcss";
   @plugin "daisyui";
 
-  div {
+  .code-container-scroll-y {
     :global(pre) {
-      @apply bg-base-200!;
+      @apply overflow-y-auto;
+    }
+  }
+
+  .code-container-scroll-x {
+    :global(pre) {
+      @apply overflow-x-auto;
+    }
+  }
+
+  .code-container {
+    :global(pre) {
+      @apply bg-base-200! p-4;
     }
 
     :global(pre:focus-visible) {
