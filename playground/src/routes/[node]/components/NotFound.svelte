@@ -1,6 +1,4 @@
 <script>
-  import { FileWarning } from "@lucide/svelte";
-
   import H1 from "$lib/components/H1.svelte";
   import LogoUfo from "$lib/components/LogoUfo.svelte";
 </script>
