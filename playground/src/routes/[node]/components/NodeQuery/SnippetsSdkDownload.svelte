@@ -106,6 +106,9 @@
         placeholder="Package name..."
         bind:value={uiStore.codeSnippetsSdkGolangPackageName}
       />
+      <div class="prose prose-sm text-base-content/50 max-w-none">
+        The generated SDK and code examples will use this package name.
+      </div>
     </label>
   {/if}
 
@@ -118,6 +121,9 @@
         placeholder="Package name..."
         bind:value={uiStore.codeSnippetsSdkDartPackageName}
       />
+      <div class="prose prose-sm text-base-content/50 max-w-none">
+        The generated SDK and code examples will use this package name.
+      </div>
     </label>
   {/if}
 
