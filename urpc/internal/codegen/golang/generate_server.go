@@ -173,6 +173,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					g.Line("//    it invokes the original generic 'next' handler.")
 					g.Linef("finalLink := func(c *%sHandlerContext[T]) (%sOutput, error) {", name, name)
 					g.Block(func() {
+						g.Line("// Update the props and input of the generic context")
+						g.Line("cGeneric.Props = c.Props")
+						g.Line("cGeneric.Input = c.Input")
 						g.Line("// Call the next generic handler in the chain.")
 						g.Line("genericOutput, err := next(cGeneric)")
 						g.Line("if err != nil {")
