@@ -40,7 +40,7 @@
 
   const tsProc = $derived.by(
     () => `// Assuming \`client\` is already created (see Setup)
-const result = client.procs.${nameCamel}().execute(...);
+const result = await client.procs.${nameCamel}().execute(...);
 console.log(result);`,
   );
 
@@ -75,7 +75,7 @@ for event := range stream {
 
   const dartProc = $derived.by(
     () => `// Assuming \`client\` is already created (see Setup)
-final result = client.procs.${nameCamel}().execute(...);
+final result = await client.procs.${nameCamel}().execute(...);
 print(result);`,
   );
 
