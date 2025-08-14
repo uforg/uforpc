@@ -8,7 +8,7 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
-const Version = "0.3.4"
+const Version = "0.3.5"
 const VersionWithPrefix = "v" + Version
 
 // asciiArtRaw is used to generate AsciiArt
