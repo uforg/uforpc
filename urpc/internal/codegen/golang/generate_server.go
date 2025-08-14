@@ -227,18 +227,17 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Handle registers the business handler for the %s procedure.", name)
 		g.Line("//")
 		g.Line("// The server will:")
-		g.Line("//   1) Deserialize and validate the input using generated pre* types")
-		g.Line("//   2) Build the procedure's middleware chain")
-		g.Line("//   3) Invoke your handler with a typed context")
+		g.Line("//  1) Deserialize and validate the input using generated pre* types")
+		g.Line("//  2) Build the procedure's middleware chain")
+		g.Line("//  3) Invoke your handler with a typed context")
 		renderDoc(g, procNode.Doc, true)
 		renderDeprecated(g, procNode.Deprecated)
 		g.Linef("func (e proc%sEntry[T]) Handle(handler %sHandlerFunc[T]) {", name, name)
 		g.Block(func() {
 			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[T, any]) (any, error) {")
 			g.Block(func() {
-				g.Line("// 1. Create the specific context from the generic one provided by the server.")
-				g.Line("//    This requires a type assertion on the input field.")
-				g.Line("//    It's assumed a higher layer guarantees the type is correct.")
+				g.Line("// Create the specific context from the generic one provided by the server.")
+				g.Line("// It's assumed a higher layer guarantees the type is correct.")
 				g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
 				g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 				g.Block(func() {
@@ -250,8 +249,8 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				})
 				g.Line("}")
 
-				g.Line("// 2. Call the user-provided, type-safe handler with the adapted context.")
-				g.Line("//    The return values are compatible with (any, error).")
+				g.Line("// Call the user-provided, type-safe handler with the adapted context.")
+				g.Line("// The return values are compatible with (any, error).")
 				g.Line("return handler(cSpecific)")
 			})
 			g.Line("}")
@@ -336,31 +335,37 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Block(func() {
 			g.Linef("adapted := func(next StreamHandlerFunc[T, any, any]) StreamHandlerFunc[T, any, any] {")
 			g.Block(func() {
-				// Returns the final handler that the system will execute.
-				g.Line("// Returns the final handler that the system will execute.")
+				g.Line("// This is the generic handler that will be executed by the server at runtime.")
 				g.Linef("return func(cGeneric *HandlerContext[T, any], emitGeneric EmitFunc[T, any, any]) error {")
 				g.Block(func() {
-					g.Line("// 1. The \"final link\" in the specific middleware chain. When called,")
-					g.Line("//    it invokes the original generic 'next' handler, using the generic")
-					g.Line("//    arguments captured from this closure.")
-					g.Linef("finalLink := func(c *%sHandlerContext[T], emit %sEmitFunc[T]) error {", name, name)
+					g.Line("// Create a type-safe 'next' function for the specific middleware to call.")
+					g.Line("// This function acts as a bridge to translate the call back into the generic world.")
+					g.Linef("typedNext := func(c *%sHandlerContext[T], emit %sEmitFunc[T]) error {", name, name)
 					g.Block(func() {
+						g.Line("// Crucially, sync mutations from the specific context back to the generic")
+						g.Line("// context before proceeding down the chain.")
+						g.Line("cGeneric.Props = c.Props")
+						g.Line("cGeneric.Input = c.Input")
+
+						g.Line("// Call the original generic handler.")
 						g.Line("return next(cGeneric, emitGeneric)")
 					})
 					g.Line("}")
 
-					g.Line("// 2. Apply the user-defined typed middleware to the final link.")
-					g.Line("handlerChain := mw(finalLink)")
+					g.Line("// Apply the user's middleware, giving it our typed bridge function.")
+					g.Line("// The result is the complete, type-safe handler chain.")
+					g.Line("typedChain := mw(typedNext)")
 
-					g.Line("// 3. Create a typed 'emit' function that delegates to the generic emit.")
-					g.Line("//    Uses 'cGeneric' from the outer scope, which is the correct context.")
+					g.Line("// Create a type-safe 'emit' function that delegates to the generic one.")
+					g.Line("// It uses 'cGeneric' from the outer scope, which is the correct context.")
 					g.Linef("emitSpecific := func(c *%sHandlerContext[T], output %sOutput) error {", name, name)
 					g.Block(func() {
 						g.Line("return emitGeneric(cGeneric, output)")
 					})
 					g.Line("}")
 
-					g.Line("// 4. Construct the typed context from the generic context.")
+					g.Line("// Prepare the initial arguments for the typed chain by creating a")
+					g.Line("// specific context from the generic one.")
 					g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
 					g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 					g.Block(func() {
@@ -372,8 +377,8 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					})
 					g.Line("}")
 
-					g.Line("// 5. Execute the complete middleware chain with the typed arguments.")
-					g.Line("return handlerChain(cSpecific, emitSpecific)")
+					g.Line("// Execute the fully composed, type-safe middleware chain.")
+					g.Line("return typedChain(cSpecific, emitSpecific)")
 				})
 				g.Line("}")
 			})
@@ -396,23 +401,29 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Block(func() {
 			g.Linef("adapted := func(next EmitFunc[T, any, any]) EmitFunc[T, any, any] {")
 			g.Block(func() {
-				g.Line("// Return a new generic 'emit' function that wraps the logic.")
+				g.Line("// Return a new generic 'emit' function that wraps the logic for every event.")
 				g.Line("return func(cGeneric *HandlerContext[T, any], outputGeneric any) error {")
 				g.Block(func() {
-					g.Line("// 1. The \"next link\" in the emit chain. It is a wrapper that")
-					g.Line("//    calls the original generic 'next' provided by the system.")
-					g.Linef("nextSpecific := func(c *%sHandlerContext[T], output %sOutput) error {", name, name)
+					g.Line("// Create a type-safe 'next' function for the specific emit middleware to call.")
+					g.Line("// This function acts as a bridge, calling the original generic 'next' function.")
+					g.Linef("typedNext := func(c *%sHandlerContext[T], output %sOutput) error {", name, name)
 					g.Block(func() {
+						g.Line("// Crucially, sync mutations from the specific context back to the generic")
+						g.Line("// context before proceeding down the chain.")
+						g.Line("cGeneric.Props = c.Props")
+						g.Line("cGeneric.Input = c.Input")
+
+						g.Line("// Call the original generic 'next' function with the updated context.")
 						g.Line("return next(cGeneric, output)")
 					})
 					g.Line("}")
 
-					g.Line("// 2. Apply the specific middleware to obtain the final 'emit' function.")
-					g.Line("//    The middleware now only takes the next function in the chain.")
-					g.Line("emitChain := mw(nextSpecific)")
+					g.Line("// Apply the user's middleware, giving it our typed bridge function.")
+					g.Line("// The result is the complete, type-safe emit chain.")
+					g.Line("emitChain := mw(typedNext)")
 
-					g.Line("// 3. Create the specific context from the generic one. This is still")
-					g.Line("//    needed to call the final emitChain function.")
+					g.Line("// Prepare the arguments for the typed chain by creating a specific context")
+					g.Line("// and asserting the output type.")
 					g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
 					g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 					g.Block(func() {
@@ -423,11 +434,9 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 						g.Line("operationType: cGeneric.operationType,")
 					})
 					g.Line("}")
-
-					g.Line("// 4. Perform the type assertion for the output object.")
 					g.Linef("outputSpecific, _ := outputGeneric.(%sOutput)", name)
 
-					g.Line("// 5. Execute the middleware chain with the specific arguments.")
+					g.Line("// Execute the fully composed, type-safe emit middleware chain.")
 					g.Line("return emitChain(cSpecific, outputSpecific)")
 				})
 				g.Line("}")
@@ -442,25 +451,25 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Linef("// Handle registers the business handler for the %s stream.", name)
 		g.Line("//")
 		g.Line("// The server will:")
-		g.Line("//   1) Deserialize and validate the input using generated pre* types")
-		g.Line("//   2) Build the stream's middleware chain and the emit chain")
-		g.Line("//   3) Provide a typed emit function and invoke your handler")
+		g.Line("//  1) Deserialize and validate the input using generated pre* types")
+		g.Line("//  2) Build the stream's middleware chain and the emit chain")
+		g.Line("//  3) Provide a typed emit function and invoke your handler")
 		renderDoc(g, streamNode.Doc, true)
 		renderDeprecated(g, streamNode.Deprecated)
 		g.Linef("func (e stream%sEntry[T]) Handle(handler %sHandlerFunc[T]) {", name, name)
 		g.Block(func() {
 			g.Linef("adaptedHandler := func(cGeneric *HandlerContext[T, any], emitGeneric EmitFunc[T, any, any]) error {")
 			g.Block(func() {
-				g.Line("// 1. Create the specific, type-safe emit function by wrapping the generic one.")
-				g.Line("//    It uses 'cGeneric' from the outer scope, which has the correct type for the generic call.")
+				g.Line("// Create the specific, type-safe emit function by wrapping the generic one.")
+				g.Line("// It uses 'cGeneric' from the outer scope, which has the correct type for the generic call.")
 				g.Linef("emitSpecific := func(c *%sHandlerContext[T], output %sOutput) error {", name, name)
 				g.Block(func() {
 					g.Line("return emitGeneric(cGeneric, output)")
 				})
 				g.Line("}")
 
-				g.Line("// 2. Create the specific context from the generic one provided by the server.")
-				g.Line("//    This requires a type assertion on the input field.")
+				g.Line("// Create the specific context from the generic one provided by the server.")
+				g.Line("// It's assumed a higher layer guarantees the type is correct.")
 				g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
 				g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 				g.Block(func() {
@@ -472,7 +481,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 				})
 				g.Line("}")
 
-				g.Line("// 3. Call the user-provided, type-safe handler with the adapted, specific arguments.")
+				g.Line("// Call the user-provided, type-safe handler with the adapted arguments.")
 				g.Line("return handler(cSpecific, emitSpecific)")
 			})
 			g.Line("}")
