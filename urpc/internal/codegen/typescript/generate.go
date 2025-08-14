@@ -18,7 +18,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generateClient,
 	}
 
-	g := genkit.NewGenKit().WithTabs()
+	g := genkit.NewGenKit().WithSpaces(2)
 	for _, generator := range subGenerators {
 		codeChunk, err := generator(sch, config)
 		if err != nil {

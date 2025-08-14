@@ -9,7 +9,7 @@ import (
 )
 
 func generateProcedureTypes(sch schema.Schema, _ Config) (string, error) {
-	g := genkit.NewGenKit().WithTabs()
+	g := genkit.NewGenKit().WithSpaces(2)
 
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Line("// Procedure Types")

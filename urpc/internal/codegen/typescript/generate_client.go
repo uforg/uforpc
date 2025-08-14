@@ -22,7 +22,7 @@ func generateClient(sch schema.Schema, config Config) (string, error) {
 		return "", fmt.Errorf("client.ts: could not find start delimiter")
 	}
 
-	g := genkit.NewGenKit().WithTabs()
+	g := genkit.NewGenKit().WithSpaces(2)
 
 	g.Raw(piece)
 	g.Break()

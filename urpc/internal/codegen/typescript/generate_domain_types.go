@@ -8,7 +8,7 @@ import (
 )
 
 func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
-	g := genkit.NewGenKit().WithTabs()
+	g := genkit.NewGenKit().WithSpaces(2)
 
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Line("// Domain Types")

@@ -72,7 +72,7 @@ func renderType(
 ) string {
 	name = parentName + name
 
-	og := genkit.NewGenKit().WithTabs()
+	og := genkit.NewGenKit().WithSpaces(2)
 	if desc != "" {
 		og.Linef("/**")
 		renderPartialMultilineComment(og, fmt.Sprintf("%s %s", name, desc))
@@ -151,7 +151,7 @@ func renderHydrateField(parentTypeName string, field schema.FieldDefinition) str
 func renderHydrateType(parentName string, name string, fields []schema.FieldDefinition) string {
 	name = parentName + name
 
-	og := genkit.NewGenKit().WithTabs()
+	og := genkit.NewGenKit().WithSpaces(2)
 	og.Linef("function hydrate%s(input: %s): %s {", name, name, name)
 	og.Block(func() {
 		for _, fieldDef := range fields {
