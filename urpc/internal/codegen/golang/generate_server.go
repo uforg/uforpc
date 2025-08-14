@@ -167,37 +167,40 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		g.Block(func() {
 			g.Linef("adapted := func(next ProcHandlerFunc[T, any, any]) ProcHandlerFunc[T, any, any] {")
 			g.Block(func() {
+				g.Line("// This is the generic handler that will be executed by the server at runtime.")
 				g.Linef("return func(cGeneric *HandlerContext[T, any]) (any, error) {")
 				g.Block(func() {
-					g.Line("// 1. The \"final link\" in the specific middleware chain. When called,")
-					g.Line("//    it invokes the original generic 'next' handler.")
-					g.Linef("finalLink := func(c *%sHandlerContext[T]) (%sOutput, error) {", name, name)
+					g.Line("// Create a type-safe 'next' function for the specific middleware to call.")
+					g.Line("// This function acts as a bridge to translate the call back into the generic world.")
+					g.Linef("typedNext := func(c *%sHandlerContext[T]) (%sOutput, error) {", name, name)
 					g.Block(func() {
-						g.Line("// Update the props and input of the generic context")
+						g.Line("// Crucially, sync mutations from the specific context back to the generic")
+						g.Line("// context before proceeding down the chain.")
 						g.Line("cGeneric.Props = c.Props")
 						g.Line("cGeneric.Input = c.Input")
-						g.Line("// Call the next generic handler in the chain.")
+
+						g.Line("// Call the original generic handler.")
 						g.Line("genericOutput, err := next(cGeneric)")
 						g.Line("if err != nil {")
 						g.Block(func() {
-							g.Linef("// On error, return the zero value for the specific output type.")
+							g.Line("// On error, return the zero value for the specific output type.")
 							g.Linef("var zero %sOutput", name)
 							g.Line("return zero, err")
 						})
 						g.Line("}")
 
 						g.Line("// On success, assert the 'any' output to the specific output type.")
-						g.Line("// It's assumed a higher layer guarantees the type is correct.")
 						g.Linef("specificOutput, _ := genericOutput.(%sOutput)", name)
 						g.Line("return specificOutput, nil")
 					})
 					g.Line("}")
 
-					g.Line("// 2. Apply the user-defined typed middleware to the final link.")
-					g.Line("handlerChain := mw(finalLink)")
+					g.Line("// Apply the user's middleware, giving it our typed bridge function.")
+					g.Line("// The result is the complete, type-safe handler chain.")
+					g.Line("typedChain := mw(typedNext)")
 
-					g.Line("// 3. Construct the typed context from the generic one.")
-					g.Line("//    It's assumed a higher layer guarantees the type is correct.")
+					g.Line("// Prepare the initial arguments for the typed chain by creating a")
+					g.Line("// specific context from the generic one.")
 					g.Linef("input, _ := cGeneric.Input.(%sInput)", name)
 					g.Linef("cSpecific := &%sHandlerContext[T]{", name)
 					g.Block(func() {
@@ -209,8 +212,8 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 					})
 					g.Line("}")
 
-					g.Line("// 4. Execute the complete middleware chain with the typed context.")
-					g.Line("return handlerChain(cSpecific)")
+					g.Line("// Execute the fully composed, type-safe middleware chain.")
+					g.Line("return typedChain(cSpecific)")
 				})
 				g.Line("}")
 			})
