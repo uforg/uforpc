@@ -24,6 +24,7 @@ jobs:
           runCmd: >
             /bin/bash -c "
               task deps &&
+              task setversion &&
               task fmt-check &&
               task lint &&
               task test &&

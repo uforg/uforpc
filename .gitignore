@@ -1,2 +1,6 @@
+# Temp dirs
 temp/
 tmp/
+
+# NodeJS
+node_modules/

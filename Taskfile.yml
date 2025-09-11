@@ -15,6 +15,7 @@ tasks:
   deps:
     desc: Install all dependencies for the project
     cmds:
+      - npm install
       - cd ./urpc && go mod download
       - cd ./playground && npm install
 
@@ -24,6 +25,10 @@ tasks:
       - cd ./urpc && task build:wasm # <- Required by the playground
       - cd ./playground && npm run build # <- Required by the final URPC binary
       - cd ./urpc && task build:urpc
+
+  setversion:
+    desc: Set the version from latest git tag in the relevant files
+    cmd: node ./scripts/set-version.ts
 
   test:
     desc: Run all repository tests
