@@ -14,6 +14,11 @@ const filesToUpdate: FileConfig[] = [
     searchText: 'const Version = "0.0.0-dev"',
     replacement: 'const Version = "%"',
   },
+  {
+    path: "./playground/src/lib/version.ts",
+    searchText: 'export const version = "0.0.0-dev";',
+    replacement: 'export const version = "%";',
+  },
 ];
 // =====================================================
 
