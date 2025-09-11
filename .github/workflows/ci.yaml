@@ -1,12 +1,12 @@
-name: Lint and test
+name: CI
 on:
   workflow_dispatch:
   pull_request:
   push:
 
 jobs:
-  lint-and-test:
-    name: Lint and test the code
+  ci:
+    name: Run CI Task
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -16,7 +16,7 @@ jobs:
       - name: Ensure .ssh directory exists even if it's empty
         run: mkdir -p /home/runner/.ssh
 
-      - name: Run lint and test
+      - name: Run CI Task
         uses: devcontainers/ci@v0.3
         with:
           push: never
