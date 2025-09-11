@@ -8,6 +8,8 @@ import (
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
+// Version is replaced during the release process by the latest Git tag
+// and should not be manually edited.
 const Version = "0.0.0-dev"
 const VersionWithPrefix = "v" + Version
 
