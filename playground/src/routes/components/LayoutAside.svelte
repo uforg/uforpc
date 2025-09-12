@@ -130,11 +130,10 @@
           <LayoutAsideItem {node} />
         {/if}
       {/each}
+      <div class="flex w-full justify-center">
+        <VersionBadge class="mx-2 w-full justify-start space-x-2" />
+      </div>
     </nav>
-
-    <div class="flex w-full justify-center pt-2 pb-8">
-      <VersionBadge />
-    </div>
   </aside>
 {/snippet}
 
