@@ -47,6 +47,34 @@ export interface UiStoreDimensions {
   };
 }
 
+export type Theme = "light" | "dark";
+
+export interface UiStore {
+  loaded: boolean;
+  isMobile: boolean;
+  theme: Theme;
+  codeSnippetsTab: "sdk" | "curl";
+  codeSnippetsCurlLang: string;
+  codeSnippetsSdkLang: CodegenGenerator;
+  codeSnippetsSdkStep: "download" | "setup" | "usage" | "";
+  codeSnippetsSdkDartPackageName: string;
+  codeSnippetsSdkGolangPackageName: string;
+  asideOpen: boolean;
+  asideSearchOpen: boolean;
+  asideSearchQuery: string;
+  asideHideDocs: boolean;
+  asideHideTypes: boolean;
+  asideHideProcs: boolean;
+  asideHideStreams: boolean;
+  app: UiStoreDimensions;
+  aside: UiStoreDimensions;
+  contentWrapper: UiStoreDimensions;
+  header: UiStoreDimensions;
+  main: UiStoreDimensions;
+}
+
+type UiStoreKey = keyof UiStore;
+
 const matchMediaColor = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
 
 const defaultUiStoreDimensions: UiStoreDimensions = {
@@ -93,49 +121,7 @@ const defaultUiStoreDimensions: UiStoreDimensions = {
   },
 };
 
-export type Theme = "light" | "dark";
-
-export interface UiStore {
-  loaded: boolean;
-  isMobile: boolean;
-  theme: Theme;
-  codeSnippetsTab: "sdk" | "curl";
-  codeSnippetsCurlLang: string;
-  codeSnippetsSdkLang: CodegenGenerator;
-  codeSnippetsSdkStep: "download" | "setup" | "usage" | "";
-  codeSnippetsSdkDartPackageName: string;
-  codeSnippetsSdkGolangPackageName: string;
-  asideOpen: boolean;
-  asideSearchOpen: boolean;
-  asideSearchQuery: string;
-  asideHideDocs: boolean;
-  asideHideTypes: boolean;
-  asideHideProcs: boolean;
-  asideHideStreams: boolean;
-  app: UiStoreDimensions;
-  aside: UiStoreDimensions;
-  contentWrapper: UiStoreDimensions;
-  header: UiStoreDimensions;
-  main: UiStoreDimensions;
-}
-
-const localStorageKeys = {
-  theme: "theme",
-  codeSnippetsTab: "codeSnippetsTab",
-  codeSnippetsCurlLang: "codeSnippetsCurlLang",
-  codeSnippetsSdkLang: "codeSnippetsSdkLang",
-  codeSnippetsSdkStep: "codeSnippetsSdkStep",
-  codeSnippetsSdkDartPackageName: "codeSnippetsSdkDartPackageName",
-  codeSnippetsSdkGolangPackageName: "codeSnippetsSdkGolangPackageName",
-  asideSearchOpen: "asideSearchOpen",
-  asideSearchQuery: "asideSearchQuery",
-  asideHideDocs: "asideHideDocs",
-  asideHideTypes: "asideHideTypes",
-  asideHideProcs: "asideHideProcs",
-  asideHideStreams: "asideHideStreams",
-};
-
-export const uiStore = $state<UiStore>({
+const defaultUiStore: UiStore = {
   loaded: false,
   isMobile: false,
   theme: "dark",
@@ -157,7 +143,25 @@ export const uiStore = $state<UiStore>({
   contentWrapper: { ...defaultUiStoreDimensions },
   header: { ...defaultUiStoreDimensions },
   main: { ...defaultUiStoreDimensions },
-});
+};
+
+const uiStoreKeysToPersist: UiStoreKey[] = [
+  "theme",
+  "codeSnippetsTab",
+  "codeSnippetsCurlLang",
+  "codeSnippetsSdkLang",
+  "codeSnippetsSdkStep",
+  "codeSnippetsSdkDartPackageName",
+  "codeSnippetsSdkGolangPackageName",
+  "asideSearchOpen",
+  "asideSearchQuery",
+  "asideHideDocs",
+  "asideHideTypes",
+  "asideHideProcs",
+  "asideHideStreams",
+];
+
+export const uiStore = $state<UiStore>({ ...defaultUiStore });
 
 $effect.root(() => {
   // Effect to check if the screen is mobile (even on resize) with debounce
@@ -187,89 +191,42 @@ $effect.root(() => {
  * Should be called only once at the start of the app.
  */
 export const loadUiStore = () => {
-  /**
-   * IMPORTANT:
-   * The theme should be loaded before anything else in
-   * the app.html file.
-   */
+  for (const keyToPersist of uiStoreKeysToPersist) {
+    if (!(keyToPersist in uiStore)) continue;
 
-  // Load code snippets tab from local storage
-  const codeSnippetsTab = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsTab,
-  );
-  uiStore.codeSnippetsTab = codeSnippetsTab === "sdk" ? "sdk" : "curl";
+    // Search for the key in the local storage and if the value is not
+    // found, do nothing, the default value is already set
+    const value = globalThis.localStorage.getItem(keyToPersist);
+    if (value === null) continue;
 
-  // Load code snippets curl lang from local storage
-  const codeSnippetsCurlLang = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsCurlLang,
-  );
-  uiStore.codeSnippetsCurlLang = codeSnippetsCurlLang ?? "Curl";
+    // Deserialize and update the value based on the javascript type of it's default value
+    const defaultValue = defaultUiStore[keyToPersist];
+    const defaultValueType = typeof defaultValue;
 
-  // Load code snippets sdk lang from local storage
-  const codeSnippetsSdkLang = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsSdkLang,
-  );
-  uiStore.codeSnippetsSdkLang = (codeSnippetsSdkLang ??
-    "typescript-client") as CodegenGenerator;
-
-  // Load code snippets sdk step from local storage
-  const codeSnippetsSdkStep = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsSdkStep,
-  );
-  uiStore.codeSnippetsSdkStep = (codeSnippetsSdkStep ?? "download") as
-    | "download"
-    | "setup"
-    | "usage";
-
-  // Load code snippets sdk dart package name from local storage
-  const codeSnippetsSdkDartPackageName = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsSdkDartPackageName,
-  );
-  uiStore.codeSnippetsSdkDartPackageName =
-    codeSnippetsSdkDartPackageName ?? "uforpc";
-
-  // Load code snippets sdk golang package name from local storage
-  const codeSnippetsSdkGolangPackageName = globalThis.localStorage.getItem(
-    localStorageKeys.codeSnippetsSdkGolangPackageName,
-  );
-  uiStore.codeSnippetsSdkGolangPackageName =
-    codeSnippetsSdkGolangPackageName ?? "uforpc";
-
-  // Load aside search open state from local storage
-  const asideSearchOpen = globalThis.localStorage.getItem(
-    localStorageKeys.asideSearchOpen,
-  );
-  uiStore.asideSearchOpen = asideSearchOpen === "true";
-
-  // Load aside search query from local storage
-  const asideSearchQuery = globalThis.localStorage.getItem(
-    localStorageKeys.asideSearchQuery,
-  );
-  uiStore.asideSearchQuery = asideSearchQuery ?? "";
-
-  // Load aside hide docs from local storage
-  const asideHideDocs = globalThis.localStorage.getItem(
-    localStorageKeys.asideHideDocs,
-  );
-  uiStore.asideHideDocs = asideHideDocs === "true";
-
-  // Load aside hide types from local storage
-  const asideHideTypes = globalThis.localStorage.getItem(
-    localStorageKeys.asideHideTypes,
-  );
-  uiStore.asideHideTypes = asideHideTypes ? asideHideTypes === "true" : true;
-
-  // Load aside hide procs from local storage
-  const asideHideProcs = globalThis.localStorage.getItem(
-    localStorageKeys.asideHideProcs,
-  );
-  uiStore.asideHideProcs = asideHideProcs === "true";
-
-  // Load aside hide streams from local storage
-  const asideHideStreams = globalThis.localStorage.getItem(
-    localStorageKeys.asideHideStreams,
-  );
-  uiStore.asideHideStreams = asideHideStreams === "true";
+    switch (defaultValueType) {
+      case "string":
+        (uiStore[keyToPersist] as string) = value;
+        break;
+      case "boolean":
+        (uiStore[keyToPersist] as boolean) = value === "true";
+        break;
+      case "number": {
+        const numberValue = Number(value);
+        if (!Number.isNaN(numberValue)) {
+          (uiStore[keyToPersist] as unknown as number) = numberValue;
+        }
+        break;
+      }
+      case "object":
+        try {
+          const parsedValue = JSON.parse(value);
+          (uiStore[keyToPersist] as object) = parsedValue;
+        } catch {
+          // Ignore invalid persisted object
+        }
+        break;
+    }
+  }
 
   uiStore.loaded = true;
 };
@@ -280,81 +237,45 @@ export const loadUiStore = () => {
  * Should be called when the store is updated.
  */
 export const saveUiStore = () => {
-  // Save theme to local storage
-  globalThis.localStorage.setItem(localStorageKeys.theme, uiStore.theme);
   setThemeAttribute(uiStore.theme);
 
-  // Save code snippets curl lang to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsTab,
-    uiStore.codeSnippetsTab,
-  );
+  for (const keyToPersist of uiStoreKeysToPersist) {
+    if (!(keyToPersist in uiStore)) continue;
+    const value = uiStore[keyToPersist];
+    const valueType = typeof value;
 
-  // Save code snippets curl lang to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsCurlLang,
-    uiStore.codeSnippetsCurlLang,
-  );
+    // Delete null or undefined values from local storage
+    if (value === null || value === undefined) {
+      globalThis.localStorage.removeItem(keyToPersist);
+      continue;
+    }
 
-  // Save code snippets sdk lang to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsSdkLang,
-    uiStore.codeSnippetsSdkLang,
-  );
-
-  // Save code snippets sdk step to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsSdkStep,
-    uiStore.codeSnippetsSdkStep,
-  );
-
-  // Save code snippets sdk dart package name to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsSdkDartPackageName,
-    uiStore.codeSnippetsSdkDartPackageName,
-  );
-
-  // Save code snippets sdk golang package name to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.codeSnippetsSdkGolangPackageName,
-    uiStore.codeSnippetsSdkGolangPackageName,
-  );
-
-  // Save aside search open state to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.asideSearchOpen,
-    uiStore.asideSearchOpen.toString(),
-  );
-
-  // Save aside search query to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.asideSearchQuery,
-    uiStore.asideSearchQuery,
-  );
-
-  // Save aside hide docs to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.asideHideDocs,
-    uiStore.asideHideDocs.toString(),
-  );
-
-  // Save aside hide types to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.asideHideTypes,
-    uiStore.asideHideTypes.toString(),
-  );
-
-  // Save aside hide procs to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.asideHideProcs,
-    uiStore.asideHideProcs.toString(),
-  );
-
-  // Save aside hide streams to local storage
-  globalThis.localStorage.setItem(
-    localStorageKeys.asideHideStreams,
-    uiStore.asideHideStreams.toString(),
-  );
+    switch (valueType) {
+      case "string":
+        globalThis.localStorage.setItem(keyToPersist, value as string);
+        break;
+      case "boolean":
+        globalThis.localStorage.setItem(
+          keyToPersist,
+          (value as boolean).toString(),
+        );
+        break;
+      case "number":
+        globalThis.localStorage.setItem(
+          keyToPersist,
+          (value as unknown as number).toString(),
+        );
+        break;
+      case "object":
+        try {
+          const stringifiedValue = JSON.stringify(value);
+          globalThis.localStorage.setItem(keyToPersist, stringifiedValue);
+        } catch {
+          // Ignore invalid object
+        }
+        break;
+    }
+  }
 };
 
 /////////////////////
@@ -380,7 +301,8 @@ function setThemeAttribute(theme: Theme) {
  * system theme
  */
 export function initTheme() {
-  const theme = localStorage.getItem(localStorageKeys.theme);
+  const localStorageKey: UiStoreKey = "theme";
+  const theme = localStorage.getItem(localStorageKey);
   if (theme === "light" || theme === "dark") {
     uiStore.theme = theme;
   } else {
