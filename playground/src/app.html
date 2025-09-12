@@ -9,13 +9,12 @@
 
     <script>
       const __mpOriginalFetch = globalThis.fetch;
+      const __mpRedirects = {
+        "/tree-sitter.wasm": "./app/cconv/tree-sitter.wasm",
+        "/tree-sitter-bash.wasm": "./app/cconv/tree-sitter-bash.wasm",
+      };
       globalThis.fetch = async function (resource, options) {
-        const redirects = {
-          "/tree-sitter.wasm": "./app/cconv/tree-sitter.wasm",
-          "/tree-sitter-bash.wasm": "./app/cconv/tree-sitter-bash.wasm",
-        };
-
-        if (redirects[resource]) resource = redirects[resource];
+        if (__mpRedirects[resource]) resource = __mpRedirects[resource];
         return __mpOriginalFetch.call(this, resource, options);
       };
     </script>
