@@ -5,6 +5,7 @@
 
   import BottomSpace from "$lib/components/BottomSpace.svelte";
   import Logo from "$lib/components/Logo.svelte";
+  import VersionBadge from "$lib/components/VersionBadge.svelte";
 </script>
 
 <svelte:head>
@@ -46,6 +47,10 @@
         <BookOpenText class="size-5" />
         Documentation
       </a>
+    </div>
+
+    <div class="flex justify-center">
+      <VersionBadge />
     </div>
 
     <div class="card bg-base-200 shadow-sm">

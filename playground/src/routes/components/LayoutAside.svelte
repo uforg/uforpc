@@ -11,6 +11,7 @@
   import Logo from "$lib/components/Logo.svelte";
   import Offcanvas from "$lib/components/Offcanvas.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
+  import VersionBadge from "$lib/components/VersionBadge.svelte";
 
   import LayoutAsideFilters from "./LayoutAsideFilters.svelte";
   import LayoutAsideItem from "./LayoutAsideItem.svelte";
@@ -99,7 +100,7 @@
       <LayoutAsideFilters />
     </header>
 
-    <nav class="p-4 pb-8">
+    <nav class="p-4">
       <Tooltip content="RPC Home">
         <a
           href="#/"
@@ -130,6 +131,10 @@
         {/if}
       {/each}
     </nav>
+
+    <div class="flex w-full justify-center p-4 pb-8">
+      <VersionBadge />
+    </div>
   </aside>
 {/snippet}
 

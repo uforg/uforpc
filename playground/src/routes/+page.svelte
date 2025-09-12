@@ -12,6 +12,7 @@
 
   import BottomSpace from "$lib/components/BottomSpace.svelte";
   import Logo from "$lib/components/Logo.svelte";
+  import VersionBadge from "$lib/components/VersionBadge.svelte";
 
   import UfoAbduction from "../lib/components/UfoAbduction.svelte";
 </script>
@@ -48,7 +49,7 @@
         <UfoAbduction width={200} />
       </div>
 
-      <div class="flex items-center justify-center space-x-2">
+      <div class="mb-8 flex items-center justify-center space-x-2">
         <a
           href="https://github.com/uforg/uforpc"
           target="_blank"
@@ -71,6 +72,10 @@
           <BookOpenText class="size-5" />
           Documentation
         </a>
+      </div>
+
+      <div class="flex justify-center">
+        <VersionBadge />
       </div>
     </div>
 
