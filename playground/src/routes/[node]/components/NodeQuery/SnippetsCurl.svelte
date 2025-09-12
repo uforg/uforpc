@@ -1,10 +1,8 @@
 <script lang="ts">
   import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
 
   import Code from "$lib/components/Code.svelte";
-  import H2 from "$lib/components/H2.svelte";
 
   import SnippetsCode from "./SnippetsCurlCode.svelte";
 
@@ -35,10 +33,10 @@
       headers.set("Cache-Control", "no-cache");
     }
 
-    for (const header of headers.entries()) {
-      let rawHeader = `${header[0]}: ${header[1]}`;
+    headers.forEach((value, key) => {
+      let rawHeader = `${key}: ${value}`;
       c += `-H ${JSON.stringify(rawHeader)} \\\n`;
-    }
+    });
 
     c += `-d '${payloadStr}'`;
 
