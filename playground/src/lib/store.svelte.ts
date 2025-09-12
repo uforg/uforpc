@@ -4,6 +4,7 @@ import { getCurrentHost } from "./helpers/getCurrentHost.ts";
 import { getMarkdownTitle } from "./helpers/getMarkdownTitle.ts";
 import { markdownToText } from "./helpers/markdownToText.ts";
 import { slugify } from "./helpers/slugify.ts";
+import { prefixLocalStorageKey } from "./storeHelpers.svelte.ts";
 import { transpileUrpcToJson } from "./urpc.ts";
 import type { Schema } from "./urpcTypes.ts";
 
@@ -54,6 +55,8 @@ export interface Store {
   jsonSchema: Schema;
 }
 
+// Cannot use createStore because of the http request needed
+// maybe it can be refactored later
 export const store: Store = $state({
   loaded: false,
   baseUrl: "",
@@ -69,6 +72,11 @@ $effect.root(() => {
   });
 });
 
+const localStorageKeys = {
+  baseUrl: prefixLocalStorageKey("baseUrl"),
+  headers: prefixLocalStorageKey("headers"),
+};
+
 /**
  * Loads the store from the browser's local storage.
  *
@@ -78,12 +86,12 @@ export const loadStore = async () => {
   // Prioritize the config stored in the browser's local storage
   await loadDefaultConfig();
 
-  const baseUrl = localStorage.getItem("baseUrl");
+  const baseUrl = localStorage.getItem(localStorageKeys.baseUrl);
   if (baseUrl) {
     store.baseUrl = baseUrl;
   }
 
-  const headers = localStorage.getItem("headers");
+  const headers = localStorage.getItem(localStorageKeys.headers);
   if (headers) {
     try {
       store.headers = normalizeHeaders(JSON.parse(headers));
@@ -101,8 +109,8 @@ export const loadStore = async () => {
  * Should be called when the store is updated.
  */
 export const saveStore = () => {
-  localStorage.setItem("baseUrl", store.baseUrl);
-  localStorage.setItem("headers", JSON.stringify(store.headers));
+  localStorage.setItem(localStorageKeys.baseUrl, store.baseUrl);
+  localStorage.setItem(localStorageKeys.headers, JSON.stringify(store.headers));
 };
 
 /**

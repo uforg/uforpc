@@ -5,6 +5,8 @@
  * @param keysToPersist The store keys of the store to persist.
  * @returns The created store.
  */
+import { browser } from "$app/environment";
+
 // biome-ignore lint/suspicious/noExplicitAny: since it's generic, it needs to be any
 export function createStore<T extends Record<string, any>>(
   initialStoreValue: T,
@@ -15,9 +17,11 @@ export function createStore<T extends Record<string, any>>(
 
   // Load persisted values from local storage
   for (const keyToPersist of keysToPersist as string[]) {
+    const localStorageKey = prefixLocalStorageKey(keyToPersist);
+
     // Search for the key in the local storage and if the value is not
     // found, do nothing, the default value is already set
-    const value = globalThis.localStorage.getItem(keyToPersist);
+    const value = globalThis.localStorage.getItem(localStorageKey);
     if (value === null) continue;
 
     // Deserialize and update the value based on the javascript type of it's default value
@@ -54,38 +58,42 @@ export function createStore<T extends Record<string, any>>(
   $effect.root(() => {
     $effect(() => {
       for (const keyToPersist of keysToPersist as string[]) {
+        const localStorageKey = prefixLocalStorageKey(keyToPersist);
         const value = store[keyToPersist];
         const valueType = typeof value;
 
         // Delete null or undefined values from local storage
         if (value === null || value === undefined) {
-          globalThis.localStorage.removeItem(keyToPersist);
+          globalThis.localStorage.removeItem(localStorageKey);
           continue;
         }
 
         switch (valueType) {
           case "string":
             globalThis.localStorage.setItem(
-              keyToPersist,
+              localStorageKey,
               value as unknown as string,
             );
             break;
           case "boolean":
             globalThis.localStorage.setItem(
-              keyToPersist,
+              localStorageKey,
               (value as unknown as boolean).toString(),
             );
             break;
           case "number":
             globalThis.localStorage.setItem(
-              keyToPersist,
+              localStorageKey,
               (value as unknown as number).toString(),
             );
             break;
           case "object":
             try {
               const stringifiedValue = JSON.stringify(value);
-              globalThis.localStorage.setItem(keyToPersist, stringifiedValue);
+              globalThis.localStorage.setItem(
+                localStorageKey,
+                stringifiedValue,
+              );
             } catch {
               // Ignore invalid object
             }
@@ -96,4 +104,18 @@ export function createStore<T extends Record<string, any>>(
   });
 
   return store;
+}
+
+function createLocalStoragePrefix(): string {
+  if (!browser) return "";
+
+  const prefix = globalThis.location.pathname
+    .replace(/[^a-z0-9]/gi, "-")
+    .toLowerCase();
+
+  return prefix;
+}
+
+export function prefixLocalStorageKey(key: string): string {
+  return `${createLocalStoragePrefix()}-${key}`;
 }
