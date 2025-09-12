@@ -132,7 +132,7 @@
       {/each}
     </nav>
 
-    <div class="flex w-full justify-center p-4 pb-8">
+    <div class="flex w-full justify-center pt-2 pb-8">
       <VersionBadge />
     </div>
   </aside>
