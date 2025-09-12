@@ -29,7 +29,10 @@
   });
 
   const addHeader = () => {
-    store.headers = [...store.headers, { key: "", value: "", enabled: true }];
+    store.headers = [
+      ...store.headers,
+      { key: "", value: "", enabled: true, description: "" },
+    ];
   };
 
   const removeHeader = (index: number) => {
@@ -57,7 +60,7 @@
   {/if}
 </button>
 
-<Modal bind:isOpen>
+<Modal bind:isOpen class="max-w-3xl">
   <div class="flex w-full items-center justify-between">
     <h3 class="text-xl font-bold">Settings</h3>
     <button class="btn btn-circle btn-ghost" onclick={closeModal}>
@@ -92,41 +95,75 @@
       <legend class="fieldset-legend">Headers</legend>
       <p class="label mb-1">Headers to send with requests to the endpoint.</p>
 
-      {#each store.headers as header, index}
-        <div class="mb-2 flex items-center gap-2">
-          <Tooltip
-            content={header.enabled ? "Disable header" : "Enable header"}
-          >
-            <input
-              type="checkbox"
-              class="toggle"
-              bind:checked={header.enabled}
-            />
-          </Tooltip>
-          <input
-            type="text"
-            class="input flex-1"
-            spellcheck="false"
-            placeholder="Key"
-            bind:value={header.key}
-          />
-          <input
-            type="text"
-            class="input flex-1"
-            spellcheck="false"
-            placeholder="Value"
-            bind:value={header.value}
-          />
-          <Tooltip content="Remove header">
-            <button
-              class="btn btn-square btn-ghost btn-error"
-              onclick={() => removeHeader(index)}
-            >
-              <Trash class="size-4" />
-            </button>
-          </Tooltip>
-        </div>
-      {/each}
+      <div class="overflow-x-auto">
+        <table class="table-sm table w-full min-w-[720px]">
+          <thead>
+            <tr>
+              <th class="w-0"></th>
+              <th>Key</th>
+              <th>Value</th>
+              <th>Description (optional)</th>
+              <th class="w-0"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each store.headers as header, index}
+              <tr>
+                <td>
+                  <Tooltip
+                    content={header.enabled
+                      ? "Disable header"
+                      : "Enable header"}
+                  >
+                    <input
+                      type="checkbox"
+                      class="toggle"
+                      bind:checked={header.enabled}
+                    />
+                  </Tooltip>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="input w-full"
+                    spellcheck="false"
+                    placeholder="Key"
+                    bind:value={header.key}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="input w-full"
+                    spellcheck="false"
+                    placeholder="Value"
+                    bind:value={header.value}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="input w-full"
+                    spellcheck="false"
+                    placeholder="Description (optional)"
+                    bind:value={header.description}
+                  />
+                </td>
+                <td>
+                  <Tooltip content="Remove header">
+                    <button
+                      class="btn btn-square btn-ghost btn-error"
+                      onclick={() => removeHeader(index)}
+                    >
+                      <Trash class="size-4" />
+                    </button>
+                  </Tooltip>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
 
       <button class="btn btn-outline mt-2" onclick={addHeader}>
         <Plus class="mr-1 size-4" />

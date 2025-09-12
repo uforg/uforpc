@@ -45,6 +45,7 @@ export interface Header {
   key: string;
   value: string;
   enabled: boolean;
+  description: string;
 }
 
 export interface Store {
@@ -140,7 +141,7 @@ export const setHeader = (key: string, value: string) => {
     // Add a new enabled header
     store.headers = [
       ...store.headers,
-      { key: trimmedKey, value, enabled: true },
+      { key: trimmedKey, value, enabled: true, description: "" },
     ];
   }
 };
@@ -186,11 +187,16 @@ export const loadDefaultConfig = async () => {
   }
 };
 
-type RawHeader = { key?: unknown; value?: unknown; enabled?: unknown };
+type RawHeader = {
+  key?: unknown;
+  value?: unknown;
+  enabled?: unknown;
+  description?: unknown;
+};
 
 /**
  * Normalize an unknown headers payload (from localStorage or config.json)
- * into a strongly-typed array of Header with a default of enabled=true.
+ * into a strongly-typed array of Header with defaults of enabled=true and description="".
  */
 const normalizeHeaders = (raw: unknown): Header[] => {
   if (!Array.isArray(raw)) return [];
@@ -199,7 +205,9 @@ const normalizeHeaders = (raw: unknown): Header[] => {
     const key = typeof item?.key === "string" ? item.key : "";
     const value = typeof item?.value === "string" ? item.value : "";
     const enabled = typeof item?.enabled === "boolean" ? item.enabled : true;
-    return { key, value, enabled } satisfies Header;
+    const description =
+      typeof item?.description === "string" ? item.description : "";
+    return { key, value, enabled, description } satisfies Header;
   });
 };
 
