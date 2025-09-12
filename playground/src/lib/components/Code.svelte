@@ -114,18 +114,18 @@
     >
       <div class="flex items-center justify-between space-x-1">
         <button
-          class="btn btn-ghost btn-xs justify-start"
-          onclick={() => copyToClipboard()}
-        >
-          <Copy class="size-3" />
-          <span>Copy to clipboard</span>
-        </button>
-        <button
           class="btn btn-ghost btn-xs justify-end"
           onclick={() => downloadCode()}
         >
           <Download class="size-3" />
           <span>Download</span>
+        </button>
+        <button
+          class="btn btn-ghost btn-xs justify-start"
+          onclick={() => copyToClipboard()}
+        >
+          <Copy class="size-3" />
+          <span>Copy to clipboard</span>
         </button>
       </div>
     </div>
