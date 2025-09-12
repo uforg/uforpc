@@ -1,6 +1,7 @@
 import type { Action } from "svelte/action";
 
 import { debounce } from "./helpers/debounce";
+import { createStore } from "./storeHelpers.svelte";
 import type { CodegenGenerator } from "./urpc";
 
 export interface UiStoreDimensions {
@@ -161,7 +162,11 @@ const uiStoreKeysToPersist: UiStoreKey[] = [
   "asideHideStreams",
 ];
 
-export const uiStore = $state<UiStore>({ ...defaultUiStore });
+// export const uiStore = $state<UiStore>({ ...defaultUiStore });
+export const uiStore = createStore<UiStore>(
+  { ...defaultUiStore },
+  uiStoreKeysToPersist,
+);
 
 $effect.root(() => {
   // Effect to check if the screen is mobile (even on resize) with debounce
@@ -178,105 +183,11 @@ $effect.root(() => {
     };
   });
 
-  // Effect to save the store to the browser's local storage
+  // Effect to set theme attribute on document element when theme changes
   $effect(() => {
-    if (!uiStore.loaded) return;
-    saveUiStore();
+    setThemeAttribute(uiStore.theme);
   });
 });
-
-/**
- * Loads the store from the browser's local storage.
- *
- * Should be called only once at the start of the app.
- */
-export const loadUiStore = () => {
-  for (const keyToPersist of uiStoreKeysToPersist) {
-    if (!(keyToPersist in uiStore)) continue;
-
-    // Search for the key in the local storage and if the value is not
-    // found, do nothing, the default value is already set
-    const value = globalThis.localStorage.getItem(keyToPersist);
-    if (value === null) continue;
-
-    // Deserialize and update the value based on the javascript type of it's default value
-    const defaultValue = defaultUiStore[keyToPersist];
-    const defaultValueType = typeof defaultValue;
-
-    switch (defaultValueType) {
-      case "string":
-        (uiStore[keyToPersist] as string) = value;
-        break;
-      case "boolean":
-        (uiStore[keyToPersist] as boolean) = value === "true";
-        break;
-      case "number": {
-        const numberValue = Number(value);
-        if (!Number.isNaN(numberValue)) {
-          (uiStore[keyToPersist] as unknown as number) = numberValue;
-        }
-        break;
-      }
-      case "object":
-        try {
-          const parsedValue = JSON.parse(value);
-          (uiStore[keyToPersist] as object) = parsedValue;
-        } catch {
-          // Ignore invalid persisted object
-        }
-        break;
-    }
-  }
-
-  uiStore.loaded = true;
-};
-
-/**
- * Saves the store to the browser's local storage.
- *
- * Should be called when the store is updated.
- */
-export const saveUiStore = () => {
-  setThemeAttribute(uiStore.theme);
-
-  for (const keyToPersist of uiStoreKeysToPersist) {
-    if (!(keyToPersist in uiStore)) continue;
-    const value = uiStore[keyToPersist];
-    const valueType = typeof value;
-
-    // Delete null or undefined values from local storage
-    if (value === null || value === undefined) {
-      globalThis.localStorage.removeItem(keyToPersist);
-      continue;
-    }
-
-    switch (valueType) {
-      case "string":
-        globalThis.localStorage.setItem(keyToPersist, value as string);
-        break;
-      case "boolean":
-        globalThis.localStorage.setItem(
-          keyToPersist,
-          (value as boolean).toString(),
-        );
-        break;
-      case "number":
-        globalThis.localStorage.setItem(
-          keyToPersist,
-          (value as unknown as number).toString(),
-        );
-        break;
-      case "object":
-        try {
-          const stringifiedValue = JSON.stringify(value);
-          globalThis.localStorage.setItem(keyToPersist, stringifiedValue);
-        } catch {
-          // Ignore invalid object
-        }
-        break;
-    }
-  }
-};
 
 /////////////////////
 // THEME UTILITIES //
@@ -301,8 +212,7 @@ function setThemeAttribute(theme: Theme) {
  * system theme
  */
 export function initTheme() {
-  const localStorageKey: UiStoreKey = "theme";
-  const theme = localStorage.getItem(localStorageKey);
+  const theme = uiStore.theme;
   if (theme === "light" || theme === "dark") {
     uiStore.theme = theme;
   } else {

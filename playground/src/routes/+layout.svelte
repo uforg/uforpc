@@ -13,7 +13,6 @@
   import {
     dimensionschangeAction,
     initTheme,
-    loadUiStore,
     uiStore,
   } from "$lib/uiStore.svelte";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
@@ -36,7 +35,6 @@
 
   // Initialize the stores
   onMount(() => {
-    loadUiStore();
     loadStore();
   });
 
