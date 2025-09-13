@@ -1,7 +1,11 @@
 <script lang="ts">
   import { Link, Plus, RefreshCcw, Settings, Trash, X } from "@lucide/svelte";
 
-  import { loadDefaultConfig, store } from "$lib/store.svelte";
+  import {
+    loadDefaultBaseURL,
+    loadDefaultHeaders,
+    store,
+  } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
   import Modal from "$lib/components/Modal.svelte";
@@ -39,9 +43,15 @@
     store.headers = store.headers.filter((_, i) => i !== index);
   };
 
-  const loadDefaultConfigConfirm = () => {
-    if (confirm("Are you sure you want to reset the default settings?")) {
-      loadDefaultConfig();
+  const loadDefaultBaseUrlWithConfirm = () => {
+    if (confirm("Are you sure you want to load the default base URL?")) {
+      loadDefaultBaseURL();
+    }
+  };
+
+  const loadDefaultHeadersWithConfirm = () => {
+    if (confirm("Are you sure you want to load the default headers?")) {
+      loadDefaultHeaders();
     }
   };
 </script>
@@ -73,16 +83,26 @@
   <div class="mt-4 space-y-4">
     <fieldset class="fieldset">
       <legend class="fieldset-legend">Base URL</legend>
-      <label class="input w-full">
-        <Link class="size-4" />
-        <input
-          type="url"
-          class="grow"
-          spellcheck="false"
-          placeholder="https://example.com/api/v1/urpc"
-          bind:value={store.baseUrl}
-        />
-      </label>
+      <div class="flex space-x-1">
+        <label class="input w-full">
+          <Link class="size-4" />
+          <input
+            type="url"
+            class="grow"
+            spellcheck="false"
+            placeholder="https://example.com/api/v1/urpc"
+            bind:value={store.baseUrl}
+          />
+        </label>
+        <Tooltip content="Reset base URL to default">
+          <button
+            class="btn btn-ghost btn-square"
+            onclick={loadDefaultBaseUrlWithConfirm}
+          >
+            <RefreshCcw class="size-4" />
+          </button>
+        </Tooltip>
+      </div>
       <p class="label text-wrap">
         This is the base URL where the UFO RPC server is running, all requests
         will be sent to {`<base-url>/{operationName}`}
@@ -167,17 +187,20 @@
         </div>
       {/if}
 
-      <button class="btn btn-outline mt-2" onclick={addHeader}>
-        <Plus class="mr-1 size-4" />
-        Add Header
-      </button>
+      <div class="mt-2 flex justify-end space-x-2">
+        <Tooltip content="Reset headers to default">
+          <button class="btn btn-ghost" onclick={loadDefaultHeadersWithConfirm}>
+            <RefreshCcw class="mr-1 size-4" />
+            Reset
+          </button>
+        </Tooltip>
+        <Tooltip content="Add a new header">
+          <button class="btn btn-ghost" onclick={addHeader}>
+            <Plus class="mr-1 size-4" />
+            Add
+          </button>
+        </Tooltip>
+      </div>
     </fieldset>
-
-    <div class="flex justify-end">
-      <button class="btn btn-ghost" onclick={loadDefaultConfigConfirm}>
-        <RefreshCcw class="mr-1 size-4" />
-        Reset default settings
-      </button>
-    </div>
   </div>
 </Modal>

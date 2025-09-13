@@ -169,6 +169,13 @@ export const getHeadersObject = (): Headers => {
  * Loads the default configuration from the static/config.json file.
  */
 export const loadDefaultConfig = async () => {
+  await Promise.all([loadDefaultBaseURL(), loadDefaultHeaders()]);
+};
+
+/**
+ * Loads the default configuration from the static/config.json file.
+ */
+export const loadDefaultBaseURL = async () => {
   const response = await fetch("./config.json");
   if (!response.ok) {
     console.error("Failed to fetch default config");
@@ -181,6 +188,18 @@ export const loadDefaultConfig = async () => {
   } else {
     store.baseUrl = `${getCurrentHost()}/api/v1/urpc`;
   }
+};
+
+/**
+ * Loads the default configuration from the static/config.json file.
+ */
+export const loadDefaultHeaders = async () => {
+  const response = await fetch("./config.json");
+  if (!response.ok) {
+    console.error("Failed to fetch default config");
+    return;
+  }
+  const config = await response.json();
 
   if (Array.isArray(config.headers)) {
     store.headers = normalizeHeaders(config.headers);
