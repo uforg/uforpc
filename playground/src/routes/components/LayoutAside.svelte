@@ -7,11 +7,11 @@
   import { store } from "$lib/store.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
   import type { Schema } from "$lib/urpcTypes";
+  import { versionWithPrefix } from "$lib/version";
 
   import Logo from "$lib/components/Logo.svelte";
   import Offcanvas from "$lib/components/Offcanvas.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
-  import VersionBadge from "$lib/components/VersionBadge.svelte";
 
   import LayoutAsideFilters from "./LayoutAsideFilters.svelte";
   import LayoutAsideItem from "./LayoutAsideItem.svelte";
@@ -80,7 +80,9 @@
           href="https://uforpc.uforg.dev"
           target="_blank"
         >
-          <Logo class="mx-auto h-full" />
+          <Tooltip content={versionWithPrefix} placement="right">
+            <Logo class="mx-auto h-full" />
+          </Tooltip>
         </a>
       {/if}
 
@@ -100,7 +102,7 @@
       <LayoutAsideFilters />
     </header>
 
-    <nav class="p-4">
+    <nav class="p-4 pb-8">
       <Tooltip content="RPC Home">
         <a
           href="#/"
@@ -130,9 +132,6 @@
           <LayoutAsideItem {node} />
         {/if}
       {/each}
-      <div class="flex w-full justify-center">
-        <VersionBadge class="mx-2 w-full justify-start space-x-2" />
-      </div>
     </nav>
   </aside>
 {/snippet}
