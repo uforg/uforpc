@@ -39,6 +39,10 @@
       tabSize: 2,
       insertSpaces: true,
       padding: { top: 30, bottom: 30 },
+      scrollbar: {
+        alwaysConsumeMouseWheel: false,
+      },
+      scrollBeyondLastLine: false,
     });
 
     editor.onDidChangeModelContent(() => {
