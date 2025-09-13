@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { CircleX, CloudAlert, Key, Loader, Sparkles } from "@lucide/svelte";
-
-  import { discoverAuthToken } from "$lib/helpers/discoverAuthToken.ts";
-  import { setHeader } from "$lib/store.svelte";
+  import { CircleX, CloudAlert, Loader } from "@lucide/svelte";
 
   import Editor from "$lib/components/Editor.svelte";
   import H3 from "$lib/components/H3.svelte";
-  import Tooltip from "$lib/components/Tooltip.svelte";
+
+  import OutputQuickActions from "./OutputQuickActions.svelte";
 
   interface Props {
     type: "stream" | "proc";
@@ -23,15 +21,6 @@
     if (output === "[]") return false;
     return true;
   });
-
-  // Discover authentication tokens in the response
-  let foundTokens = $derived(type === "proc" ? discoverAuthToken(output) : []);
-  let hasToken = $derived(foundTokens.length > 0);
-
-  // Function to handle selecting a specific token
-  function handleSelectToken(token: (typeof foundTokens)[number]) {
-    setHeader("Authorization", `Bearer ${token.value}`);
-  }
 </script>
 
 {#snippet CancelButton()}
@@ -73,25 +62,8 @@
 {/if}
 
 {#if hasOutput}
-  {#if type == "proc" && hasToken}
-    <div class="flex flex-wrap items-center justify-start space-x-2">
-      <span class="flex flex-none items-center pr-2 text-sm font-bold">
-        <Sparkles class="mr-1 size-4" />
-        <span>Quick Actions</span>
-      </span>
-
-      {#each foundTokens as token}
-        <Tooltip content={`Set "Authorization: Bearer <${token.path}>" header`}>
-          <button
-            class="btn btn-sm btn-ghost flex-none"
-            onclick={() => handleSelectToken(token)}
-          >
-            <Key class="mr-1 size-4" />
-            <span>{token.key}</span>
-          </button>
-        </Tooltip>
-      {/each}
-    </div>
+  {#if type == "proc"}
+    <OutputQuickActions {output} />
   {/if}
 
   {#if type == "stream" && isExecuting}
