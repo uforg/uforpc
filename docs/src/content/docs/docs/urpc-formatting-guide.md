@@ -1,4 +1,7 @@
-# UFO-RPC DSL (URPC) Formatting Guide
+---
+title: Formatting Guide
+description: A guide to correctly format UFO RPC DSL (URPC)
+---
 
 This document specifies the standard formatting rules for the UFO-RPC DSL
 (URPC). Consistent formatting enhances code readability, maintainability, and

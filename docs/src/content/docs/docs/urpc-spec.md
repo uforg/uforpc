@@ -1,4 +1,7 @@
-# UFO-RPC DSL (URPC) Specification v1.0
+---
+title: UFO-RPC DSL Specification
+description: Full specification of the UFO RPC (URPC) DSL language
+---
 
 ## 1. Overview
 

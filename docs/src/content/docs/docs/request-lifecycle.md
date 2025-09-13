@@ -1,4 +1,7 @@
-# Request Lifecycle
+---
+title: Request Lifecycle
+description: Lifecycle of a single request in UFO RPC
+---
 
 This document outlines the end-to-end data flow for both procedure calls and stream subscriptions in UFO RPC. It details the process from the client's initial request to the server's final response, including URL structure, JSON payloads, and error handling. This specification is language-agnostic and applies to all official UFO RPC code generators.
 

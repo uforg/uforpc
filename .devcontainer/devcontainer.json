@@ -21,7 +21,9 @@
         "esbenp.prettier-vscode",
         "vitest.explorer",
         "biomejs.biome",
-        "Dart-Code.dart-code"
+        "Dart-Code.dart-code",
+        "astro-build.astro-vscode",
+        "unifiedjs.vscode-mdx"
       ],
       "settings": {
         "autoOpenWorkspace.enableAutoOpenIfSingleWorkspace": true,
