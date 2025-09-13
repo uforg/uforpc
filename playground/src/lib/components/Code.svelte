@@ -104,13 +104,10 @@
     ])}
   >
     <div
-      class={mergeClasses([
-        "w-full border-b px-4 py-2",
-        {
-          "border-base-content/20 border-b": withBorder,
-        },
-        className,
-      ])}
+      class={{
+        "w-full border-b px-4 py-2": true,
+        "border-base-content/20 border-b": withBorder,
+      }}
     >
       <div class="flex items-center justify-between space-x-1">
         <button
