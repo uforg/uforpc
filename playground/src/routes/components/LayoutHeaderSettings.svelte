@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Link, Plus, RefreshCcw, Settings, Trash, X } from "@lucide/svelte";
 
+  import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
   import {
     loadDefaultBaseURL,
     loadDefaultHeaders,
@@ -10,9 +11,6 @@
 
   import Modal from "$lib/components/Modal.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
-
-  const isMac = /mac/.test(navigator.userAgent.toLowerCase());
-  const ctrl = isMac ? "⌘" : "CTRL";
 
   let isOpen = $state(false);
   const openModal = () => (isOpen = true);
@@ -64,7 +62,7 @@
   <span>Settings</span>
   {#if !uiStore.isMobile}
     <span class="ml-4">
-      <kbd class="kbd kbd-sm">{ctrl}</kbd>
+      <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
       <kbd class="kbd kbd-sm">,</kbd>
     </span>
   {/if}

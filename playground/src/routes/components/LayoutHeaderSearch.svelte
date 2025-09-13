@@ -9,6 +9,7 @@
     X,
   } from "@lucide/svelte";
 
+  import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
   import {
     markSearchHintsMinisearch,
     truncateWithMarkMinisearch,
@@ -18,9 +19,6 @@
 
   import H2 from "$lib/components/H2.svelte";
   import Modal from "$lib/components/Modal.svelte";
-
-  const isMac = /mac/.test(navigator.userAgent.toLowerCase());
-  const ctrl = isMac ? "⌘" : "CTRL";
 
   let input: HTMLInputElement | null = null;
   let isOpen = $state(false);
@@ -58,7 +56,7 @@
   <span>Search...</span>
   {#if !uiStore.isMobile}
     <span class="ml-4">
-      <kbd class="kbd kbd-sm">{ctrl}</kbd>
+      <kbd class="kbd kbd-sm">{ctrlSymbol()}}</kbd>
       <kbd class="kbd kbd-sm">K</kbd>
     </span>
   {/if}
