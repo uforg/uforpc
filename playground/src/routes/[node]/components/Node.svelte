@@ -92,7 +92,7 @@
         "max-w-5xl": !isProcOrStream,
       }}
     >
-      <h1>{name}</h1>
+      <h1 class="break-all">{name}</h1>
 
       {#if deprecatedMessage !== ""}
         <div
