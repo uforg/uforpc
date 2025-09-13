@@ -95,7 +95,7 @@
 {#if codeHighlighted !== ""}
   <div
     class={mergeClasses([
-      "bg-base-200",
+      "bg-base-200 flex h-full flex-col",
       {
         "border-base-content/20 border": withBorder,
         "rounded-box": rounded,
@@ -128,7 +128,7 @@
     </div>
     <div
       class={mergeClasses([
-        "code-container",
+        "code-container flex-1",
         {
           "code-container-scroll-y": scrollY,
           "code-container-scroll-x": scrollX,
@@ -145,15 +145,11 @@
   @plugin "daisyui";
 
   .code-container-scroll-y {
-    :global(pre) {
-      @apply overflow-y-auto;
-    }
+    @apply overflow-y-auto;
   }
 
   .code-container-scroll-x {
-    :global(pre) {
-      @apply overflow-x-auto;
-    }
+    @apply overflow-x-auto;
   }
 
   .code-container {
