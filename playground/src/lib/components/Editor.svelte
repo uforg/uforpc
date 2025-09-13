@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Loader } from "@lucide/svelte";
   import loader from "@monaco-editor/loader";
   import { shikiToMonaco } from "@shikijs/monaco";
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
@@ -22,14 +23,19 @@
     class: className,
     ...rest
   }: Props = $props();
+
   let editorContainer: HTMLElement;
   let monaco: typeof Monaco | null = $state(null);
   let editor: Monaco.editor.IStandaloneCodeEditor | null = $state(null);
+  let isLoading = $state(true);
 
   onMount(async () => {
-    const highlighter = await getHighlighter();
+    const [highlighter, monacoEditor] = await Promise.all([
+      getHighlighter(),
+      loader.init(),
+    ]);
 
-    monaco = await loader.init();
+    monaco = monacoEditor;
     monaco.languages.register({ id: "urpc" });
     shikiToMonaco(highlighter, monaco);
 
@@ -43,11 +49,14 @@
         alwaysConsumeMouseWheel: false,
       },
       scrollBeyondLastLine: false,
+      automaticLayout: true,
     });
 
     editor.onDidChangeModelContent(() => {
       value = editor?.getValue() ?? "";
     });
+
+    isLoading = false;
   });
 
   // Effect that manages the editor's value
@@ -70,8 +79,19 @@
   });
 </script>
 
+{#if isLoading}
+  <div
+    class={mergeClasses(
+      className,
+      "flex h-[400px] w-full items-center justify-center",
+    )}
+  >
+    <Loader class="animate size-10 animate-spin" />
+  </div>
+{/if}
+
 <div
   bind:this={editorContainer}
-  class={mergeClasses(className)}
+  class={mergeClasses(className, { hidden: isLoading })}
   {...rest}
 ></div>
