@@ -2,12 +2,14 @@
   import { Info, Loader, MoveDownLeft, MoveUpRight, Zap } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
 
+  import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
   import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
 
   import H2 from "$lib/components/H2.svelte";
+  import Menu from "$lib/components/Menu.svelte";
 
   import Field from "./Field.svelte";
   import Output from "./Output.svelte";
@@ -61,6 +63,14 @@
     } finally {
       isExecuting = false;
       cancelRequest = () => {};
+    }
+  }
+
+  async function executeProcedureFromKbd(event: KeyboardEvent) {
+    // CTRL/CMD + ENTER to execute
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      await executeProcedure();
     }
   }
 
@@ -125,7 +135,9 @@
           the server side
         </span>
       </div>
-      <Field fields={proc.input} path="root" bind:value />
+      <div onkeydown={executeProcedureFromKbd} role="button" tabindex="0">
+        <Field fields={proc.input} path="root" bind:value />
+      </div>
     {:else}
       <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
         <Info class="size-4" />
@@ -134,18 +146,27 @@
     {/if}
 
     <div class="flex w-full justify-end pt-4">
-      <button
-        class="btn btn-primary"
-        disabled={isExecuting}
-        onclick={executeProcedure}
-      >
-        {#if isExecuting}
-          <Loader class="animate size-4 animate-spin" />
-        {:else}
-          <Zap class="size-4" />
-        {/if}
-        <span>Execute procedure</span>
-      </button>
+      {#snippet kbd()}
+        <span>
+          <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
+          <kbd class="kbd kbd-sm">⤶</kbd>
+        </span>
+      {/snippet}
+
+      <Menu content={kbd} placement="left" trigger="mouseenter">
+        <button
+          class="btn btn-primary"
+          disabled={isExecuting}
+          onclick={executeProcedure}
+        >
+          {#if isExecuting}
+            <Loader class="animate size-4 animate-spin" />
+          {:else}
+            <Zap class="size-4" />
+          {/if}
+          <span>Execute procedure</span>
+        </button>
+      </Menu>
     </div>
   </div>
 

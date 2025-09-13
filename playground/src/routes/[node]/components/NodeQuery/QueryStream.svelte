@@ -2,12 +2,14 @@
   import { Info, Loader, MoveDownLeft, MoveUpRight, Zap } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
 
+  import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
   import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import type { StreamDefinitionNode } from "$lib/urpcTypes";
 
   import H2 from "$lib/components/H2.svelte";
+  import Menu from "$lib/components/Menu.svelte";
 
   import Field from "./Field.svelte";
   import Output from "./Output.svelte";
@@ -113,6 +115,14 @@
     }
   }
 
+  async function executeStreamFromKbd(event: KeyboardEvent) {
+    // CTRL/CMD + ENTER to execute
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      await executeStream();
+    }
+  }
+
   let tab: "input" | "output" = $state("input");
   let wrapper: HTMLDivElement | null = $state(null);
   function openInput(scroll = false) {
@@ -174,7 +184,9 @@
           the server side
         </span>
       </div>
-      <Field fields={stream.input} path="root" bind:value />
+      <div onkeydown={executeStreamFromKbd} role="button" tabindex="0">
+        <Field fields={stream.input} path="root" bind:value />
+      </div>
     {:else}
       <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
         <Info class="size-4" />
@@ -183,18 +195,27 @@
     {/if}
 
     <div class="flex w-full justify-end gap-2 pt-4">
-      <button
-        class="btn btn-primary"
-        disabled={isExecuting}
-        onclick={executeStream}
-      >
-        {#if isExecuting}
-          <Loader class="animate size-4 animate-spin" />
-        {:else}
-          <Zap class="size-4" />
-        {/if}
-        <span>Start stream</span>
-      </button>
+      {#snippet kbd()}
+        <span>
+          <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
+          <kbd class="kbd kbd-sm">⤶</kbd>
+        </span>
+      {/snippet}
+
+      <Menu content={kbd} placement="left" trigger="mouseenter">
+        <button
+          class="btn btn-primary"
+          disabled={isExecuting}
+          onclick={executeStream}
+        >
+          {#if isExecuting}
+            <Loader class="animate size-4 animate-spin" />
+          {:else}
+            <Zap class="size-4" />
+          {/if}
+          <span>Start stream</span>
+        </button>
+      </Menu>
     </div>
   </div>
 
