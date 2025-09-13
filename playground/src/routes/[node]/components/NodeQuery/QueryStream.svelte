@@ -184,7 +184,12 @@
           the server side
         </span>
       </div>
-      <div onkeydown={executeStreamFromKbd} role="button" tabindex="0">
+      <div
+        class="space-y-4"
+        onkeydown={executeStreamFromKbd}
+        role="button"
+        tabindex="0"
+      >
         <Field fields={stream.input} path="root" bind:value />
       </div>
     {:else}

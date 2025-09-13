@@ -135,7 +135,12 @@
           the server side
         </span>
       </div>
-      <div onkeydown={executeProcedureFromKbd} role="button" tabindex="0">
+      <div
+        class="space-y-4"
+        onkeydown={executeProcedureFromKbd}
+        role="button"
+        tabindex="0"
+      >
         <Field fields={proc.input} path="root" bind:value />
       </div>
     {:else}
