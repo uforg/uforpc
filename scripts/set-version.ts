@@ -37,7 +37,7 @@ function getLatestGitTag(): string {
     return tag.startsWith("v") ? tag.substring(1) : tag;
   } catch (error) {
     console.error(
-      "Error: Could not get Git tag. Make sure you are in a Git repository with at least one tag."
+      "Error: Could not get Git tag. Make sure you are in a Git repository with at least one tag.",
     );
     process.exit(1);
   }
@@ -64,7 +64,7 @@ function run() {
 
       if (!originalContent.includes(file.searchText)) {
         console.warn(
-          `Warning: Text not found in ${file.path}: "${file.searchText}"`
+          `Warning: Text not found in ${file.path}: "${file.searchText}"`,
         );
         warnings++;
         continue;
@@ -73,7 +73,7 @@ function run() {
       const finalReplacement = file.replacement.replace("%", version);
       const updatedContent = originalContent.replace(
         file.searchText,
-        finalReplacement
+        finalReplacement,
       );
 
       fs.writeFileSync(filePath, updatedContent, "utf-8");

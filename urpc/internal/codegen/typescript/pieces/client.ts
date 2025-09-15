@@ -91,7 +91,7 @@ class internalClient {
     baseURL: string,
     procNames: string[],
     streamNames: string[],
-    opts: internalClientOption[]
+    opts: internalClientOption[],
   ) {
     this.verifyRuntimeDeps();
 
@@ -104,7 +104,7 @@ class internalClient {
 
     if (!this.fetchFn) {
       throw new Error(
-        "globalThis.fetch is undefined - please supply a custom fetch using WithFetch()"
+        "globalThis.fetch is undefined - please supply a custom fetch using WithFetch()",
       );
     }
   }
@@ -130,7 +130,7 @@ class internalClient {
     if (missing.length > 0) {
       const missingStr = missing.join(", ");
       throw new Error(
-        `Missing required runtime dependencies: ${missingStr}. Install the necessary polyfills or use a compatible environment.`
+        `Missing required runtime dependencies: ${missingStr}. Install the necessary polyfills or use a compatible environment.`,
       );
     }
   }
@@ -140,7 +140,7 @@ class internalClient {
     input: unknown,
     headers: Record<string, string>,
     retryConfig?: RetryConfig,
-    timeoutConfig?: TimeoutConfig
+    timeoutConfig?: TimeoutConfig,
   ): Promise<Response<any>> {
     const retryConf = retryConfig ?? {
       maxAttempts: 3,
@@ -222,7 +222,7 @@ class internalClient {
             const backoffMs = Math.min(
               retryConf.initialDelayMs *
                 Math.pow(retryConf.delayMultiplier, attempt - 1),
-              retryConf.maxDelayMs
+              retryConf.maxDelayMs,
             );
             await sleep(backoffMs);
             continue;
@@ -259,7 +259,7 @@ class internalClient {
             const backoffMs = Math.min(
               retryConf.initialDelayMs *
                 Math.pow(retryConf.delayMultiplier, attempt - 1),
-              retryConf.maxDelayMs
+              retryConf.maxDelayMs,
             );
             await sleep(backoffMs);
             continue;
@@ -274,7 +274,7 @@ class internalClient {
           const backoffMs = Math.min(
             retryConf.initialDelayMs *
               Math.pow(retryConf.delayMultiplier, attempt - 1),
-            retryConf.maxDelayMs
+            retryConf.maxDelayMs,
           );
           await sleep(backoffMs);
           continue;
@@ -301,7 +301,7 @@ class internalClient {
     name: string,
     input: unknown,
     headers: Record<string, string>,
-    reconnectConfig?: ReconnectConfig
+    reconnectConfig?: ReconnectConfig,
   ): {
     stream: AsyncGenerator<Response<any>, void, unknown>;
     cancel: () => void;
@@ -383,7 +383,7 @@ class internalClient {
               const delayMs = Math.min(
                 reconnectConf.initialDelayMs *
                   Math.pow(reconnectConf.delayMultiplier, reconnectAttempt - 1),
-                reconnectConf.maxDelayMs
+                reconnectConf.maxDelayMs,
               );
 
               await sleep(delayMs);
@@ -465,7 +465,7 @@ class internalClient {
               const delayMs = Math.min(
                 reconnectConf.initialDelayMs *
                   Math.pow(reconnectConf.delayMultiplier, reconnectAttempt - 1),
-                reconnectConf.maxDelayMs
+                reconnectConf.maxDelayMs,
               );
 
               await sleep(delayMs);
@@ -501,7 +501,7 @@ class internalClient {
             const delayMs = Math.min(
               reconnectConf.initialDelayMs *
                 Math.pow(reconnectConf.delayMultiplier, reconnectAttempt - 1),
-              reconnectConf.maxDelayMs
+              reconnectConf.maxDelayMs,
             );
 
             await sleep(delayMs);
