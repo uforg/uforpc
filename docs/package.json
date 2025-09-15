@@ -9,11 +9,10 @@
     "preview": "vite preview --host 0.0.0.0",
     "prepare": "svelte-kit sync || echo ''",
     "gendocs": "node ./scripts/gendocs.ts",
-    "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && biome lint --write .",
+    "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "fmt": "prettier . --write"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
     "@sveltejs/adapter-static": "3.0.9",
     "@sveltejs/kit": "2.39.1",
     "@sveltejs/vite-plugin-svelte": "6.2.0",
