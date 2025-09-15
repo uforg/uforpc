@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "prepare": "svelte-kit sync || echo ''",
+    "gendocs": "node ./scripts/gendocs.ts",
     "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && biome lint --write .",
     "fmt": "prettier . --write"
   },
@@ -19,8 +20,11 @@
     "@tailwindcss/typography": "0.5.16",
     "@tailwindcss/vite": "4.1.13",
     "@trivago/prettier-plugin-sort-imports": "5.2.2",
+    "@types/fs-extra": "11.0.4",
     "daisyui": "5.1.12",
     "fast-glob": "3.3.3",
+    "fs-extra": "11.3.1",
+    "gray-matter": "4.0.3",
     "mdsvex": "0.12.6",
     "prettier": "3.6.2",
     "prettier-plugin-svelte": "3.4.0",
@@ -29,6 +33,7 @@
     "svelte-check": "4.3.1",
     "tailwindcss": "4.1.13",
     "typescript": "5.9.2",
-    "vite": "7.1.5"
+    "vite": "7.1.5",
+    "vite-plugin-run": "0.6.1"
   }
 }
