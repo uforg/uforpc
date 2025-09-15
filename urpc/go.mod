@@ -14,6 +14,7 @@ require (
 	github.com/orsinium-labs/enum v1.4.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1
 	github.com/stretchr/testify v1.10.0
+	github.com/uforg/ufogenkit v0.1.0
 	golang.org/x/tools v0.32.0
 )
 
