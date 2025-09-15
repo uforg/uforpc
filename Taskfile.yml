@@ -41,6 +41,7 @@ tasks:
     cmds:
       - cd ./urpc && task lint
       - cd ./playground && npm run lint
+      - cd ./docs && npm run lint
 
   fmt:
     desc: Run all repository code formatters
@@ -50,9 +51,11 @@ tasks:
       # own formatter
       - cd ./urpc && task fmt
       - cd ./playground && npm run fmt
+      - cd ./docs && npm run fmt
 
   fmt-check:
     desc: Run all repository code formatter checks
     cmds:
       - cd ./urpc && task fmt-check
       - cd ./playground && npm run fmt-check
+      - cd ./docs && npm run fmt-check
