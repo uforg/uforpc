@@ -2,3 +2,4 @@
 # so they are not formatted by the root formatter and instead the
 # task fmt command should call the formatter for each directory.
 playground/
+docs/
