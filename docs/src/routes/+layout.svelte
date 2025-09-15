@@ -18,7 +18,7 @@
     </nav>
   </header>
 
-  <main class="flex h-full w-full flex-1">
+  <main class="h-full w-full flex-1 overflow-auto">
     {@render children?.()}
   </main>
 </div>
