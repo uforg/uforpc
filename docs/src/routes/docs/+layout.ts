@@ -1,8 +1,8 @@
 import { getPublishedDocsInfo } from "$lib/docs";
 
-import type { PageLoad } from "./$types";
+import type { LayoutLoad } from "./$types";
 
-export const load: PageLoad = async () => {
+export const load: LayoutLoad = async () => {
   const docsInfo = getPublishedDocsInfo();
 
   return {
