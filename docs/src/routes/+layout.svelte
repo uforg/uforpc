@@ -4,4 +4,6 @@
   let { children } = $props();
 </script>
 
-{@render children?.()}
+<main class="h-[100dvh] w-[100dvw] overflow-auto">
+  {@render children?.()}
+</main>
