@@ -70,7 +70,12 @@ function getSlugFromPath(path: string): string {
   return slug;
 }
 
-export async function getDocs() {
+/**
+ * Fetches and processes all documents from the base directory, extracting their metadata.
+ *
+ * @returns Array of document metadata objects
+ */
+export async function getDocsMeta() {
   const docPaths = getDocsPaths();
   let allImported: { docPath: DocPath; docImport: DocImport }[] = [];
   let docs: DocMeta[] = [];
