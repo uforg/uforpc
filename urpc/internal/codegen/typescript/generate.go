@@ -3,7 +3,7 @@ package typescript
 import (
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
@@ -18,7 +18,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generateClient,
 	}
 
-	g := genkit.NewGenKit().WithSpaces(2)
+	g := ufogenkit.NewGenKit().WithSpaces(2)
 	for _, generator := range subGenerators {
 		codeChunk, err := generator(sch, config)
 		if err != nil {

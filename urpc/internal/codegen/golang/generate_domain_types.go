@@ -3,13 +3,13 @@ package golang
 import (
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 func generateDomainTypes(sch schema.Schema, config Config) (string, error) {
-	g := genkit.NewGenKit().WithTabs()
+	g := ufogenkit.NewGenKit().WithTabs()
 
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Line("// Domain Types")

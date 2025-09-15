@@ -3,13 +3,13 @@ package typescript
 import (
 	"fmt"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 func generateStreamTypes(sch schema.Schema, _ Config) (string, error) {
-	g := genkit.NewGenKit().WithSpaces(2)
+	g := ufogenkit.NewGenKit().WithSpaces(2)
 
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Line("// Stream Types")

@@ -1,13 +1,13 @@
 package formatter
 
 import (
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 type streamFormatter struct {
-	g                 *genkit.GenKit
+	g                 *ufogenkit.GenKit
 	streamDecl        *ast.StreamDecl
 	children          []*ast.ProcOrStreamDeclChild
 	maxIndex          int
@@ -16,7 +16,7 @@ type streamFormatter struct {
 	currentIndexChild ast.ProcOrStreamDeclChild
 }
 
-func newStreamFormatter(g *genkit.GenKit, streamDecl *ast.StreamDecl) *streamFormatter {
+func newStreamFormatter(g *ufogenkit.GenKit, streamDecl *ast.StreamDecl) *streamFormatter {
 	if streamDecl == nil {
 		streamDecl = &ast.StreamDecl{}
 	}
@@ -83,7 +83,7 @@ func (f *streamFormatter) peekChild(offset int) (ast.ProcOrStreamDeclChild, ast.
 // format formats the entire procDecl, handling spacing and EOL comments.
 //
 // Returns the formatted genkit.GenKit.
-func (f *streamFormatter) format() *genkit.GenKit {
+func (f *streamFormatter) format() *ufogenkit.GenKit {
 	if f.streamDecl.Docstring != nil {
 		f.g.Linef(`"""%s"""`, f.streamDecl.Docstring.Value)
 	}

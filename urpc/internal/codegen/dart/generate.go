@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
@@ -40,7 +40,7 @@ func Generate(sch schema.Schema, config Config) (Output, error) {
 	}
 
 	// 1) Generate lib/main.dart
-	g := genkit.NewGenKit().WithSpaces(2)
+	g := ufogenkit.NewGenKit().WithSpaces(2)
 	for _, generator := range subGenerators {
 		codeChunk, err := generator(sch, config)
 		if err != nil {

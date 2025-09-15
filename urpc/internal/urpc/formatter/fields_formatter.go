@@ -3,13 +3,13 @@ package formatter
 import (
 	"fmt"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 type fieldsFormatter struct {
-	g                 *genkit.GenKit
+	g                 *ufogenkit.GenKit
 	parent            ast.WithPositions
 	fields            []*ast.FieldOrComment
 	maxIndex          int
@@ -18,7 +18,7 @@ type fieldsFormatter struct {
 	currentIndexChild ast.FieldOrComment
 }
 
-func newFieldsFormatter(g *genkit.GenKit, parent ast.WithPositions, fields []*ast.FieldOrComment) *fieldsFormatter {
+func newFieldsFormatter(g *ufogenkit.GenKit, parent ast.WithPositions, fields []*ast.FieldOrComment) *fieldsFormatter {
 	if fields == nil {
 		fields = []*ast.FieldOrComment{}
 	}
@@ -110,7 +110,7 @@ func (f *fieldsFormatter) LineAndCommentf(format string, args ...any) {
 // format formats the entire rule, handling spacing and EOL comments.
 //
 // Returns the formatted genkit.GenKit.
-func (f *fieldsFormatter) format() *genkit.GenKit {
+func (f *fieldsFormatter) format() *ufogenkit.GenKit {
 	if f.currentIndexEOF {
 		f.g.Inline("{}")
 		return f.g

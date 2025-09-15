@@ -4,13 +4,13 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 func generateClient(sch schema.Schema, _ Config) (string, error) {
-	g := genkit.NewGenKit().WithSpaces(2)
+	g := ufogenkit.NewGenKit().WithSpaces(2)
 
 	g.Line("// =============================================================================")
 	g.Line("// Generated Client Implementation")
@@ -32,7 +32,7 @@ func generateClient(sch schema.Schema, _ Config) (string, error) {
 	return g.String(), nil
 }
 
-func generateClientBuilder(g *genkit.GenKit) {
+func generateClientBuilder(g *ufogenkit.GenKit) {
 	g.Line("/// Creates a new UFO RPC client builder.")
 	g.Line("_ClientBuilder NewClient(String baseURL) => _ClientBuilder(baseURL);")
 	g.Break()
@@ -54,7 +54,7 @@ func generateClientBuilder(g *genkit.GenKit) {
 	g.Line("}")
 }
 
-func generateClientClass(g *genkit.GenKit) {
+func generateClientClass(g *ufogenkit.GenKit) {
 	g.Line("/// Main UFO RPC client providing type-safe access to procedures and streams.")
 	g.Line("class Client {")
 	g.Block(func() {
@@ -67,7 +67,7 @@ func generateClientClass(g *genkit.GenKit) {
 	g.Line("}")
 }
 
-func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
+func generateProcedureImplementation(g *ufogenkit.GenKit, sch schema.Schema) {
 	g.Line("// =============================================================================")
 	g.Line("// Procedure Implementation")
 	g.Line("// =============================================================================")
@@ -135,7 +135,7 @@ func generateProcedureImplementation(g *genkit.GenKit, sch schema.Schema) {
 	}
 }
 
-func generateStreamImplementation(g *genkit.GenKit, sch schema.Schema) {
+func generateStreamImplementation(g *ufogenkit.GenKit, sch schema.Schema) {
 	g.Line("// =============================================================================")
 	g.Line("// Stream Implementation")
 	g.Line("// =============================================================================")

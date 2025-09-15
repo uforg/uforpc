@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
@@ -22,7 +22,7 @@ func generateServer(sch schema.Schema, config Config) (string, error) {
 		return "", fmt.Errorf("server.go: could not find start delimiter")
 	}
 
-	g := genkit.NewGenKit().WithTabs()
+	g := ufogenkit.NewGenKit().WithTabs()
 
 	// Core server piece (types + internal implementation)
 	g.Raw(piece)

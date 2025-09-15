@@ -3,13 +3,13 @@ package golang
 import (
 	"fmt"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 func generateStreamTypes(sch schema.Schema, _ Config) (string, error) {
-	g := genkit.NewGenKit().WithTabs()
+	g := ufogenkit.NewGenKit().WithTabs()
 
 	g.Line("// -----------------------------------------------------------------------------")
 	g.Line("// Stream Types")

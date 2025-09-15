@@ -3,7 +3,7 @@ package golang
 import (
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 )
 
@@ -28,7 +28,7 @@ var packageHeader = strings.TrimSpace(`
 `)
 
 func generatePackage(_ schema.Schema, config Config) (string, error) {
-	g := genkit.NewGenKit().WithTabs()
+	g := ufogenkit.NewGenKit().WithTabs()
 
 	g.Line(packageHeader)
 	g.Break()

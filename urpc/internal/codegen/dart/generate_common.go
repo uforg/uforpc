@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
@@ -147,7 +147,7 @@ func dartToJsonExpr(field schema.FieldDefinition, varName string) string {
 func renderDartType(parentName, name, desc string, fields []schema.FieldDefinition) string {
 	name = parentName + name
 
-	og := genkit.NewGenKit().WithSpaces(2)
+	og := ufogenkit.NewGenKit().WithSpaces(2)
 	if desc != "" {
 		og.Line("/// " + strings.ReplaceAll(desc, "\n", "\n/// "))
 	}
@@ -257,7 +257,7 @@ func renderDartType(parentName, name, desc string, fields []schema.FieldDefiniti
 }
 
 // renderDeprecatedDart writes a deprecated doc line if provided.
-func renderDeprecatedDart(g *genkit.GenKit, deprecated *string) {
+func renderDeprecatedDart(g *ufogenkit.GenKit, deprecated *string) {
 	if deprecated == nil {
 		return
 	}

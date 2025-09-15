@@ -1,17 +1,17 @@
 package formatter
 
 import (
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
 
 type typeFormatter struct {
-	g        *genkit.GenKit
+	g        *ufogenkit.GenKit
 	typeDecl *ast.TypeDecl
 }
 
-func newTypeFormatter(g *genkit.GenKit, typeDecl *ast.TypeDecl) *typeFormatter {
+func newTypeFormatter(g *ufogenkit.GenKit, typeDecl *ast.TypeDecl) *typeFormatter {
 	if typeDecl == nil {
 		typeDecl = &ast.TypeDecl{}
 	}
@@ -25,7 +25,7 @@ func newTypeFormatter(g *genkit.GenKit, typeDecl *ast.TypeDecl) *typeFormatter {
 // format formats the entire typeDecl, handling spacing and EOL comments.
 //
 // Returns the formatted genkit.GenKit.
-func (f *typeFormatter) format() *genkit.GenKit {
+func (f *typeFormatter) format() *ufogenkit.GenKit {
 	if f.typeDecl.Docstring != nil {
 		f.g.Linef(`"""%s"""`, f.typeDecl.Docstring.Value)
 	}

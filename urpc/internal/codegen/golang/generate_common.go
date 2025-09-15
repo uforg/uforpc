@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
 )
@@ -78,7 +78,7 @@ func renderType(
 ) string {
 	name = parentName + name
 
-	og := genkit.NewGenKit().WithTabs()
+	og := ufogenkit.NewGenKit().WithTabs()
 	renderMultilineComment(og, desc)
 	og.Linef("type %s struct {", name)
 	og.Block(func() {
@@ -162,7 +162,7 @@ func renderPreType(
 ) string {
 	name = parentName + name
 
-	og := genkit.NewGenKit().WithTabs()
+	og := ufogenkit.NewGenKit().WithTabs()
 	og.Linef("// pre%s is the version of %s previous to the required field validation", name, name)
 	og.Linef("type pre%s struct {", name)
 	og.Block(func() {
@@ -355,7 +355,7 @@ func renderPreType(
 
 // renderMultilineComment receives a text and renders it to the given genkit.GenKit
 // as a multiline comment.
-func renderMultilineComment(g *genkit.GenKit, text string) {
+func renderMultilineComment(g *ufogenkit.GenKit, text string) {
 	for line := range strings.SplitSeq(text, "\n") {
 		g.Linef("// %s", line)
 	}
@@ -368,7 +368,7 @@ func renderDocString(doc *string, newLineBefore bool) string {
 		return ""
 	}
 
-	og := genkit.NewGenKit().WithTabs()
+	og := ufogenkit.NewGenKit().WithTabs()
 	renderDoc(og, doc, newLineBefore)
 	return og.String()
 }
@@ -377,7 +377,7 @@ func renderDocString(doc *string, newLineBefore bool) string {
 // render a comment with the documentation to the given genkit.GenKit.
 //
 // It will normalize the indent and trim the trailing and leading whitespace.
-func renderDoc(g *genkit.GenKit, doc *string, newLineBefore bool) {
+func renderDoc(g *ufogenkit.GenKit, doc *string, newLineBefore bool) {
 	if doc == nil {
 		return
 	}
@@ -391,7 +391,7 @@ func renderDoc(g *genkit.GenKit, doc *string, newLineBefore bool) {
 
 // renderDeprecated receives a pointer to a string and if it is not nil, it will
 // render a comment with the deprecated message to the given genkit.GenKit.
-func renderDeprecated(g *genkit.GenKit, deprecated *string) {
+func renderDeprecated(g *ufogenkit.GenKit, deprecated *string) {
 	if deprecated == nil {
 		return
 	}

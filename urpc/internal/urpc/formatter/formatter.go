@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/urpc/ast"
 	"github.com/uforg/uforpc/urpc/internal/urpc/parser"
 	"github.com/uforg/uforpc/urpc/internal/util/strutil"
@@ -26,7 +26,7 @@ func Format(filename, content string) (string, error) {
 
 // FormatSchema formats an already parsed UFO RPC AST Schema.
 func FormatSchema(sch *ast.Schema) string {
-	g := genkit.NewGenKit().WithSpaces(2)
+	g := ufogenkit.NewGenKit().WithSpaces(2)
 
 	schFormatter := newSchemaFormatter(g, sch)
 	formatted := schFormatter.format().String()
@@ -42,7 +42,7 @@ func FormatSchema(sch *ast.Schema) string {
 
 // schemaFormatter is a formatter for a schema.
 type schemaFormatter struct {
-	g                 *genkit.GenKit
+	g                 *ufogenkit.GenKit
 	sch               *ast.Schema
 	maxIndex          int
 	currentIndex      int
@@ -51,7 +51,7 @@ type schemaFormatter struct {
 }
 
 // newSchemaFormatter creates a new schema formatter and initializes all the necessary fields.
-func newSchemaFormatter(g *genkit.GenKit, sch *ast.Schema) *schemaFormatter {
+func newSchemaFormatter(g *ufogenkit.GenKit, sch *ast.Schema) *schemaFormatter {
 	maxIndex := max(len(sch.Children)-1, 0)
 	currentIndex := 0
 	currentIndexEOF := len(sch.Children) < 1
@@ -109,7 +109,7 @@ func (f *schemaFormatter) peekChild(offset int) (ast.SchemaChild, ast.LineDiff, 
 // format formats the entire schema, handling spacing and EOL comments.
 //
 // Returns the formatted genkit.GenKit.
-func (f *schemaFormatter) format() *genkit.GenKit {
+func (f *schemaFormatter) format() *ufogenkit.GenKit {
 	for !f.currentIndexEOF {
 		switch f.currentIndexChild.Kind() {
 		case ast.SchemaChildKindComment:

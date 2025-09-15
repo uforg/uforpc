@@ -3,7 +3,7 @@ package golang
 import (
 	"strings"
 
-	"github.com/uforg/uforpc/urpc/internal/genkit"
+	"github.com/uforg/ufogenkit"
 	"github.com/uforg/uforpc/urpc/internal/schema"
 	"golang.org/x/tools/imports"
 )
@@ -21,7 +21,7 @@ func Generate(sch schema.Schema, config Config) (string, error) {
 		generateClient,
 	}
 
-	g := genkit.NewGenKit().WithTabs()
+	g := ufogenkit.NewGenKit().WithTabs()
 	for _, generator := range subGenerators {
 		codeChunk, err := generator(sch, config)
 		if err != nil {
