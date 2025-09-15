@@ -1,0 +1,18 @@
+{
+  "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
+  "importOrder": [
+    "^\\$lib/(?!components)(.*)$",
+    "^\\$lib/components/(.*)$",
+    "^[.][.]/",
+    "^[.]/"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderCaseInsensitive": true,
+  "tailwindStylesheet": "./src/app.css",
+  "plugins": [
+    "prettier-plugin-svelte",
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ]
+}
