@@ -10,7 +10,8 @@
     "prepare": "svelte-kit sync || echo ''",
     "gendocs": "node ./scripts/gendocs.ts",
     "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "fmt": "prettier . --write"
+    "fmt": "prettier . --write",
+    "fmt-check": "prettier . --check"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "3.0.9",
