@@ -21,6 +21,8 @@ The Svelte version used is 5, and the syntax is different from previous versions
 
 Always use typescript and svelte runes.
 
+Don't use svelte <style></style> tags, instead use TailwindCSS and DaisyUI classes to style the HTML elements.
+
 ### MDsveX
 
 The project includes support for `.svx` files using MDsveX, you can write your docs using markdown and svelte components.
