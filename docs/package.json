@@ -6,7 +6,9 @@
     "dev": "astro dev --host 0.0.0.0",
     "build": "astro build",
     "preview": "astro preview --host 0.0.0.0",
-    "astro": "astro"
+    "astro": "astro",
+    "fmt": "prettier . --write",
+    "fmt-check": "prettier . --check"
   },
   "dependencies": {
     "@astrojs/starlight": "0.35.3",
@@ -15,5 +17,12 @@
     "astro": "5.13.8",
     "sharp": "0.34.4",
     "tailwindcss": "4.1.13"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "5.2.2",
+    "prettier": "3.6.2",
+    "prettier-plugin-astro": "0.14.1",
+    "prettier-plugin-svelte": "3.4.0",
+    "prettier-plugin-tailwindcss": "0.6.14"
   }
 }

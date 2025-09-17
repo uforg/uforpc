@@ -41,7 +41,6 @@ tasks:
     cmds:
       - cd ./urpc && task lint
       - cd ./playground && npm run lint
-      - cd ./docs && npm run lint
 
   fmt:
     desc: Run all repository code formatters
