@@ -1,11 +1,13 @@
 // @ts-check
 import starlight from "@astrojs/starlight";
+import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [
+    svelte(),
     starlight({
       title: "Docs with Tailwind",
       social: [
