@@ -120,6 +120,7 @@
 
   .beam-container {
     position: relative;
+    margin: 0;
     height: 120px;
     width: 100%;
     overflow: hidden;
