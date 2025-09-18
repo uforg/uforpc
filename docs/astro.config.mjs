@@ -49,8 +49,8 @@ export default defineConfig({
           href: "https://uforpc.uforg.dev/r/reddit",
         },
         {
-          icon: "twitter",
-          label: "Twitter",
+          icon: "x.com",
+          label: "X (Twitter)",
           href: "https://uforpc.uforg.dev/r/twitter",
         },
       ],
