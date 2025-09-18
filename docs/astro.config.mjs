@@ -3,6 +3,11 @@ import starlight from "@astrojs/starlight";
 import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
+import { run } from "vite-plugin-run";
+
+const syntaxUrl =
+  "https://cdn.jsdelivr.net/gh/uforg/uforpc-vscode@0.1.7/syntaxes/urpc.tmLanguage.json";
+const syntaxOutputFile = "urpc.tmLanguage.json";
 
 // https://astro.build/config
 export default defineConfig({
@@ -33,7 +38,19 @@ export default defineConfig({
       customCss: ["./src/styles/global.css"],
     }),
   ],
+
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      run([
+        {
+          name: "download urpc syntax",
+          run: ["wget", "-q", syntaxUrl, "-O", syntaxOutputFile],
+          pattern: ["astro.config.mjs"],
+          build: true,
+          startup: true,
+        },
+      ]),
+    ],
   },
 });
