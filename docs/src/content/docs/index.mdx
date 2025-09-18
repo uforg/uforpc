@@ -29,6 +29,7 @@ hero:
 ---
 
 import { Card, CardGrid, LinkButton } from "@astrojs/starlight/components";
+
 import GithubStarsImg from "../../components/GithubStarsImg.svelte";
 
 ## Who is UFO RPC for?
@@ -59,7 +60,7 @@ In short, if you want to build modern APIs quickly and safely, UFO RPC is built 
 
     - **UFO RPC Generator**: [AGPL-3.0](https://github.com/uforg/uforpc/blob/main/LICENSE) - Ensures this project remains free and open source forever
     - **Generated Code**: [MIT](https://github.com/uforg/uforpc/blob/main/LICENSE-GENERATED-CODE) - Your generated code is yours to use freely in any way you want
-    
+
     **What This Means**
 
     - ✅ **For UFO RPC**: Anyone who modifies UFO RPC must share their changes with the community
@@ -72,17 +73,19 @@ In short, if you want to build modern APIs quickly and safely, UFO RPC is built 
         <GithubStarsImg class="size-6" />
       </LinkButton>
     </div>
+
   </Card>
   <Card title="Cross language" icon="pencil">
     UFO RPC is designed to work in a polyglot ecosystem. The schema is the single source of truth, and from it, you can generate clients and servers in multiple programming languages.
 
     **It includes**
-    
+
     - **Go Server & Client**: Zero-dependency code for building high-performance backends or communicating microservices
     - **TypeScript Server & Client**: Zero-dependency code for seamless integration with the JavaScript/Node.js ecosystem and modern frontends
     - **Dart Client**: For building web, mobile and desktop applications, even with Flutter
     - **OpenAPI**: Automatically generate an OpenAPI specification from your schema, so you can use other code generators or tools that support OpenAPI
     - **Code Snippets**: The interactive playground generates ready-to-use code snippets for `curl` and many other programming languages
+
   </Card>
   <Card title="Interactive Playground" icon="seti:html">
     Every UFO RPC project can generate a static, zero-dependency, self-contained and responsive web portal where developers can:
@@ -95,5 +98,6 @@ In short, if you want to build modern APIs quickly and safely, UFO RPC is built 
     - **Explore OpenAPI**: The playground includes a built-in Swagger UI to explore the OpenAPI specification generated from your schema
 
     The playground is unique to your UFO RPC schema and can be hosted anywhere you can serve static files.
+
   </Card>
 </CardGrid>
