@@ -29,27 +29,44 @@ export default defineConfig({
   integrations: [
     svelte(),
     starlight({
-      title: "Docs with Tailwind",
+      favicon: "/icon.png",
+      title: "UFO RPC",
+      description: "Modern RPC framework that puts developer experience first.",
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/withastro/starlight",
+          href: "https://github.com/uforg/uforpc",
+        },
+        {
+          icon: "discord",
+          label: "Discord",
+          href: "https://uforpc.uforg.dev/r/discord",
+        },
+        {
+          icon: "reddit",
+          label: "Reddit",
+          href: "https://uforpc.uforg.dev/r/reddit",
+        },
+        {
+          icon: "twitter",
+          label: "Twitter",
+          href: "https://uforpc.uforg.dev/r/twitter",
         },
       ],
       sidebar: [
         {
           label: "Guides",
-          items: [
-            // Each item here is one entry in the navigation menu.
-            { label: "Example Guide", slug: "guides/example" },
-          ],
+          autogenerate: { directory: "guides" },
         },
         {
           label: "Reference",
           autogenerate: { directory: "reference" },
         },
       ],
+      editLink: {
+        baseUrl: "https://github.com/uforg/uforpc/tree/main/docs/",
+      },
       customCss: ["./src/styles/global.css"],
     }),
   ],
