@@ -67,6 +67,9 @@ export default defineConfig({
       editLink: {
         baseUrl: "https://github.com/uforg/uforpc/tree/main/docs/",
       },
+      components: {
+        SiteTitle: "./src/components/SiteTitle.svelte",
+      },
       customCss: ["./src/styles/global.css"],
     }),
   ],
