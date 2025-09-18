@@ -5,7 +5,7 @@
 </center>
 
 <center>
-  <h2>The RPC framework that puts developer experience first.</h2>
+  <h2>Modern RPC framework that puts developer experience first.</h2>
 </center>
 
 UFO RPC is a complete and modern API development ecosystem, designed for building robust, strongly-typed, and maintainable network services. It was born from the need for a tool that combines the simplicity and readability of REST APIs with the type safety and performance of more complex RPC frameworks.
