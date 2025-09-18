@@ -3,11 +3,26 @@ import starlight from "@astrojs/starlight";
 import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
-import { run } from "vite-plugin-run";
+import { execSync } from "child_process";
+import fse from "fs-extra";
+import { bundledLanguages } from "shiki";
 
 const syntaxUrl =
   "https://cdn.jsdelivr.net/gh/uforg/uforpc-vscode@0.1.7/syntaxes/urpc.tmLanguage.json";
 const syntaxOutputFile = "urpc.tmLanguage.json";
+
+// https://docs.astro.build/en/reference/configuration-reference/#markdown-options
+// https://shiki.style/guide/load-lang
+function getShikiLangs() {
+  if (!fse.existsSync(syntaxOutputFile)) {
+    execSync(`wget -q -O ${syntaxOutputFile} ${syntaxUrl}`);
+  }
+
+  const urpcLang = fse.readJSONSync(syntaxOutputFile);
+  urpcLang.name = "urpc";
+
+  return [...Object.keys(bundledLanguages), urpcLang];
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -39,18 +54,14 @@ export default defineConfig({
     }),
   ],
 
+  markdown: {
+    syntaxHighlight: "shiki",
+    shikiConfig: {
+      langs: getShikiLangs(),
+    },
+  },
+
   vite: {
-    plugins: [
-      tailwindcss(),
-      run([
-        {
-          name: "download urpc syntax",
-          run: ["wget", "-q", syntaxUrl, "-O", syntaxOutputFile],
-          pattern: ["astro.config.mjs"],
-          build: true,
-          startup: true,
-        },
-      ]),
-    ],
+    plugins: [tailwindcss()],
   },
 });
