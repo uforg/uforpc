@@ -182,7 +182,7 @@ export function discoverAuthToken(
   if (typeof data === "string") {
     try {
       dataObject = JSON.parse(data);
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   } else {
