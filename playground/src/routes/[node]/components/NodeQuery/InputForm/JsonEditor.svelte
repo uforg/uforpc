@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { untrack } from "svelte";
+
   import Editor from "$lib/components/Editor.svelte";
 
   interface Props {
@@ -9,16 +11,16 @@
 
   let valueString = $state(JSON.stringify(value, null, 2));
   $effect(() => {
-    if (JSON.stringify(value, null, 2) !== valueString) {
+    const val = valueString;
+    untrack(() => {
       try {
-        value = JSON.parse(valueString);
+        value = JSON.parse(val);
       } catch {
-        // Ignore JSON parse errors
+        // Empty object if invalid JSON until the user fixes it
+        value = {};
       }
-    }
+    });
   });
-
-  let tab: "form" | "json" = $state("form");
 </script>
 
 <Editor
