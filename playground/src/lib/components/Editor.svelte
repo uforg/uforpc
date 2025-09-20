@@ -12,14 +12,15 @@
   interface Props {
     lang: string;
     value: string;
+    onChange?: (value: string) => void;
     class?: ClassValue;
-    // biome-ignore lint/suspicious/noExplicitAny: can be any other attribute
     rest?: any;
   }
 
   let {
     lang = "urpc",
     value = $bindable(),
+    onChange = undefined,
     class: className,
     ...rest
   }: Props = $props();
@@ -76,6 +77,11 @@
     };
 
     monaco.editor.setTheme(themeMap[uiStore.theme]);
+  });
+
+  // Effect that calls onChange when value changes
+  $effect(() => {
+    if (onChange) onChange(value);
   });
 </script>
 
