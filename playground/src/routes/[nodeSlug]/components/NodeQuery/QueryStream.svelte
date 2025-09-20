@@ -177,13 +177,6 @@
     }}
   >
     {#if stream.input}
-      <div role="alert" class="alert alert-soft alert-info mt-6 w-fit">
-        <Info class="size-4" />
-        <span>
-          Requests are made from your browser and validations are performed on
-          the server side
-        </span>
-      </div>
       <div
         class="space-y-4"
         onkeydown={executeStreamFromKbd}

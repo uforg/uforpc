@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { Info } from "@lucide/svelte";
+
+  import { uiStore } from "$lib/uiStore.svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
 
   import Field from "./Field.svelte";
@@ -11,34 +14,48 @@
 
   let { fields, input = $bindable() }: Props = $props();
 
-  let tab: "form" | "json" = $state("form");
+  let isFormTab = $derived(uiStore.inputFormTab === "form");
+  const switchToForm = () => (uiStore.inputFormTab = "form");
+
+  let isJsonTab = $derived(uiStore.inputFormTab === "json");
+  const switchToJson = () => (uiStore.inputFormTab = "json");
 </script>
 
-<div class="flex justify-end">
+<div
+  class="desk:flex-row desk:items-center mt-4 flex flex-col justify-between gap-4"
+>
+  <div role="alert" class="alert alert-soft alert-info w-fit">
+    <Info class="size-4" />
+    <span>
+      Requests are made from your browser and validations are performed on the
+      server side
+    </span>
+  </div>
+
   <div class="join">
     <button
       class={[
-        "btn btn-xs join-item border-base-content/20 flex-grow",
-        tab === "form" && "btn-primary btn-active",
+        "btn desk:btn-xs join-item border-base-content/20 flex-grow",
+        isFormTab && "btn-primary btn-active",
       ]}
-      onclick={() => (tab = "form")}>Form</button
+      onclick={switchToForm}>Form</button
     >
     <button
       class={[
-        "btn btn-xs join-item border-base-content/20 flex-grow",
-        tab === "json" && "btn-primary btn-active",
+        "btn desk:btn-xs join-item border-base-content/20 flex-grow",
+        isJsonTab && "btn-primary btn-active",
       ]}
-      onclick={() => (tab = "json")}>JSON</button
+      onclick={switchToJson}>JSON</button
     >
   </div>
 </div>
 
-{#if tab === "form"}
+{#if isFormTab}
   {#each fields as field}
     <Field {field} path={field.name} bind:input />
   {/each}
 {/if}
 
-{#if tab === "json"}
+{#if isJsonTab}
   <JsonEditor bind:input />
 {/if}

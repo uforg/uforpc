@@ -53,6 +53,7 @@ export type Theme = "light" | "dark";
 export interface UiStore {
   isMobile: boolean;
   theme: Theme;
+  inputFormTab: "form" | "json";
   codeSnippetsTab: "sdk" | "curl";
   codeSnippetsCurlLang: string;
   codeSnippetsSdkLang: CodegenGenerator;
@@ -124,6 +125,7 @@ const defaultUiStoreDimensions: UiStoreDimensions = {
 const defaultUiStore: UiStore = {
   isMobile: false,
   theme: "dark",
+  inputFormTab: "form",
   codeSnippetsTab: "curl",
   codeSnippetsCurlLang: "Curl",
   codeSnippetsSdkLang: "typescript-client",
@@ -146,6 +148,7 @@ const defaultUiStore: UiStore = {
 
 const uiStoreKeysToPersist: UiStoreKey[] = [
   "theme",
+  "inputFormTab",
   "codeSnippetsTab",
   "codeSnippetsCurlLang",
   "codeSnippetsSdkLang",
