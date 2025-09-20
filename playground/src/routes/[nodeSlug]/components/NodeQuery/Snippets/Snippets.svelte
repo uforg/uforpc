@@ -13,7 +13,7 @@
     name: string;
   }
 
-  const { input, type, name }: Props = $props();
+  let { input, type, name }: Props = $props();
 </script>
 
 <div>

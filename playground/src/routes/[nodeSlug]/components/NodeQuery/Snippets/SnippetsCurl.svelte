@@ -12,7 +12,7 @@
     name: string;
   }
 
-  const { input, type, name }: Props = $props();
+  let { input, type, name }: Props = $props();
 
   let curl = $derived.by(() => {
     const endpoint = joinPath([store.baseUrl, name]);
