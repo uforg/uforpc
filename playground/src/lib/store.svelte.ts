@@ -8,6 +8,8 @@ import { prefixLocalStorageKey } from "./storeHelpers.svelte.ts";
 import { transpileUrpcToJson } from "./urpc.ts";
 import type { Schema } from "./urpcTypes.ts";
 
+export const primitiveTypes = ["string", "int", "float", "bool", "datetime"];
+
 type SearchItem = {
   id: number;
   kind: "doc" | "type" | "proc" | "stream";

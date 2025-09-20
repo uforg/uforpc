@@ -6,8 +6,6 @@
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
-  import { prettyLabel } from "./prettyLabel";
-
   interface Props {
     label: string;
     optional: boolean;
@@ -16,9 +14,8 @@
 
   const { label, optional, class: className }: Props = $props();
 
-  let plabel = $derived(prettyLabel(label));
   let dataTip = $derived(
-    `${plabel} is marked as ${optional ? "optional" : "required"}`,
+    `${label} is marked as ${optional ? "optional" : "required"}`,
   );
 </script>
 
@@ -30,7 +27,7 @@
     ])}
   >
     <span>
-      {plabel}
+      {label}
     </span>
 
     {#if optional}

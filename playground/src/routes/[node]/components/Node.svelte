@@ -22,7 +22,7 @@
 
   const { node }: Props = $props();
 
-  let value = $state({ root: {} });
+  let value = $state({});
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;

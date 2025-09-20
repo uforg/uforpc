@@ -1,55 +1,58 @@
+<!--
+  This component handles the final single field rendering for a named type that is not an array.
+
+  It handles primitive types only: string, int, float, bool, datetime
+
+  It should handle reactivity and binding of default values correctly.
+-->
+
 <script lang="ts">
   import { BrushCleaning, EllipsisVertical, Trash } from "@lucide/svelte";
   import flatpickr from "flatpickr";
-  import { onMount, untrack } from "svelte";
+  import { get, set, unset } from "lodash-es";
+  import { onMount } from "svelte";
 
-  import { setAtPath } from "$lib/helpers/setAtPath";
   import type { FieldDefinition } from "$lib/urpcTypes";
 
   import Menu from "$lib/components/Menu.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
-  import FieldDoc from "./FieldDoc.svelte";
-  import Label from "./Label.svelte";
-  import { prettyLabel } from "./prettyLabel";
+  import CommonFieldDoc from "./CommonFieldDoc.svelte";
+  import CommonLabel from "./CommonLabel.svelte";
 
   interface Props {
-    field: FieldDefinition;
     path: string;
-    // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
-    value: any;
+    field: FieldDefinition;
+    value: Record<string, any>;
   }
 
-  let { field, path, value: globalValue = $bindable() }: Props = $props();
+  let { field, value = $bindable(), path }: Props = $props();
   const fieldId = $props.id();
 
-  // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
-  let value: any = $state(null);
-
-  // Listen to changes and update the global value
-  // Use untrack to avoid infinite loop
-  // https://svelte.dev/docs/svelte/svelte#untrack
+  // We can't bind directly to value[path] because Svelte doesn't support dynamic bindings.
+  // So we create a local reactive variable and update value[path] whenever it changes.
+  let localValue = $state(get(value, path) ?? undefined);
   $effect(() => {
-    const val = value;
-    untrack(() => {
-      globalValue = setAtPath(globalValue, path, val);
-    });
+    if (get(value, path) !== localValue) {
+      set(value, path, localValue);
+    }
   });
 
   export const deleteValue = () => {
     if (flatpickrInstance) flatpickrInstance.clear();
-    value = null;
+    localValue = undefined;
+    unset(value, path);
   };
 
   export const clearValue = () => {
-    if (field.typeName === "string") value = "";
-    if (field.typeName === "int") value = 0;
-    if (field.typeName === "float") value = 0;
-    if (field.typeName === "bool") value = false;
+    if (field.typeName === "string") localValue = "";
+    if (field.typeName === "int") localValue = 0;
+    if (field.typeName === "float") localValue = 0;
+    if (field.typeName === "bool") localValue = false;
     if (field.typeName === "datetime") {
       let now = new Date();
       if (flatpickrInstance) flatpickrInstance.setDate(now);
-      value = now;
+      localValue = now;
     }
   };
 
@@ -85,8 +88,6 @@
     }
   });
 
-  let label = $derived(prettyLabel(path));
-
   let flatpickrInstance: flatpickr.Instance | null = $state(null);
   onMount(() => {
     if (field.typeName !== "datetime") return;
@@ -105,7 +106,7 @@
 {#snippet menuContent()}
   <div class="py-1">
     <Tooltip
-      content={`Clear and reset ${label} to its default value`}
+      content={`Clear and reset ${path} to its default value`}
       placement="left"
     >
       <button
@@ -117,7 +118,7 @@
       </button>
     </Tooltip>
 
-    <Tooltip content={`Delete ${label} from the JSON object`} placement="left">
+    <Tooltip content={`Delete ${path} from the JSON object`} placement="left">
       <button
         class="btn btn-ghost btn-block flex items-center justify-start space-x-2"
         onclick={deleteValue}
@@ -140,7 +141,7 @@
 <div>
   <label class="group/field block w-full">
     <span class="mb-1 block font-semibold">
-      <Label optional={field.optional} {label} />
+      <CommonLabel optional={field.optional} label={path} />
     </span>
 
     {#if inputType !== "checkbox" && inputType !== "datetime"}
@@ -148,9 +149,9 @@
         <input
           type={inputType}
           step={inputStep}
-          bind:value
+          bind:value={localValue}
           class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
-          placeholder={`Enter ${label} here...`}
+          placeholder={`Enter ${path} here...`}
         />
 
         {@render menu()}
@@ -163,9 +164,9 @@
           id={fieldId}
           type={inputType}
           step={inputStep}
-          bind:value
+          bind:value={localValue}
           class="input group-hover/field:border-base-content/50 mr-1 flex-grow"
-          placeholder={`Enter ${label} here...`}
+          placeholder={`Enter ${path} here...`}
         />
 
         {@render menu()}
@@ -179,7 +180,7 @@
       <div class="flex items-center justify-start space-x-2">
         <input
           type="checkbox"
-          bind:checked={value as boolean}
+          bind:checked={localValue}
           class="toggle toggle-lg"
         />
 
@@ -188,5 +189,5 @@
     {/if}
   </label>
 
-  <FieldDoc doc={field.doc} />
+  <CommonFieldDoc doc={field.doc} />
 </div>

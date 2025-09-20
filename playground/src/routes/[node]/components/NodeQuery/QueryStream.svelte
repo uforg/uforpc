@@ -11,7 +11,7 @@
   import H2 from "$lib/components/H2.svelte";
   import Menu from "$lib/components/Menu.svelte";
 
-  import Field from "./Field.svelte";
+  import InputForm from "./InputForm/InputForm.svelte";
   import Output from "./Output.svelte";
   import Snippets from "./Snippets.svelte";
 
@@ -190,7 +190,7 @@
         role="button"
         tabindex="0"
       >
-        <Field fields={stream.input} path="root" bind:value />
+        <InputForm input={stream.input} bind:value />
       </div>
     {:else}
       <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
