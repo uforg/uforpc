@@ -22,7 +22,7 @@
 </script>
 
 <div
-  class="desk:flex-row desk:items-center mt-4 flex flex-col justify-between gap-4"
+  class="desk:flex-row desk:items-center mt-4 flex flex-col items-end justify-between gap-4"
 >
   <div role="alert" class="alert alert-soft alert-info w-fit">
     <Info class="size-4" />
@@ -35,14 +35,14 @@
   <div class="join">
     <button
       class={[
-        "btn desk:btn-xs join-item border-base-content/20 flex-grow",
+        "btn btn-xs join-item border-base-content/20 flex-grow",
         isFormTab && "btn-primary btn-active",
       ]}
       onclick={switchToForm}>Form</button
     >
     <button
       class={[
-        "btn desk:btn-xs join-item border-base-content/20 flex-grow",
+        "btn btn-xs join-item border-base-content/20 flex-grow",
         isJsonTab && "btn-primary btn-active",
       ]}
       onclick={switchToJson}>JSON</button
