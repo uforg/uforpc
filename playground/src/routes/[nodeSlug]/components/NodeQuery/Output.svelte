@@ -14,7 +14,6 @@
   }
 
   const { cancelRequest, isExecuting, output, type }: Props = $props();
-  // let hasOutput = $derived(!!output);
   let hasOutput = $derived.by(() => {
     if (!output) return false;
     if (output === "{}") return false;
