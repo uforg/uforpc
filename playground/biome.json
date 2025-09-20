@@ -4,6 +4,7 @@
     "includes": [
       "**",
       "!**/*.css",
+      "!**/*.svelte",
       "!**/node_modules",
       "!**/dist",
       "!**/build",
