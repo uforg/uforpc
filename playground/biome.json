@@ -1,14 +1,15 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
   "files": {
-    "ignore": [
-      "*.css",
-      "node_modules",
-      "dist",
-      "build",
-      ".svelte-kit",
-      "src/lib/urpcTypes.ts",
-      "static/urpc/wasm_exec.js"
+    "includes": [
+      "**",
+      "!**/*.css",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/.svelte-kit",
+      "!**/src/lib/urpcTypes.ts",
+      "!**/static/urpc/wasm_exec.js"
     ]
   },
   "formatter": {
@@ -16,7 +17,7 @@
   },
   "linter": {
     "enabled": true,
-    "ignore": ["*.test.ts"],
+    "includes": ["**", "!**/*.test.ts"],
     "rules": {
       "recommended": true,
       "style": {
