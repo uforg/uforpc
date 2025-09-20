@@ -17,12 +17,13 @@
   import Snippets from "./NodeQuery/Snippets.svelte";
 
   interface Props {
+    nodeSlug: string;
     node: (typeof store.jsonSchema.nodes)[number];
   }
 
-  const { node }: Props = $props();
+  const { nodeSlug, node }: Props = $props();
 
-  let value = $state({});
+  let input = $state({});
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;
@@ -111,13 +112,13 @@
 
     {#if node.kind === "proc"}
       <div>
-        <NodeQueryProc proc={node} bind:value />
+        <NodeQueryProc proc={node} bind:value={input} />
       </div>
     {/if}
 
     {#if node.kind === "stream"}
       <div>
-        <NodeQueryStream stream={node} bind:value />
+        <NodeQueryStream stream={node} bind:value={input} />
       </div>
     {/if}
 
@@ -140,7 +141,7 @@
 
   {#if !uiStore.isMobile && (node.kind == "proc" || node.kind == "stream")}
     <div class="col-span-4 overflow-y-auto p-4 pt-0">
-      <Snippets {value} type={node.kind} name={node.name} />
+      <Snippets value={input} type={node.kind} name={node.name} />
       <BottomSpace />
     </div>
   {/if}

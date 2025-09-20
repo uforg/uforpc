@@ -75,6 +75,6 @@
 
 {#if nodeExists}
   {#key nodeIndex}
-    <Node {node} />
+    <Node nodeSlug={data.nodeSlug} {node} />
   {/key}
 {/if}
