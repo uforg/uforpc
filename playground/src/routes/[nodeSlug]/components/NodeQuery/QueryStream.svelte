@@ -13,7 +13,7 @@
 
   import InputForm from "./InputForm/InputForm.svelte";
   import Output from "./Output.svelte";
-  import Snippets from "./Snippets.svelte";
+  import Snippets from "./Snippets/Snippets.svelte";
 
   interface Props {
     stream: StreamDefinitionNode;

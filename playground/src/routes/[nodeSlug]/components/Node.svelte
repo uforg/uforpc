@@ -19,7 +19,7 @@
 
   import NodeQueryProc from "./NodeQuery/QueryProc.svelte";
   import NodeQueryStream from "./NodeQuery/QueryStream.svelte";
-  import Snippets from "./NodeQuery/Snippets.svelte";
+  import Snippets from "./NodeQuery/Snippets/Snippets.svelte";
 
   interface Props {
     nodeSlug: string;
