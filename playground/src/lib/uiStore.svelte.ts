@@ -51,7 +51,6 @@ export interface UiStoreDimensions {
 export type Theme = "light" | "dark";
 
 export interface UiStore {
-  loaded: boolean;
   isMobile: boolean;
   theme: Theme;
   codeSnippetsTab: "sdk" | "curl";
@@ -123,7 +122,6 @@ const defaultUiStoreDimensions: UiStoreDimensions = {
 };
 
 const defaultUiStore: UiStore = {
-  loaded: false,
   isMobile: false,
   theme: "dark",
   codeSnippetsTab: "curl",
@@ -162,7 +160,6 @@ const uiStoreKeysToPersist: UiStoreKey[] = [
   "asideHideStreams",
 ];
 
-// export const uiStore = $state<UiStore>({ ...defaultUiStore });
 export const uiStore = createStore<UiStore>(
   { ...defaultUiStore },
   uiStoreKeysToPersist,
