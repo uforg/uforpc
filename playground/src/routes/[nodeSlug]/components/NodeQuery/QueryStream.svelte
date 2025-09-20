@@ -17,18 +17,18 @@
 
   interface Props {
     stream: StreamDefinitionNode;
-    // biome-ignore lint/suspicious/noExplicitAny: consistent with sibling components
-    value: any;
+    input: any;
+    output: string | null;
   }
 
-  let { stream, value = $bindable() }: Props = $props();
+  let { stream, input = $bindable(), output = $bindable() }: Props = $props();
 
   // biome-ignore lint/suspicious/noExplicitAny: can be any stream response
   let outputArray: any[] = $state([]);
   let isExecuting = $state(false);
   let cancelRequest = $state<() => void>(() => {});
 
-  let output = $derived(JSON.stringify(outputArray, null, 2));
+  // let output = $derived(JSON.stringify(outputArray, null, 2));
 
   async function executeStream() {
     if (isExecuting) return;
@@ -52,7 +52,7 @@
 
       const response = await fetch(endpoint, {
         method: "POST",
-        body: JSON.stringify(value.root ?? {}),
+        body: JSON.stringify(input.root ?? {}),
         headers,
         signal: signal,
       });
@@ -190,7 +190,7 @@
         role="button"
         tabindex="0"
       >
-        <InputForm input={stream.input} bind:value />
+        <InputForm fields={stream.input} bind:input />
       </div>
     {:else}
       <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
@@ -237,6 +237,6 @@
 
 {#if uiStore.isMobile}
   <div class="mt-12">
-    <Snippets {value} type="stream" name={stream.name} />
+    <Snippets {input} type="stream" name={stream.name} />
   </div>
 {/if}

@@ -28,31 +28,31 @@
   interface Props {
     path: string;
     field: FieldDefinition;
-    value: Record<string, any>;
+    input: Record<string, any>;
   }
 
-  let { field, value = $bindable(), path }: Props = $props();
+  let { field, input = $bindable(), path }: Props = $props();
 
   let noArrayField = $derived({ ...field, isArray: false, doc: undefined });
-  let arrayLen = $derived(get(value, path)?.length || 0);
+  let arrayLen = $derived(get(input, path)?.length || 0);
   let arrayIndexes = $derived(Array.from({ length: arrayLen }, (_, i) => i));
   let lastIndex = $derived(arrayIndexes[arrayIndexes.length - 1]);
 
   function clearArray() {
-    value = set(value, path, []);
+    input = set(input, path, []);
   }
 
   function deleteArray() {
-    unset(value, path);
+    unset(input, path);
   }
 
   function removeItem() {
     if (arrayLen <= 0) return;
-    unset(value, `${path}[${lastIndex}]`);
+    unset(input, `${path}[${lastIndex}]`);
   }
 
   function addItem() {
-    value = set(value, `${path}[${arrayLen}]`, null);
+    input = set(input, `${path}[${arrayLen}]`, null);
   }
 </script>
 
@@ -71,7 +71,7 @@
   {/if}
 
   {#each arrayIndexes as index}
-    <Field field={noArrayField} path={`${path}[${index}]`} bind:value />
+    <Field field={noArrayField} path={`${path}[${index}]`} bind:input />
   {/each}
 
   <div class="flex justify-end">

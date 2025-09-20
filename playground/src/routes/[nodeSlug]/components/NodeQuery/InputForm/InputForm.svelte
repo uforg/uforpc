@@ -5,11 +5,11 @@
   import JsonEditor from "./JsonEditor.svelte";
 
   interface Props {
-    input: FieldDefinition[];
-    value: Record<string, any>;
+    fields: FieldDefinition[];
+    input: Record<string, any>;
   }
 
-  let { input, value = $bindable() }: Props = $props();
+  let { fields, input = $bindable() }: Props = $props();
 
   let tab: "form" | "json" = $state("form");
 </script>
@@ -34,11 +34,11 @@
 </div>
 
 {#if tab === "form"}
-  {#each input as field}
-    <Field {field} path={field.name} bind:value />
+  {#each fields as field}
+    <Field {field} path={field.name} bind:input />
   {/each}
 {/if}
 
 {#if tab === "json"}
-  <JsonEditor bind:value />
+  <JsonEditor bind:input />
 {/if}

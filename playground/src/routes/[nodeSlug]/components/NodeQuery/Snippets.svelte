@@ -8,13 +8,12 @@
   import SnippetsSdk from "./SnippetsSdk.svelte";
 
   interface Props {
-    // biome-ignore lint/suspicious/noExplicitAny: consistent with sibling components
-    value: any;
+    input: any;
     type: "proc" | "stream";
     name: string;
   }
 
-  const { value, type, name }: Props = $props();
+  const { input, type, name }: Props = $props();
 </script>
 
 <div>
@@ -40,7 +39,7 @@
     {#if uiStore.codeSnippetsTab === "sdk"}
       <SnippetsSdk {type} {name} />
     {:else}
-      <SnippetsCurl {value} {type} {name} />
+      <SnippetsCurl {input} {type} {name} />
     {/if}
   </div>
 </div>

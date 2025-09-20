@@ -21,17 +21,17 @@
   interface Props {
     path: string;
     field: FieldDefinition;
-    value: Record<string, any>;
+    input: Record<string, any>;
   }
 
-  let { field, value = $bindable(), path }: Props = $props();
+  let { field, input = $bindable(), path }: Props = $props();
 
   function clearObject() {
-    value = set(value, path, {});
+    input = set(input, path, {});
   }
 
   function deleteObject() {
-    unset(value, path);
+    unset(input, path);
   }
 </script>
 
@@ -43,7 +43,7 @@
   <CommonFieldDoc doc={field.doc} class="-mt-2" />
 
   {#each field.typeInline!.fields as childField}
-    <Field field={childField} path={`${path}.${childField.name}`} bind:value />
+    <Field field={childField} path={`${path}.${childField.name}`} bind:input />
   {/each}
 
   <div class="flex justify-end">

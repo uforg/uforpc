@@ -17,13 +17,12 @@
 
   interface Props {
     proc: ProcedureDefinitionNode;
-    // biome-ignore lint/suspicious/noExplicitAny: consistent with sibling components
-    value: any;
+    input: any;
+    output: string | null;
   }
 
-  let { proc, value = $bindable() }: Props = $props();
+  let { proc, input = $bindable(), output = $bindable() }: Props = $props();
 
-  let output: string | null = $state(null);
   let isExecuting = $state(false);
   let cancelRequest = $state<() => void>(() => {});
 
@@ -45,7 +44,7 @@
       const endpoint = joinPath([store.baseUrl, proc.name]);
       const response = await fetch(endpoint, {
         method: "POST",
-        body: JSON.stringify(value.root ?? {}),
+        body: JSON.stringify(input.root ?? {}),
         headers: getHeadersObject(),
         signal: signal,
       });
@@ -141,7 +140,7 @@
         role="button"
         tabindex="0"
       >
-        <InputForm input={proc.input} bind:value />
+        <InputForm fields={proc.input} bind:input />
       </div>
     {:else}
       <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
@@ -188,6 +187,6 @@
 
 {#if uiStore.isMobile}
   <div class="mt-12">
-    <Snippets {value} type="proc" name={proc.name} />
+    <Snippets {input} type="proc" name={proc.name} />
   </div>
 {/if}

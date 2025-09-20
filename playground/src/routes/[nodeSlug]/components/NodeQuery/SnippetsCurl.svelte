@@ -7,17 +7,16 @@
   import SnippetsCode from "./SnippetsCurlCode.svelte";
 
   interface Props {
-    // biome-ignore lint/suspicious/noExplicitAny: it's too dynamic to determine the type
-    value: any;
+    input: any;
     type: "proc" | "stream";
     name: string;
   }
 
-  const { value, type, name }: Props = $props();
+  const { input, type, name }: Props = $props();
 
   let curl = $derived.by(() => {
     const endpoint = joinPath([store.baseUrl, name]);
-    const payload = value ?? {};
+    const payload = input ?? {};
     let payloadStr = JSON.stringify(payload, null, 2);
     payloadStr = payloadStr.replace(/'/g, "'\\''");
 

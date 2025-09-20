@@ -1,10 +1,15 @@
 <script lang="ts">
   import { TriangleAlert } from "@lucide/svelte";
+  import { onMount } from "svelte";
 
   import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
+  import {
+    getCurrentInputForOperation,
+    getCurrentOutputForOperation,
+  } from "$lib/historyStore.svelte";
   import { store } from "$lib/store.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
@@ -23,7 +28,10 @@
 
   const { nodeSlug, node }: Props = $props();
 
-  let input = $state({});
+  // svelte-ignore non_reactive_update - This is reactive through the store
+  let input = getCurrentInputForOperation(nodeSlug);
+  // svelte-ignore non_reactive_update - This is reactive through the store
+  let output = getCurrentOutputForOperation(nodeSlug);
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;
@@ -112,13 +120,13 @@
 
     {#if node.kind === "proc"}
       <div>
-        <NodeQueryProc proc={node} bind:value={input} />
+        <NodeQueryProc proc={node} bind:input bind:output />
       </div>
     {/if}
 
     {#if node.kind === "stream"}
       <div>
-        <NodeQueryStream stream={node} bind:value={input} />
+        <NodeQueryStream stream={node} bind:input bind:output />
       </div>
     {/if}
 
@@ -141,7 +149,7 @@
 
   {#if !uiStore.isMobile && (node.kind == "proc" || node.kind == "stream")}
     <div class="col-span-4 overflow-y-auto p-4 pt-0">
-      <Snippets value={input} type={node.kind} name={node.name} />
+      <Snippets {input} type={node.kind} name={node.name} />
       <BottomSpace />
     </div>
   {/if}

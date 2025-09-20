@@ -23,10 +23,10 @@
   interface Props {
     path: string;
     field: FieldDefinition;
-    value: Record<string, any>;
+    input: Record<string, any>;
   }
 
-  let { field: originalField, value = $bindable(), path }: Props = $props();
+  let { field: originalField, input = $bindable(), path }: Props = $props();
 
   /**
    * Get fields of a custom type
@@ -66,17 +66,17 @@
 </script>
 
 {#if isInlineArray}
-  <FieldInlineArray {field} {path} bind:value />
+  <FieldInlineArray {field} {path} bind:input />
 {/if}
 
 {#if isInlineSingle}
-  <FieldInlineSingle {field} {path} bind:value />
+  <FieldInlineSingle {field} {path} bind:input />
 {/if}
 
 {#if isNamedArray}
-  <FieldNamedArray {field} {path} bind:value />
+  <FieldNamedArray {field} {path} bind:input />
 {/if}
 
 {#if isNamedSingle}
-  <FieldNamedSingle {field} {path} bind:value />
+  <FieldNamedSingle {field} {path} bind:input />
 {/if}

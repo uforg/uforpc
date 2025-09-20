@@ -23,25 +23,25 @@
   interface Props {
     path: string;
     field: FieldDefinition;
-    value: Record<string, any>;
+    input: Record<string, any>;
   }
 
-  let { field, value = $bindable(), path }: Props = $props();
+  let { field, input = $bindable(), path }: Props = $props();
   const fieldId = $props.id();
 
-  // We can't bind directly to value[path] because Svelte doesn't support dynamic bindings.
-  // So we create a local reactive variable and update value[path] whenever it changes.
-  let localValue = $state(get(value, path) ?? undefined);
+  // We can't bind directly to input[path] because Svelte doesn't support dynamic bindings.
+  // So we create a local reactive variable and update input[path] whenever it changes.
+  let localValue = $state(get(input, path) ?? undefined);
   $effect(() => {
-    if (get(value, path) !== localValue) {
-      set(value, path, localValue);
+    if (get(input, path) !== localValue) {
+      set(input, path, localValue);
     }
   });
 
   export const deleteValue = () => {
     if (flatpickrInstance) flatpickrInstance.clear();
     localValue = undefined;
-    unset(value, path);
+    unset(input, path);
   };
 
   export const clearValue = () => {
