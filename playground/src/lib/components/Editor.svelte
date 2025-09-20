@@ -55,6 +55,7 @@
 
     editor.onDidChangeModelContent(() => {
       value = editor?.getValue() ?? "";
+      if (onChange) onChange(value);
     });
 
     isLoading = false;
@@ -77,11 +78,6 @@
     };
 
     monaco.editor.setTheme(themeMap[uiStore.theme]);
-  });
-
-  // Effect that calls onChange when value changes
-  $effect(() => {
-    if (onChange) onChange(value);
   });
 </script>
 
