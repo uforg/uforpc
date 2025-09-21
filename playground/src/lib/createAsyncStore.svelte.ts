@@ -124,12 +124,21 @@ export function createAsyncStore<T extends Record<string, any>>(
             await db.setItem(keyToPersist as string, value);
           }
         } catch (error) {
+          // On error, remove the item to avoid stale or corrupted data
+          db.removeItem(keyToPersist as string);
+
+          // Show error toast and log to console for debugging
           toast.error(
             `Failed to persist ${keyToPersist as string} value to the database ${dbName}`,
             {
               description: `Error: ${error}`,
             },
           );
+          console.error(
+            `Failed to persist ${keyToPersist as string} value to the database ${dbName}`,
+            error,
+          );
+          console.log({ value });
         } finally {
           status.saving = false;
         }
