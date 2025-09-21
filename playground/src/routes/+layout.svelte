@@ -5,7 +5,10 @@
   import { fade } from "svelte/transition";
 
   import { initializeShiki } from "$lib/shiki";
-  import { loadJsonSchemaFromUrpcSchemaUrl, store } from "$lib/store.svelte";
+  import {
+    loadJsonSchemaFromUrpcSchemaUrl,
+    storeSettings,
+  } from "$lib/storeSettings.svelte";
   import {
     dimensionschangeAction,
     initTheme,
@@ -37,7 +40,7 @@
 
     message = "Loading configuration";
     try {
-      await Promise.all([store.ready(), uiStore.ready()]);
+      await Promise.all([storeSettings.ready(), uiStore.ready()]);
       initTheme();
     } catch (error) {
       handleError(error);

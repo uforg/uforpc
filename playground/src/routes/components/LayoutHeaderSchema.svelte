@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ScrollText, X } from "@lucide/svelte";
 
-  import { store } from "$lib/store.svelte";
+  import { storeSettings } from "$lib/storeSettings.svelte";
 
   import Code from "$lib/components/Code.svelte";
   import Modal from "$lib/components/Modal.svelte";
@@ -30,5 +30,9 @@
     </button>
   </div>
 
-  <Code lang="urpc" code={store.store.urpcSchema} class="min-h-0 flex-1" />
+  <Code
+    lang="urpc"
+    code={storeSettings.store.urpcSchema}
+    class="min-h-0 flex-1"
+  />
 </Modal>

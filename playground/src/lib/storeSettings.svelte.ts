@@ -50,16 +50,14 @@ export interface Header {
   description: string;
 }
 
-export interface Store {
+export interface StoreSettings {
   baseUrl: string;
   headers: Header[];
   urpcSchema: string;
   jsonSchema: Schema;
 }
 
-// TODO: Rename to settingsStore
-
-async function storeGetInitialValue(): Promise<Store> {
+async function storeSettingsGetInitialValue(): Promise<StoreSettings> {
   const config = await fetchConfig();
   return {
     baseUrl: config.baseUrl,
@@ -71,10 +69,10 @@ async function storeGetInitialValue(): Promise<Store> {
 
 // Cannot use createStore because of the http request needed
 // maybe it can be refactored later
-export const store = createAsyncStore<Store>({
-  initialValue: storeGetInitialValue,
+export const storeSettings = createAsyncStore<StoreSettings>({
+  initialValue: storeSettingsGetInitialValue,
   keysToPersist: ["baseUrl", "headers"],
-  storeName: "settingsStore",
+  storeName: "storeSettings",
 });
 
 /**
@@ -86,24 +84,24 @@ export const store = createAsyncStore<Store>({
 export const setHeader = (key: string, value: string) => {
   const trimmedKey = key.trim();
   const targetKeyLower = trimmedKey.toLowerCase();
-  const existingIndex = store.store.headers.findIndex(
+  const existingIndex = storeSettings.store.headers.findIndex(
     (h) => h.key.trim().toLowerCase() === targetKeyLower,
   );
 
   if (existingIndex !== -1) {
     // Update existing header value and ensure it is enabled
-    store.store.headers[existingIndex] = {
-      ...store.store.headers[existingIndex],
+    storeSettings.store.headers[existingIndex] = {
+      ...storeSettings.store.headers[existingIndex],
       key: trimmedKey,
       value,
       enabled: true,
     };
     // Reassign to trigger reactivity in Svelte
-    store.store.headers = [...store.store.headers];
+    storeSettings.store.headers = [...storeSettings.store.headers];
   } else {
     // Add a new enabled header
-    store.store.headers = [
-      ...store.store.headers,
+    storeSettings.store.headers = [
+      ...storeSettings.store.headers,
       { key: trimmedKey, value, enabled: true, description: "" },
     ];
   }
@@ -120,7 +118,7 @@ export const getHeadersObject = (): Headers => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
 
-  for (const header of store.store.headers) {
+  for (const header of storeSettings.store.headers) {
     if (!header.enabled) continue;
     if (header.key.trim()) headers.set(header.key, header.value);
   }
@@ -167,8 +165,8 @@ export const fetchConfig = async () => {
  */
 export const loadDefaultConfig = async () => {
   const config = await fetchConfig();
-  store.store.baseUrl = config.baseUrl;
-  store.store.headers = config.headers;
+  storeSettings.store.baseUrl = config.baseUrl;
+  storeSettings.store.headers = config.headers;
 };
 
 /**
@@ -176,7 +174,7 @@ export const loadDefaultConfig = async () => {
  */
 export const loadDefaultBaseURL = async () => {
   const config = await fetchConfig();
-  store.store.baseUrl = config.baseUrl;
+  storeSettings.store.baseUrl = config.baseUrl;
 };
 
 /**
@@ -184,7 +182,7 @@ export const loadDefaultBaseURL = async () => {
  */
 export const loadDefaultHeaders = async () => {
   const config = await fetchConfig();
-  store.store.headers = config.headers;
+  storeSettings.store.headers = config.headers;
 };
 
 type RawHeader = {
@@ -218,7 +216,9 @@ const normalizeHeaders = (raw: unknown): Header[] => {
  * using the `transpileUrpcToJson` utility, and then updates the `jsonSchema` store with the result.
  */
 export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
-  store.store.jsonSchema = await transpileUrpcToJson(store.store.urpcSchema);
+  storeSettings.store.jsonSchema = await transpileUrpcToJson(
+    storeSettings.store.urpcSchema,
+  );
   await indexSearchItems();
 };
 
@@ -227,7 +227,7 @@ export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
  */
 const indexSearchItems = async () => {
   const searchItems = await Promise.all(
-    store.store.jsonSchema.nodes.map(async (node, index) => {
+    storeSettings.store.jsonSchema.nodes.map(async (node, index) => {
       let name = "";
       let doc = "";
 
@@ -275,7 +275,7 @@ export const loadUrpcSchemaFromUrl = async (url: string) => {
   }
 
   const sch = await response.text();
-  store.store.urpcSchema = sch;
+  storeSettings.store.urpcSchema = sch;
 };
 
 /**
@@ -287,7 +287,7 @@ export const loadUrpcSchemaFromUrl = async (url: string) => {
  * @param sch The URPC schema string to be loaded into the store.
  */
 export const loadUrpcSchemaFromString = (sch: string) => {
-  store.store.urpcSchema = sch;
+  storeSettings.store.urpcSchema = sch;
 };
 
 /**

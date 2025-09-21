@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { store } from "$lib/store.svelte";
+  import { storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
   import Code from "$lib/components/Code.svelte";
@@ -18,7 +18,7 @@
 import { NewClient } from "./path/to/uforpc-client-sdk.ts";
 
 // 2) Build the client
-const client = NewClient("${store.store.baseUrl}").build();`,
+const client = NewClient("${storeSettings.store.baseUrl}").build();`,
   );
 
   const goSetup = $derived.by(
@@ -29,7 +29,7 @@ package main
 import "yourmodule/${golangPackageName}"
 
 func main() {
-	client := ${golangPackageName}.NewClient("${store.store.baseUrl}").Build()
+	client := ${golangPackageName}.NewClient("${storeSettings.store.baseUrl}").Build()
 	_ = client // ready to use
 }`,
   );
@@ -45,7 +45,7 @@ dependencies:
   const dartSetup = $derived.by(
     () => `import "package:${dartPackageName}/client.dart" as urpc;
 
-final client = urpc.NewClient("${store.store.baseUrl}").build();`,
+final client = urpc.NewClient("${storeSettings.store.baseUrl}").build();`,
   );
 </script>
 

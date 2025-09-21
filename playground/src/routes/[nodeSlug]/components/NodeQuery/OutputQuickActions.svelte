@@ -6,7 +6,7 @@
     discoverAuthToken,
     type TokenInfo,
   } from "$lib/helpers/discoverAuthToken.ts";
-  import { setHeader } from "$lib/store.svelte";
+  import { setHeader } from "$lib/storeSettings.svelte";
 
   import Menu from "$lib/components/Menu.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";

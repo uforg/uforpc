@@ -11,13 +11,13 @@
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { markSearchHints } from "$lib/helpers/markSearchHints";
   import { slugify } from "$lib/helpers/slugify";
-  import type { store } from "$lib/store.svelte";
+  import type { storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   interface Props {
-    node: (typeof store.store.jsonSchema.nodes)[number];
+    node: (typeof storeSettings.store.jsonSchema.nodes)[number];
   }
 
   const { node }: Props = $props();

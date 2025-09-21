@@ -4,7 +4,7 @@
 
   import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
   import { joinPath } from "$lib/helpers/joinPath";
-  import { getHeadersObject, store } from "$lib/store.svelte";
+  import { getHeadersObject, storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import type { StreamDefinitionNode } from "$lib/urpcTypes";
 
@@ -45,7 +45,7 @@
         toast.info("Stream stopped");
       };
 
-      const endpoint = joinPath([store.store.baseUrl, stream.name]);
+      const endpoint = joinPath([storeSettings.store.baseUrl, stream.name]);
       const headers = getHeadersObject();
       headers.set("Accept", "text/event-stream");
       headers.set("Cache-Control", "no-cache");

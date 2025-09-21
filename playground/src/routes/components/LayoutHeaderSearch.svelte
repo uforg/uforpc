@@ -14,7 +14,7 @@
     markSearchHintsMinisearch,
     truncateWithMarkMinisearch,
   } from "$lib/helpers/markSearchHints";
-  import { miniSearch } from "$lib/store.svelte";
+  import { miniSearch } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
   import H2 from "$lib/components/H2.svelte";

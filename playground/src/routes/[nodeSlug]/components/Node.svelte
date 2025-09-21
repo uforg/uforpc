@@ -10,7 +10,7 @@
     getCurrentInputForOperation,
     getCurrentOutputForOperation,
   } from "$lib/historyStore.svelte";
-  import { store } from "$lib/store.svelte";
+  import { storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
   import BottomSpace from "$lib/components/BottomSpace.svelte";
@@ -23,7 +23,7 @@
 
   interface Props {
     nodeSlug: string;
-    node: (typeof store.store.jsonSchema.nodes)[number];
+    node: (typeof storeSettings.store.jsonSchema.nodes)[number];
   }
 
   const { nodeSlug, node }: Props = $props();
@@ -75,7 +75,7 @@
   $effect(() => {
     if (node.kind === "doc") return;
     const extracted = extractNodeFromSchema(
-      store.store.urpcSchema,
+      storeSettings.store.urpcSchema,
       node.kind,
       name,
     );

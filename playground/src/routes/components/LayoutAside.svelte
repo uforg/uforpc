@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
 
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
-  import { store } from "$lib/store.svelte";
+  import { storeSettings } from "$lib/storeSettings.svelte";
   import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
   import type { Schema } from "$lib/urpcTypes";
   import { versionWithPrefix } from "$lib/version";
@@ -118,7 +118,7 @@
         </a>
       </Tooltip>
 
-      {#each store.store.jsonSchema.nodes as node}
+      {#each storeSettings.store.jsonSchema.nodes as node}
         {#if shouldShowNode("doc", node)}
           <LayoutAsideItem {node} />
         {/if}

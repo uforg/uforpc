@@ -3,7 +3,7 @@
 
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
-  import { store } from "$lib/store.svelte";
+  import { storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
   import type { PageProps } from "./$types";
@@ -13,7 +13,10 @@
   let { data }: PageProps = $props();
 
   let nodeIndex = $derived.by(() => {
-    for (const [index, node] of store.store.jsonSchema.nodes.entries()) {
+    for (const [
+      index,
+      node,
+    ] of storeSettings.store.jsonSchema.nodes.entries()) {
       if (node.kind !== data.nodeKind) continue;
 
       const isDoc = node.kind === "doc";
@@ -28,7 +31,7 @@
 
   let nodeExists = $derived(nodeIndex !== -1);
 
-  let node = $derived(store.store.jsonSchema.nodes[nodeIndex]);
+  let node = $derived(storeSettings.store.jsonSchema.nodes[nodeIndex]);
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;

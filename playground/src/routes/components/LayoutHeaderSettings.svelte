@@ -5,8 +5,8 @@
   import {
     loadDefaultBaseURL,
     loadDefaultHeaders,
-    store,
-  } from "$lib/store.svelte";
+    storeSettings,
+  } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
   import Modal from "$lib/components/Modal.svelte";
@@ -31,14 +31,16 @@
   });
 
   const addHeader = () => {
-    store.store.headers = [
-      ...store.store.headers,
+    storeSettings.store.headers = [
+      ...storeSettings.store.headers,
       { key: "", value: "", enabled: true, description: "" },
     ];
   };
 
   const removeHeader = (index: number) => {
-    store.store.headers = store.store.headers.filter((_, i) => i !== index);
+    storeSettings.store.headers = storeSettings.store.headers.filter(
+      (_, i) => i !== index,
+    );
   };
 
   const loadDefaultBaseUrlWithConfirm = () => {
@@ -89,7 +91,7 @@
             class="grow"
             spellcheck="false"
             placeholder="https://example.com/api/v1/urpc"
-            bind:value={store.store.baseUrl}
+            bind:value={storeSettings.store.baseUrl}
           />
         </label>
         <Tooltip content="Reset base URL to default">
@@ -113,7 +115,7 @@
       <legend class="fieldset-legend">Headers</legend>
       <p class="label mb-1">Headers to send with requests to the endpoint.</p>
 
-      {#if store.store.headers.length > 0}
+      {#if storeSettings.store.headers.length > 0}
         <div class="overflow-x-auto">
           <table class="table-xs table w-full min-w-[720px]">
             <thead>
@@ -126,7 +128,7 @@
               </tr>
             </thead>
             <tbody>
-              {#each store.store.headers as header, index}
+              {#each storeSettings.store.headers as header, index}
                 <tr>
                   <td>
                     <Tooltip

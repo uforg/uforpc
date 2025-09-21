@@ -4,7 +4,7 @@
 
   import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
   import { joinPath } from "$lib/helpers/joinPath";
-  import { getHeadersObject, store } from "$lib/store.svelte";
+  import { getHeadersObject, storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import type { ProcedureDefinitionNode } from "$lib/urpcTypes";
 
@@ -41,7 +41,7 @@
         toast.info("Procedure call cancelled");
       };
 
-      const endpoint = joinPath([store.store.baseUrl, proc.name]);
+      const endpoint = joinPath([storeSettings.store.baseUrl, proc.name]);
       const response = await fetch(endpoint, {
         method: "POST",
         body: JSON.stringify(input.root ?? {}),

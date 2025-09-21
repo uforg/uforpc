@@ -12,7 +12,7 @@
 -->
 
 <script lang="ts">
-  import { primitiveTypes, store } from "$lib/store.svelte";
+  import { primitiveTypes, storeSettings } from "$lib/storeSettings.svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
 
   import FieldInlineArray from "./FieldInlineArray.svelte";
@@ -33,7 +33,7 @@
    * @param typeName Name of the custom type
    */
   function getCustomTypeFields(typeName: string): FieldDefinition[] {
-    for (const node of store.store.jsonSchema.nodes) {
+    for (const node of storeSettings.store.jsonSchema.nodes) {
       if (node.kind !== "type") continue;
       if (node.name !== typeName) continue;
       if (!node.fields) break;

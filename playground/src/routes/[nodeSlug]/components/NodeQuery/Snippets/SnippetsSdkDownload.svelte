@@ -3,7 +3,7 @@
   import { downloadZip } from "client-zip";
   import { toast } from "svelte-sonner";
 
-  import { store } from "$lib/store.svelte";
+  import { storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
   import {
     cmdCodegen,
@@ -60,7 +60,7 @@
     try {
       let opts: CmdCodegenOptions = {
         generator: uiStore.store.codeSnippetsSdkLang,
-        schemaInput: store.store.urpcSchema,
+        schemaInput: storeSettings.store.urpcSchema,
       };
       if (uiStore.store.codeSnippetsSdkLang === "golang-client") {
         opts.golangPackageName =
