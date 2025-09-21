@@ -1,4 +1,5 @@
 import MiniSearch from "minisearch";
+import { toast } from "svelte-sonner";
 
 import { createAsyncStore } from "./createAsyncStore.svelte.ts";
 import { getCurrentHost } from "./helpers/getCurrentHost.ts";
@@ -57,11 +58,57 @@ export interface StoreSettings {
   jsonSchema: Schema;
 }
 
+export const fetchConfig = async () => {
+  // biome-ignore lint/suspicious/noExplicitAny: the fetch can return anything
+  let config: any = {};
+
+  try {
+    const response = await fetch("./config.json");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    config = await response.json();
+  } catch (error) {
+    console.error("Failed to fetch default config", error);
+    return {
+      baseUrl: `${getCurrentHost()}/api/v1/urpc`,
+      headers: [],
+    };
+  }
+
+  let baseUrl = "";
+  let headers: Header[] = [];
+
+  if (typeof config.baseUrl === "string" && config.baseUrl.trim() !== "") {
+    baseUrl = config.baseUrl;
+  } else {
+    baseUrl = `${getCurrentHost()}/api/v1/urpc`;
+  }
+
+  if (Array.isArray(config.headers)) {
+    headers = normalizeHeaders(config.headers);
+  }
+
+  return { baseUrl, headers };
+};
+
 async function storeSettingsGetInitialValue(): Promise<StoreSettings> {
-  const config = await fetchConfig();
+  let baseUrl = "";
+  let headers: Header[] = [];
+
+  try {
+    const config = await fetchConfig();
+    baseUrl = config.baseUrl;
+    headers = config.headers;
+  } catch (error) {
+    toast.error("Failed to load default config", {
+      description: `Error: ${error}`,
+    });
+  }
+
   return {
-    baseUrl: config.baseUrl,
-    headers: config.headers,
+    baseUrl,
+    headers,
     urpcSchema: "version 1",
     jsonSchema: { version: 1, nodes: [] },
   };
@@ -124,40 +171,6 @@ export const getHeadersObject = (): Headers => {
   }
 
   return headers;
-};
-
-export const fetchConfig = async () => {
-  // biome-ignore lint/suspicious/noExplicitAny: the fetch can return anything
-  let config: any = {};
-
-  try {
-    const response = await fetch("./config.json");
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    config = await response.json();
-  } catch (error) {
-    console.error("Failed to fetch default config", error);
-    return {
-      baseUrl: `${getCurrentHost()}/api/v1/urpc`,
-      headers: [],
-    };
-  }
-
-  let baseUrl = "";
-  let headers: Header[] = [];
-
-  if (typeof config.baseUrl === "string" && config.baseUrl.trim() !== "") {
-    baseUrl = config.baseUrl;
-  } else {
-    baseUrl = `${getCurrentHost()}/api/v1/urpc`;
-  }
-
-  if (Array.isArray(config.headers)) {
-    headers = normalizeHeaders(config.headers);
-  }
-
-  return { baseUrl, headers };
 };
 
 /**
