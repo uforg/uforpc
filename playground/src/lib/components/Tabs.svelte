@@ -27,7 +27,7 @@
     <button
       class={[
         "btn join-item border-base-content/20 flex-grow",
-        activeId === tab.id && "btn-primary btn-active",
+        activeId === tab.id && "btn-primary",
       ]}
       onclick={() => onSelect(tab.id)}
       type="button"

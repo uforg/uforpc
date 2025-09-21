@@ -149,7 +149,7 @@
       <button
         class={[
           "btn join-item border-base-content/20 flex-grow",
-          tab === "input" && "btn-primary btn-active",
+          tab === "input" && "btn-primary",
         ]}
         onclick={() => openInput(false)}
       >
@@ -159,7 +159,7 @@
       <button
         class={[
           "btn join-item border-base-content/20 flex-grow",
-          tab === "output" && "btn-primary btn-active",
+          tab === "output" && "btn-primary",
         ]}
         onclick={() => openOutput(false)}
       >

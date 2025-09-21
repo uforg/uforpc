@@ -36,14 +36,14 @@
     <button
       class={[
         "btn btn-xs join-item border-base-content/20 flex-grow",
-        isFormTab && "btn-primary btn-active",
+        isFormTab && "btn-primary",
       ]}
       onclick={switchToForm}>Form</button
     >
     <button
       class={[
         "btn btn-xs join-item border-base-content/20 flex-grow",
-        isJsonTab && "btn-primary btn-active",
+        isJsonTab && "btn-primary",
       ]}
       onclick={switchToJson}>JSON</button
     >

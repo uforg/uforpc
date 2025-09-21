@@ -7,6 +7,16 @@
   logs: false;
 }
 
+/* Custom colors */
+[data-theme="dark"] {
+  --color-primary: #fbbf24;
+  --color-primary-content: #000000;
+}
+[data-theme="light"] {
+  --color-primary: #fbbf24;
+  --color-primary-content: #000000;
+}
+
 @theme {
   /* https://tailwindcss.com/docs/responsive-design#removing-default-breakpoints */
   --breakpoint-*: initial;
