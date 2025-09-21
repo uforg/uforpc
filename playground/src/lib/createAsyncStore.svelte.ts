@@ -41,7 +41,9 @@ interface AsyncStoreResult<T extends Record<string, unknown>> {
  * });
  * ```
  */
-export function createAsyncStore<T extends Record<string, unknown>>(
+
+// biome-ignore lint/suspicious/noExplicitAny: the values are dynamic and varied between different stores
+export function createAsyncStore<T extends Record<string, any>>(
   opts: CreateAsyncStoreOptions<T>,
 ): AsyncStoreResult<T> {
   // Initialize Svelte stores
