@@ -25,6 +25,8 @@ interface AsyncStoreResult<T extends Record<string, unknown>> {
  * provided async function and persists specified keys to IndexedDB using
  * localforage with fallback to localStorage if IndexedDB is unavailable.
  *
+ * Important: this function works only with JSON-serializable values.
+ *
  * @template T - The type of the store object, which should be a record with string keys and unknown values.
  * @param opts - Configuration options for creating the async store.
  * @param opts.initialValue - An async function that returns the initial value of the store.
@@ -121,7 +123,11 @@ export function createAsyncStore<T extends Record<string, any>>(
           if (value === null || value === undefined) {
             await db.removeItem(keyToPersist as string);
           } else {
-            await db.setItem(keyToPersist as string, value);
+            // localforage can only store JSON-serializable values and svelte
+            // wraps stores in proxies, so we need to convert the value to a
+            // plain object before persisting it
+            const plainValue = JSON.parse(JSON.stringify(value));
+            await db.setItem(keyToPersist as string, plainValue);
           }
         } catch (error) {
           // On error, remove the item to avoid stale or corrupted data
