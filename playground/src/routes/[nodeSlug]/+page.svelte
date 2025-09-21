@@ -55,7 +55,7 @@
   let title = $derived.by(() => {
     if (!nodeExists) return "UFO RPC Playground";
 
-    return `${name} ${humanKind} - UFO RPC Playground`;
+    return `${name} ${humanKind} | UFO RPC Playground`;
   });
 
   // Scroll to top of page when node changes

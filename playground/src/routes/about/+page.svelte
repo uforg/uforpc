@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-  <title>About - UFO RPC Playground</title>
+  <title>About | UFO RPC Playground</title>
 </svelte:head>
 
 <div
