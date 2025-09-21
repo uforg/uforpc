@@ -12,21 +12,21 @@ export interface OperationHistory {
   history: InOut[];
 }
 
-export interface HistoryStore {
+export interface StoreHistory {
   operations: Record<string, OperationHistory>;
 }
 
-type HistoryStoreKey = keyof HistoryStore;
+type StoreHistoryKey = keyof StoreHistory;
 
-const defaultHistoryStore: HistoryStore = {
+const defaultStoreHistory: StoreHistory = {
   operations: {},
 };
 
-const historyStoreKeysToPersist: HistoryStoreKey[] = ["operations"];
+const storeHistoryKeysToPersist: StoreHistoryKey[] = ["operations"];
 
-export const historyStore = createAsyncStore<HistoryStore>({
-  initialValue: async () => defaultHistoryStore,
-  keysToPersist: historyStoreKeysToPersist,
+export const storeHistory = createAsyncStore<StoreHistory>({
+  initialValue: async () => defaultStoreHistory,
+  keysToPersist: storeHistoryKeysToPersist,
 });
 
 /**
@@ -35,24 +35,24 @@ export const historyStore = createAsyncStore<HistoryStore>({
  * @param operationID the operation ID to initialize
  */
 const initializeOperation = (operationID: string) => {
-  if (!historyStore.store.operations[operationID]) {
-    historyStore.store.operations[operationID] = {
+  if (!storeHistory.store.operations[operationID]) {
+    storeHistory.store.operations[operationID] = {
       input: {},
       output: "",
       history: [],
     };
   }
 
-  if (!historyStore.store.operations[operationID].input) {
-    historyStore.store.operations[operationID].input = {};
+  if (!storeHistory.store.operations[operationID].input) {
+    storeHistory.store.operations[operationID].input = {};
   }
 
-  if (!historyStore.store.operations[operationID].output) {
-    historyStore.store.operations[operationID].output = "";
+  if (!storeHistory.store.operations[operationID].output) {
+    storeHistory.store.operations[operationID].output = "";
   }
 
-  if (!historyStore.store.operations[operationID].history) {
-    historyStore.store.operations[operationID].history = [];
+  if (!storeHistory.store.operations[operationID].history) {
+    storeHistory.store.operations[operationID].history = [];
   }
 };
 
@@ -66,7 +66,7 @@ export const getCurrentInputForOperation = (
   operationID: string,
 ): InOut["input"] => {
   initializeOperation(operationID);
-  return historyStore.store.operations[operationID].input;
+  return storeHistory.store.operations[operationID].input;
 };
 
 /** * Get the current output for a given operation ID, initializing it if necessary.
@@ -78,7 +78,7 @@ export const getCurrentOutputForOperation = (
   operationID: string,
 ): InOut["output"] => {
   initializeOperation(operationID);
-  return historyStore.store.operations[operationID].output;
+  return storeHistory.store.operations[operationID].output;
 };
 
 /** * Set the current input for a given operation ID, initializing it if necessary.
@@ -91,7 +91,7 @@ export const setCurrentInputForOperation = (
   input: object,
 ) => {
   initializeOperation(operationID);
-  historyStore.store.operations[operationID].input = input;
+  storeHistory.store.operations[operationID].input = input;
 };
 
 /** * Set the current output for a given operation ID, initializing it if necessary.
@@ -104,7 +104,7 @@ export const setCurrentOutputForOperation = (
   output: string,
 ) => {
   initializeOperation(operationID);
-  historyStore.store.operations[operationID].output = output;
+  storeHistory.store.operations[operationID].output = output;
 };
 
 /** * Save the current input and output to the history for a given operation ID, initializing it if necessary.
@@ -119,16 +119,16 @@ export const saveCurrentToHistoryForOperation = (operationID: string) => {
   const input = getCurrentInputForOperation(operationID);
   const output = getCurrentOutputForOperation(operationID);
   if (input && output) {
-    historyStore.store.operations[operationID].history.unshift({
+    storeHistory.store.operations[operationID].history.unshift({
       input,
       output,
       date: new Date().toISOString(),
     });
     // Limit history entries
     if (
-      historyStore.store.operations[operationID].history.length > historyLimit
+      storeHistory.store.operations[operationID].history.length > historyLimit
     ) {
-      historyStore.store.operations[operationID].history.pop();
+      storeHistory.store.operations[operationID].history.pop();
     }
   }
 };

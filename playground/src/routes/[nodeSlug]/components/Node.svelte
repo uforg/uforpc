@@ -1,6 +1,5 @@
 <script lang="ts">
   import { TriangleAlert } from "@lucide/svelte";
-  import { onMount } from "svelte";
 
   import { deleteMarkdownHeadings } from "$lib/helpers/deleteMarkdownHeadings";
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
@@ -9,7 +8,7 @@
   import {
     getCurrentInputForOperation,
     getCurrentOutputForOperation,
-  } from "$lib/historyStore.svelte";
+  } from "$lib/storeHistory";
   import { storeSettings } from "$lib/storeSettings.svelte";
   import { uiStore } from "$lib/uiStore.svelte";
 
