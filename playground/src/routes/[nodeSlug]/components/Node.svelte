@@ -23,7 +23,7 @@
 
   interface Props {
     nodeSlug: string;
-    node: (typeof store.jsonSchema.nodes)[number];
+    node: (typeof store.store.jsonSchema.nodes)[number];
   }
 
   const { nodeSlug, node }: Props = $props();
@@ -74,7 +74,11 @@
   let urpcSchema = $state("");
   $effect(() => {
     if (node.kind === "doc") return;
-    const extracted = extractNodeFromSchema(store.urpcSchema, node.kind, name);
+    const extracted = extractNodeFromSchema(
+      store.store.urpcSchema,
+      node.kind,
+      name,
+    );
     if (extracted) urpcSchema = extracted;
   });
 
@@ -84,14 +88,14 @@
 <div
   class={{
     "h-full overflow-hidden": true,
-    "grid grid-cols-12": !uiStore.isMobile,
+    "grid grid-cols-12": !uiStore.store.isMobile,
   }}
 >
   <section
     class={{
       "h-full space-y-12 overflow-y-auto p-4 pt-0": true,
-      "col-span-8": !uiStore.isMobile && isProcOrStream,
-      "col-span-12": !uiStore.isMobile && !isProcOrStream,
+      "col-span-8": !uiStore.store.isMobile && isProcOrStream,
+      "col-span-12": !uiStore.store.isMobile && !isProcOrStream,
     }}
   >
     <div
@@ -142,12 +146,12 @@
       </div>
     {/if}
 
-    {#if uiStore.isMobile || !isProcOrStream}
+    {#if uiStore.store.isMobile || !isProcOrStream}
       <BottomSpace />
     {/if}
   </section>
 
-  {#if !uiStore.isMobile && (node.kind == "proc" || node.kind == "stream")}
+  {#if !uiStore.store.isMobile && (node.kind == "proc" || node.kind == "stream")}
     <div class="col-span-4 overflow-y-auto p-4 pt-0">
       <Snippets {input} type={node.kind} name={node.name} />
       <BottomSpace />

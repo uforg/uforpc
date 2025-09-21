@@ -14,11 +14,11 @@
 
   let { fields, input = $bindable() }: Props = $props();
 
-  let isFormTab = $derived(uiStore.inputFormTab === "form");
-  const switchToForm = () => (uiStore.inputFormTab = "form");
+  let isFormTab = $derived(uiStore.store.inputFormTab === "form");
+  const switchToForm = () => (uiStore.store.inputFormTab = "form");
 
-  let isJsonTab = $derived(uiStore.inputFormTab === "json");
-  const switchToJson = () => (uiStore.inputFormTab = "json");
+  let isJsonTab = $derived(uiStore.store.inputFormTab === "json");
+  const switchToJson = () => (uiStore.store.inputFormTab = "json");
 </script>
 
 <div

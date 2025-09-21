@@ -15,7 +15,7 @@
   let { input, type, name }: Props = $props();
 
   let curl = $derived.by(() => {
-    const endpoint = joinPath([store.baseUrl, name]);
+    const endpoint = joinPath([store.store.baseUrl, name]);
     const payload = input ?? {};
     let payloadStr = JSON.stringify(payload, null, 2);
     payloadStr = payloadStr.replace(/'/g, "'\\''");

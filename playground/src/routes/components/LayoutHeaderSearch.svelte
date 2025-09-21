@@ -54,7 +54,7 @@
 >
   <Search class="size-4" />
   <span>Search...</span>
-  {#if !uiStore.isMobile}
+  {#if !uiStore.store.isMobile}
     <span class="ml-4">
       <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
       <kbd class="kbd kbd-sm">K</kbd>

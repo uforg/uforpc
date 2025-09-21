@@ -100,15 +100,15 @@ handle.cancel();`,
 
   <p>Use your editor/IDE to help you with the types, the SDK is fully typed.</p>
 
-  {#if uiStore.codeSnippetsSdkLang === "typescript-client"}
+  {#if uiStore.store.codeSnippetsSdkLang === "typescript-client"}
     <div class="not-prose">
       <Code code={isProc ? tsProc : tsStream} lang="ts" />
     </div>
-  {:else if uiStore.codeSnippetsSdkLang === "golang-client"}
+  {:else if uiStore.store.codeSnippetsSdkLang === "golang-client"}
     <div class="not-prose">
       <Code code={isProc ? goProc : goStream} lang="go" />
     </div>
-  {:else if uiStore.codeSnippetsSdkLang === "dart-client"}
+  {:else if uiStore.store.codeSnippetsSdkLang === "dart-client"}
     <div class="not-prose">
       <Code code={isProc ? dartProc : dartStream} lang="dart" />
     </div>

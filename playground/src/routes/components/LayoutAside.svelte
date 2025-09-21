@@ -46,19 +46,19 @@
   ): boolean {
     if (node.kind !== kind) return false;
 
-    if (uiStore.asideSearchOpen) {
-      if (uiStore.asideSearchQuery === "") return true;
+    if (uiStore.store.asideSearchOpen) {
+      if (uiStore.store.asideSearchQuery === "") return true;
 
       // Do the search
       const name = getNodeName(node).toLowerCase();
-      const query = uiStore.asideSearchQuery.toLowerCase();
+      const query = uiStore.store.asideSearchQuery.toLowerCase();
       return name.includes(query);
     }
 
-    if (node.kind === "doc") return !uiStore.asideHideDocs;
-    if (node.kind === "type") return !uiStore.asideHideTypes;
-    if (node.kind === "proc") return !uiStore.asideHideProcs;
-    if (node.kind === "stream") return !uiStore.asideHideStreams;
+    if (node.kind === "doc") return !uiStore.store.asideHideDocs;
+    if (node.kind === "type") return !uiStore.store.asideHideTypes;
+    if (node.kind === "proc") return !uiStore.store.asideHideProcs;
+    if (node.kind === "stream") return !uiStore.store.asideHideStreams;
 
     return false;
   }
@@ -67,14 +67,14 @@
 {#snippet aside()}
   <aside
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.aside = e.detail)}
+    ondimensionschange={(e) => (uiStore.store.aside = e.detail)}
     class={[
       "bg-base-100 h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[130px]",
       "overflow-x-hidden overflow-y-auto",
     ]}
   >
     <header class="bg-base-100 sticky top-0 z-10 w-full shadow-xs">
-      {#if !uiStore.isMobile}
+      {#if !uiStore.store.isMobile}
         <a
           class="sticky top-0 z-10 flex h-[72px] w-full items-end p-4 shadow-xs"
           href="https://uforpc.uforg.dev"
@@ -86,13 +86,13 @@
         </a>
       {/if}
 
-      {#if uiStore.isMobile}
+      {#if uiStore.store.isMobile}
         <div class="flex items-center justify-between p-4">
           <Logo class="w-[180px]" />
 
           <button
             class="btn btn-ghost btn-square btn-sm"
-            onclick={() => (uiStore.asideOpen = !uiStore.asideOpen)}
+            onclick={() => (uiStore.store.asideOpen = !uiStore.store.asideOpen)}
           >
             <X class="size-6" />
           </button>
@@ -106,7 +106,7 @@
       <Tooltip content="RPC Home">
         <a
           href="#/"
-          onclick={() => (uiStore.asideOpen = false)}
+          onclick={() => (uiStore.store.asideOpen = false)}
           class={[
             "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
             "hover:bg-blue-500/20",
@@ -118,7 +118,7 @@
         </a>
       </Tooltip>
 
-      {#each store.jsonSchema.nodes as node}
+      {#each store.store.jsonSchema.nodes as node}
         {#if shouldShowNode("doc", node)}
           <LayoutAsideItem {node} />
         {/if}
@@ -136,12 +136,12 @@
   </aside>
 {/snippet}
 
-{#if !uiStore.isMobile}
+{#if !uiStore.store.isMobile}
   {@render aside()}
 {/if}
 
-{#if uiStore.isMobile}
-  <Offcanvas bind:isOpen={uiStore.asideOpen}>
+{#if uiStore.store.isMobile}
+  <Offcanvas bind:isOpen={uiStore.store.asideOpen}>
     {@render aside()}
   </Offcanvas>
 {/if}

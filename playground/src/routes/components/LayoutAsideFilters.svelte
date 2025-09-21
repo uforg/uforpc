@@ -15,26 +15,26 @@
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   const searchTooltip = $derived(
-    uiStore.asideSearchOpen ? "Close search" : "Open search",
+    uiStore.store.asideSearchOpen ? "Close search" : "Open search",
   );
   const docsTooltip = $derived(
-    uiStore.asideHideDocs ? "Show documentation" : "Hide documentation",
+    uiStore.store.asideHideDocs ? "Show documentation" : "Hide documentation",
   );
   const typesTooltip = $derived(
-    uiStore.asideHideTypes ? "Show data types" : "Hide data types",
+    uiStore.store.asideHideTypes ? "Show data types" : "Hide data types",
   );
   const procsTooltip = $derived(
-    uiStore.asideHideProcs ? "Show procedures" : "Hide procedures",
+    uiStore.store.asideHideProcs ? "Show procedures" : "Hide procedures",
   );
   const streamsTooltip = $derived(
-    uiStore.asideHideStreams ? "Show streams" : "Hide streams",
+    uiStore.store.asideHideStreams ? "Show streams" : "Hide streams",
   );
 
   let searchInput: HTMLInputElement | null = $state(null);
 
   function openSearch() {
-    uiStore.asideSearchOpen = true;
-    uiStore.asideSearchQuery = "";
+    uiStore.store.asideSearchOpen = true;
+    uiStore.store.asideSearchQuery = "";
 
     setTimeout(() => {
       searchInput?.focus();
@@ -42,33 +42,33 @@
   }
 
   function closeSearch() {
-    uiStore.asideSearchOpen = false;
-    uiStore.asideSearchQuery = "";
+    uiStore.store.asideSearchOpen = false;
+    uiStore.store.asideSearchQuery = "";
   }
 
   function toggleDocs() {
-    uiStore.asideHideDocs = !uiStore.asideHideDocs;
+    uiStore.store.asideHideDocs = !uiStore.store.asideHideDocs;
   }
 
   function toggleTypes() {
-    uiStore.asideHideTypes = !uiStore.asideHideTypes;
+    uiStore.store.asideHideTypes = !uiStore.store.asideHideTypes;
   }
 
   function toggleProcs() {
-    uiStore.asideHideProcs = !uiStore.asideHideProcs;
+    uiStore.store.asideHideProcs = !uiStore.store.asideHideProcs;
   }
 
   function toggleStreams() {
-    uiStore.asideHideStreams = !uiStore.asideHideStreams;
+    uiStore.store.asideHideStreams = !uiStore.store.asideHideStreams;
   }
 
   function resetFilters() {
-    uiStore.asideSearchOpen = false;
-    uiStore.asideSearchQuery = "";
-    uiStore.asideHideDocs = false;
-    uiStore.asideHideTypes = true;
-    uiStore.asideHideProcs = false;
-    uiStore.asideHideStreams = false;
+    uiStore.store.asideSearchOpen = false;
+    uiStore.store.asideSearchQuery = "";
+    uiStore.store.asideHideDocs = false;
+    uiStore.store.asideHideTypes = true;
+    uiStore.store.asideHideProcs = false;
+    uiStore.store.asideHideStreams = false;
   }
 </script>
 
@@ -80,13 +80,13 @@
     </button>
   </Tooltip>
 
-  {#if uiStore.asideSearchOpen}
+  {#if uiStore.store.asideSearchOpen}
     <input
       type="text"
       class="input input-sm flex-grow"
       placeholder="Search..."
       bind:this={searchInput}
-      bind:value={uiStore.asideSearchQuery}
+      bind:value={uiStore.store.asideSearchQuery}
     />
 
     <Tooltip content={searchTooltip} placement="bottom">
@@ -96,7 +96,7 @@
     </Tooltip>
   {/if}
 
-  {#if !uiStore.asideSearchOpen}
+  {#if !uiStore.store.asideSearchOpen}
     <Tooltip content={searchTooltip} placement="bottom">
       <button class={["btn btn-sm btn-square relative"]} onclick={openSearch}>
         <Search class="size-4" />
@@ -106,7 +106,7 @@
       <button
         class={[
           "btn btn-sm btn-square relative",
-          uiStore.asideHideDocs && "toggle-disabled",
+          uiStore.store.asideHideDocs && "toggle-disabled",
         ]}
         onclick={toggleDocs}
       >
@@ -117,7 +117,7 @@
       <button
         class={[
           "btn btn-sm btn-square relative",
-          uiStore.asideHideTypes && "toggle-disabled",
+          uiStore.store.asideHideTypes && "toggle-disabled",
         ]}
         onclick={toggleTypes}
       >
@@ -128,7 +128,7 @@
       <button
         class={[
           "btn btn-sm btn-square relative",
-          uiStore.asideHideProcs && "toggle-disabled",
+          uiStore.store.asideHideProcs && "toggle-disabled",
         ]}
         onclick={toggleProcs}
       >
@@ -139,7 +139,7 @@
       <button
         class={[
           "btn btn-sm btn-square relative",
-          uiStore.asideHideStreams && "toggle-disabled",
+          uiStore.store.asideHideStreams && "toggle-disabled",
         ]}
         onclick={toggleStreams}
       >

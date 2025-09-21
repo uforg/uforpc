@@ -1,7 +1,8 @@
+import { browser } from "$app/environment";
+import { debounce } from "lodash-es";
 import type { Action } from "svelte/action";
 
-import { debounce } from "./helpers/debounce";
-import { createStore } from "./storeHelpers.svelte";
+import { createAsyncStore } from "./createAsyncStore.svelte";
 import type { CodegenGenerator } from "./urpc";
 
 export interface UiStoreDimensions {
@@ -122,7 +123,7 @@ const defaultUiStoreDimensions: UiStoreDimensions = {
   },
 };
 
-const defaultUiStore: UiStore = {
+const uiStoreDefault: UiStore = {
   isMobile: false,
   theme: "dark",
   inputFormTab: "form",
@@ -163,19 +164,20 @@ const uiStoreKeysToPersist: UiStoreKey[] = [
   "asideHideStreams",
 ];
 
-export const uiStore = createStore<UiStore>(
-  { ...defaultUiStore },
-  uiStoreKeysToPersist,
-);
+export const uiStore = createAsyncStore<UiStore>({
+  initialValue: async () => uiStoreDefault,
+  keysToPersist: uiStoreKeysToPersist,
+  storeName: "uiStore",
+});
 
 $effect.root(() => {
+  const calcIsMobile = debounce(() => {
+    const mobileThreshold = 1200;
+    uiStore.store.isMobile = globalThis.innerWidth < mobileThreshold;
+  }, 100);
+
   // Effect to check if the screen is mobile (even on resize) with debounce
   $effect(() => {
-    const calcIsMobile = debounce(() => {
-      const mobileThreshold = 1200;
-      uiStore.isMobile = globalThis.innerWidth < mobileThreshold;
-    }, 100);
-
     calcIsMobile();
     globalThis.addEventListener("resize", calcIsMobile);
     return () => {
@@ -185,7 +187,7 @@ $effect.root(() => {
 
   // Effect to set theme attribute on document element when theme changes
   $effect(() => {
-    setThemeAttribute(uiStore.theme);
+    setThemeAttribute(uiStore.store.theme);
   });
 });
 
@@ -212,18 +214,20 @@ function setThemeAttribute(theme: Theme) {
  * system theme
  */
 export function initTheme() {
-  const theme = uiStore.theme;
+  if (!browser) return;
+
+  const theme = uiStore.store.theme;
   if (theme === "light" || theme === "dark") {
-    uiStore.theme = theme;
+    uiStore.store.theme = theme;
   } else {
-    uiStore.theme = getSystemTheme();
+    uiStore.store.theme = getSystemTheme();
   }
-  setThemeAttribute(uiStore.theme);
+  setThemeAttribute(uiStore.store.theme);
 
   // Listen for changes in the color scheme to change the theme dinamically
   matchMediaColor?.addEventListener("change", () => {
-    uiStore.theme = getSystemTheme();
-    setThemeAttribute(uiStore.theme);
+    uiStore.store.theme = getSystemTheme();
+    setThemeAttribute(uiStore.store.theme);
   });
 }
 

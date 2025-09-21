@@ -15,12 +15,12 @@
 <div
   class={{
     "h-full overflow-y-auto p-4": true,
-    "pt-16": !uiStore.isMobile,
-    "pt-8": uiStore.isMobile,
+    "pt-16": !uiStore.store.isMobile,
+    "pt-8": uiStore.store.isMobile,
   }}
 >
   <div class="container mx-auto space-y-8 pb-8">
-    {#if !uiStore.isMobile}
+    {#if !uiStore.store.isMobile}
       <Logo class="mx-auto h-full max-w-[600px]" />
     {/if}
 
@@ -30,7 +30,7 @@
         target="_blank"
         class={{
           "btn btn-primary": true,
-          "btn-lg": !uiStore.isMobile,
+          "btn-lg": !uiStore.store.isMobile,
         }}
       >
         <Github class="size-5" />
@@ -41,7 +41,7 @@
         target="_blank"
         class={{
           "btn btn-outline": true,
-          "btn-lg": !uiStore.isMobile,
+          "btn-lg": !uiStore.store.isMobile,
         }}
       >
         <BookOpenText class="size-5" />

@@ -20,7 +20,7 @@
   <div
     class={{
       "mb-4": true,
-      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.isMobile,
+      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.store.isMobile,
     }}
   >
     <H2 class="mb-4 flex items-center space-x-2">Code snippets</H2>
@@ -30,13 +30,13 @@
         { id: "curl", label: "HTTP Snippets" },
         { id: "sdk", label: "SDK Snippets" },
       ]}
-      activeId={uiStore.codeSnippetsTab}
-      onSelect={(id) => (uiStore.codeSnippetsTab = id as "sdk" | "curl")}
+      activeId={uiStore.store.codeSnippetsTab}
+      onSelect={(id) => (uiStore.store.codeSnippetsTab = id as "sdk" | "curl")}
     />
   </div>
 
   <div class="space-y-2">
-    {#if uiStore.codeSnippetsTab === "sdk"}
+    {#if uiStore.store.codeSnippetsTab === "sdk"}
       <SnippetsSdk {type} {name} />
     {:else}
       <SnippetsCurl {input} {type} {name} />

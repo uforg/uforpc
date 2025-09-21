@@ -14,16 +14,16 @@
   let isGenerating: boolean = $state(false);
 
   let downloadFileName = $derived.by(() => {
-    if (uiStore.codeSnippetsSdkLang === "typescript-client") {
+    if (uiStore.store.codeSnippetsSdkLang === "typescript-client") {
       return "uforpc-client-sdk.ts";
     }
-    if (uiStore.codeSnippetsSdkLang === "golang-client") {
+    if (uiStore.store.codeSnippetsSdkLang === "golang-client") {
       return "uforpc-client-sdk.go";
     }
-    if (uiStore.codeSnippetsSdkLang === "golang-server") {
+    if (uiStore.store.codeSnippetsSdkLang === "golang-server") {
       return "uforpc-server-sdk.go";
     }
-    if (uiStore.codeSnippetsSdkLang === "dart-client") {
+    if (uiStore.store.codeSnippetsSdkLang === "dart-client") {
       return "uforpc-dart-client-sdk.zip";
     }
     return "unknown";
@@ -59,18 +59,19 @@
 
     try {
       let opts: CmdCodegenOptions = {
-        generator: uiStore.codeSnippetsSdkLang,
-        schemaInput: store.urpcSchema,
+        generator: uiStore.store.codeSnippetsSdkLang,
+        schemaInput: store.store.urpcSchema,
       };
-      if (uiStore.codeSnippetsSdkLang === "golang-client") {
+      if (uiStore.store.codeSnippetsSdkLang === "golang-client") {
         opts.golangPackageName =
-          uiStore.codeSnippetsSdkGolangPackageName.trim();
+          uiStore.store.codeSnippetsSdkGolangPackageName.trim();
         if (opts.golangPackageName === "") {
           throw new Error("Package name is required");
         }
       }
-      if (uiStore.codeSnippetsSdkLang === "dart-client") {
-        opts.dartPackageName = uiStore.codeSnippetsSdkDartPackageName.trim();
+      if (uiStore.store.codeSnippetsSdkLang === "dart-client") {
+        opts.dartPackageName =
+          uiStore.store.codeSnippetsSdkDartPackageName.trim();
         if (opts.dartPackageName === "") {
           throw new Error("Package name is required");
         }
@@ -97,14 +98,14 @@
 </script>
 
 <div>
-  {#if uiStore.codeSnippetsSdkLang === "golang-client"}
+  {#if uiStore.store.codeSnippetsSdkLang === "golang-client"}
     <label class="fieldset">
       <legend class="fieldset-legend">Go package name</legend>
       <input
         id="go-pkg"
         class="input w-full"
         placeholder="Package name..."
-        bind:value={uiStore.codeSnippetsSdkGolangPackageName}
+        bind:value={uiStore.store.codeSnippetsSdkGolangPackageName}
       />
       <div class="prose prose-sm text-base-content/50 max-w-none">
         The generated SDK and code examples will use this package name.
@@ -112,14 +113,14 @@
     </label>
   {/if}
 
-  {#if uiStore.codeSnippetsSdkLang === "dart-client"}
+  {#if uiStore.store.codeSnippetsSdkLang === "dart-client"}
     <label class="fieldset">
       <legend class="fieldset-legend">Dart package name</legend>
       <input
         id="go-pkg"
         class="input w-full"
         placeholder="Package name..."
-        bind:value={uiStore.codeSnippetsSdkDartPackageName}
+        bind:value={uiStore.store.codeSnippetsSdkDartPackageName}
       />
       <div class="prose prose-sm text-base-content/50 max-w-none">
         The generated SDK and code examples will use this package name.

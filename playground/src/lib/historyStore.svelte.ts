@@ -1,4 +1,4 @@
-import { createStore } from "./storeHelpers.svelte";
+import { createAsyncStore } from "./createAsyncStore.svelte";
 
 export interface InOut {
   input: object;
@@ -24,10 +24,10 @@ const defaultHistoryStore: HistoryStore = {
 
 const historyStoreKeysToPersist: HistoryStoreKey[] = ["operations"];
 
-export const historyStore = createStore<HistoryStore>(
-  { ...defaultHistoryStore },
-  historyStoreKeysToPersist,
-);
+export const historyStore = createAsyncStore<HistoryStore>({
+  initialValue: async () => defaultHistoryStore,
+  keysToPersist: historyStoreKeysToPersist,
+});
 
 /**
  * Initialize the operation history for a given operation ID if it doesn't exist.
@@ -35,24 +35,24 @@ export const historyStore = createStore<HistoryStore>(
  * @param operationID the operation ID to initialize
  */
 const initializeOperation = (operationID: string) => {
-  if (!historyStore.operations[operationID]) {
-    historyStore.operations[operationID] = {
+  if (!historyStore.store.operations[operationID]) {
+    historyStore.store.operations[operationID] = {
       input: {},
       output: "",
       history: [],
     };
   }
 
-  if (!historyStore.operations[operationID].input) {
-    historyStore.operations[operationID].input = {};
+  if (!historyStore.store.operations[operationID].input) {
+    historyStore.store.operations[operationID].input = {};
   }
 
-  if (!historyStore.operations[operationID].output) {
-    historyStore.operations[operationID].output = "";
+  if (!historyStore.store.operations[operationID].output) {
+    historyStore.store.operations[operationID].output = "";
   }
 
-  if (!historyStore.operations[operationID].history) {
-    historyStore.operations[operationID].history = [];
+  if (!historyStore.store.operations[operationID].history) {
+    historyStore.store.operations[operationID].history = [];
   }
 };
 
@@ -66,7 +66,7 @@ export const getCurrentInputForOperation = (
   operationID: string,
 ): InOut["input"] => {
   initializeOperation(operationID);
-  return historyStore.operations[operationID].input;
+  return historyStore.store.operations[operationID].input;
 };
 
 /** * Get the current output for a given operation ID, initializing it if necessary.
@@ -78,7 +78,7 @@ export const getCurrentOutputForOperation = (
   operationID: string,
 ): InOut["output"] => {
   initializeOperation(operationID);
-  return historyStore.operations[operationID].output;
+  return historyStore.store.operations[operationID].output;
 };
 
 /** * Set the current input for a given operation ID, initializing it if necessary.
@@ -91,7 +91,7 @@ export const setCurrentInputForOperation = (
   input: object,
 ) => {
   initializeOperation(operationID);
-  historyStore.operations[operationID].input = input;
+  historyStore.store.operations[operationID].input = input;
 };
 
 /** * Set the current output for a given operation ID, initializing it if necessary.
@@ -104,7 +104,7 @@ export const setCurrentOutputForOperation = (
   output: string,
 ) => {
   initializeOperation(operationID);
-  historyStore.operations[operationID].output = output;
+  historyStore.store.operations[operationID].output = output;
 };
 
 /** * Save the current input and output to the history for a given operation ID, initializing it if necessary.
@@ -119,14 +119,16 @@ export const saveCurrentToHistoryForOperation = (operationID: string) => {
   const input = getCurrentInputForOperation(operationID);
   const output = getCurrentOutputForOperation(operationID);
   if (input && output) {
-    historyStore.operations[operationID].history.unshift({
+    historyStore.store.operations[operationID].history.unshift({
       input,
       output,
       date: new Date().toISOString(),
     });
     // Limit history entries
-    if (historyStore.operations[operationID].history.length > historyLimit) {
-      historyStore.operations[operationID].history.pop();
+    if (
+      historyStore.store.operations[operationID].history.length > historyLimit
+    ) {
+      historyStore.store.operations[operationID].history.pop();
     }
   }
 };

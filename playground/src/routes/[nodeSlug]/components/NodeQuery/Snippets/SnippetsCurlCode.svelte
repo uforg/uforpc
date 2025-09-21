@@ -312,7 +312,7 @@
 
   let pickedLang = $derived.by(() => {
     const lang = langs.find(
-      (lang) => lang.label === uiStore.codeSnippetsCurlLang,
+      (lang) => lang.label === uiStore.store.codeSnippetsCurlLang,
     );
     if (!lang) return defaultLang.langCode;
     return lang.langCode;
@@ -320,7 +320,7 @@
 
   let pickedCode = $derived.by(() => {
     const lang = langs.find(
-      (lang) => lang.label === uiStore.codeSnippetsCurlLang,
+      (lang) => lang.label === uiStore.store.codeSnippetsCurlLang,
     );
     if (!lang) return defaultLang.func(curl);
     return lang.func(curl);
@@ -328,17 +328,17 @@
 
   onMount(() => {
     const lang = langs.find(
-      (lang) => lang.label === uiStore.codeSnippetsCurlLang,
+      (lang) => lang.label === uiStore.store.codeSnippetsCurlLang,
     );
     if (!lang) {
-      uiStore.codeSnippetsCurlLang = defaultLang.label;
+      uiStore.store.codeSnippetsCurlLang = defaultLang.label;
     }
   });
 </script>
 
 <label class="fieldset mb-4">
   <legend class="fieldset-legend">Language</legend>
-  <select class="select w-full" bind:value={uiStore.codeSnippetsCurlLang}>
+  <select class="select w-full" bind:value={uiStore.store.codeSnippetsCurlLang}>
     {#each langGroups as langGroup}
       {#if langGroup.langs.length > 1}
         <optgroup label={langGroup.group}>

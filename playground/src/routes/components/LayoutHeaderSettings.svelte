@@ -31,14 +31,14 @@
   });
 
   const addHeader = () => {
-    store.headers = [
-      ...store.headers,
+    store.store.headers = [
+      ...store.store.headers,
       { key: "", value: "", enabled: true, description: "" },
     ];
   };
 
   const removeHeader = (index: number) => {
-    store.headers = store.headers.filter((_, i) => i !== index);
+    store.store.headers = store.store.headers.filter((_, i) => i !== index);
   };
 
   const loadDefaultBaseUrlWithConfirm = () => {
@@ -60,7 +60,7 @@
 >
   <Settings class="size-4" />
   <span>Settings</span>
-  {#if !uiStore.isMobile}
+  {#if !uiStore.store.isMobile}
     <span class="ml-4">
       <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
       <kbd class="kbd kbd-sm">,</kbd>
@@ -89,7 +89,7 @@
             class="grow"
             spellcheck="false"
             placeholder="https://example.com/api/v1/urpc"
-            bind:value={store.baseUrl}
+            bind:value={store.store.baseUrl}
           />
         </label>
         <Tooltip content="Reset base URL to default">
@@ -113,7 +113,7 @@
       <legend class="fieldset-legend">Headers</legend>
       <p class="label mb-1">Headers to send with requests to the endpoint.</p>
 
-      {#if store.headers.length > 0}
+      {#if store.store.headers.length > 0}
         <div class="overflow-x-auto">
           <table class="table-xs table w-full min-w-[720px]">
             <thead>
@@ -126,7 +126,7 @@
               </tr>
             </thead>
             <tbody>
-              {#each store.headers as header, index}
+              {#each store.store.headers as header, index}
                 <tr>
                   <td>
                     <Tooltip

@@ -41,7 +41,7 @@
         toast.info("Procedure call cancelled");
       };
 
-      const endpoint = joinPath([store.baseUrl, proc.name]);
+      const endpoint = joinPath([store.store.baseUrl, proc.name]);
       const response = await fetch(endpoint, {
         method: "POST",
         body: JSON.stringify(input.root ?? {}),
@@ -90,7 +90,7 @@
 <div bind:this={wrapper}>
   <div
     class={{
-      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.isMobile,
+      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.store.isMobile,
     }}
   >
     <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
@@ -178,7 +178,7 @@
   </div>
 </div>
 
-{#if uiStore.isMobile}
+{#if uiStore.store.isMobile}
   <div class="mt-12">
     <Snippets {input} type="proc" name={proc.name} />
   </div>

@@ -24,12 +24,12 @@
 <div
   class={{
     "h-full overflow-y-auto p-4": true,
-    "pt-16": !uiStore.isMobile,
+    "pt-16": !uiStore.store.isMobile,
   }}
 >
   <div class="container mx-auto">
     <div class="mb-16 text-center">
-      {#if !uiStore.isMobile}
+      {#if !uiStore.store.isMobile}
         <div class="mb-8">
           <Logo class="mx-auto h-full max-w-[600px]" />
         </div>
@@ -38,7 +38,7 @@
       <p
         class={{
           "mx-auto mb-8 max-w-2xl text-xl": true,
-          "text-base-content/70": !uiStore.isMobile,
+          "text-base-content/70": !uiStore.store.isMobile,
         }}
       >
         Test and experiment with UFO RPC in this interactive playground using
@@ -55,7 +55,7 @@
           target="_blank"
           class={{
             "btn btn-primary": true,
-            "btn-lg": !uiStore.isMobile,
+            "btn-lg": !uiStore.store.isMobile,
           }}
         >
           <Github class="size-5" />
@@ -66,7 +66,7 @@
           target="_blank"
           class={{
             "btn btn-outline": true,
-            "btn-lg": !uiStore.isMobile,
+            "btn-lg": !uiStore.store.isMobile,
           }}
         >
           <BookOpenText class="size-5" />

@@ -17,10 +17,10 @@
   let isMobileOffcanvasOpen = $state(false);
 </script>
 
-{#if !uiStore.isMobile}
+{#if !uiStore.store.isMobile}
   <header
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.header = e.detail)}
+    ondimensionschange={(e) => (uiStore.store.header = e.detail)}
     class={[
       "sticky top-0 z-30 flex h-[72px] w-full items-center justify-between space-x-2 p-4",
       "bg-base-100 shadow-xs",
@@ -52,10 +52,10 @@
   </header>
 {/if}
 
-{#if uiStore.isMobile}
+{#if uiStore.store.isMobile}
   <header
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.header = e.detail)}
+    ondimensionschange={(e) => (uiStore.store.header = e.detail)}
     class={[
       "sticky top-0 z-30 flex h-[72px] w-full items-center justify-between space-x-2 p-4",
       "bg-base-100 shadow-xs",
@@ -64,7 +64,7 @@
     <div class="flex items-center justify-start space-x-2">
       <button
         class="btn btn-ghost btn-square"
-        onclick={() => (uiStore.asideOpen = true)}
+        onclick={() => (uiStore.store.asideOpen = true)}
       >
         <Menu class="size-6" />
       </button>

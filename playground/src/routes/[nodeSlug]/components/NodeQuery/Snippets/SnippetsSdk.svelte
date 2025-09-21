@@ -17,11 +17,11 @@
   const { type, name }: Props = $props();
 
   function toggleStep(step: "download" | "setup" | "usage") {
-    if (uiStore.codeSnippetsSdkStep === step) {
-      uiStore.codeSnippetsSdkStep = "";
+    if (uiStore.store.codeSnippetsSdkStep === step) {
+      uiStore.store.codeSnippetsSdkStep = "";
       return;
     }
-    uiStore.codeSnippetsSdkStep = step;
+    uiStore.store.codeSnippetsSdkStep = step;
   }
 </script>
 
@@ -30,7 +30,7 @@
   <select
     id="sdk-generator-select"
     class="select w-full"
-    bind:value={uiStore.codeSnippetsSdkLang}
+    bind:value={uiStore.store.codeSnippetsSdkLang}
   >
     <option value="typescript-client">TypeScript</option>
     <option value="golang-client">Go</option>
@@ -90,21 +90,21 @@
 
 <div class="space-y-4">
   {@render step(
-    uiStore.codeSnippetsSdkStep === "download",
+    uiStore.store.codeSnippetsSdkStep === "download",
     "1. Download SDK",
     () => toggleStep("download"),
     download,
   )}
 
   {@render step(
-    uiStore.codeSnippetsSdkStep === "setup",
+    uiStore.store.codeSnippetsSdkStep === "setup",
     "2. Setup SDK",
     () => toggleStep("setup"),
     setup,
   )}
 
   {@render step(
-    uiStore.codeSnippetsSdkStep === "usage",
+    uiStore.store.codeSnippetsSdkStep === "usage",
     "3. Usage example",
     () => toggleStep("usage"),
     usage,

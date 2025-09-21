@@ -17,7 +17,7 @@
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   interface Props {
-    node: (typeof store.jsonSchema.nodes)[number];
+    node: (typeof store.store.jsonSchema.nodes)[number];
   }
 
   const { node }: Props = $props();
@@ -31,11 +31,11 @@
   });
 
   let nameHtml = $derived.by(() => {
-    if (!uiStore.asideSearchOpen || !uiStore.asideSearchQuery) {
+    if (!uiStore.store.asideSearchOpen || !uiStore.store.asideSearchQuery) {
       return name;
     }
 
-    return markSearchHints([uiStore.asideSearchQuery], name);
+    return markSearchHints([uiStore.store.asideSearchQuery], name);
   });
 
   let title = $derived.by(() => {
@@ -78,7 +78,7 @@
   <a
     {id}
     {href}
-    onclick={() => (uiStore.asideOpen = false)}
+    onclick={() => (uiStore.store.asideOpen = false)}
     class={[
       "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
       {

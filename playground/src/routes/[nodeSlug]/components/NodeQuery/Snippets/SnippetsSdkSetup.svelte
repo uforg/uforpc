@@ -5,10 +5,12 @@
   import Code from "$lib/components/Code.svelte";
 
   const dartPackageName = $derived.by(
-    () => uiStore.codeSnippetsSdkDartPackageName.trim() || "your_dart_package",
+    () =>
+      uiStore.store.codeSnippetsSdkDartPackageName.trim() ||
+      "your_dart_package",
   );
   const golangPackageName = $derived.by(
-    () => uiStore.codeSnippetsSdkGolangPackageName.trim() || "yourpkg",
+    () => uiStore.store.codeSnippetsSdkGolangPackageName.trim() || "yourpkg",
   );
 
   const tsSetup = $derived.by(
@@ -16,7 +18,7 @@
 import { NewClient } from "./path/to/uforpc-client-sdk.ts";
 
 // 2) Build the client
-const client = NewClient("${store.baseUrl}").build();`,
+const client = NewClient("${store.store.baseUrl}").build();`,
   );
 
   const goSetup = $derived.by(
@@ -27,7 +29,7 @@ package main
 import "yourmodule/${golangPackageName}"
 
 func main() {
-	client := ${golangPackageName}.NewClient("${store.baseUrl}").Build()
+	client := ${golangPackageName}.NewClient("${store.store.baseUrl}").Build()
 	_ = client // ready to use
 }`,
   );
@@ -43,12 +45,12 @@ dependencies:
   const dartSetup = $derived.by(
     () => `import "package:${dartPackageName}/client.dart" as urpc;
 
-final client = urpc.NewClient("${store.baseUrl}").build();`,
+final client = urpc.NewClient("${store.store.baseUrl}").build();`,
   );
 </script>
 
 <div class="prose prose-sm text-base-content max-w-none space-y-4">
-  {#if uiStore.codeSnippetsSdkLang === "typescript-client"}
+  {#if uiStore.store.codeSnippetsSdkLang === "typescript-client"}
     <h3>TypeScript setup</h3>
     <p>
       The SDK is a single <code>.ts</code> file with no external dependencies.
@@ -65,7 +67,7 @@ final client = urpc.NewClient("${store.baseUrl}").build();`,
       <Code code={tsSetup} lang="ts" />
     </div>
     <p>No additional configuration or dependencies are required.</p>
-  {:else if uiStore.codeSnippetsSdkLang === "golang-client"}
+  {:else if uiStore.store.codeSnippetsSdkLang === "golang-client"}
     <h3>Go setup</h3>
     <p>
       The SDK is a single <code>.go</code> file with no external dependencies. Place
@@ -86,7 +88,7 @@ final client = urpc.NewClient("${store.baseUrl}").build();`,
       If you keep the generated client in a different package, import that
       package and call <code>NewClient</code> through it.
     </p>
-  {:else if uiStore.codeSnippetsSdkLang === "dart-client"}
+  {:else if uiStore.store.codeSnippetsSdkLang === "dart-client"}
     <h3>Dart setup</h3>
     <p>
       The download is a zip containing a full Dart package. Unzip it and add it

@@ -1,10 +1,10 @@
 import MiniSearch from "minisearch";
 
+import { createAsyncStore } from "./createAsyncStore.svelte.ts";
 import { getCurrentHost } from "./helpers/getCurrentHost.ts";
 import { getMarkdownTitle } from "./helpers/getMarkdownTitle.ts";
 import { markdownToText } from "./helpers/markdownToText.ts";
 import { slugify } from "./helpers/slugify.ts";
-import { prefixLocalStorageKey } from "./storeHelpers.svelte.ts";
 import { transpileUrpcToJson } from "./urpc.ts";
 import type { Schema } from "./urpcTypes.ts";
 
@@ -51,70 +51,31 @@ export interface Header {
 }
 
 export interface Store {
-  loaded: boolean;
   baseUrl: string;
   headers: Header[];
   urpcSchema: string;
   jsonSchema: Schema;
 }
 
+// TODO: Rename to settingsStore
+
+async function storeGetInitialValue(): Promise<Store> {
+  const config = await fetchConfig();
+  return {
+    baseUrl: config.baseUrl,
+    headers: config.headers,
+    urpcSchema: "version 1",
+    jsonSchema: { version: 1, nodes: [] },
+  };
+}
+
 // Cannot use createStore because of the http request needed
 // maybe it can be refactored later
-export const store: Store = $state({
-  loaded: false,
-  baseUrl: "",
-  headers: [],
-  urpcSchema: "version 1",
-  jsonSchema: { version: 1, nodes: [] },
+export const store = createAsyncStore<Store>({
+  initialValue: storeGetInitialValue,
+  keysToPersist: ["baseUrl", "headers"],
+  storeName: "settingsStore",
 });
-
-$effect.root(() => {
-  $effect(() => {
-    if (!store.loaded) return;
-    saveStore();
-  });
-});
-
-const localStorageKeys = {
-  baseUrl: prefixLocalStorageKey("baseUrl"),
-  headers: prefixLocalStorageKey("headers"),
-};
-
-/**
- * Loads the store from the browser's local storage.
- *
- * Should be called only once at the start of the app.
- */
-export const loadStore = async () => {
-  // Prioritize the config stored in the browser's local storage
-  await loadDefaultConfig();
-
-  const baseUrl = localStorage.getItem(localStorageKeys.baseUrl);
-  if (baseUrl) {
-    store.baseUrl = baseUrl;
-  }
-
-  const headers = localStorage.getItem(localStorageKeys.headers);
-  if (headers) {
-    try {
-      store.headers = normalizeHeaders(JSON.parse(headers));
-    } catch {
-      // Ignore invalid persisted headers
-    }
-  }
-
-  store.loaded = true;
-};
-
-/**
- * Saves the store to the browser's local storage.
- *
- * Should be called when the store is updated.
- */
-export const saveStore = () => {
-  localStorage.setItem(localStorageKeys.baseUrl, store.baseUrl);
-  localStorage.setItem(localStorageKeys.headers, JSON.stringify(store.headers));
-};
 
 /**
  * Add or update a header in the store.headers array.
@@ -125,24 +86,24 @@ export const saveStore = () => {
 export const setHeader = (key: string, value: string) => {
   const trimmedKey = key.trim();
   const targetKeyLower = trimmedKey.toLowerCase();
-  const existingIndex = store.headers.findIndex(
+  const existingIndex = store.store.headers.findIndex(
     (h) => h.key.trim().toLowerCase() === targetKeyLower,
   );
 
   if (existingIndex !== -1) {
     // Update existing header value and ensure it is enabled
-    store.headers[existingIndex] = {
-      ...store.headers[existingIndex],
+    store.store.headers[existingIndex] = {
+      ...store.store.headers[existingIndex],
       key: trimmedKey,
       value,
       enabled: true,
     };
     // Reassign to trigger reactivity in Svelte
-    store.headers = [...store.headers];
+    store.store.headers = [...store.store.headers];
   } else {
     // Add a new enabled header
-    store.headers = [
-      ...store.headers,
+    store.store.headers = [
+      ...store.store.headers,
       { key: trimmedKey, value, enabled: true, description: "" },
     ];
   }
@@ -159,7 +120,7 @@ export const getHeadersObject = (): Headers => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
 
-  for (const header of store.headers) {
+  for (const header of store.store.headers) {
     if (!header.enabled) continue;
     if (header.key.trim()) headers.set(header.key, header.value);
   }
@@ -167,45 +128,63 @@ export const getHeadersObject = (): Headers => {
   return headers;
 };
 
+export const fetchConfig = async () => {
+  // biome-ignore lint/suspicious/noExplicitAny: the fetch can return anything
+  let config: any = {};
+
+  try {
+    const response = await fetch("./config.json");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    config = await response.json();
+  } catch (error) {
+    console.error("Failed to fetch default config", error);
+    return {
+      baseUrl: `${getCurrentHost()}/api/v1/urpc`,
+      headers: [],
+    };
+  }
+
+  let baseUrl = "";
+  let headers: Header[] = [];
+
+  if (typeof config.baseUrl === "string" && config.baseUrl.trim() !== "") {
+    baseUrl = config.baseUrl;
+  } else {
+    baseUrl = `${getCurrentHost()}/api/v1/urpc`;
+  }
+
+  if (Array.isArray(config.headers)) {
+    headers = normalizeHeaders(config.headers);
+  }
+
+  return { baseUrl, headers };
+};
+
 /**
  * Loads the default configuration from the static/config.json file.
  */
 export const loadDefaultConfig = async () => {
-  await Promise.all([loadDefaultBaseURL(), loadDefaultHeaders()]);
+  const config = await fetchConfig();
+  store.store.baseUrl = config.baseUrl;
+  store.store.headers = config.headers;
 };
 
 /**
  * Loads the default configuration from the static/config.json file.
  */
 export const loadDefaultBaseURL = async () => {
-  const response = await fetch("./config.json");
-  if (!response.ok) {
-    console.error("Failed to fetch default config");
-    return;
-  }
-  const config = await response.json();
-
-  if (typeof config.baseUrl === "string" && config.baseUrl.trim() !== "") {
-    store.baseUrl = config.baseUrl;
-  } else {
-    store.baseUrl = `${getCurrentHost()}/api/v1/urpc`;
-  }
+  const config = await fetchConfig();
+  store.store.baseUrl = config.baseUrl;
 };
 
 /**
  * Loads the default configuration from the static/config.json file.
  */
 export const loadDefaultHeaders = async () => {
-  const response = await fetch("./config.json");
-  if (!response.ok) {
-    console.error("Failed to fetch default config");
-    return;
-  }
-  const config = await response.json();
-
-  if (Array.isArray(config.headers)) {
-    store.headers = normalizeHeaders(config.headers);
-  }
+  const config = await fetchConfig();
+  store.store.headers = config.headers;
 };
 
 type RawHeader = {
@@ -239,7 +218,7 @@ const normalizeHeaders = (raw: unknown): Header[] => {
  * using the `transpileUrpcToJson` utility, and then updates the `jsonSchema` store with the result.
  */
 export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
-  store.jsonSchema = await transpileUrpcToJson(store.urpcSchema);
+  store.store.jsonSchema = await transpileUrpcToJson(store.store.urpcSchema);
   await indexSearchItems();
 };
 
@@ -248,7 +227,7 @@ export const loadJsonSchemaFromCurrentUrpcSchema = async () => {
  */
 const indexSearchItems = async () => {
   const searchItems = await Promise.all(
-    store.jsonSchema.nodes.map(async (node, index) => {
+    store.store.jsonSchema.nodes.map(async (node, index) => {
       let name = "";
       let doc = "";
 
@@ -296,7 +275,7 @@ export const loadUrpcSchemaFromUrl = async (url: string) => {
   }
 
   const sch = await response.text();
-  store.urpcSchema = sch;
+  store.store.urpcSchema = sch;
 };
 
 /**
@@ -308,7 +287,7 @@ export const loadUrpcSchemaFromUrl = async (url: string) => {
  * @param sch The URPC schema string to be loaded into the store.
  */
 export const loadUrpcSchemaFromString = (sch: string) => {
-  store.urpcSchema = sch;
+  store.store.urpcSchema = sch;
 };
 
 /**

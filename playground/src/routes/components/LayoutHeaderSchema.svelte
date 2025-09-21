@@ -30,5 +30,5 @@
     </button>
   </div>
 
-  <Code lang="urpc" code={store.urpcSchema} class="min-h-0 flex-1" />
+  <Code lang="urpc" code={store.store.urpcSchema} class="min-h-0 flex-1" />
 </Modal>

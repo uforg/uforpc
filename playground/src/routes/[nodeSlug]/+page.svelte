@@ -13,7 +13,7 @@
   let { data }: PageProps = $props();
 
   let nodeIndex = $derived.by(() => {
-    for (const [index, node] of store.jsonSchema.nodes.entries()) {
+    for (const [index, node] of store.store.jsonSchema.nodes.entries()) {
       if (node.kind !== data.nodeKind) continue;
 
       const isDoc = node.kind === "doc";
@@ -28,7 +28,7 @@
 
   let nodeExists = $derived(nodeIndex !== -1);
 
-  let node = $derived(store.jsonSchema.nodes[nodeIndex]);
+  let node = $derived(store.store.jsonSchema.nodes[nodeIndex]);
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;
@@ -60,7 +60,10 @@
     nodeIndex; // Just to add a dependency to trigger the effect
     untrack(() => {
       // Untrack the uiStore.contentWrapper.element to avoid infinite loop
-      uiStore.contentWrapper.element?.scrollTo({ top: 0, behavior: "smooth" });
+      uiStore.store.contentWrapper.element?.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     });
   });
 </script>

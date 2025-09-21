@@ -1,15 +1,11 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
   import { onNavigate } from "$app/navigation";
   import { onMount } from "svelte";
   import { toast, Toaster } from "svelte-sonner";
   import { fade } from "svelte/transition";
 
   import { initializeShiki } from "$lib/shiki";
-  import {
-    loadJsonSchemaFromUrpcSchemaUrl,
-    loadStore,
-  } from "$lib/store.svelte";
+  import { loadJsonSchemaFromUrpcSchemaUrl, store } from "$lib/store.svelte";
   import {
     dimensionschangeAction,
     initTheme,
@@ -27,18 +23,7 @@
 
   let { children } = $props();
 
-  // Initialize theme
-  onMount(() => {
-    if (!browser) return;
-    initTheme();
-  });
-
-  // Initialize the stores
-  onMount(() => {
-    loadStore();
-  });
-
-  // Initialize the WebAssembly binary
+  // Initialize playground
   let initialized = $state(false);
   let message = $state("Starting playground");
   onMount(async () => {
@@ -49,6 +34,15 @@
         duration: 15000,
       });
     };
+
+    message = "Loading configuration";
+    try {
+      await Promise.all([store.ready(), uiStore.ready()]);
+      initTheme();
+    } catch (error) {
+      handleError(error);
+      return;
+    }
 
     message = "Loading code highlighter";
     try {
@@ -90,12 +84,17 @@
   });
 
   let mainWidth = $derived.by(() => {
-    if (uiStore.isMobile) return uiStore.app.size.offsetWidth;
-    return uiStore.app.size.offsetWidth - uiStore.aside.size.offsetWidth;
+    if (uiStore.store.isMobile) return uiStore.store.app.size.offsetWidth;
+    return (
+      uiStore.store.app.size.offsetWidth - uiStore.store.aside.size.offsetWidth
+    );
   });
 
   let mainHeight = $derived.by(() => {
-    return uiStore.app.size.offsetHeight - uiStore.header.size.offsetHeight;
+    return (
+      uiStore.store.app.size.offsetHeight -
+      uiStore.store.header.size.offsetHeight
+    );
   });
 
   let mainStyle = $derived.by(() => {
@@ -117,13 +116,13 @@
   <div
     transition:fade={{ duration: 200 }}
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.app = e.detail)}
+    ondimensionschange={(e) => (uiStore.store.app = e.detail)}
     class="flex h-[100dvh] w-[100dvw] justify-start"
   >
     <LayoutAside />
     <div
       use:dimensionschangeAction
-      ondimensionschange={(e) => (uiStore.contentWrapper = e.detail)}
+      ondimensionschange={(e) => (uiStore.store.contentWrapper = e.detail)}
       class="h-[100dvh] flex-grow scroll-p-[90px]"
     >
       <LayoutHeader />
@@ -131,7 +130,7 @@
         class="overflow-hidden"
         style={mainStyle}
         use:dimensionschangeAction
-        ondimensionschange={(e) => (uiStore.main = e.detail)}
+        ondimensionschange={(e) => (uiStore.store.main = e.detail)}
       >
         {@render children()}
       </main>

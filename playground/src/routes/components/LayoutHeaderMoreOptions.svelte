@@ -13,7 +13,7 @@
 </script>
 
 <div class="flex flex-col items-start [&>*]:w-full">
-  {#if uiStore.isMobile}
+  {#if uiStore.store.isMobile}
     <LayoutHeaderStarOnGithub />
     <LayoutHeaderDocsLink />
   {/if}
@@ -21,7 +21,7 @@
   <LayoutHeaderSchema />
   <LayoutHeaderOpenApiSchema />
 
-  {#if uiStore.isMobile}
+  {#if uiStore.store.isMobile}
     <LayoutHeaderSearch />
     <LayoutHeaderSettings />
     <LayoutHeaderThemeSelect />

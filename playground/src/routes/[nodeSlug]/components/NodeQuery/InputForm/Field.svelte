@@ -33,7 +33,7 @@
    * @param typeName Name of the custom type
    */
   function getCustomTypeFields(typeName: string): FieldDefinition[] {
-    for (const node of store.jsonSchema.nodes) {
+    for (const node of store.store.jsonSchema.nodes) {
       if (node.kind !== "type") continue;
       if (node.name !== typeName) continue;
       if (!node.fields) break;

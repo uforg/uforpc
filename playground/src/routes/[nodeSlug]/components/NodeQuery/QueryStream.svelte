@@ -45,7 +45,7 @@
         toast.info("Stream stopped");
       };
 
-      const endpoint = joinPath([store.baseUrl, stream.name]);
+      const endpoint = joinPath([store.store.baseUrl, stream.name]);
       const headers = getHeadersObject();
       headers.set("Accept", "text/event-stream");
       headers.set("Cache-Control", "no-cache");
@@ -140,7 +140,7 @@
 <div bind:this={wrapper}>
   <div
     class={{
-      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.isMobile,
+      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.store.isMobile,
     }}
   >
     <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
@@ -228,7 +228,7 @@
   </div>
 </div>
 
-{#if uiStore.isMobile}
+{#if uiStore.store.isMobile}
   <div class="mt-12">
     <Snippets {input} type="stream" name={stream.name} />
   </div>
