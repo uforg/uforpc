@@ -8,7 +8,7 @@
   import {
     getCurrentInputForOperation,
     getCurrentOutputForOperation,
-  } from "$lib/storeHistory";
+  } from "$lib/storeHistory.svelte";
   import { storeSettings } from "$lib/storeSettings.svelte";
   import { storeUi } from "$lib/storeUi.svelte";
 
