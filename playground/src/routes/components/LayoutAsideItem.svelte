@@ -67,7 +67,7 @@
   });
 
   let isActive = $derived.by(() => {
-    const paramsNode = page.params.node;
+    const paramsNode = page.params.nodeSlug;
     if (!paramsNode) return false;
 
     return paramsNode === contentId;
