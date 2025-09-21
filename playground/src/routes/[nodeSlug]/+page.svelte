@@ -4,7 +4,7 @@
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { slugify } from "$lib/helpers/slugify";
   import { storeSettings } from "$lib/storeSettings.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import type { PageProps } from "./$types";
   import Node from "./components/Node.svelte";
@@ -62,8 +62,8 @@
   $effect(() => {
     nodeIndex; // Just to add a dependency to trigger the effect
     untrack(() => {
-      // Untrack the uiStore.contentWrapper.element to avoid infinite loop
-      uiStore.store.contentWrapper.element?.scrollTo({
+      // Untrack the storeUi.contentWrapper.element to avoid infinite loop
+      storeUi.store.contentWrapper.element?.scrollTo({
         top: 0,
         behavior: "smooth",
       });

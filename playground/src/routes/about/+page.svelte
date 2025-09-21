@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BookOpenText, Github } from "@lucide/svelte";
 
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import BottomSpace from "$lib/components/BottomSpace.svelte";
   import Logo from "$lib/components/Logo.svelte";
@@ -15,12 +15,12 @@
 <div
   class={{
     "h-full overflow-y-auto p-4": true,
-    "pt-16": !uiStore.store.isMobile,
-    "pt-8": uiStore.store.isMobile,
+    "pt-16": !storeUi.store.isMobile,
+    "pt-8": storeUi.store.isMobile,
   }}
 >
   <div class="container mx-auto space-y-8 pb-8">
-    {#if !uiStore.store.isMobile}
+    {#if !storeUi.store.isMobile}
       <Logo class="mx-auto h-full max-w-[600px]" />
     {/if}
 
@@ -30,7 +30,7 @@
         target="_blank"
         class={{
           "btn btn-primary": true,
-          "btn-lg": !uiStore.store.isMobile,
+          "btn-lg": !storeUi.store.isMobile,
         }}
       >
         <Github class="size-5" />
@@ -41,7 +41,7 @@
         target="_blank"
         class={{
           "btn btn-outline": true,
-          "btn-lg": !uiStore.store.isMobile,
+          "btn-lg": !storeUi.store.isMobile,
         }}
       >
         <BookOpenText class="size-5" />

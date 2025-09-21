@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import H2 from "$lib/components/H2.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
@@ -20,7 +20,7 @@
   <div
     class={{
       "mb-4": true,
-      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.store.isMobile,
+      "bg-base-100 sticky top-0 z-20 pt-4": !storeUi.store.isMobile,
     }}
   >
     <H2 class="mb-4 flex items-center space-x-2">Code snippets</H2>
@@ -30,13 +30,13 @@
         { id: "curl", label: "HTTP Snippets" },
         { id: "sdk", label: "SDK Snippets" },
       ]}
-      activeId={uiStore.store.codeSnippetsTab}
-      onSelect={(id) => (uiStore.store.codeSnippetsTab = id as "sdk" | "curl")}
+      activeId={storeUi.store.codeSnippetsTab}
+      onSelect={(id) => (storeUi.store.codeSnippetsTab = id as "sdk" | "curl")}
     />
   </div>
 
   <div class="space-y-2">
-    {#if uiStore.store.codeSnippetsTab === "sdk"}
+    {#if storeUi.store.codeSnippetsTab === "sdk"}
       <SnippetsSdk {type} {name} />
     {:else}
       <SnippetsCurl {input} {type} {name} />

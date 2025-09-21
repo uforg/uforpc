@@ -10,7 +10,7 @@
     getCurrentOutputForOperation,
   } from "$lib/storeHistory";
   import { storeSettings } from "$lib/storeSettings.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import BottomSpace from "$lib/components/BottomSpace.svelte";
   import Code from "$lib/components/Code.svelte";
@@ -87,14 +87,14 @@
 <div
   class={{
     "h-full overflow-hidden": true,
-    "grid grid-cols-12": !uiStore.store.isMobile,
+    "grid grid-cols-12": !storeUi.store.isMobile,
   }}
 >
   <section
     class={{
       "h-full space-y-12 overflow-y-auto p-4 pt-0": true,
-      "col-span-8": !uiStore.store.isMobile && isProcOrStream,
-      "col-span-12": !uiStore.store.isMobile && !isProcOrStream,
+      "col-span-8": !storeUi.store.isMobile && isProcOrStream,
+      "col-span-12": !storeUi.store.isMobile && !isProcOrStream,
     }}
   >
     <div
@@ -145,12 +145,12 @@
       </div>
     {/if}
 
-    {#if uiStore.store.isMobile || !isProcOrStream}
+    {#if storeUi.store.isMobile || !isProcOrStream}
       <BottomSpace />
     {/if}
   </section>
 
-  {#if !uiStore.store.isMobile && (node.kind == "proc" || node.kind == "stream")}
+  {#if !storeUi.store.isMobile && (node.kind == "proc" || node.kind == "stream")}
     <div class="col-span-4 overflow-y-auto p-4 pt-0">
       <Snippets {input} type={node.kind} name={node.name} />
       <BottomSpace />

@@ -12,7 +12,7 @@
   import { markSearchHints } from "$lib/helpers/markSearchHints";
   import { slugify } from "$lib/helpers/slugify";
   import type { storeSettings } from "$lib/storeSettings.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import Tooltip from "$lib/components/Tooltip.svelte";
 
@@ -31,11 +31,11 @@
   });
 
   let nameHtml = $derived.by(() => {
-    if (!uiStore.store.asideSearchOpen || !uiStore.store.asideSearchQuery) {
+    if (!storeUi.store.asideSearchOpen || !storeUi.store.asideSearchQuery) {
       return name;
     }
 
-    return markSearchHints([uiStore.store.asideSearchQuery], name);
+    return markSearchHints([storeUi.store.asideSearchQuery], name);
   });
 
   let title = $derived.by(() => {
@@ -78,7 +78,7 @@
   <a
     {id}
     {href}
-    onclick={() => (uiStore.store.asideOpen = false)}
+    onclick={() => (storeUi.store.asideOpen = false)}
     class={[
       "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
       {

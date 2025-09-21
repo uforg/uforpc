@@ -12,8 +12,8 @@
   import {
     dimensionschangeAction,
     initTheme,
-    uiStore,
-  } from "$lib/uiStore.svelte";
+    storeUi,
+  } from "$lib/storeUi.svelte";
   import { initWasm, waitUntilInitialized } from "$lib/urpc";
 
   import Logo from "$lib/components/Logo.svelte";
@@ -40,7 +40,7 @@
 
     message = "Loading configuration";
     try {
-      await Promise.all([storeSettings.ready(), uiStore.ready()]);
+      await Promise.all([storeSettings.ready(), storeUi.ready()]);
       initTheme();
     } catch (error) {
       handleError(error);
@@ -87,16 +87,16 @@
   });
 
   let mainWidth = $derived.by(() => {
-    if (uiStore.store.isMobile) return uiStore.store.app.size.offsetWidth;
+    if (storeUi.store.isMobile) return storeUi.store.app.size.offsetWidth;
     return (
-      uiStore.store.app.size.offsetWidth - uiStore.store.aside.size.offsetWidth
+      storeUi.store.app.size.offsetWidth - storeUi.store.aside.size.offsetWidth
     );
   });
 
   let mainHeight = $derived.by(() => {
     return (
-      uiStore.store.app.size.offsetHeight -
-      uiStore.store.header.size.offsetHeight
+      storeUi.store.app.size.offsetHeight -
+      storeUi.store.header.size.offsetHeight
     );
   });
 
@@ -119,13 +119,13 @@
   <div
     transition:fade={{ duration: 200 }}
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.store.app = e.detail)}
+    ondimensionschange={(e) => (storeUi.store.app = e.detail)}
     class="flex h-[100dvh] w-[100dvw] justify-start"
   >
     <LayoutAside />
     <div
       use:dimensionschangeAction
-      ondimensionschange={(e) => (uiStore.store.contentWrapper = e.detail)}
+      ondimensionschange={(e) => (storeUi.store.contentWrapper = e.detail)}
       class="h-[100dvh] flex-grow scroll-p-[90px]"
     >
       <LayoutHeader />
@@ -133,7 +133,7 @@
         class="overflow-hidden"
         style={mainStyle}
         use:dimensionschangeAction
-        ondimensionschange={(e) => (uiStore.store.main = e.detail)}
+        ondimensionschange={(e) => (storeUi.store.main = e.detail)}
       >
         {@render children()}
       </main>

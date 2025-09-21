@@ -3,7 +3,7 @@
   import type { Snippet } from "svelte";
   import { slide } from "svelte/transition";
 
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import SnippetsSdkDownload from "./SnippetsSdkDownload.svelte";
   import SnippetsSdkSetup from "./SnippetsSdkSetup.svelte";
@@ -17,11 +17,11 @@
   const { type, name }: Props = $props();
 
   function toggleStep(step: "download" | "setup" | "usage") {
-    if (uiStore.store.codeSnippetsSdkStep === step) {
-      uiStore.store.codeSnippetsSdkStep = "";
+    if (storeUi.store.codeSnippetsSdkStep === step) {
+      storeUi.store.codeSnippetsSdkStep = "";
       return;
     }
-    uiStore.store.codeSnippetsSdkStep = step;
+    storeUi.store.codeSnippetsSdkStep = step;
   }
 </script>
 
@@ -30,7 +30,7 @@
   <select
     id="sdk-generator-select"
     class="select w-full"
-    bind:value={uiStore.store.codeSnippetsSdkLang}
+    bind:value={storeUi.store.codeSnippetsSdkLang}
   >
     <option value="typescript-client">TypeScript</option>
     <option value="golang-client">Go</option>
@@ -90,21 +90,21 @@
 
 <div class="space-y-4">
   {@render step(
-    uiStore.store.codeSnippetsSdkStep === "download",
+    storeUi.store.codeSnippetsSdkStep === "download",
     "1. Download SDK",
     () => toggleStep("download"),
     download,
   )}
 
   {@render step(
-    uiStore.store.codeSnippetsSdkStep === "setup",
+    storeUi.store.codeSnippetsSdkStep === "setup",
     "2. Setup SDK",
     () => toggleStep("setup"),
     setup,
   )}
 
   {@render step(
-    uiStore.store.codeSnippetsSdkStep === "usage",
+    storeUi.store.codeSnippetsSdkStep === "usage",
     "3. Usage example",
     () => toggleStep("usage"),
     usage,

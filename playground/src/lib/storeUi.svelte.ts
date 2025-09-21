@@ -5,7 +5,7 @@ import type { Action } from "svelte/action";
 import { createAsyncStore } from "./createAsyncStore.svelte";
 import type { CodegenGenerator } from "./urpc";
 
-export interface UiStoreDimensions {
+export interface StoreUiDimensions {
   element: HTMLElement | null;
   size: {
     clientWidth: number;
@@ -51,7 +51,7 @@ export interface UiStoreDimensions {
 
 export type Theme = "light" | "dark";
 
-export interface UiStore {
+export interface StoreUi {
   isMobile: boolean;
   theme: Theme;
   inputFormTab: "form" | "json";
@@ -68,18 +68,18 @@ export interface UiStore {
   asideHideTypes: boolean;
   asideHideProcs: boolean;
   asideHideStreams: boolean;
-  app: UiStoreDimensions;
-  aside: UiStoreDimensions;
-  contentWrapper: UiStoreDimensions;
-  header: UiStoreDimensions;
-  main: UiStoreDimensions;
+  app: StoreUiDimensions;
+  aside: StoreUiDimensions;
+  contentWrapper: StoreUiDimensions;
+  header: StoreUiDimensions;
+  main: StoreUiDimensions;
 }
 
-type UiStoreKey = keyof UiStore;
+type StoreUiKey = keyof StoreUi;
 
 const matchMediaColor = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
 
-const defaultUiStoreDimensions: UiStoreDimensions = {
+const defaultStoreUiDimensions: StoreUiDimensions = {
   element: null,
   size: {
     clientWidth: 0,
@@ -123,7 +123,7 @@ const defaultUiStoreDimensions: UiStoreDimensions = {
   },
 };
 
-const uiStoreDefault: UiStore = {
+const storeUiDefault: StoreUi = {
   isMobile: false,
   theme: "dark",
   inputFormTab: "form",
@@ -140,14 +140,14 @@ const uiStoreDefault: UiStore = {
   asideHideTypes: true,
   asideHideProcs: false,
   asideHideStreams: false,
-  app: { ...defaultUiStoreDimensions },
-  aside: { ...defaultUiStoreDimensions },
-  contentWrapper: { ...defaultUiStoreDimensions },
-  header: { ...defaultUiStoreDimensions },
-  main: { ...defaultUiStoreDimensions },
+  app: { ...defaultStoreUiDimensions },
+  aside: { ...defaultStoreUiDimensions },
+  contentWrapper: { ...defaultStoreUiDimensions },
+  header: { ...defaultStoreUiDimensions },
+  main: { ...defaultStoreUiDimensions },
 };
 
-const uiStoreKeysToPersist: UiStoreKey[] = [
+const storeUiKeysToPersist: StoreUiKey[] = [
   "theme",
   "inputFormTab",
   "codeSnippetsTab",
@@ -164,16 +164,16 @@ const uiStoreKeysToPersist: UiStoreKey[] = [
   "asideHideStreams",
 ];
 
-export const uiStore = createAsyncStore<UiStore>({
-  initialValue: async () => uiStoreDefault,
-  keysToPersist: uiStoreKeysToPersist,
-  storeName: "uiStore",
+export const storeUi = createAsyncStore<StoreUi>({
+  initialValue: async () => storeUiDefault,
+  keysToPersist: storeUiKeysToPersist,
+  storeName: "storeUi",
 });
 
 $effect.root(() => {
   const calcIsMobile = debounce(() => {
     const mobileThreshold = 1200;
-    uiStore.store.isMobile = globalThis.innerWidth < mobileThreshold;
+    storeUi.store.isMobile = globalThis.innerWidth < mobileThreshold;
   }, 100);
 
   // Effect to check if the screen is mobile (even on resize) with debounce
@@ -187,7 +187,7 @@ $effect.root(() => {
 
   // Effect to set theme attribute on document element when theme changes
   $effect(() => {
-    setThemeAttribute(uiStore.store.theme);
+    setThemeAttribute(storeUi.store.theme);
   });
 });
 
@@ -216,18 +216,18 @@ function setThemeAttribute(theme: Theme) {
 export function initTheme() {
   if (!browser) return;
 
-  const theme = uiStore.store.theme;
+  const theme = storeUi.store.theme;
   if (theme === "light" || theme === "dark") {
-    uiStore.store.theme = theme;
+    storeUi.store.theme = theme;
   } else {
-    uiStore.store.theme = getSystemTheme();
+    storeUi.store.theme = getSystemTheme();
   }
-  setThemeAttribute(uiStore.store.theme);
+  setThemeAttribute(storeUi.store.theme);
 
   // Listen for changes in the color scheme to change the theme dinamically
   matchMediaColor?.addEventListener("change", () => {
-    uiStore.store.theme = getSystemTheme();
-    setThemeAttribute(uiStore.store.theme);
+    storeUi.store.theme = getSystemTheme();
+    setThemeAttribute(storeUi.store.theme);
   });
 }
 
@@ -275,7 +275,7 @@ function getScrollableAncestors(el: HTMLElement): (Window | HTMLElement)[] {
 export const dimensionschangeAction: Action<
   HTMLElement,
   undefined,
-  { ondimensionschange: (e: CustomEvent<UiStoreDimensions>) => void }
+  { ondimensionschange: (e: CustomEvent<StoreUiDimensions>) => void }
 > = (node) => {
   let scrollHosts: (Window | HTMLElement)[] = [];
   let ticking = false;
@@ -327,7 +327,7 @@ export const dimensionschangeAction: Action<
     const borderLeft = Number.parseFloat(style.borderLeftWidth);
 
     node.dispatchEvent(
-      new CustomEvent<UiStoreDimensions>("dimensionschange", {
+      new CustomEvent<StoreUiDimensions>("dimensionschange", {
         detail: {
           element: node,
           size: {

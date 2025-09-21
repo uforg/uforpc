@@ -5,7 +5,7 @@
   import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
   import { joinPath } from "$lib/helpers/joinPath";
   import { getHeadersObject, storeSettings } from "$lib/storeSettings.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
   import type { StreamDefinitionNode } from "$lib/urpcTypes";
 
   import H2 from "$lib/components/H2.svelte";
@@ -140,7 +140,7 @@
 <div bind:this={wrapper}>
   <div
     class={{
-      "bg-base-100 sticky top-0 z-20 pt-4": !uiStore.store.isMobile,
+      "bg-base-100 sticky top-0 z-20 pt-4": !storeUi.store.isMobile,
     }}
   >
     <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
@@ -228,7 +228,7 @@
   </div>
 </div>
 
-{#if uiStore.store.isMobile}
+{#if storeUi.store.isMobile}
   <div class="mt-12">
     <Snippets {input} type="stream" name={stream.name} />
   </div>

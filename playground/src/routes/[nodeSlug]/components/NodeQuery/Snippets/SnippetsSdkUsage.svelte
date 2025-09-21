@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import Code from "$lib/components/Code.svelte";
 
@@ -100,15 +100,15 @@ handle.cancel();`,
 
   <p>Use your editor/IDE to help you with the types, the SDK is fully typed.</p>
 
-  {#if uiStore.store.codeSnippetsSdkLang === "typescript-client"}
+  {#if storeUi.store.codeSnippetsSdkLang === "typescript-client"}
     <div class="not-prose">
       <Code code={isProc ? tsProc : tsStream} lang="ts" />
     </div>
-  {:else if uiStore.store.codeSnippetsSdkLang === "golang-client"}
+  {:else if storeUi.store.codeSnippetsSdkLang === "golang-client"}
     <div class="not-prose">
       <Code code={isProc ? goProc : goStream} lang="go" />
     </div>
-  {:else if uiStore.store.codeSnippetsSdkLang === "dart-client"}
+  {:else if storeUi.store.codeSnippetsSdkLang === "dart-client"}
     <div class="not-prose">
       <Code code={isProc ? dartProc : dartStream} lang="dart" />
     </div>

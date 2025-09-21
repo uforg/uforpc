@@ -12,7 +12,7 @@
     getOrFallbackLanguage,
     lightTheme,
   } from "$lib/shiki";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   interface Props {
     code: string;
@@ -40,7 +40,7 @@
       dark: darkTheme,
       light: lightTheme,
     };
-    let theme = themeMap[uiStore.theme];
+    let theme = themeMap[storeUi.store.theme];
 
     const codeToHighlight = code.trim();
 

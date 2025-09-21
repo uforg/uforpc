@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Ellipsis, EllipsisVertical, Menu, X } from "@lucide/svelte";
 
-  import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+  import { dimensionschangeAction, storeUi } from "$lib/storeUi.svelte";
 
   import Logo from "$lib/components/Logo.svelte";
   import MenuComponent from "$lib/components/Menu.svelte";
@@ -17,10 +17,10 @@
   let isMobileOffcanvasOpen = $state(false);
 </script>
 
-{#if !uiStore.store.isMobile}
+{#if !storeUi.store.isMobile}
   <header
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.store.header = e.detail)}
+    ondimensionschange={(e) => (storeUi.store.header = e.detail)}
     class={[
       "sticky top-0 z-30 flex h-[72px] w-full items-center justify-between space-x-2 p-4",
       "bg-base-100 shadow-xs",
@@ -52,10 +52,10 @@
   </header>
 {/if}
 
-{#if uiStore.store.isMobile}
+{#if storeUi.store.isMobile}
   <header
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.store.header = e.detail)}
+    ondimensionschange={(e) => (storeUi.store.header = e.detail)}
     class={[
       "sticky top-0 z-30 flex h-[72px] w-full items-center justify-between space-x-2 p-4",
       "bg-base-100 shadow-xs",
@@ -64,7 +64,7 @@
     <div class="flex items-center justify-start space-x-2">
       <button
         class="btn btn-ghost btn-square"
-        onclick={() => (uiStore.store.asideOpen = true)}
+        onclick={() => (storeUi.store.asideOpen = true)}
       >
         <Menu class="size-6" />
       </button>

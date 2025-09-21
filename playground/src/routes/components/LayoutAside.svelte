@@ -5,7 +5,7 @@
 
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { storeSettings } from "$lib/storeSettings.svelte";
-  import { dimensionschangeAction, uiStore } from "$lib/uiStore.svelte";
+  import { dimensionschangeAction, storeUi } from "$lib/storeUi.svelte";
   import type { Schema } from "$lib/urpcTypes";
   import { versionWithPrefix } from "$lib/version";
 
@@ -46,19 +46,19 @@
   ): boolean {
     if (node.kind !== kind) return false;
 
-    if (uiStore.store.asideSearchOpen) {
-      if (uiStore.store.asideSearchQuery === "") return true;
+    if (storeUi.store.asideSearchOpen) {
+      if (storeUi.store.asideSearchQuery === "") return true;
 
       // Do the search
       const name = getNodeName(node).toLowerCase();
-      const query = uiStore.store.asideSearchQuery.toLowerCase();
+      const query = storeUi.store.asideSearchQuery.toLowerCase();
       return name.includes(query);
     }
 
-    if (node.kind === "doc") return !uiStore.store.asideHideDocs;
-    if (node.kind === "type") return !uiStore.store.asideHideTypes;
-    if (node.kind === "proc") return !uiStore.store.asideHideProcs;
-    if (node.kind === "stream") return !uiStore.store.asideHideStreams;
+    if (node.kind === "doc") return !storeUi.store.asideHideDocs;
+    if (node.kind === "type") return !storeUi.store.asideHideTypes;
+    if (node.kind === "proc") return !storeUi.store.asideHideProcs;
+    if (node.kind === "stream") return !storeUi.store.asideHideStreams;
 
     return false;
   }
@@ -67,14 +67,14 @@
 {#snippet aside()}
   <aside
     use:dimensionschangeAction
-    ondimensionschange={(e) => (uiStore.store.aside = e.detail)}
+    ondimensionschange={(e) => (storeUi.store.aside = e.detail)}
     class={[
       "bg-base-100 h-[100dvh] w-full max-w-[280px] flex-none scroll-p-[130px]",
       "overflow-x-hidden overflow-y-auto",
     ]}
   >
     <header class="bg-base-100 sticky top-0 z-10 w-full shadow-xs">
-      {#if !uiStore.store.isMobile}
+      {#if !storeUi.store.isMobile}
         <a
           class="sticky top-0 z-10 flex h-[72px] w-full items-end p-4 shadow-xs"
           href="https://uforpc.uforg.dev"
@@ -86,13 +86,13 @@
         </a>
       {/if}
 
-      {#if uiStore.store.isMobile}
+      {#if storeUi.store.isMobile}
         <div class="flex items-center justify-between p-4">
           <Logo class="w-[180px]" />
 
           <button
             class="btn btn-ghost btn-square btn-sm"
-            onclick={() => (uiStore.store.asideOpen = !uiStore.store.asideOpen)}
+            onclick={() => (storeUi.store.asideOpen = !storeUi.store.asideOpen)}
           >
             <X class="size-6" />
           </button>
@@ -106,7 +106,7 @@
       <Tooltip content="RPC Home">
         <a
           href="#/"
-          onclick={() => (uiStore.store.asideOpen = false)}
+          onclick={() => (storeUi.store.asideOpen = false)}
           class={[
             "btn btn-ghost btn-block justify-start space-x-2 border-transparent",
             "hover:bg-blue-500/20",
@@ -136,12 +136,12 @@
   </aside>
 {/snippet}
 
-{#if !uiStore.store.isMobile}
+{#if !storeUi.store.isMobile}
   {@render aside()}
 {/if}
 
-{#if uiStore.store.isMobile}
-  <Offcanvas bind:isOpen={uiStore.store.asideOpen}>
+{#if storeUi.store.isMobile}
+  <Offcanvas bind:isOpen={storeUi.store.asideOpen}>
     {@render aside()}
   </Offcanvas>
 {/if}

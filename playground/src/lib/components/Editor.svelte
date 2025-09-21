@@ -7,7 +7,7 @@
 
   import { type ClassValue, mergeClasses } from "$lib/helpers/mergeClasses";
   import { darkTheme, getHighlighter, lightTheme } from "$lib/shiki";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   interface Props {
     lang: string;
@@ -77,7 +77,7 @@
       dark: darkTheme,
     };
 
-    monaco.editor.setTheme(themeMap[uiStore.theme]);
+    monaco.editor.setTheme(themeMap[storeUi.store.theme]);
   });
 </script>
 

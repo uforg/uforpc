@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Info } from "@lucide/svelte";
 
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
 
   import Field from "./Field.svelte";
@@ -14,11 +14,11 @@
 
   let { fields, input = $bindable() }: Props = $props();
 
-  let isFormTab = $derived(uiStore.store.inputFormTab === "form");
-  const switchToForm = () => (uiStore.store.inputFormTab = "form");
+  let isFormTab = $derived(storeUi.store.inputFormTab === "form");
+  const switchToForm = () => (storeUi.store.inputFormTab = "form");
 
-  let isJsonTab = $derived(uiStore.store.inputFormTab === "json");
-  const switchToJson = () => (uiStore.store.inputFormTab = "json");
+  let isJsonTab = $derived(storeUi.store.inputFormTab === "json");
+  const switchToJson = () => (storeUi.store.inputFormTab = "json");
 </script>
 
 <div

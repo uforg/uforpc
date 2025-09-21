@@ -7,7 +7,7 @@
     loadDefaultHeaders,
     storeSettings,
   } from "$lib/storeSettings.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import Modal from "$lib/components/Modal.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
@@ -62,7 +62,7 @@
 >
   <Settings class="size-4" />
   <span>Settings</span>
-  {#if !uiStore.store.isMobile}
+  {#if !storeUi.store.isMobile}
     <span class="ml-4">
       <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
       <kbd class="kbd kbd-sm">,</kbd>

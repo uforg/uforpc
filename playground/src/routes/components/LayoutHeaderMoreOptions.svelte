@@ -1,7 +1,7 @@
 <script>
   import { Info } from "@lucide/svelte";
 
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import LayoutHeaderDocsLink from "./LayoutHeaderDocsLink.svelte";
   import LayoutHeaderOpenApiSchema from "./LayoutHeaderOpenApiSchema.svelte";
@@ -13,7 +13,7 @@
 </script>
 
 <div class="flex flex-col items-start [&>*]:w-full">
-  {#if uiStore.store.isMobile}
+  {#if storeUi.store.isMobile}
     <LayoutHeaderStarOnGithub />
     <LayoutHeaderDocsLink />
   {/if}
@@ -21,7 +21,7 @@
   <LayoutHeaderSchema />
   <LayoutHeaderOpenApiSchema />
 
-  {#if uiStore.store.isMobile}
+  {#if storeUi.store.isMobile}
     <LayoutHeaderSearch />
     <LayoutHeaderSettings />
     <LayoutHeaderThemeSelect />

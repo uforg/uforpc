@@ -2,7 +2,7 @@
   import * as curlconverter from "curlconverter";
   import { onMount } from "svelte";
 
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import Code from "$lib/components/Code.svelte";
 
@@ -312,7 +312,7 @@
 
   let pickedLang = $derived.by(() => {
     const lang = langs.find(
-      (lang) => lang.label === uiStore.store.codeSnippetsCurlLang,
+      (lang) => lang.label === storeUi.store.codeSnippetsCurlLang,
     );
     if (!lang) return defaultLang.langCode;
     return lang.langCode;
@@ -320,7 +320,7 @@
 
   let pickedCode = $derived.by(() => {
     const lang = langs.find(
-      (lang) => lang.label === uiStore.store.codeSnippetsCurlLang,
+      (lang) => lang.label === storeUi.store.codeSnippetsCurlLang,
     );
     if (!lang) return defaultLang.func(curl);
     return lang.func(curl);
@@ -328,17 +328,17 @@
 
   onMount(() => {
     const lang = langs.find(
-      (lang) => lang.label === uiStore.store.codeSnippetsCurlLang,
+      (lang) => lang.label === storeUi.store.codeSnippetsCurlLang,
     );
     if (!lang) {
-      uiStore.store.codeSnippetsCurlLang = defaultLang.label;
+      storeUi.store.codeSnippetsCurlLang = defaultLang.label;
     }
   });
 </script>
 
 <label class="fieldset mb-4">
   <legend class="fieldset-legend">Language</legend>
-  <select class="select w-full" bind:value={uiStore.store.codeSnippetsCurlLang}>
+  <select class="select w-full" bind:value={storeUi.store.codeSnippetsCurlLang}>
     {#each langGroups as langGroup}
       {#if langGroup.langs.length > 1}
         <optgroup label={langGroup.group}>

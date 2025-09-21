@@ -15,7 +15,7 @@
     truncateWithMarkMinisearch,
   } from "$lib/helpers/markSearchHints";
   import { miniSearch } from "$lib/storeSettings.svelte";
-  import { uiStore } from "$lib/uiStore.svelte";
+  import { storeUi } from "$lib/storeUi.svelte";
 
   import H2 from "$lib/components/H2.svelte";
   import Modal from "$lib/components/Modal.svelte";
@@ -54,7 +54,7 @@
 >
   <Search class="size-4" />
   <span>Search...</span>
-  {#if !uiStore.store.isMobile}
+  {#if !storeUi.store.isMobile}
     <span class="ml-4">
       <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
       <kbd class="kbd kbd-sm">K</kbd>
