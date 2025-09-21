@@ -98,9 +98,9 @@ export function createAsyncStore<T extends Record<string, any>>(
     // https://localforage.github.io/localForage/#multiple-instances-createinstance
     // https://localforage.github.io/localForage/#settings-api-config
     const db = localforage.createInstance({
-      name: dbName,
       driver: localforage.INDEXEDDB,
-      storeName: opts.tableName,
+      name: dbName ?? "defaultDb",
+      storeName: opts.tableName ?? "defaultTable",
     });
 
     // Load the initial store value
