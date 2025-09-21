@@ -1,11 +1,12 @@
 <script lang="ts">
   import {
+    ArrowRight,
     BookOpenText,
-    Brain,
-    Cable,
+    FileJson,
     Github,
-    NotebookText,
-    ShieldCheck,
+    Languages,
+    Laptop,
+    MonitorSmartphone,
   } from "@lucide/svelte";
 
   import { storeUi } from "$lib/storeUi.svelte";
@@ -49,7 +50,7 @@
         <UfoAbduction width={200} />
       </div>
 
-      <div class="mb-8 flex items-center justify-center space-x-2">
+      <div class="mb-8 flex flex-wrap items-center justify-center gap-2">
         <a
           href="https://github.com/uforg/uforpc"
           target="_blank"
@@ -80,94 +81,193 @@
     </div>
 
     <div class="desk:grid-cols-2 mb-16 grid gap-8">
-      <div class="card bg-base-200 shadow-sm">
+      <div class="card bg-base-300 shadow-md">
         <div class="card-body">
           <h2 class="card-title mb-4 text-2xl">What is UFO RPC?</h2>
           <p class="text-base-content/80 leading-relaxed">
             UFO RPC is a DX-focused RPC system that provides type safety and
             cross-language compatibility. It includes its own DSL (Domain
             Specific Language) that makes it easy to define and validate RPC
-            services with a clean, intuitive syntax.
+            services with a clean, intuitive syntax
           </p>
         </div>
       </div>
 
-      <div class="card bg-base-200 shadow-sm">
+      <div class="card bg-base-300 shadow-md">
         <div class="card-body">
           <h2 class="card-title mb-4 text-2xl">About this Playground</h2>
           <p class="text-base-content/80 leading-relaxed">
-            This playground provides an interactive environment where you can
-            test and experiment with a provided UFO RPC schema.
+            This playground (generated from a UFO RPC schema) provides an
+            interactive environment where you can explore the API, read the
+            documentation, and experiment by executing procedures and
+            subscribing to streams
           </p>
         </div>
       </div>
     </div>
 
-    <div class="text-center">
-      <h2 class="mb-8 text-3xl font-bold">Key Features</h2>
+    <div class="mb-16">
+      <h2 class="mb-4 text-3xl font-bold">Who is UFO RPC for?</h2>
+      <p class="text-base-content/80 leading-relaxed">
+        UFO RPC is the ideal tool for teams and developers who:
+      </p>
+      <ul class="text-base-content/80 mt-4 list-disc space-y-2 pl-6">
+        <li>
+          Want the <span class="font-semibold">type safety of gRPC</span>
+          without the complexity of Protobuf and HTTP/2
+        </li>
+        <li>
+          Need clear, well-defined APIs but don't require the
+          <span class="font-semibold">querying flexibility of GraphQL</span>
+        </li>
+        <li>
+          Are looking for the <span class="font-semibold"
+            >simplicity of tRPC</span
+          >
+          but need to support a
+          <span class="font-semibold">polyglot ecosystem</span>
+          (beyond just TypeScript)
+        </li>
+        <li>
+          Value a fast workflow, exceptional tooling, and the ability to move
+          confidently between the backend and frontend
+        </li>
+      </ul>
+      <p class="text-base-content/70 mt-4">
+        In short, if you want to build modern APIs quickly and safely, UFO RPC
+        is built for you.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="mb-8 text-3xl font-bold">Features</h2>
       <div class="desk:grid-cols-4 grid gap-6">
         <div class="card bg-base-200 shadow-sm">
-          <div class="card-body text-center">
-            <div
-              class="bg-primary/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-            >
-              <span class="text-2xl">
-                <ShieldCheck class="size-6" />
-              </span>
+          <div class="card-body">
+            <div class="flex flex-col gap-4">
+              <div
+                class="bg-primary/10 inline-flex items-center justify-start rounded-full p-3"
+              >
+                <Laptop class="mr-2 size-6 flex-none" />
+                <h3 class="text-xl font-semibold">DX first</h3>
+              </div>
+
+              <p class="text-base-content/80">
+                Every single detail of UFO RPC is designed to make your life as
+                a developer easier and more productive
+              </p>
+
+              <ul class="text-base-content/70 list-disc space-y-1 pl-6 text-sm">
+                <li>
+                  <span class="font-semibold">Intuitive DSL</span>: A simple,
+                  human-readable language for defining APIs
+                </li>
+                <li>
+                  <span class="font-semibold">Powerful Tooling</span>:
+                  Playground, LSP support, formatter, VS Code extension, etc
+                </li>
+                <li>
+                  <span class="font-semibold">Type Safety</span>: End-to-end
+                  type safety from schema to client and server
+                </li>
+              </ul>
             </div>
-            <h3 class="mb-2 font-semibold">Type Safety</h3>
-            <p class="text-base-content/70 text-sm">
-              Strong type validation and business rules.
-            </p>
           </div>
         </div>
 
         <div class="card bg-base-200 shadow-sm">
-          <div class="card-body text-center">
-            <div
-              class="bg-secondary/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-            >
-              <span class="text-2xl">
-                <NotebookText class="size-6" />
-              </span>
+          <div class="card-body">
+            <div class="flex flex-col gap-4">
+              <div
+                class="bg-secondary/10 inline-flex items-center justify-start rounded-full p-3"
+              >
+                <FileJson class="mr-2 size-6 flex-none" />
+                <h3 class="text-xl font-semibold">Open Source</h3>
+              </div>
+
+              <p class="text-base-content/80">
+                UFO RPC is <span class="font-semibold">100% open source</span> and
+                uses a dual-open-license approach
+              </p>
+
+              <ul class="text-base-content/70 list-disc space-y-1 pl-6 text-sm">
+                <li>
+                  <span class="font-semibold">UFO RPC Generator</span>: AGPL-3.0
+                </li>
+                <li><span class="font-semibold">Generated Code</span>: MIT</li>
+                <li>
+                  Ensures UFO RPC remains free and open source while your
+                  generated code can be used freely in any project
+                </li>
+              </ul>
             </div>
-            <h3 class="mb-2 font-semibold">Declarative Syntax</h3>
-            <p class="text-base-content/70 text-sm">
-              Intuitive and human-readable format.
-            </p>
           </div>
         </div>
 
         <div class="card bg-base-200 shadow-sm">
-          <div class="card-body text-center">
-            <div
-              class="bg-accent/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-            >
-              <span class="text-2xl">
-                <Cable class="size-6" />
-              </span>
+          <div class="card-body">
+            <div class="flex flex-col gap-4">
+              <div
+                class="bg-accent/10 inline-flex items-center justify-start rounded-full p-3"
+              >
+                <Languages class="mr-2 size-6 flex-none" />
+                <h3 class="text-xl font-semibold">Cross language</h3>
+              </div>
+
+              <p class="text-base-content/80">
+                Designed to work in a polyglot ecosystem from a single source of
+                truth
+              </p>
+
+              <ul class="text-base-content/70 list-disc space-y-1 pl-6 text-sm">
+                <li>
+                  <span class="font-semibold">Server & Client</span>:
+                  Zero-dependency, high-performance servers and clients for
+                  supported languages
+                </li>
+                <li>
+                  <span class="font-semibold">OpenAPI</span>: Generate OpenAPI
+                  specs from your schema
+                </li>
+                <li>
+                  <span class="font-semibold">Code Snippets</span>: Ready-to-use
+                  curl and many languages
+                </li>
+              </ul>
             </div>
-            <h3 class="mb-2 font-semibold">Cross-Language Compatibility</h3>
-            <p class="text-base-content/70 text-sm">
-              Generate efficient type-safe server and client code from your UFO
-              RPC schema.
-            </p>
           </div>
         </div>
 
         <div class="card bg-base-200 shadow-sm">
-          <div class="card-body text-center">
-            <div
-              class="bg-info/10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-            >
-              <span class="text-2xl">
-                <Brain class="size-6" />
-              </span>
+          <div class="card-body">
+            <div class="flex flex-col gap-4">
+              <div
+                class="bg-info/10 inline-flex items-center justify-start rounded-full p-3"
+              >
+                <MonitorSmartphone class="mr-2 size-6 flex-none" />
+                <h3 class="text-xl font-semibold">Playground</h3>
+              </div>
+
+              <p class="text-base-content/80">
+                Generate a static, zero-dependency, responsive web portal for
+                your schema
+              </p>
+
+              <ul class="text-base-content/70 list-disc space-y-1 pl-6 text-sm">
+                <li>
+                  <span class="font-semibold">Explore</span>: Procedures,
+                  streams, and data types
+                </li>
+                <li>
+                  <span class="font-semibold">Read the Docs</span>: Markdown
+                  docs alongside your schema
+                </li>
+                <li>
+                  <span class="font-semibold">Test the API</span>: Execute
+                  procedures and subscribe to streams
+                </li>
+              </ul>
             </div>
-            <h3 class="mb-2 font-semibold">Developer Experience</h3>
-            <p class="text-base-content/70 text-sm">
-              Best possible DX with strict data integrity.
-            </p>
           </div>
         </div>
       </div>
