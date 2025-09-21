@@ -9,8 +9,11 @@
   import type { PageProps } from "./$types";
   import Node from "./components/Node.svelte";
   import NotFound from "./components/NotFound.svelte";
+  import { createStoreNode } from "./storeNode.svelte";
 
   let { data }: PageProps = $props();
+
+  let storeNode = createStoreNode(data.nodeSlug);
 
   let nodeIndex = $derived.by(() => {
     for (const [
@@ -79,8 +82,8 @@
   <NotFound />
 {/if}
 
-{#if nodeExists}
+{#if nodeExists && !storeNode.status.loading}
   {#key nodeIndex}
-    <Node nodeSlug={data.nodeSlug} {node} />
+    <Node {node} bind:storeNode />
   {/key}
 {/if}

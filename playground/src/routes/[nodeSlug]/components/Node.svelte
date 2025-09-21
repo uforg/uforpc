@@ -5,10 +5,6 @@
   import { extractNodeFromSchema } from "$lib/helpers/extractNodeFromSchema";
   import { getMarkdownTitle } from "$lib/helpers/getMarkdownTitle";
   import { markdownToHtml } from "$lib/helpers/markdownToHtml";
-  import {
-    getCurrentInputForOperation,
-    getCurrentOutputForOperation,
-  } from "$lib/storeHistory.svelte";
   import { storeSettings } from "$lib/storeSettings.svelte";
   import { storeUi } from "$lib/storeUi.svelte";
 
@@ -16,21 +12,18 @@
   import Code from "$lib/components/Code.svelte";
   import H2 from "$lib/components/H2.svelte";
 
+  import type { StoreNodeInstance } from "../storeNode.svelte";
+
   import NodeQueryProc from "./NodeQuery/QueryProc.svelte";
   import NodeQueryStream from "./NodeQuery/QueryStream.svelte";
   import Snippets from "./NodeQuery/Snippets/Snippets.svelte";
 
   interface Props {
-    nodeSlug: string;
     node: (typeof storeSettings.store.jsonSchema.nodes)[number];
+    storeNode: StoreNodeInstance;
   }
 
-  const { nodeSlug, node }: Props = $props();
-
-  // svelte-ignore non_reactive_update - This is reactive through the store
-  let input = getCurrentInputForOperation(nodeSlug);
-  // svelte-ignore non_reactive_update - This is reactive through the store
-  let output = getCurrentOutputForOperation(nodeSlug);
+  const { node, storeNode = $bindable() }: Props = $props();
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;
@@ -123,13 +116,21 @@
 
     {#if node.kind === "proc"}
       <div>
-        <NodeQueryProc proc={node} bind:input bind:output />
+        <NodeQueryProc
+          proc={node}
+          bind:input={storeNode.store.input}
+          bind:output={storeNode.store.output}
+        />
       </div>
     {/if}
 
     {#if node.kind === "stream"}
       <div>
-        <NodeQueryStream stream={node} bind:input bind:output />
+        <NodeQueryStream
+          stream={node}
+          bind:input={storeNode.store.input}
+          bind:output={storeNode.store.output}
+        />
       </div>
     {/if}
 
@@ -152,7 +153,11 @@
 
   {#if !storeUi.store.isMobile && (node.kind == "proc" || node.kind == "stream")}
     <div class="col-span-4 overflow-y-auto p-4 pt-0">
-      <Snippets {input} type={node.kind} name={node.name} />
+      <Snippets
+        input={storeNode.store.input}
+        type={node.kind}
+        name={node.name}
+      />
       <BottomSpace />
     </div>
   {/if}
