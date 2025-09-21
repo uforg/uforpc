@@ -2,16 +2,18 @@ import { createAsyncStore } from "$lib/createAsyncStore.svelte";
 
 type Input = object;
 type Output = string;
+type Date = string;
 
 export interface HistoryItem {
   input: Input;
   output: Output;
-  date: string;
+  date: Date;
 }
 
 export interface StoreNode {
   input: Input;
   output: Output;
+  date: Date;
   history: HistoryItem[];
 }
 
@@ -22,10 +24,16 @@ type StoreNodeKey = keyof StoreNode;
 const storeNodeDefault: StoreNode = {
   input: {},
   output: "",
+  date: "",
   history: [],
 };
 
-const storeNodeKeysToPersist: StoreNodeKey[] = ["input", "output", "history"];
+const storeNodeKeysToPersist: StoreNodeKey[] = [
+  "input",
+  "output",
+  "date",
+  "history",
+];
 
 export const createStoreNode = (nodeSlug: string) => {
   return createAsyncStore<StoreNode>({

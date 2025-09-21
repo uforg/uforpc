@@ -12,29 +12,40 @@
   import Menu from "$lib/components/Menu.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
 
+  import type { StoreNodeInstance } from "../../storeNode.svelte";
+
   import InputForm from "./InputForm/InputForm.svelte";
   import Output from "./Output.svelte";
   import Snippets from "./Snippets/Snippets.svelte";
 
   interface Props {
     stream: StreamDefinitionNode;
-    input: any;
-    output: string | null;
+    storeNode: StoreNodeInstance;
   }
 
-  let { stream, input = $bindable(), output = $bindable() }: Props = $props();
+  let { stream, storeNode = $bindable() }: Props = $props();
 
-  // biome-ignore lint/suspicious/noExplicitAny: can be any stream response
   let outputArray: any[] = $state([]);
   let isExecuting = $state(false);
   let cancelRequest = $state<() => void>(() => {});
+
+  // Synchronize the output string with the output array
+  $effect(() => {
+    if (outputArray.length === 0) {
+      storeNode.store.output = "";
+      storeNode.store.date = "";
+    } else {
+      storeNode.store.output = JSON.stringify(outputArray, null, 2);
+      storeNode.store.date = new Date().toISOString();
+    }
+  });
 
   // let output = $derived(JSON.stringify(outputArray, null, 2));
 
   async function executeStream() {
     if (isExecuting) return;
     isExecuting = true;
-    output = "";
+    outputArray = [];
 
     try {
       openOutputTab(true);
@@ -53,7 +64,7 @@
 
       const response = await fetch(endpoint, {
         method: "POST",
-        body: JSON.stringify(input.root ?? {}),
+        body: JSON.stringify(storeNode.store.input ?? {}),
         headers,
         signal: signal,
       });
@@ -164,7 +175,7 @@
         role="button"
         tabindex="0"
       >
-        <InputForm fields={stream.input} bind:input />
+        <InputForm fields={stream.input} bind:input={storeNode.store.input} />
       </div>
     {:else}
       <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
@@ -205,12 +216,17 @@
       block: tab === "output",
     }}
   >
-    <Output {cancelRequest} {isExecuting} type="stream" {output} />
+    <Output
+      {cancelRequest}
+      {isExecuting}
+      type="stream"
+      output={storeNode.store.output}
+    />
   </div>
 </div>
 
 {#if storeUi.store.isMobile}
   <div class="mt-12">
-    <Snippets {input} type="stream" name={stream.name} />
+    <Snippets type="stream" name={stream.name} input={storeNode.store.input} />
   </div>
 {/if}

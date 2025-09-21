@@ -23,7 +23,7 @@
     storeNode: StoreNodeInstance;
   }
 
-  const { node, storeNode = $bindable() }: Props = $props();
+  let { node, storeNode = $bindable() }: Props = $props();
 
   let name = $derived.by(() => {
     if (node.kind === "type") return node.name;
@@ -116,21 +116,13 @@
 
     {#if node.kind === "proc"}
       <div>
-        <NodeQueryProc
-          proc={node}
-          bind:input={storeNode.store.input}
-          bind:output={storeNode.store.output}
-        />
+        <NodeQueryProc proc={node} bind:storeNode />
       </div>
     {/if}
 
     {#if node.kind === "stream"}
       <div>
-        <NodeQueryStream
-          stream={node}
-          bind:input={storeNode.store.input}
-          bind:output={storeNode.store.output}
-        />
+        <NodeQueryStream stream={node} bind:storeNode />
       </div>
     {/if}
 
@@ -154,9 +146,9 @@
   {#if !storeUi.store.isMobile && (node.kind == "proc" || node.kind == "stream")}
     <div class="col-span-4 overflow-y-auto p-4 pt-0">
       <Snippets
-        input={storeNode.store.input}
         type={node.kind}
         name={node.name}
+        input={storeNode.store.input}
       />
       <BottomSpace />
     </div>

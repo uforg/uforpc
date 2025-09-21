@@ -12,17 +12,18 @@
   import Menu from "$lib/components/Menu.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
 
+  import type { StoreNodeInstance } from "../../storeNode.svelte";
+
   import InputForm from "./InputForm/InputForm.svelte";
   import Output from "./Output.svelte";
   import Snippets from "./Snippets/Snippets.svelte";
 
   interface Props {
     proc: ProcedureDefinitionNode;
-    input: any;
-    output: string;
+    storeNode: StoreNodeInstance;
   }
 
-  let { proc, input = $bindable(), output = $bindable() }: Props = $props();
+  let { proc, storeNode = $bindable() }: Props = $props();
 
   let isExecuting = $state(false);
   let cancelRequest = $state<() => void>(() => {});
@@ -30,7 +31,8 @@
   async function executeProcedure() {
     if (isExecuting) return;
     isExecuting = true;
-    output = "";
+    storeNode.store.output = "";
+    storeNode.store.date = "";
 
     try {
       openOutputTab(true);
@@ -45,13 +47,14 @@
       const endpoint = joinPath([storeSettings.store.baseUrl, proc.name]);
       const response = await fetch(endpoint, {
         method: "POST",
-        body: JSON.stringify(input.root ?? {}),
+        body: JSON.stringify(storeNode.store.input ?? {}),
         headers: getHeadersObject(),
         signal: signal,
       });
 
       const data = await response.json();
-      output = JSON.stringify(data, null, 2);
+      storeNode.store.output = JSON.stringify(data, null, 2);
+      storeNode.store.date = new Date().toISOString();
     } catch (error) {
       if (!(error instanceof Error && error.name === "AbortError")) {
         console.error(error);
@@ -114,7 +117,7 @@
         role="button"
         tabindex="0"
       >
-        <InputForm fields={proc.input} bind:input />
+        <InputForm fields={proc.input} bind:input={storeNode.store.input} />
       </div>
     {:else}
       <div role="alert" class="alert alert-soft alert-warning mt-6 w-fit">
@@ -155,12 +158,17 @@
       block: tab === "output",
     }}
   >
-    <Output {cancelRequest} {isExecuting} type="proc" {output} />
+    <Output
+      {cancelRequest}
+      {isExecuting}
+      type="proc"
+      output={storeNode.store.output}
+    />
   </div>
 </div>
 
 {#if storeUi.store.isMobile}
   <div class="mt-12">
-    <Snippets {input} type="proc" name={proc.name} />
+    <Snippets type="proc" name={proc.name} input={storeNode.store.input} />
   </div>
 {/if}
