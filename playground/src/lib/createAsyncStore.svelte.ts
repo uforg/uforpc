@@ -89,9 +89,7 @@ export function createAsyncStore<T extends Record<string, any>>(
     // Load the initial store value
     try {
       const initialValue = await opts.initialValue();
-      for (const key in initialValue) {
-        (store[key] as unknown) = initialValue[key];
-      }
+      Object.assign(store, initialValue);
     } catch (error) {
       toast.error("Failed to load initial store value", {
         description: `Error: ${error}`,
@@ -123,9 +121,8 @@ export function createAsyncStore<T extends Record<string, any>>(
           if (value === null || value === undefined) {
             await db.removeItem(keyToPersist as string);
           } else {
-            // localforage can only store JSON-serializable values and svelte
-            // wraps stores in proxies, so we need to convert the value to a
-            // plain object before persisting it
+            // We must unwrap the Svelte Proxy before saving.
+            // The JSON cycle is a simple way to do this, but limits us to JSON-serializable data.
             const plainValue = JSON.parse(JSON.stringify(value));
             await db.setItem(keyToPersist as string, plainValue);
           }
@@ -160,6 +157,9 @@ export function createAsyncStore<T extends Record<string, any>>(
       for (const keyToPersist of opts.keysToPersist) {
         $effect(() => {
           const value = store[keyToPersist];
+          // Force svelte to track changes for complex or nested object values
+          // by using JSON.stringify that involves reading all properties
+          JSON.stringify(value);
           const persistFn = persistDebouncedMap.get(keyToPersist as string);
           if (persistFn) persistFn(value);
         });
