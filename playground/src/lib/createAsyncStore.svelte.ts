@@ -121,10 +121,7 @@ export function createAsyncStore<T extends Record<string, any>>(
           if (value === null || value === undefined) {
             await db.removeItem(keyToPersist as string);
           } else {
-            // We must unwrap the Svelte Proxy before saving.
-            // The JSON cycle is a simple way to do this, but limits us to JSON-serializable data.
-            const plainValue = JSON.parse(JSON.stringify(value));
-            await db.setItem(keyToPersist as string, plainValue);
+            await db.setItem(keyToPersist as string, value);
           }
         } catch (error) {
           // On error, remove the item to avoid stale or corrupted data
@@ -156,12 +153,16 @@ export function createAsyncStore<T extends Record<string, any>>(
     $effect.root(() => {
       for (const keyToPersist of opts.keysToPersist) {
         $effect(() => {
-          const value = store[keyToPersist];
-          // Force svelte to track changes for complex or nested object values
-          // by using JSON.stringify that involves reading all properties
-          JSON.stringify(value);
           const persistFn = persistDebouncedMap.get(keyToPersist as string);
-          if (persistFn) persistFn(value);
+          if (!persistFn) return;
+
+          // We must unwrap the Svelte Proxy before saving because it can't be easily saved as-is.
+          // The JSON cycle is a simple way to do this, but limits us to JSON-serializable data.
+          //
+          // This also force svelte to track changes for complex or nested object values
+          // by using JSON.stringify that involves reading all properties
+          const value = JSON.parse(JSON.stringify(store[keyToPersist]));
+          persistFn(value);
         });
       }
     });
