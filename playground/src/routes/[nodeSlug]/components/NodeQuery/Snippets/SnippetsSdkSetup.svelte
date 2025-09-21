@@ -4,6 +4,10 @@
 
   import Code from "$lib/components/Code.svelte";
 
+  // We use 'imp' instead of 'import' because the latter confuses the vite
+  // import resolver, it thinks it's a real import and tries to resolve it
+  const imp = "import";
+
   const dartPackageName = $derived.by(
     () =>
       storeUi.store.codeSnippetsSdkDartPackageName.trim() ||
@@ -15,7 +19,7 @@
 
   const tsSetup = $derived.by(
     () => `// 1) Place the generated file in your project, e.g. src/lib/uforpc-client-sdk.ts
-import { NewClient } from "./path/to/uforpc-client-sdk.ts";
+${imp} { NewClient } from "./path/to/uforpc-client-sdk.ts";
 
 // 2) Build the client
 const client = NewClient("${storeSettings.store.baseUrl}").build();`,
@@ -26,7 +30,7 @@ const client = NewClient("${storeSettings.store.baseUrl}").build();`,
 
 package main
 
-import "yourmodule/${golangPackageName}"
+${imp} "yourmodule/${golangPackageName}"
 
 func main() {
 	client := ${golangPackageName}.NewClient("${storeSettings.store.baseUrl}").Build()
@@ -43,7 +47,7 @@ dependencies:
   );
 
   const dartSetup = $derived.by(
-    () => `import "package:${dartPackageName}/client.dart" as urpc;
+    () => `${imp} "package:${dartPackageName}/client.dart" as urpc;
 
 final client = urpc.NewClient("${storeSettings.store.baseUrl}").build();`,
   );
