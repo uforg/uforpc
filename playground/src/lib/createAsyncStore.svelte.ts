@@ -7,6 +7,7 @@ interface CreateAsyncStoreOptions<T extends Record<string, unknown>> {
   initialValue: () => Promise<T>;
   keysToPersist: (keyof T)[];
   dbName?: string;
+  tableName?: string;
 }
 
 interface AsyncStoreStatus {
@@ -31,7 +32,8 @@ interface AsyncStoreResult<T extends Record<string, unknown>> {
  * @param opts - Configuration options for creating the async store.
  * @param opts.initialValue - An async function that returns the initial value of the store.
  * @param opts.keysToPersist - An array of keys from the store that should be persisted to IndexedDB.
- * @param opts.storeName - An optional name for the store, used to create a unique isolated database instead of the global one.
+ * @param opts.dbName - An optional name for the store, used to create a unique isolated database instead of the global one.
+ * @param opts.tableName - An optional table name within the database to further isolate the store data.
  * @returns An object containing the Svelte store, its lifecycle (status) state and a promise to wait for initialization.
  *
  * @example
@@ -84,6 +86,7 @@ export function createAsyncStore<T extends Record<string, any>>(
     const db = localforage.createInstance({
       name: dbName,
       driver: localforage.INDEXEDDB,
+      storeName: opts.tableName,
     });
 
     // Load the initial store value
