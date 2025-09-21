@@ -4,6 +4,8 @@ This is the playground webapp of UFO RPC. Read this entire document and only pay
 
 ## Commands
 
+Read the `package.json` file to see all available commands, the most important ones are:
+
 - `npm run dev`: Starts a local development server with live reloading (this blocks terminal until the process is killed)
 - `npm run build`: Builds the app for production
 - `npm run lint`: Lints the codebase and run typescript checks
