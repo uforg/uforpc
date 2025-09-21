@@ -4,6 +4,8 @@
   import { storeUi } from "$lib/storeUi.svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
 
+  import Tabs from "$lib/components/Tabs.svelte";
+
   import Field from "./Field.svelte";
   import JsonEditor from "./JsonEditor.svelte";
 
@@ -15,10 +17,7 @@
   let { fields, input = $bindable() }: Props = $props();
 
   let isFormTab = $derived(storeUi.store.inputFormTab === "form");
-  const switchToForm = () => (storeUi.store.inputFormTab = "form");
-
   let isJsonTab = $derived(storeUi.store.inputFormTab === "json");
-  const switchToJson = () => (storeUi.store.inputFormTab = "json");
 </script>
 
 <div
@@ -32,22 +31,15 @@
     </span>
   </div>
 
-  <div class="join">
-    <button
-      class={[
-        "btn btn-xs join-item border-base-content/20 flex-grow",
-        isFormTab && "btn-primary",
-      ]}
-      onclick={switchToForm}>Form</button
-    >
-    <button
-      class={[
-        "btn btn-xs join-item border-base-content/20 flex-grow",
-        isJsonTab && "btn-primary",
-      ]}
-      onclick={switchToJson}>JSON</button
-    >
-  </div>
+  <Tabs
+    containerClass="w-auto"
+    buttonClass="btn-xs"
+    items={[
+      { id: "form", label: "Form" },
+      { id: "json", label: "JSON" },
+    ]}
+    bind:active={storeUi.store.inputFormTab}
+  />
 </div>
 
 {#if isFormTab}

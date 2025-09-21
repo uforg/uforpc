@@ -10,6 +10,7 @@
 
   import H2 from "$lib/components/H2.svelte";
   import Menu from "$lib/components/Menu.svelte";
+  import Tabs from "$lib/components/Tabs.svelte";
 
   import InputForm from "./InputForm/InputForm.svelte";
   import Output from "./Output.svelte";
@@ -32,7 +33,7 @@
     output = "";
 
     try {
-      openOutput(true);
+      openOutputTab(true);
       const controller = new AbortController();
       const signal = controller.signal;
 
@@ -75,12 +76,7 @@
 
   let tab: "input" | "output" = $state("input");
   let wrapper: HTMLDivElement | null = $state(null);
-  function openInput(scroll = false) {
-    if (tab === "input") return;
-    tab = "input";
-    if (scroll) wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-  function openOutput(scroll = false) {
+  function openOutputTab(scroll = false) {
     if (tab === "output") return;
     tab = "output";
     if (scroll) wrapper?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -95,28 +91,13 @@
   >
     <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
 
-    <div class="join flex w-full">
-      <button
-        class={[
-          "btn join-item border-base-content/20 flex-grow",
-          tab === "input" && "btn-primary",
-        ]}
-        onclick={() => openInput(false)}
-      >
-        <MoveUpRight class="size-4" />
-        Input
-      </button>
-      <button
-        class={[
-          "btn join-item border-base-content/20 flex-grow",
-          tab === "output" && "btn-primary",
-        ]}
-        onclick={() => openOutput(false)}
-      >
-        <MoveDownLeft class="size-4" />
-        <span>Output</span>
-      </button>
-    </div>
+    <Tabs
+      items={[
+        { id: "input", label: "Input", icon: MoveUpRight },
+        { id: "output", label: "Output", icon: MoveDownLeft },
+      ]}
+      bind:active={tab}
+    />
   </div>
 
   <div

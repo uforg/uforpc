@@ -30,8 +30,7 @@
         { id: "curl", label: "HTTP Snippets" },
         { id: "sdk", label: "SDK Snippets" },
       ]}
-      activeId={storeUi.store.codeSnippetsTab}
-      onSelect={(id) => (storeUi.store.codeSnippetsTab = id as "sdk" | "curl")}
+      bind:active={storeUi.store.codeSnippetsTab}
     />
   </div>
 
