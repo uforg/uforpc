@@ -27,7 +27,7 @@ const storeHistoryKeysToPersist: StoreHistoryKey[] = ["operations"];
 export const storeHistory = createAsyncStore<StoreHistory>({
   initialValue: async () => defaultStoreHistory,
   keysToPersist: storeHistoryKeysToPersist,
-  storeName: "storeHistory",
+  dbName: "storeHistory",
 });
 
 /**

@@ -167,7 +167,7 @@ const storeUiKeysToPersist: StoreUiKey[] = [
 export const storeUi = createAsyncStore<StoreUi>({
   initialValue: async () => storeUiDefault,
   keysToPersist: storeUiKeysToPersist,
-  storeName: "storeUi",
+  dbName: "storeUi",
 });
 
 $effect.root(() => {

@@ -6,7 +6,7 @@ import { toast } from "svelte-sonner";
 interface CreateAsyncStoreOptions<T extends Record<string, unknown>> {
   initialValue: () => Promise<T>;
   keysToPersist: (keyof T)[];
-  storeName?: string;
+  dbName?: string;
 }
 
 interface AsyncStoreStatus {
@@ -74,8 +74,8 @@ export function createAsyncStore<T extends Record<string, any>>(
     // Create the localforage database name, it' will be used to isolate
     // different stores between themselves
     let dbName = createGlobalDbNamePrefix();
-    if (opts.storeName && opts.storeName.trim() !== "") {
-      dbName += `-${opts.storeName.trim()}`;
+    if (opts.dbName && opts.dbName.trim() !== "") {
+      dbName += `-${opts.dbName.trim()}`;
     }
 
     // Create localforage database instance

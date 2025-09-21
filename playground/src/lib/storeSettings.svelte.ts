@@ -119,7 +119,7 @@ async function storeSettingsGetInitialValue(): Promise<StoreSettings> {
 export const storeSettings = createAsyncStore<StoreSettings>({
   initialValue: storeSettingsGetInitialValue,
   keysToPersist: ["baseUrl", "headers"],
-  storeName: "storeSettings",
+  dbName: "storeSettings",
 });
 
 /**
