@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Code, Terminal } from "@lucide/svelte";
+
   import { storeUi } from "$lib/storeUi.svelte";
 
   import H2 from "$lib/components/H2.svelte";
@@ -27,8 +29,8 @@
 
     <Tabs
       items={[
-        { id: "curl", label: "HTTP Snippets" },
-        { id: "sdk", label: "SDK Snippets" },
+        { id: "curl", label: "HTTP Snippets", icon: Terminal },
+        { id: "sdk", label: "SDK Snippets", icon: Code },
       ]}
       bind:active={storeUi.store.codeSnippetsTab}
     />

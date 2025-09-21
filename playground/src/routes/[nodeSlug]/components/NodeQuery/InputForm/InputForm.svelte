@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Info } from "@lucide/svelte";
+  import { BookText, Braces, Info } from "@lucide/svelte";
 
   import { storeUi } from "$lib/storeUi.svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
@@ -35,8 +35,8 @@
     containerClass="w-auto"
     buttonClass="btn-xs"
     items={[
-      { id: "form", label: "Form" },
-      { id: "json", label: "JSON" },
+      { id: "form", label: "Form", icon: BookText },
+      { id: "json", label: "JSON", icon: Braces },
     ]}
     bind:active={storeUi.store.inputFormTab}
   />
