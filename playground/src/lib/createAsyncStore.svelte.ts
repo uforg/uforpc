@@ -9,15 +9,15 @@ interface CreateAsyncStoreOptions<T extends Record<string, unknown>> {
   storeName?: string;
 }
 
-interface AsyncStoreLifecycle {
-  initialized: boolean;
+interface AsyncStoreStatus {
   loading: boolean;
   saving: boolean;
 }
 
 interface AsyncStoreResult<T extends Record<string, unknown>> {
   store: T;
-  lifecycle: AsyncStoreLifecycle;
+  status: AsyncStoreStatus;
+  ready: () => Promise<void>;
 }
 
 /**
@@ -30,11 +30,11 @@ interface AsyncStoreResult<T extends Record<string, unknown>> {
  * @param opts.initialValue - An async function that returns the initial value of the store.
  * @param opts.keysToPersist - An array of keys from the store that should be persisted to IndexedDB.
  * @param opts.storeName - An optional name for the store, used to create a unique isolated database instead of the global one.
- * @returns An object containing the Svelte store and its lifecycle state.
+ * @returns An object containing the Svelte store, its lifecycle (status) state and a promise to wait for initialization.
  *
  * @example
  * ```ts
- * const { store, lifecycle } = createAsyncStore({
+ * const { store, status, ready } = createAsyncStore({
  *   initialValue: async () => ({ theme: 'light', fontSize: 14 }),
  *   keysToPersist: ['theme'],
  *   storeName: 'userPreferences',
@@ -48,16 +48,26 @@ export function createAsyncStore<T extends Record<string, any>>(
 ): AsyncStoreResult<T> {
   // Initialize Svelte stores
   let store = $state<T>({} as T);
-  const lifecycle = $state({
-    initialized: false,
+  const status = $state({
     loading: true,
     saving: false,
+  });
+
+  // Promise for waiting for initialization
+  let resolveReady: () => void;
+  const readyPromise = new Promise<void>((resolve) => {
+    resolveReady = resolve;
   });
 
   // Asynchronously manage the store lifecycle
   (async () => {
     // Browser-only check
-    if (!browser) return;
+    if (!browser) {
+      // biome-ignore lint/style/noNonNullAssertion: the function is always defined above
+      resolveReady!();
+      status.loading = false;
+      return;
+    }
 
     // Create the localforage database name, it' will be used to isolate
     // different stores between themselves
@@ -104,7 +114,7 @@ export function createAsyncStore<T extends Record<string, any>>(
     const persistDebouncedMap = new Map<string, (value: unknown) => void>();
     for (const keyToPersist of opts.keysToPersist) {
       const persistFn = async (value: unknown) => {
-        lifecycle.saving = true;
+        status.saving = true;
 
         try {
           // Delete null or undefined values from the database
@@ -121,7 +131,7 @@ export function createAsyncStore<T extends Record<string, any>>(
             },
           );
         } finally {
-          lifecycle.saving = false;
+          status.saving = false;
         }
       };
 
@@ -141,13 +151,15 @@ export function createAsyncStore<T extends Record<string, any>>(
       }
     });
 
-    lifecycle.initialized = true;
-    lifecycle.loading = false;
+    // biome-ignore lint/style/noNonNullAssertion: the function is always defined above
+    resolveReady!();
+    status.loading = false;
   })();
 
   return {
     store,
-    lifecycle,
+    status,
+    ready: () => readyPromise,
   };
 }
 
