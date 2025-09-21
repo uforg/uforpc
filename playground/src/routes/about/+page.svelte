@@ -64,7 +64,7 @@
           <ul class="list-inside list-disc">
             <li>
               <a
-                href="https://github.com/uforg/uforpc/blob/main/LICENSE"
+                href="https://uforpc.uforg.dev/r/license-code"
                 target="_blank"
                 class="link"
               >
@@ -74,7 +74,7 @@
             </li>
             <li>
               <a
-                href="https://github.com/uforg/uforpc/blob/main/LICENSE-GENERATED-CODE"
+                href="https://uforpc.uforg.dev/r/license-gen"
                 target="_blank"
                 class="link"
               >
@@ -152,25 +152,37 @@
         <div class="space-y-4">
           <p class="text-base-content/80 leading-relaxed">
             This project was created and is maintained with ❤️ by
-            <a href="https://eduardo.lat" target="_blank" class="link">
+            <a
+              href="https://uforpc.uforg.dev/r/author/web"
+              target="_blank"
+              class="link"
+            >
               Luis Eduardo
             </a>
           </p>
 
           <ul class="list-inside list-disc">
             <li>
-              <a href="https://eduardo.lat" target="_blank" class="link">
+              <a
+                href="https://uforpc.uforg.dev/r/author/web"
+                target="_blank"
+                class="link"
+              >
                 Website
               </a>
             </li>
             <li>
-              <a href="https://eduardo.lat/github" target="_blank" class="link">
+              <a
+                href="https://uforpc.uforg.dev/r/author/gh"
+                target="_blank"
+                class="link"
+              >
                 GitHub
               </a>
             </li>
             <li>
               <a
-                href="https://eduardo.lat/linkedin"
+                href="https://uforpc.uforg.dev/r/author/linkedin"
                 target="_blank"
                 class="link"
               >
@@ -178,7 +190,11 @@
               </a>
             </li>
             <li>
-              <a href="https://eduardo.lat/x" target="_blank" class="link">
+              <a
+                href="https://uforpc.uforg.dev/r/author/x"
+                target="_blank"
+                class="link"
+              >
                 X (Twitter)
               </a>
             </li>
