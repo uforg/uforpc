@@ -108,7 +108,7 @@
 {#if !initialized}
   <main
     out:fade={{ duration: 200 }}
-    class="fixed top-0 left-0 flex h-screen w-screen flex-col items-center justify-center"
+    class="fixed top-0 left-0 flex h-[100dvh] w-[100dvw] flex-col items-center justify-center"
   >
     <Logo class="mb-6 h-auto w-[90dvw] max-w-[600px]" />
     <h2>{message}...</h2>
