@@ -4,9 +4,23 @@ import { debounce } from "lodash-es";
 import { toast } from "svelte-sonner";
 
 interface CreateAsyncStoreOptions<T extends Record<string, unknown>> {
+  /**
+   * A function that returns the initial value of the store.
+   * @returns A promise that resolves to the initial value of the store.
+   */
   initialValue: () => Promise<T>;
+  /**
+   * An array of keys from the store that should be persisted to IndexedDB.
+   * Only top-level keys are supported.
+   */
   keysToPersist: (keyof T)[];
+  /**
+   * An optional name for the database, used to create a unique isolated database instead of the global one.
+   */
   dbName?: string;
+  /**
+   * An optional table name within the database to further isolate the store data.
+   */
   tableName?: string;
 }
 
