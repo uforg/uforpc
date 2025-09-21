@@ -13,7 +13,11 @@
 
   let { data }: PageProps = $props();
 
-  let storeNode = createStoreNode(data.nodeSlug);
+  // Create a per-slug store and recreate it whenever the slug changes
+  let storeNode = $state(createStoreNode(data.nodeSlug));
+  $effect(() => {
+    storeNode = createStoreNode(data.nodeSlug);
+  });
 
   let nodeIndex = $derived.by(() => {
     for (const [
