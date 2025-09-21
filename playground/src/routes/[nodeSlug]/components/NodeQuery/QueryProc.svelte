@@ -18,7 +18,7 @@
   interface Props {
     proc: ProcedureDefinitionNode;
     input: any;
-    output: string | null;
+    output: string;
   }
 
   let { proc, input = $bindable(), output = $bindable() }: Props = $props();
@@ -29,7 +29,7 @@
   async function executeProcedure() {
     if (isExecuting) return;
     isExecuting = true;
-    output = null;
+    output = "";
 
     try {
       openOutput(true);
