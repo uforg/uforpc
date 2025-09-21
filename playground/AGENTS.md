@@ -13,6 +13,8 @@ Read the `package.json` file to see all available commands, the most important o
 
 Always execute the `fmt`, `lint` and `build` commands when you finish your changes, and ensure there are no errors. If there are errors, fix them until there are none.
 
+Before running a command like `npm run {command}`, make sure you are inside `/workspaces/uforpc/playground` directory.
+
 ## Stack
 
 ### Svelte and SvelteKit v5
