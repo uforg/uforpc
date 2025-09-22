@@ -44,28 +44,29 @@ export const createStoreNode = (nodeSlug: string) => {
   });
 };
 
-/** * Save the current input and output to the history for a given operation ID, initializing it if necessary.
- * Limits the history to the most recent 50 entries.
+/**
+ * Save the current input and output to the history for a given operation ID, initializing it if necessary.
+ * Limits the history to the most recent 150 entries.
  *
  * @param operationID the operation ID to save the current input and output for
  */
-// export const saveCurrentToHistoryForOperation = (operationID: string) => {
-//   const historyLimit = 50;
+export const saveCurrentToHistory = (
+  storeNode: ReturnType<typeof createStoreNode>,
+) => {
+  const historyLimit = 150;
+  const input = storeNode.store.input;
+  const output = storeNode.store.output;
 
-//   initializeOperation(operationID);
-//   const input = getCurrentInputForOperation(operationID);
-//   const output = getCurrentOutputForOperation(operationID);
-//   if (input && output) {
-//     storeHistory.store.operations[operationID].history.unshift({
-//       input,
-//       output,
-//       date: new Date().toISOString(),
-//     });
-//     // Limit history entries
-//     if (
-//       storeHistory.store.operations[operationID].history.length > historyLimit
-//     ) {
-//       storeHistory.store.operations[operationID].history.pop();
-//     }
-//   }
-// };
+  if (storeNode.status.loading) return;
+  if (!input && !output) return;
+
+  storeNode.store.history.unshift({
+    input,
+    output,
+    date: new Date().toISOString(),
+  });
+
+  if (storeNode.store.history.length > historyLimit) {
+    storeNode.store.history.pop();
+  }
+};
