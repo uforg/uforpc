@@ -1,4 +1,4 @@
-import { createAsyncStore } from "$lib/createAsyncStore.svelte";
+import { createStore } from "$lib/createStore.svelte";
 
 type Input = object;
 type Output = string;
@@ -36,7 +36,7 @@ const storeNodeKeysToPersist: StoreNodeKey[] = [
 ];
 
 export const createStoreNode = (nodeSlug: string) => {
-  return createAsyncStore<StoreNode>({
+  return createStore<StoreNode>({
     initialValue: async () => storeNodeDefault,
     keysToPersist: storeNodeKeysToPersist,
     dbName: "storeNode",

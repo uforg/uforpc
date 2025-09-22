@@ -1,7 +1,7 @@
 import MiniSearch from "minisearch";
 import { toast } from "svelte-sonner";
 
-import { createAsyncStore } from "./createAsyncStore.svelte.ts";
+import { createStore } from "./createStore.svelte.ts";
 import { getCurrentHost } from "./helpers/getCurrentHost.ts";
 import { getMarkdownTitle } from "./helpers/getMarkdownTitle.ts";
 import { markdownToText } from "./helpers/markdownToText.ts";
@@ -116,7 +116,7 @@ async function storeSettingsGetInitialValue(): Promise<StoreSettings> {
 
 // Cannot use createStore because of the http request needed
 // maybe it can be refactored later
-export const storeSettings = createAsyncStore<StoreSettings>({
+export const storeSettings = createStore<StoreSettings>({
   initialValue: storeSettingsGetInitialValue,
   keysToPersist: ["baseUrl", "headers"],
   dbName: "storeSettings",

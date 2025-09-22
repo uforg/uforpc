@@ -2,7 +2,7 @@ import { browser } from "$app/environment";
 import { debounce } from "lodash-es";
 import type { Action } from "svelte/action";
 
-import { createAsyncStore } from "./createAsyncStore.svelte";
+import { createStore } from "./createStore.svelte";
 import type { CodegenGenerator } from "./urpc";
 
 export interface StoreUiDimensions {
@@ -164,7 +164,7 @@ const storeUiKeysToPersist: StoreUiKey[] = [
   "asideHideStreams",
 ];
 
-export const storeUi = createAsyncStore<StoreUi>({
+export const storeUi = createStore<StoreUi>({
   initialValue: async () => storeUiDefault,
   keysToPersist: storeUiKeysToPersist,
   dbName: "storeUi",

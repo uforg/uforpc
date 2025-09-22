@@ -3,7 +3,7 @@ import localforage from "localforage";
 import { debounce } from "lodash-es";
 import { toast } from "svelte-sonner";
 
-interface CreateAsyncStoreOptions<T extends Record<string, unknown>> {
+interface CreateStoreOptions<T extends Record<string, unknown>> {
   /**
    * A function that returns the initial value of the store.
    * @returns A promise that resolves to the initial value of the store.
@@ -24,14 +24,14 @@ interface CreateAsyncStoreOptions<T extends Record<string, unknown>> {
   tableName?: string;
 }
 
-interface AsyncStoreStatus {
+interface StoreStatus {
   loading: boolean;
   saving: boolean;
 }
 
-interface AsyncStoreResult<T extends Record<string, unknown>> {
+interface StoreResult<T extends Record<string, unknown>> {
   store: T;
-  status: AsyncStoreStatus;
+  status: StoreStatus;
   ready: () => Promise<void>;
 }
 
@@ -52,7 +52,7 @@ interface AsyncStoreResult<T extends Record<string, unknown>> {
  *
  * @example
  * ```ts
- * const { store, status, ready } = createAsyncStore({
+ * const { store, status, ready } = createStore({
  *   initialValue: async () => ({ theme: 'light', fontSize: 14 }),
  *   keysToPersist: ['theme'],
  *   storeName: 'userPreferences',
@@ -61,9 +61,9 @@ interface AsyncStoreResult<T extends Record<string, unknown>> {
  */
 
 // biome-ignore lint/suspicious/noExplicitAny: the values are dynamic and varied between different stores
-export function createAsyncStore<T extends Record<string, any>>(
-  opts: CreateAsyncStoreOptions<T>,
-): AsyncStoreResult<T> {
+export function createStore<T extends Record<string, any>>(
+  opts: CreateStoreOptions<T>,
+): StoreResult<T> {
   // Initialize Svelte stores
   let store = $state<T>({} as T);
   const status = $state({
