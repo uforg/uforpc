@@ -40,7 +40,10 @@
 
     message = "Loading configuration";
     try {
-      await Promise.all([storeSettings.ready(), storeUi.ready()]);
+      await Promise.all([
+        storeSettings.status.waitUntilReady(),
+        storeUi.status.waitUntilReady(),
+      ]);
       initTheme();
     } catch (error) {
       handleError(error);
