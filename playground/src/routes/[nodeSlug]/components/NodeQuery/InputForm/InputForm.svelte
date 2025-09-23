@@ -21,7 +21,7 @@
 </script>
 
 <div
-  class="desk:flex-row desk:items-center mt-4 flex flex-col items-end justify-between gap-4"
+  class="desk:flex-row desk:items-start mt-4 flex flex-col items-end justify-between gap-4"
 >
   <div role="alert" class="alert alert-soft alert-info w-fit">
     <Info class="size-4" />
@@ -32,7 +32,7 @@
   </div>
 
   <Tabs
-    containerClass="w-auto"
+    containerClass="w-auto flex-none"
     buttonClass="btn-xs"
     iconClass="size-3"
     items={[
