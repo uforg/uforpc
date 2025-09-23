@@ -1,10 +1,18 @@
 <script lang="ts">
-  import { CircleX, CloudAlert, Copy, Loader, Trash } from "@lucide/svelte";
+  import {
+    CircleX,
+    Clock,
+    CloudAlert,
+    Copy,
+    Loader,
+    Trash,
+  } from "@lucide/svelte";
 
   import { copyTextToClipboard } from "$lib/helpers/copyTextToClipboard";
 
   import Editor from "$lib/components/Editor.svelte";
   import H3 from "$lib/components/H3.svelte";
+  import Tabs from "$lib/components/Tabs.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
 
   import type { StoreNodeInstance } from "../../storeNode.svelte";
@@ -105,25 +113,32 @@
         {/if}
       </div>
 
-      <div class="flex items-center justify-end">
-        <Tooltip content="Latest output date" placement="top">
-          <button class="btn btn-xs mr-2">
-            {prettyOutputDate}
-          </button>
-        </Tooltip>
-        <Tooltip content="Copy output to clipboard" placement="top">
-          <button class="btn btn-xs btn-square mr-2" onclick={copyToClipboard}>
-            <Copy class="size-3" />
-          </button>
-        </Tooltip>
-        <Tooltip content="Clear output" placement="top">
-          <button
-            class="btn btn-xs btn-square"
-            onclick={storeNode.actions.clearOutput}
-          >
-            <Trash class="size-3" />
-          </button>
-        </Tooltip>
+      <div class="flex justify-end">
+        <Tabs
+          buttonClass="btn-xs"
+          iconClass="size-3"
+          items={[
+            {
+              id: "outputDate",
+              icon: Clock,
+              action: () => {},
+              label: prettyOutputDate,
+              tooltipText: "Latest output date",
+            },
+            {
+              id: "copy",
+              icon: Copy,
+              action: copyToClipboard,
+              tooltipText: "Copy output to clipboard",
+            },
+            {
+              id: "clear",
+              icon: Trash,
+              action: storeNode.actions.clearOutput,
+              tooltipText: "Clear output",
+            },
+          ]}
+        />
       </div>
     </div>
 
