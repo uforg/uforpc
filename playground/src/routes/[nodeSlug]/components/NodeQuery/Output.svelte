@@ -25,10 +25,19 @@
     return true;
   });
 
+  /**
+   * Formats the output date to be more human-readable.
+   *
+   * The date is in ISO 8601 format (e.g., "2000-10-05T14:48:00.000Z").
+   *
+   * And the result will be like "2000-10-05 14:48:00"
+   */
   let prettyOutputDate = $derived.by(() => {
     if (!storeNode.store.outputDate) return "unknown output date";
-    let date = new Date(storeNode.store.outputDate);
-    return date.toLocaleString();
+    return storeNode.store.outputDate
+      .replaceAll("T", " ")
+      .replaceAll("Z", "")
+      .split(".")[0];
   });
 
   async function copyToClipboard() {
