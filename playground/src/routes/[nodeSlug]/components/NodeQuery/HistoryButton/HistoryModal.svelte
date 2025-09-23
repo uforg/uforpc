@@ -24,17 +24,15 @@
   });
 </script>
 
-<Modal bind:isOpen class="w-[95vw] max-w-4xl">
+<Modal bind:isOpen class="h-full w-full max-w-4xl">
   {#if historyItem}
-    <div class="flex h-full max-h-[80vh] flex-col">
-      <div
-        class="border-base-content/20 flex items-center justify-between border-b pb-4"
-      >
+    <div class="flex h-full flex-col space-y-4 overflow-hidden">
+      <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">
           {formatISODate(historyItem.date)}
         </h2>
         <button
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-sm btn-circle"
           onclick={() => (isOpen = false)}
           aria-label="Close"
         >
@@ -42,7 +40,7 @@
         </button>
       </div>
 
-      <div class="mt-4">
+      <div>
         <Tabs
           items={[
             { id: "input", label: "Input", icon: MoveUpRight },
@@ -52,7 +50,7 @@
         />
       </div>
 
-      <div class="mt-4 flex-1 overflow-hidden">
+      <div class="flex-1 flex-grow overflow-hidden">
         {#if activeTab === "input"}
           <Code lang="json" code={historyItem.input} />
         {/if}
