@@ -88,7 +88,7 @@
 {#if codeHighlighted !== ""}
   <div
     class={mergeClasses([
-      "bg-base-200 flex h-full flex-col",
+      "bg-base-200 flex h-full flex-col overflow-hidden",
       {
         "border-base-content/20 border": withBorder,
         "rounded-box": rounded,
