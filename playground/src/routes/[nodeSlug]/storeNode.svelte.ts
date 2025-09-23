@@ -3,11 +3,14 @@ import { createStore } from "$lib/createStore.svelte";
 type Input = object;
 type Output = string;
 type Date = string;
+type HistoryInput = string;
+type HistoryOutput = string;
+type HistoryDate = string;
 
 export interface HistoryItem {
-  input: Input;
-  output: Output;
-  date: Date;
+  input: HistoryInput;
+  output: HistoryOutput;
+  date: HistoryDate;
 }
 
 export interface StoreNode {
@@ -58,8 +61,8 @@ export const createStoreNode = (nodeSlug: string) => {
         if (!input && !output) return;
 
         store.history.unshift({
-          input,
-          output,
+          input: JSON.stringify(input, null, 2),
+          output: output,
           date: new Date().toISOString(),
         });
 
