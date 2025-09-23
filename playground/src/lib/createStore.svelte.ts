@@ -3,7 +3,13 @@ import localforage from "localforage";
 import { debounce } from "lodash-es";
 import { toast } from "svelte-sonner";
 
-interface CreateStoreOptions<T extends Record<string, unknown>> {
+/**
+ * Options for configuring the store creation.
+ */
+interface CreateStoreOptions<
+  T extends Record<string, unknown>,
+  M extends Record<string, (...args: unknown[]) => unknown | Promise<unknown>>,
+> {
   /**
    * A function that returns the initial value of the store.
    * @returns A promise that resolves to the initial value of the store.
@@ -22,17 +28,54 @@ interface CreateStoreOptions<T extends Record<string, unknown>> {
    * An optional table name within the database to further isolate the store data.
    */
   tableName?: string;
+  /**
+   * An optional object containing additional methods to be added to the returned store.
+   * The methods will receive the store and its status as arguments.
+   */
+  methods?: (store: T, status: StoreStatus) => M;
 }
 
+/**
+ * Interface representing the status of the store.
+ */
 interface StoreStatus {
+  /**
+   * A function that returns a promise that resolves when the store is ready.
+   */
+  waitUntilReady: () => Promise<void>;
+  /**
+   * Indicates whether the store is ready for use (the opposite of loading).
+   */
+  ready: boolean;
+  /**
+   * Indicates whether the store is currently loading (the opposite of ready).
+   */
   loading: boolean;
+  /**
+   * Indicates whether the store is currently saving data to the persistent storage.
+   */
   saving: boolean;
 }
 
-interface StoreResult<T extends Record<string, unknown>> {
+/**
+ * The result returned by the createStore function.
+ */
+interface StoreResult<
+  T extends Record<string, unknown>,
+  M extends Record<string, (...args: unknown[]) => unknown | Promise<unknown>>,
+> {
+  /**
+   * The store object.
+   */
   store: T;
+  /**
+   * The status of the store.
+   */
   status: StoreStatus;
-  ready: () => Promise<void>;
+  /**
+   * Additional methods for the store.
+   */
+  methods: M;
 }
 
 /**
@@ -48,33 +91,36 @@ interface StoreResult<T extends Record<string, unknown>> {
  * @param opts.keysToPersist - An array of keys from the store that should be persisted to IndexedDB.
  * @param opts.dbName - An optional name for the store, used to create a unique isolated database instead of the global one.
  * @param opts.tableName - An optional table name within the database to further isolate the store data.
- * @returns An object containing the Svelte store, its lifecycle (status) state and a promise to wait for initialization.
+ * @param opts.methods - An optional object containing additional methods to be added to the returned store. The methods will receive the store and its status as arguments.
+ * @returns An object containing the Svelte store and its lifecycle (status) state.
  *
  * @example
  * ```ts
- * const { store, status, ready } = createStore({
+ * const { store, status, methods } = createStore({
  *   initialValue: async () => ({ theme: 'light', fontSize: 14 }),
  *   keysToPersist: ['theme'],
  *   storeName: 'userPreferences',
  * });
  * ```
  */
-
-// biome-ignore lint/suspicious/noExplicitAny: the values are dynamic and varied between different stores
-export function createStore<T extends Record<string, any>>(
-  opts: CreateStoreOptions<T>,
-): StoreResult<T> {
-  // Initialize Svelte stores
-  let store = $state<T>({} as T);
-  const status = $state({
-    loading: true,
-    saving: false,
+export function createStore<
+  // biome-ignore lint/suspicious/noExplicitAny: the values are dynamic and varied between different stores
+  T extends Record<string, any>,
+  M extends Record<string, (...args: unknown[]) => unknown | Promise<unknown>>,
+>(opts: CreateStoreOptions<T, M>): StoreResult<T, M> {
+  // Promise for waiting for initialization
+  let readyPromiseResolve: () => void;
+  const readyPromise = new Promise<void>((resolve) => {
+    readyPromiseResolve = resolve;
   });
 
-  // Promise for waiting for initialization
-  let resolveReady: () => void;
-  const readyPromise = new Promise<void>((resolve) => {
-    resolveReady = resolve;
+  // Initialize Svelte stores
+  let store = $state<T>({} as T);
+  const status = $state<StoreStatus>({
+    waitUntilReady: () => readyPromise,
+    ready: false,
+    loading: true,
+    saving: false,
   });
 
   // Asynchronously manage the store lifecycle
@@ -82,7 +128,8 @@ export function createStore<T extends Record<string, any>>(
     // Browser-only check
     if (!browser) {
       // biome-ignore lint/style/noNonNullAssertion: the function is always defined above
-      resolveReady!();
+      readyPromiseResolve!();
+      status.ready = true;
       status.loading = false;
       return;
     }
@@ -185,14 +232,18 @@ export function createStore<T extends Record<string, any>>(
     });
 
     // biome-ignore lint/style/noNonNullAssertion: the function is always defined above
-    resolveReady!();
+    readyPromiseResolve!();
+    status.ready = true;
     status.loading = false;
   })();
+
+  // Create methods if provided
+  const methods = opts.methods ? opts.methods(store, status) : ({} as M);
 
   return {
     store,
     status,
-    ready: () => readyPromise,
+    methods,
   };
 }
 
