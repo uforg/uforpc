@@ -127,7 +127,7 @@
       </div>
     {/if}
 
-    <div class="flex w-full justify-end pt-4">
+    <div class="flex w-full justify-end">
       {#snippet kbd()}
         <span>
           <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>

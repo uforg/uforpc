@@ -184,7 +184,7 @@
       </div>
     {/if}
 
-    <div class="flex w-full justify-end gap-2 pt-4">
+    <div class="flex w-full justify-end gap-2">
       {#snippet kbd()}
         <span>
           <kbd class="kbd kbd-sm">{ctrlSymbol()}</kbd>
