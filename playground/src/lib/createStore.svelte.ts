@@ -4,16 +4,16 @@ import { debounce } from "lodash-es";
 import { toast } from "svelte-sonner";
 
 /**
- * The type of function that can be used as a method in the store.
+ * The type of function that can be used as an action in the store.
  */
-type MethodFunc = (...args: unknown[]) => unknown | Promise<unknown>;
+type ActionFunc = (...args: unknown[]) => unknown | Promise<unknown>;
 
 /**
  * Options for configuring the store creation.
  */
 interface CreateStoreOptions<
   T extends Record<string, unknown>,
-  M extends Record<string, MethodFunc> = Record<string, MethodFunc>,
+  M extends Record<string, ActionFunc> = Record<string, ActionFunc>,
 > {
   /**
    * A function that returns the initial value of the store.
@@ -34,10 +34,10 @@ interface CreateStoreOptions<
    */
   tableName?: string;
   /**
-   * An optional object containing additional methods to be added to the returned store.
-   * The methods will receive the store and its status as arguments.
+   * An optional object containing additional actions to be added to the returned store.
+   * The actions will receive the store and its status as arguments.
    */
-  methods?: (store: T, status: StoreStatus) => M;
+  actions?: (store: T, status: StoreStatus) => M;
 }
 
 /**
@@ -67,7 +67,7 @@ interface StoreStatus {
  */
 interface StoreResult<
   T extends Record<string, unknown>,
-  M extends Record<string, MethodFunc> = Record<string, MethodFunc>,
+  M extends Record<string, ActionFunc> = Record<string, ActionFunc>,
 > {
   /**
    * The store object, read-write reactive to changes.
@@ -78,9 +78,9 @@ interface StoreResult<
    */
   status: StoreStatus;
   /**
-   * Custom additional methods added to the store when it was created.
+   * Custom additional actions added to the store when it was created.
    */
-  methods: M;
+  actions: M;
 }
 
 /**
@@ -96,12 +96,12 @@ interface StoreResult<
  * @param opts.keysToPersist - An array of keys from the store that should be persisted to IndexedDB.
  * @param opts.dbName - An optional name for the store, used to create a unique isolated database instead of the global one.
  * @param opts.tableName - An optional table name within the database to further isolate the store data.
- * @param opts.methods - An optional object containing additional methods to be added to the returned store. The methods will receive the store and its status as arguments.
+ * @param opts.actions - An optional object containing additional actions to be added to the returned store. The actions will receive the store and its status as arguments.
  * @returns An object containing the Svelte store and its lifecycle (status) state.
  *
  * @example
  * ```ts
- * const { store, status, methods } = createStore({
+ * const { store, status, actions } = createStore({
  *   initialValue: async () => ({ theme: 'light', fontSize: 14 }),
  *   keysToPersist: ['theme'],
  *   storeName: 'userPreferences',
@@ -111,7 +111,7 @@ interface StoreResult<
 export function createStore<
   // biome-ignore lint/suspicious/noExplicitAny: the values are dynamic and varied between different stores
   T extends Record<string, any>,
-  M extends Record<string, MethodFunc> = Record<string, MethodFunc>,
+  M extends Record<string, ActionFunc> = Record<string, ActionFunc>,
 >(opts: CreateStoreOptions<T, M>): StoreResult<T, M> {
   // Promise for waiting for initialization
   let readyPromiseResolve: () => void;
@@ -242,13 +242,13 @@ export function createStore<
     status.loading = false;
   })();
 
-  // Create methods if provided
-  const methods = opts.methods ? opts.methods(store, status) : ({} as M);
+  // Create actions if provided
+  const actions = opts.actions ? opts.actions(store, status) : ({} as M);
 
   return {
     store,
     status,
-    methods,
+    actions: actions,
   };
 }
 
