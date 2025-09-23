@@ -153,17 +153,12 @@
 
   <div
     class={{
-      "mt-4 space-y-2": true,
+      "mt-4": true,
       hidden: tab === "input",
       block: tab === "output",
     }}
   >
-    <Output
-      {cancelRequest}
-      {isExecuting}
-      type="proc"
-      output={storeNode.store.output}
-    />
+    <Output type="proc" {cancelRequest} {isExecuting} {storeNode} />
   </div>
 </div>
 

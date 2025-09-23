@@ -43,8 +43,8 @@
 
 {#if hasToken}
   <div class="flex flex-wrap items-center justify-start space-x-2">
-    <span class="flex flex-none items-center pr-2 text-sm font-bold">
-      <Sparkles class="mr-1 size-4" />
+    <span class="flex flex-none items-center pr-2 text-xs font-bold">
+      <Sparkles class="mr-1 size-3" />
       <span>Quick Actions</span>
     </span>
 
@@ -64,15 +64,15 @@
               onclick={() => handleSetAuthHeader(token)}
             >
               <EarthLock class="mr-1 size-4" />
-              <span>Set header</span>
+              <span>Set as header</span>
             </button>
           </Tooltip>
         </div>
       {/snippet}
 
       <Menu content={menuContent} placement="bottom" trigger="mouseenter click">
-        <button class="btn btn-sm btn-ghost flex-none">
-          <Key class="mr-1 size-4" />
+        <button class="btn btn-xs flex-none">
+          <Key class="mr-1 size-3" />
           <span>{token.key}</span>
         </button>
       </Menu>

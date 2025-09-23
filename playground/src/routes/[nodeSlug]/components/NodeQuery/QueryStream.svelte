@@ -211,17 +211,12 @@
 
   <div
     class={{
-      "mt-4 space-y-2": true,
+      "mt-4": true,
       hidden: tab === "input",
       block: tab === "output",
     }}
   >
-    <Output
-      {cancelRequest}
-      {isExecuting}
-      type="stream"
-      output={storeNode.store.output}
-    />
+    <Output type="stream" {cancelRequest} {isExecuting} {storeNode} />
   </div>
 </div>
 
