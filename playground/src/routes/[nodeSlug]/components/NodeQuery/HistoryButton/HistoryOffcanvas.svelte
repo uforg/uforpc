@@ -65,7 +65,7 @@
 
     <div class="border-base-content/20 border-b p-4">
       <button
-        class="btn btn-error btn-sm w-full"
+        class="btn btn-warning btn-sm w-full"
         onclick={clearAllHistory}
         disabled={!hasHistory}
       >
@@ -104,9 +104,8 @@
                 </p>
               </button>
               <button
-                class="btn btn-error btn-square btn-xs mr-4 ml-2"
+                class="btn btn-warning btn-square btn-xs mr-4 ml-2"
                 onclick={(e) => deleteHistoryItem(index, e)}
-                title="Delete item"
                 type="button"
               >
                 <Trash class="size-3" />
