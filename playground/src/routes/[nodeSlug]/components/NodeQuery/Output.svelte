@@ -97,11 +97,11 @@
     {/if}
 
     <div class="flex w-full flex-wrap items-start justify-between space-x-2">
-      {#if type == "proc"}
-        <OutputQuickActions output={storeNode.store.output} />
-      {:else}
-        <div></div>
-      {/if}
+      <div>
+        {#if type == "proc"}
+          <OutputQuickActions output={storeNode.store.output} />
+        {/if}
+      </div>
 
       <div class="flex items-center justify-end">
         <Tooltip content="Latest output date" placement="top">
