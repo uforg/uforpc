@@ -51,6 +51,7 @@
       },
       scrollBeyondLastLine: false,
       automaticLayout: true,
+      minimap: { enabled: false },
     });
 
     editor.onDidChangeModelContent(() => {
