@@ -9,11 +9,11 @@
   } from "@lucide/svelte";
 
   import { copyTextToClipboard } from "$lib/helpers/copyTextToClipboard";
+  import { formatISODate } from "$lib/helpers/formatISODate";
 
   import Editor from "$lib/components/Editor.svelte";
   import H3 from "$lib/components/H3.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
-  import Tooltip from "$lib/components/Tooltip.svelte";
 
   import type { StoreNodeInstance } from "../../storeNode.svelte";
 
@@ -43,10 +43,7 @@
    */
   let prettyOutputDate = $derived.by(() => {
     if (!storeNode.store.outputDate) return "unknown output date";
-    return storeNode.store.outputDate
-      .replaceAll("T", " ")
-      .replaceAll("Z", "")
-      .split(".")[0];
+    return formatISODate(storeNode.store.outputDate);
   });
 
   async function copyToClipboard() {
