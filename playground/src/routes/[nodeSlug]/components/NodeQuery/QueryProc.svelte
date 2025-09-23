@@ -21,6 +21,7 @@
 
   import type { StoreNodeInstance } from "../../storeNode.svelte";
 
+  import HistoryButton from "./HistoryButton/HistoryButton.svelte";
   import InputForm from "./InputForm/InputForm.svelte";
   import Output from "./Output.svelte";
   import Snippets from "./Snippets/Snippets.svelte";
@@ -100,7 +101,10 @@
       "bg-base-100 sticky top-0 z-20 pt-4": !storeUi.store.isMobile,
     }}
   >
-    <H2 class="mb-4 flex items-center space-x-2">Try it out</H2>
+    <H2 class="mb-4 flex items-center justify-between">
+      <span>Try it out</span>
+      <HistoryButton {storeNode} nodeName={proc.name} />
+    </H2>
 
     <Tabs
       items={[
