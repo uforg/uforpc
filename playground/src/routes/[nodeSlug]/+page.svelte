@@ -86,7 +86,7 @@
   <NotFound />
 {/if}
 
-{#if nodeExists && !storeNode.status.loading}
+{#if nodeExists && storeNode.status.ready}
   {#key nodeIndex}
     <Node {node} bind:storeNode />
   {/key}
