@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { BookText, Braces, Info } from "@lucide/svelte";
+  import { BookText, Braces, Copy, Info } from "@lucide/svelte";
 
+  import { copyTextToClipboard } from "$lib/helpers/copyTextToClipboard";
   import { storeUi } from "$lib/storeUi.svelte";
   import type { FieldDefinition } from "$lib/urpcTypes";
 
   import Tabs from "$lib/components/Tabs.svelte";
+  import Tooltip from "$lib/components/Tooltip.svelte";
 
   import Field from "./Field.svelte";
   import JsonEditor from "./JsonEditor.svelte";
@@ -18,6 +20,10 @@
 
   let isFormTab = $derived(storeUi.store.inputFormTab === "form");
   let isJsonTab = $derived(storeUi.store.inputFormTab === "json");
+
+  async function copyToClipboard() {
+    return copyTextToClipboard(JSON.stringify(input, null, 2));
+  }
 </script>
 
 <div
@@ -31,16 +37,34 @@
     </span>
   </div>
 
-  <Tabs
-    containerClass="w-auto flex-none"
-    buttonClass="btn-xs"
-    iconClass="size-3"
-    items={[
-      { id: "form", label: "Form", icon: BookText },
-      { id: "json", label: "JSON", icon: Braces },
-    ]}
-    bind:active={storeUi.store.inputFormTab}
-  />
+  <div class="flex items-center space-x-2">
+    <Tabs
+      containerClass="w-auto flex-none"
+      buttonClass="btn-xs"
+      iconClass="size-3"
+      items={[
+        {
+          id: "form",
+          label: "Form",
+          icon: BookText,
+          tooltipText: "Edit input using form editor",
+        },
+        {
+          id: "json",
+          label: "JSON",
+          icon: Braces,
+          tooltipText: "Edit input using JSON editor",
+        },
+        {
+          id: "copy",
+          icon: Copy,
+          action: copyToClipboard,
+          tooltipText: "Copy input to clipboard",
+        },
+      ]}
+      bind:active={storeUi.store.inputFormTab}
+    />
+  </div>
 </div>
 
 {#if isFormTab}
