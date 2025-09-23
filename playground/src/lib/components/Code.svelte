@@ -3,6 +3,7 @@
   import { transformerColorizedBrackets } from "@shikijs/colorized-brackets";
   import { toast } from "svelte-sonner";
 
+  import { copyTextToClipboard } from "$lib/helpers/copyTextToClipboard";
   import { getLangExtension } from "$lib/helpers/getLangExtension";
   import { mergeClasses } from "$lib/helpers/mergeClasses";
   import type { ClassValue } from "$lib/helpers/mergeClasses";
@@ -55,15 +56,7 @@
   });
 
   async function copyToClipboard() {
-    try {
-      await navigator.clipboard.writeText(code);
-      toast.success("Code copied to clipboard", { duration: 1500 });
-    } catch (err) {
-      console.error("Failed to copy code: ", err);
-      toast.error("Failed to copy code", {
-        description: `Error: ${err}`,
-      });
-    }
+    return copyTextToClipboard(code);
   }
 
   const downloadCode = () => {

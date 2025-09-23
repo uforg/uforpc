@@ -1,6 +1,7 @@
 <script lang="ts">
   import { CircleX, CloudAlert, Copy, Loader, Trash } from "@lucide/svelte";
-  import { toast } from "svelte-sonner";
+
+  import { copyTextToClipboard } from "$lib/helpers/copyTextToClipboard";
 
   import Editor from "$lib/components/Editor.svelte";
   import H3 from "$lib/components/H3.svelte";
@@ -41,15 +42,7 @@
   });
 
   async function copyToClipboard() {
-    try {
-      await navigator.clipboard.writeText(storeNode.store.output);
-      toast.success("Output copied to clipboard", { duration: 1500 });
-    } catch (err) {
-      console.error("Failed to copy output: ", err);
-      toast.error("Failed to copy output", {
-        description: `Error: ${err}`,
-      });
-    }
+    return copyTextToClipboard(storeNode.store.output);
   }
 </script>
 

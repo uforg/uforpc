@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Copy, EarthLock, Key, Sparkles } from "@lucide/svelte";
-  import { toast } from "svelte-sonner";
 
+  import { copyTextToClipboard } from "$lib/helpers/copyTextToClipboard";
   import {
     discoverAuthToken,
     type TokenInfo,
@@ -29,15 +29,7 @@
   }
 
   async function handleCopyToClipboard(token: TokenInfo) {
-    try {
-      await navigator.clipboard.writeText(token.value);
-      toast.success("Token copied to clipboard", { duration: 1500 });
-    } catch (err) {
-      console.error("Failed to copy token: ", err);
-      toast.error("Failed to copy token", {
-        description: `Error: ${err}`,
-      });
-    }
+    return copyTextToClipboard(token.value);
   }
 </script>
 
