@@ -6,7 +6,8 @@ import { toast } from "svelte-sonner";
 /**
  * The type of function that can be used as an action in the store.
  */
-type ActionFunc = (...args: unknown[]) => unknown | Promise<unknown>;
+// biome-ignore lint/suspicious/noExplicitAny: the args and return types are dynamic and can't be typed here.
+type ActionFunc = (...args: any[]) => any | Promise<any>;
 
 /**
  * Options for configuring the store creation.
