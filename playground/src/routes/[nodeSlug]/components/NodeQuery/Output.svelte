@@ -96,7 +96,7 @@
       </div>
     {/if}
 
-    <div class="flex w-full items-center justify-between space-x-2">
+    <div class="flex w-full flex-wrap items-start justify-between space-x-2">
       {#if type == "proc"}
         <OutputQuickActions output={storeNode.store.output} />
       {:else}
