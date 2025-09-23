@@ -34,6 +34,7 @@
   <Tabs
     containerClass="w-auto"
     buttonClass="btn-xs"
+    iconClass="size-3"
     items={[
       { id: "form", label: "Form", icon: BookText },
       { id: "json", label: "JSON", icon: Braces },
