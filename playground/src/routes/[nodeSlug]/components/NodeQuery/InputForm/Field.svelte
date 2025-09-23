@@ -24,9 +24,15 @@
     path: string;
     field: FieldDefinition;
     input: Record<string, any>;
+    disableDelete?: boolean;
   }
 
-  let { field: originalField, input = $bindable(), path }: Props = $props();
+  let {
+    field: originalField,
+    input = $bindable(),
+    path,
+    disableDelete,
+  }: Props = $props();
 
   /**
    * Get fields of a custom type
@@ -70,7 +76,7 @@
 {/if}
 
 {#if isInlineSingle}
-  <FieldInlineSingle {field} {path} bind:input />
+  <FieldInlineSingle {field} {path} {disableDelete} bind:input />
 {/if}
 
 {#if isNamedArray}
@@ -78,5 +84,5 @@
 {/if}
 
 {#if isNamedSingle}
-  <FieldNamedSingle {field} {path} bind:input />
+  <FieldNamedSingle {field} {path} {disableDelete} bind:input />
 {/if}

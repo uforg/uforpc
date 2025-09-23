@@ -71,7 +71,12 @@
   {/if}
 
   {#each arrayIndexes as index}
-    <Field field={noArrayField} path={`${path}[${index}]`} bind:input />
+    <Field
+      field={noArrayField}
+      path={`${path}[${index}]`}
+      disableDelete={true}
+      bind:input
+    />
   {/each}
 
   <div class="flex justify-end">

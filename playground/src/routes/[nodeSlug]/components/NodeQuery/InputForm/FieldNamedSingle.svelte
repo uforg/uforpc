@@ -24,9 +24,10 @@
     path: string;
     field: FieldDefinition;
     input: Record<string, any>;
+    disableDelete?: boolean;
   }
 
-  let { field, input = $bindable(), path }: Props = $props();
+  let { field, input = $bindable(), path, disableDelete }: Props = $props();
   const fieldId = $props.id();
 
   // We can't bind directly to input[path] because Svelte doesn't support dynamic bindings.
@@ -141,15 +142,17 @@
       </button>
     </Tooltip>
 
-    <Tooltip content={`Delete ${path} from the JSON object`} placement="left">
-      <button
-        class="btn btn-ghost btn-block flex items-center justify-start space-x-2"
-        onclick={deleteValue}
-      >
-        <Trash class="size-4" />
-        <span>Delete</span>
-      </button>
-    </Tooltip>
+    {#if !disableDelete}
+      <Tooltip content={`Delete ${path} from the JSON object`} placement="left">
+        <button
+          class="btn btn-ghost btn-block flex items-center justify-start space-x-2"
+          onclick={deleteValue}
+        >
+          <Trash class="size-4" />
+          <span>Delete</span>
+        </button>
+      </Tooltip>
+    {/if}
   </div>
 {/snippet}
 

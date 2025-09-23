@@ -22,9 +22,10 @@
     path: string;
     field: FieldDefinition;
     input: Record<string, any>;
+    disableDelete?: boolean;
   }
 
-  let { field, input = $bindable(), path }: Props = $props();
+  let { field, input = $bindable(), path, disableDelete }: Props = $props();
 
   function clearObject() {
     input = set(input, path, {});
@@ -56,10 +57,12 @@
       </button>
     </Tooltip>
 
-    <Tooltip content={`Delete ${path} from the JSON object`} placement="left">
-      <button class="btn btn-sm btn-ghost btn-square" onclick={deleteObject}>
-        <Trash class="size-4" />
-      </button>
-    </Tooltip>
+    {#if !disableDelete}
+      <Tooltip content={`Delete ${path} from the JSON object`} placement="left">
+        <button class="btn btn-sm btn-ghost btn-square" onclick={deleteObject}>
+          <Trash class="size-4" />
+        </button>
+      </Tooltip>
+    {/if}
   </div>
 </CommonFieldset>
