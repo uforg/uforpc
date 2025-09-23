@@ -4,11 +4,16 @@ import { debounce } from "lodash-es";
 import { toast } from "svelte-sonner";
 
 /**
+ * The type of function that can be used as a method in the store.
+ */
+type MethodFunc = (...args: unknown[]) => unknown | Promise<unknown>;
+
+/**
  * Options for configuring the store creation.
  */
 interface CreateStoreOptions<
   T extends Record<string, unknown>,
-  M extends Record<string, (...args: unknown[]) => unknown | Promise<unknown>>,
+  M extends Record<string, MethodFunc> = Record<string, MethodFunc>,
 > {
   /**
    * A function that returns the initial value of the store.
@@ -62,18 +67,18 @@ interface StoreStatus {
  */
 interface StoreResult<
   T extends Record<string, unknown>,
-  M extends Record<string, (...args: unknown[]) => unknown | Promise<unknown>>,
+  M extends Record<string, MethodFunc> = Record<string, MethodFunc>,
 > {
   /**
-   * The store object.
+   * The store object, read-write reactive to changes.
    */
   store: T;
   /**
-   * The status of the store.
+   * The lifecycle status of the store, read-only reactive to changes.
    */
   status: StoreStatus;
   /**
-   * Additional methods for the store.
+   * Custom additional methods added to the store when it was created.
    */
   methods: M;
 }
@@ -106,7 +111,7 @@ interface StoreResult<
 export function createStore<
   // biome-ignore lint/suspicious/noExplicitAny: the values are dynamic and varied between different stores
   T extends Record<string, any>,
-  M extends Record<string, (...args: unknown[]) => unknown | Promise<unknown>>,
+  M extends Record<string, MethodFunc> = Record<string, MethodFunc>,
 >(opts: CreateStoreOptions<T, M>): StoreResult<T, M> {
   // Promise for waiting for initialization
   let readyPromiseResolve: () => void;
