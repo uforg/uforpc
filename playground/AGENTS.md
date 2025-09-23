@@ -11,7 +11,7 @@ Read the `package.json` file to see all available commands, the most important o
 - `npm run lint`: Lints the codebase and run typescript checks
 - `npm run fmt`: Formats the codebase using prettier
 
-Always execute the `fmt`, `lint` and `build` commands when you finish your changes, and ensure there are no errors. If there are errors, fix them until there are none.
+Always execute the `fmt`, `lint` and `build` commands when you finish your changes, and ensure there are no errors. If there are errors, fix them until there are none, the only exception is when you are only writing documentation, in that case only `fmt` is required.
 
 Before running a command like `npm run {command}`, make sure you are inside `/workspaces/uforpc/playground` directory.
 
