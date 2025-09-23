@@ -16,7 +16,7 @@
 
   interface Props<T extends string> {
     items: TabItem<T>[];
-    active: T;
+    active?: T;
     onSelect?: (id: T) => void;
     containerClass?: ClassValue;
     buttonClass?: ClassValue;
