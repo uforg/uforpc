@@ -34,7 +34,7 @@
 </script>
 
 {#if hasToken}
-  <div class="flex flex-wrap items-center justify-start space-y-2 space-x-2">
+  <div class="flex flex-wrap items-center justify-start gap-2">
     <span class="flex flex-none items-center pr-2 text-xs font-bold">
       <Sparkles class="mr-1 size-3" />
       <span>Quick Actions</span>
@@ -63,7 +63,7 @@
       {/snippet}
 
       <Menu content={menuContent} placement="top" trigger="mouseenter click">
-        <button class="btn btn-xs flex-none">
+        <button class="btn btn-xs border-base-content/20 flex-none">
           <Key class="mr-1 size-3" />
           <span>{token.key}</span>
         </button>
