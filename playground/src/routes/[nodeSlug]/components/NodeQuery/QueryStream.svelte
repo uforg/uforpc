@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { Info, Loader, MoveDownLeft, MoveUpRight, Zap } from "@lucide/svelte";
+  import {
+    Info,
+    Loader,
+    MoveDownLeft,
+    MoveUpRight,
+    Trash,
+    Zap,
+  } from "@lucide/svelte";
   import { toast } from "svelte-sonner";
 
   import { ctrlSymbol } from "$lib/helpers/ctrlSymbol";
@@ -192,7 +199,16 @@
         </span>
       {/snippet}
 
-      <Menu content={kbd} placement="left" trigger="mouseenter">
+      <button
+        class="btn btn-primary btn-ghost"
+        disabled={isExecuting}
+        onclick={storeNode.actions.clearInput}
+      >
+        <Trash class="size-4" />
+        <span>Clear input</span>
+      </button>
+
+      <Menu content={kbd} placement="bottom" trigger="mouseenter">
         <button
           class="btn btn-primary"
           disabled={isExecuting}
