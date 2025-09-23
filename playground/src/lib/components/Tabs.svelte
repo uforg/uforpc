@@ -18,6 +18,8 @@
     buttonClass?: ClassValue;
     activeButtonClass?: ClassValue;
     inactiveButtonClass?: ClassValue;
+    iconClass?: ClassValue;
+    spanTextClass?: ClassValue;
   }
 
   let {
@@ -28,6 +30,8 @@
     buttonClass,
     activeButtonClass,
     inactiveButtonClass,
+    iconClass,
+    spanTextClass,
   }: Props<T> = $props();
 
   const handleSelect = (id: T) => {
@@ -55,10 +59,10 @@
       type="button"
     >
       {#if tab.icon}
-        <tab.icon class="size-4" />
+        <tab.icon class={mergeClasses("size-4", iconClass)} />
       {/if}
       {#if tab.label}
-        <span>
+        <span class={mergeClasses(spanTextClass)}>
           {tab.label}
         </span>
       {/if}
