@@ -10,7 +10,7 @@
   import { BrushCleaning, EllipsisVertical, Trash } from "@lucide/svelte";
   import flatpickr from "flatpickr";
   import { get, set, unset } from "lodash-es";
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
 
   import type { FieldDefinition } from "$lib/urpcTypes";
 
@@ -32,10 +32,33 @@
   // We can't bind directly to input[path] because Svelte doesn't support dynamic bindings.
   // So we create a local reactive variable and update input[path] whenever it changes.
   let localValue = $state(get(input, path) ?? undefined);
+
+  // Effect to sinchronize localValue changes to external input[path]
+  // This runs whenever localValue changes.
   $effect(() => {
-    if (get(input, path) !== localValue) {
-      set(input, path, localValue);
-    }
+    const reactiveLocalValue = localValue;
+    // From here we must use untrack to avoid the effect
+    // from being triggered by input[path] changes as
+    // we want it to only run when localValue changes
+    untrack(() => {
+      if (get(input, path) !== reactiveLocalValue) {
+        set(input, path, reactiveLocalValue);
+      }
+    });
+  });
+
+  // Effect to synchronize external input[path] changes to localValue
+  // this only runs when the input changes externally
+  $effect(() => {
+    const reactiveInputValue = get(input, path);
+    // From here we must use untrack to avoid the effect
+    // from being triggered by localValue changes as
+    // we want it to only run when input[path] changes
+    untrack(() => {
+      if (reactiveInputValue !== localValue) {
+        localValue = reactiveInputValue;
+      }
+    });
   });
 
   export const deleteValue = () => {
