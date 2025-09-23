@@ -13,7 +13,7 @@ type ActionFunc = (...args: unknown[]) => unknown | Promise<unknown>;
  */
 interface CreateStoreOptions<
   T extends Record<string, unknown>,
-  M extends Record<string, ActionFunc> = Record<string, ActionFunc>,
+  M extends Record<string, ActionFunc>,
 > {
   /**
    * A function that returns the initial value of the store.
@@ -67,7 +67,7 @@ interface StoreStatus {
  */
 interface StoreResult<
   T extends Record<string, unknown>,
-  M extends Record<string, ActionFunc> = Record<string, ActionFunc>,
+  M extends Record<string, ActionFunc>,
 > {
   /**
    * The store object, read-write reactive to changes.
@@ -111,7 +111,7 @@ interface StoreResult<
 export function createStore<
   // biome-ignore lint/suspicious/noExplicitAny: the values are dynamic and varied between different stores
   T extends Record<string, any>,
-  M extends Record<string, ActionFunc> = Record<string, ActionFunc>,
+  M extends Record<string, ActionFunc>,
 >(opts: CreateStoreOptions<T, M>): StoreResult<T, M> {
   // Promise for waiting for initialization
   let readyPromiseResolve: () => void;
