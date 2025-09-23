@@ -20,7 +20,7 @@ interface CreateStoreOptions<
    * A function that returns the initial value of the store.
    * @returns A promise that resolves to the initial value of the store.
    */
-  initialValue: () => Promise<T>;
+  initialValue: () => T | Promise<T>;
   /**
    * An array of keys from the store that should be persisted to IndexedDB.
    * Only top-level keys are supported.
@@ -93,7 +93,7 @@ interface StoreResult<
  *
  * @template T - The type of the store object, which should be a record with string keys and unknown values.
  * @param opts - Configuration options for creating the async store.
- * @param opts.initialValue - An async function that returns the initial value of the store.
+ * @param opts.initialValue - A sync or async function that returns the initial value of the store.
  * @param opts.keysToPersist - An array of keys from the store that should be persisted to IndexedDB.
  * @param opts.dbName - An optional name for the store, used to create a unique isolated database instead of the global one.
  * @param opts.tableName - An optional table name within the database to further isolate the store data.
