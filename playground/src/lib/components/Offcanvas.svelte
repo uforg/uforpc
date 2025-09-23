@@ -26,18 +26,18 @@
     escapeClose = true,
   }: Props = $props();
 
+  let offcanvasWrapper: HTMLDivElement | undefined = $state(undefined);
   const closeOffcanvas = () => (isOpen = false);
 
   const handleEscapeKey = (event: KeyboardEvent) => {
+    if (!escapeClose) return;
     if (event.key === "Escape") closeOffcanvas();
   };
+
+  // Focus the offcanvas when it opens
   $effect(() => {
-    if (escapeClose) {
-      document.addEventListener("keydown", handleEscapeKey);
-      return () => {
-        document.removeEventListener("keydown", handleEscapeKey);
-      };
-    }
+    if (!isOpen) return;
+    offcanvasWrapper?.focus();
   });
 </script>
 
@@ -46,6 +46,9 @@
     <div
       class="fixed top-0 left-0 z-40 h-screen w-screen"
       transition:fade={{ duration: 100 }}
+      onkeydown={handleEscapeKey}
+      role="button"
+      tabindex="0"
     >
       <button
         class={mergeClasses(
@@ -68,6 +71,8 @@
           },
           className,
         )}
+        bind:this={offcanvasWrapper}
+        tabindex="-1"
       >
         {#if children}
           {@render children()}

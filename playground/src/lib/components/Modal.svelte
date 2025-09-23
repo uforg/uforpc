@@ -24,18 +24,18 @@
     escapeClose = true,
   }: Props = $props();
 
+  let modalWrapper: HTMLDivElement | undefined = $state(undefined);
   const closeModal = () => (isOpen = false);
 
   const handleEscapeKey = (event: KeyboardEvent) => {
+    if (!escapeClose) return;
     if (event.key === "Escape") closeModal();
   };
+
+  // Focus the modal when it opens
   $effect(() => {
-    if (escapeClose) {
-      document.addEventListener("keydown", handleEscapeKey);
-      return () => {
-        document.removeEventListener("keydown", handleEscapeKey);
-      };
-    }
+    if (!isOpen) return;
+    modalWrapper?.focus();
   });
 </script>
 
@@ -44,6 +44,9 @@
     <div
       class="fixed top-0 left-0 z-40 h-screen w-screen"
       transition:fade={{ duration: 100 }}
+      onkeydown={handleEscapeKey}
+      role="button"
+      tabindex="0"
     >
       <button
         class={mergeClasses(
@@ -62,6 +65,8 @@
           "overflow-x-hidden overflow-y-auto",
           className,
         )}
+        bind:this={modalWrapper}
+        tabindex="-1"
       >
         {#if children}
           {@render children()}
