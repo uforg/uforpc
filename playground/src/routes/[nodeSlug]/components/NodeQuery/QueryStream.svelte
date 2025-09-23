@@ -33,10 +33,10 @@
   $effect(() => {
     if (outputArray.length === 0) {
       storeNode.store.output = "";
-      storeNode.store.date = "";
+      storeNode.store.outputDate = "";
     } else {
       storeNode.store.output = JSON.stringify(outputArray, null, 2);
-      storeNode.store.date = new Date().toISOString();
+      storeNode.store.outputDate = new Date().toISOString();
     }
   });
 

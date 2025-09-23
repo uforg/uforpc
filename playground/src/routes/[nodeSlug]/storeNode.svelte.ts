@@ -13,7 +13,7 @@ export interface HistoryItem {
 export interface StoreNode {
   input: Input;
   output: Output;
-  date: Date;
+  outputDate: Date;
   history: HistoryItem[];
 }
 
@@ -24,14 +24,14 @@ type StoreNodeKey = keyof StoreNode;
 const storeNodeDefault: StoreNode = {
   input: {},
   output: "",
-  date: "",
+  outputDate: "",
   history: [],
 };
 
 const storeNodeKeysToPersist: StoreNodeKey[] = [
   "input",
   "output",
-  "date",
+  "outputDate",
   "history",
 ];
 
@@ -87,10 +87,38 @@ export const createStoreNode = (nodeSlug: string) => {
         store.history = [];
       }
 
+      /**
+       * Clear the input and date fields.
+       */
+      function clearInput() {
+        if (status.loading) return;
+        store.input = {};
+      }
+
+      /**
+       * Clear the output and date fields.
+       */
+      function clearOutput() {
+        if (status.loading) return;
+        store.output = "";
+        store.outputDate = "";
+      }
+
+      /**
+       * Clear the input and output fields.
+       */
+      function clearInputOutput() {
+        clearInput();
+        clearOutput();
+      }
+
       return {
         saveCurrentToHistory,
         deleteHistoryItem,
         clearHistory,
+        clearInput,
+        clearOutput,
+        clearInputOutput,
       };
     },
   });

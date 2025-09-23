@@ -32,7 +32,7 @@
     if (isExecuting) return;
     isExecuting = true;
     storeNode.store.output = "";
-    storeNode.store.date = "";
+    storeNode.store.outputDate = "";
 
     try {
       openOutputTab(true);
@@ -54,7 +54,7 @@
 
       const data = await response.json();
       storeNode.store.output = JSON.stringify(data, null, 2);
-      storeNode.store.date = new Date().toISOString();
+      storeNode.store.outputDate = new Date().toISOString();
     } catch (error) {
       if (!(error instanceof Error && error.name === "AbortError")) {
         console.error(error);
