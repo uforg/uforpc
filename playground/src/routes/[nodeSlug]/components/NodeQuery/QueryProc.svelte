@@ -55,6 +55,7 @@
       const data = await response.json();
       storeNode.store.output = JSON.stringify(data, null, 2);
       storeNode.store.outputDate = new Date().toISOString();
+      storeNode.actions.saveCurrentToHistory();
     } catch (error) {
       if (!(error instanceof Error && error.name === "AbortError")) {
         console.error(error);

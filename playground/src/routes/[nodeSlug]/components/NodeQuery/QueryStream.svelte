@@ -32,15 +32,12 @@
   // Synchronize the output string with the output array
   $effect(() => {
     if (outputArray.length === 0) {
-      storeNode.store.output = "";
-      storeNode.store.outputDate = "";
+      storeNode.actions.clearOutput();
     } else {
       storeNode.store.output = JSON.stringify(outputArray, null, 2);
       storeNode.store.outputDate = new Date().toISOString();
     }
   });
-
-  // let output = $derived(JSON.stringify(outputArray, null, 2));
 
   async function executeStream() {
     if (isExecuting) return;
@@ -124,6 +121,9 @@
     } finally {
       isExecuting = false;
       cancelRequest = () => {};
+      if (outputArray.length > 0) {
+        storeNode.actions.saveCurrentToHistory();
+      }
     }
   }
 
