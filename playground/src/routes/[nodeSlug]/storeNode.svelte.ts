@@ -37,7 +37,7 @@ const storeNodeKeysToPersist: StoreNodeKey[] = [
 
 export const createStoreNode = (nodeSlug: string) => {
   return createStore({
-    initialValue: async () => storeNodeDefault,
+    initialValue: () => storeNodeDefault,
     keysToPersist: storeNodeKeysToPersist,
     dbName: "storeNode",
     tableName: nodeSlug,
